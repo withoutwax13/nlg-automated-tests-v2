@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../support/pwtest';
 import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessResetModal from "../../objects/BusinessResetModal";
 import BusinessAdd from "../../objects/BusinessAdd";

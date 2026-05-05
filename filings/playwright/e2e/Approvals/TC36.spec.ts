@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../support/pwtest';
 import ApprovalGrid from "../../objects/ApprovalGrid";
 
 const govApprovalGrid = new ApprovalGrid({ userType: "municipal" });

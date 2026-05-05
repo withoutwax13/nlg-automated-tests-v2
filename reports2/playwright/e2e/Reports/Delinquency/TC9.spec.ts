@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../support/pwtest';
 import DelinquencyGrid from "../../../objects/DelinquencyGrid";
 import { AGS_DELINQUENCY_GRID_COLUMNS as defaultColumns } from "../../../objects/DelinquencyGrid";
 

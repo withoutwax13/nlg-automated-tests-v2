@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../support/pwtest';
 import Form from "../../objects/Form";
 import FormPreview from "../../objects/FormPreview";
 import Payment from "../../objects/Payment";

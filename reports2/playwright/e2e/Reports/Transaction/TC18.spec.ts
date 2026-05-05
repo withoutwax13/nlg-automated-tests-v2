@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../support/pwtest';
 import TransactionGrid from "../../../objects/TransactionGrid";
 import { AGS_TRANSACTION_GRID_COLUMNS as defaultColumns } from "../../../objects/TransactionGrid";
 

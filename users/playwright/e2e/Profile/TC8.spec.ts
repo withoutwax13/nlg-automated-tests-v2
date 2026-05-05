@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../support/pwtest';
 import Profile from "../../objects/Profile";
 
 const randomSeed = Math.floor(Math.random() * 10000);

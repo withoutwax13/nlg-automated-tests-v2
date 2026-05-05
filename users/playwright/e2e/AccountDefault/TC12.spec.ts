@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../support/pwtest';
 import Profile from "../../objects/Profile";
 import { TAXPAYER_DEFAULT_HOME_PAGE as pageOptions } from "../../objects/Profile";
 

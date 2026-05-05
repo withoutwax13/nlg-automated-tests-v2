@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../support/pwtest';
 import SettlementGrid from "../../../objects/SettlementGrid";
 import { AGS_SETTLEMENT_GRID_COLUMNS as defaultColumns } from "../../../objects/SettlementGrid";
 

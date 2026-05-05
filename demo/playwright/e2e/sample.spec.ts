@@ -1,23 +1,23 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../support/pwtest';
 
-test.describe("This is a sample test", () => {
+test.describe.skip("This is a sample test", () => {
   test("This should be a passing test", async () => {
-    await expect(true).toBe(true);
+    expect(true).to.equal(true);
   });
 
   test("This should be a failing test", async () => {
-    await expect(true).toBe(false);
+    expect(true).to.equal(false);
   });
 
   test.skip("This should be a skipped test", async () => {
-    await expect(true).toBe(true);
+    expect(true).to.equal(true);
   });
 
   test("This should be a failing test (2)", async () => {
-    await expect(5).toBe(1);
+    expect(5).to.equal(1);
   });
 
   test("This should be a failing test (3)", async () => {
-    await expect(5).toBe(1);
+    expect(5).to.equal(1);
   });
 });

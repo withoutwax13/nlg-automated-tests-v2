@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../support/pwtest';
 test.describe("Login Happy Path", () => {
   test("As a user, I should be able to login with valid credentials", () => {
     cy.login();

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../support/pwtest';
 import TransactionGrid from "../../../objects/TransactionGrid";
 
 test.describe(

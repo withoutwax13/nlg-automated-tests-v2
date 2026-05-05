@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../support/pwtest';
 test.describe("Login Negative Path", () => {
     test("As a user, I should not be able to login with invalid credentials", () => {
         cy.login({ manualAuth: true});

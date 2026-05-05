@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../support/pwtest';
 import FormGrid from "../../../objects/FormGrid";
 
 const agsFormGrid = new FormGrid({ userType: "ags" });

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../support/pwtest';
 import InviteUserModal from "../../objects/InviteUserModal";
 import UserGrid from "../../objects/UserGrid";
 

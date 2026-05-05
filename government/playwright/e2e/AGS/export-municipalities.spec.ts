@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../support/pwtest';
 import viewMunicipalities from "../../helpers/view-municipalities";
 import selector from "../../fixtures/selector.json";
 
