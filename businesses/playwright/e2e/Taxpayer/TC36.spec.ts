@@ -1,28 +1,19 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
 
 const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
 
 test.describe("As a taxpayer, I should only have details and delete as options in my action button column", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "taxpayer", accountIndex: 7 });
-    taxpayerBusinessList.init();
-    taxpayerBusinessList.getElementOfColumn(
+  test("Initiating test", async () => {
+    await login({ accountType: "taxpayer", accountIndex: 7 });
+    await taxpayerBusinessList.init();
+    const actionButton = await taxpayerBusinessList.getElementOfColumn(
       "Actions",
       "DBA",
-      "Arrakis Spice Company 13685",
-      "actionButton"
+      "Arrakis Spice Company 13685"
     );
-    pw.get("@actionButton").click();
-    taxpayerBusinessList
-      .getElement()
-      .anyList()
-      .contains("View Details")
-      .should("exist");
-    taxpayerBusinessList
-      .getElement()
-      .anyList()
-      .contains("Delete")
-      .should("exist");
+    await actionButton.click();
+    await expect(taxpayerBusinessList.getElement().anyList().filter({ hasText: "View Details" }).first()).toBeVisible();
+    await expect(taxpayerBusinessList.getElement().anyList().filter({ hasText: "Delete" }).first()).toBeVisible();
   });
 });

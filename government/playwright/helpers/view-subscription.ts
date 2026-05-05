@@ -1,15 +1,21 @@
+import { expect, type Page } from "@playwright/test";
 import selector from "../fixtures/selector.json";
+import {
+  clickLocatorByText,
+  expectLocatorWithText,
+  login,
+  waitForApiResponse,
+} from "../support/native-helpers";
 
-export default function viewSubscription() {
-  pw.intercept("GET", "https://**.amazonaws.com/municipalities/ActiveTaxAndFeesSubscriptions").as("loadMunicipalitiesData");
-  pw.intercept("GET", "https://**.amazonaws.com/municipalities").as("municipalList");
-  pw.intercept("GET", "https://**.amazonaws.com/subscriptions").as("subsList");
+export default async function viewSubscription(page: Page): Promise<void> {
+  await login(page, { accountType: "ags" });
+  await page.locator(selector.navigateMunicipality).click();
+  await expect(page).toHaveURL(/\/municipalityApp\/list\//);
 
-  pw.login({ accountType: "ags" });
-  pw.get(selector.navigateMunicipality).click();
-  pw.url().should('contain', '/municipalityApp/list/');
-
-  pw.wait("@subsList").its("response.statusCode").should("eq", 200);
-  pw.get(selector.dataLink).contains("Subscriptions").click();
-  pw.get(selector.heading2Title).contains("Subscriptions").should('exist');
+  await waitForApiResponse(page, {
+    method: "GET",
+    urlPart: "/subscriptions",
+  });
+  await clickLocatorByText(page.locator(selector.dataLink), "Subscriptions");
+  await expectLocatorWithText(page.locator(selector.heading2Title), "Subscriptions");
 }

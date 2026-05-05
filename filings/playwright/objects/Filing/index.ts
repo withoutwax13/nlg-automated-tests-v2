@@ -1,124 +1,84 @@
-/**
- * Class representing the Filing process.
- */
+import { Page } from "@playwright/test";
+import { resolvePage } from "../../pageContext";
+import { waitForLoading } from "../../utils/runtime";
+
 class Filing {
   isResumingDraftApplication: boolean;
+
   constructor(props: { isResumingDraftApplication: boolean }) {
     this.isResumingDraftApplication = props.isResumingDraftApplication;
   }
 
-  /**
-   * Get the elements used in the filing process.
-   * @returns {Object} The elements used in the filing process.
-   */
-  private elements() {
+  private elements(page: Page = resolvePage()) {
     return {
-      submitFormsTab: () => pw.get('a[href="/formsApp/ListMunicipalityForms"]'),
+      submitFormsTab: () => page.locator('a[href="/formsApp/ListMunicipalityForms"]'),
       governmentSelection: () =>
-        pw.get('input[placeholder="Search government and press enter …"]'),
-      formList: () => pw.get('ul[data-cy="ListForms"]'),
+        page.locator('input[placeholder="Search government and press enter …"]'),
+      formList: () => page.locator('ul[data-cy="ListForms"]'),
       formLinkItem: (formName: string) =>
-        this.getElements().formList().find("li").contains(formName),
-      modalTitle: () => pw.get("k-dialog-title"),
-      closeModalButton: () => pw.get(".k-dialog-titlebar-actions"),
-      modalContent: () => pw.get(".k-dialog-content"),
-      renewCancelButton: () => pw.get("NLGSecondaryButton").contains("Cancel"),
-      anyList: () => pw.get("li"),
+        page.locator('ul[data-cy="ListForms"] li').filter({ hasText: formName }).first(),
+      anyList: () => page.locator("li"),
       createNewFilingButton: () =>
-        pw.get(".NLGButtonSecondary").contains("Create a New Filing"),
+        page.getByRole("button", { name: "Create a New Filing" }),
       resumeDraftFilingButton: () =>
-        pw.get(".NLGButtonPrimary").contains("Resume Draft Filing"),
+        page.getByRole("button", { name: "Resume Draft Filing" }),
       businessSelectionDropdown: () =>
-        pw.get('*[data-cy="business-dialog-choose-business-comboBox"]'),
-      nextButton: () => pw.get(".NLGButtonPrimary").contains("Next"),
-      cancelButton: () => pw.get(".NLGButtonSecondary").contains("Cancel"),
+        page.locator('*[data-cy="business-dialog-choose-business-comboBox"]'),
+      nextButton: () => page.getByRole("button", { name: "Next" }),
+      cancelButton: () => page.getByRole("button", { name: "Cancel" }),
     };
   }
 
-  /**
-   * Get the elements used in the filing process.
-   * @returns {Object} The elements used in the filing process.
-   */
-  getElements() {
-    return this.elements();
+  getElements(page: Page = resolvePage()) {
+    return this.elements(page);
   }
 
-  /**
-   * Navigate to the submit forms tab.
-   */
-  goToSubmitFormsTab() {
-    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/ActiveTaxAndFeesSubscriptions").as("getMunicipalitiesWithActiveSubscriptionsSubmitFormTab");
-    pw.intercept("GET", "https://**.azavargovapps.com/filings/draftFilings").as("getDraftFilings");
-    this.getElements().submitFormsTab().click();
-    pw.wait("@getMunicipalitiesWithActiveSubscriptionsSubmitFormTab").its("response.statusCode").should("eq", 200);
-    pw.wait("@getDraftFilings").its("response.statusCode").should("eq", 200);
+  async goToSubmitFormsTab(page: Page = resolvePage()) {
+    await this.getElements(page).submitFormsTab().click();
+    await waitForLoading(page);
   }
 
-  /**
-   * Handles accounts with draft filings.
-   */
-  private startFiling() {
-    pw.get("body").then(($body) => {
-      const modal = $body.find(".k-dialog-titlebar");
-      if (modal.length > 0) {
-        if (modal.text().includes("Resume Draft Filing")) {
-          if (!this.isResumingDraftApplication) {
-            this.getElements().createNewFilingButton().click();
-          } else {
-            this.getElements().resumeDraftFilingButton().click();
-          }
+  private async startFiling(page: Page = resolvePage()) {
+    const modalTitle = page.locator(".k-dialog-titlebar");
+    if ((await modalTitle.count()) > 0) {
+      const text = await modalTitle.first().innerText();
+      if (text.includes("Resume Draft Filing")) {
+        if (!this.isResumingDraftApplication) {
+          await this.getElements(page).createNewFilingButton().click();
+        } else {
+          await this.getElements(page).resumeDraftFilingButton().click();
         }
       }
-    });
-    pw.waitForLoading(5);
+    }
+    await waitForLoading(page, 5);
   }
 
-  /**
-   * Select a government from the list.
-   * @param {string} government - The name of the government to select.
-   */
-  selectGovernment(government: string) {
-    pw.intercept("GET", "https://**.azavargovapps.com/businesses/municipalityBusinessConfig/**").as("getMunicipalityBusinessConfig");
-    pw.intercept("GET", "https://**.azavargovapps.com/forms/formsConfig/**").as("getFormsConfig");
-    pw.intercept("GET", "https://**.azavargovapps.com/businesses/taxpayerBusinesses?munId=**").as("getTaxpayerBusinesses");
-    pw.intercept("GET", "https://**.azavargovapps.com/forms/municipality**").as("getActiveForms");
-    this.getElements().governmentSelection().click();
-    this.getElements().governmentSelection().type(government);
-    this.getElements().anyList().contains(government).click();
-    pw.wait("@getMunicipalityBusinessConfig").its("response.statusCode").should("eq", 200);
-    pw.wait("@getFormsConfig").its("response.statusCode").should("eq", 200);
-    pw.wait("@getTaxpayerBusinesses").its("response.statusCode").should("eq", 200);
-    pw.wait("@getActiveForms").its("response.statusCode").should("eq", 200);
+  async selectGovernment(page: Page = resolvePage(), government: string) {
+    await this.getElements(page).governmentSelection().click();
+    await this.getElements(page).governmentSelection().fill(government);
+    await this.getElements(page).anyList().filter({ hasText: government }).first().click();
+    await waitForLoading(page);
   }
 
-  /**
-   * Select a form from the list.
-   * @param {string} formName - The name of the form to select.
-   */
-  selectForm(formName: string) {
-    this.getElements().formLinkItem(formName).click();
+  async selectForm(page: Page = resolvePage(), formName: string) {
+    await this.getElements(page).formLinkItem(formName).click();
   }
 
-  /**
-   * Select a business to file.
-   * @param {string} businessDba - The name of the business to file.
-   */
-  selectBusinessToFile(businessDba: string) {
-    pw.intercept("POST", "https://**.azavargovapps.com/filings/").as("createFiling");
-    pw.intercept("PATCH", "https://**.azavargovapps.com/filings/**/visit-page?&form-id=8**").as("visitFormPage");
-    this.getElements().businessSelectionDropdown().click();
-    this.getElements().businessSelectionDropdown().type(businessDba);
-    this.getElements().anyList().contains(businessDba).click();
-    this.clickNextButton();
-    this.startFiling();
-  }
-  clickNextButton() {
-    this.getElements().nextButton().click();
-    pw.waitForLoading();
+  async selectBusinessToFile(page: Page = resolvePage(), businessDba: string) {
+    await this.getElements(page).businessSelectionDropdown().click();
+    await this.getElements(page).businessSelectionDropdown().fill(businessDba);
+    await this.getElements(page).anyList().filter({ hasText: businessDba }).first().click();
+    await this.clickNextButton(page);
+    await this.startFiling(page);
   }
 
-  clickCancelButton() {
-    this.getElements().cancelButton().click();
+  async clickNextButton(page: Page = resolvePage()) {
+    await this.getElements(page).nextButton().click();
+    await waitForLoading(page);
+  }
+
+  async clickCancelButton(page: Page = resolvePage()) {
+    await this.getElements(page).cancelButton().click();
   }
 }
 

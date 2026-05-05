@@ -1,35 +1,25 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
 
 const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
 
 test.describe("As a municipal user,  I should be able to reveal the full content of FEIN in business list.", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "municipal", accountIndex: 6 });
-    municipalBusinessGrid.init();
-    municipalBusinessGrid.getDataOfColumn(
+  test("Initiating test", async () => {
+    await login({ accountType: "municipal", accountIndex: 6 });
+    await municipalBusinessGrid.init();
+    const feinValueBeforeClick = await municipalBusinessGrid.getDataOfColumn(
       "FEIN",
       "DBA",
-      "Arrakis Spice Company 13685",
-      "feinValueBeforeClick"
+      "Arrakis Spice Company 13685"
     );
-    municipalBusinessGrid.clickClearAllFiltersButton();
-    municipalBusinessGrid.getElementOfColumn(
+    await municipalBusinessGrid.clickClearAllFiltersButton();
+    const feinCell = await municipalBusinessGrid.getElementOfColumn(
       "FEIN",
       "DBA",
-      "Arrakis Spice Company 13685",
-      "feinCell"
+      "Arrakis Spice Company 13685"
     );
-    pw.get("@feinCell").then(($feinCell) => {
-      pw.wrap($feinCell)
-        .find(".fa-eye-slash")
-        .click()
-        .then(() => {
-          pw.wrap($feinCell).find("span").invoke("text").as("feinValueAfterClick");
-        });
-    });
-    pw.get("@feinValueBeforeClick").then(($feinValueBeforeClick) => {
-      pw.get("@feinValueAfterClick").should("not.eq", $feinValueBeforeClick);
-    });
+    await feinCell.locator(".fa-eye-slash").click();
+    const feinValueAfterClick = (await feinCell.locator("span").first().innerText()).trim();
+    expect(feinValueAfterClick).not.toEqual(feinValueBeforeClick);
   });
 });

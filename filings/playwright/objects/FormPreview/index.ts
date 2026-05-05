@@ -1,61 +1,38 @@
+import { expect, Page } from "@playwright/test";
+import { resolvePage } from "../../pageContext";
 import Form from "../Form";
 
 class FormPreview extends Form {
-  constructor() {
-    super();
-  }
-
-  private formPreviewElements() {
+  private formPreviewElements(page: Page = resolvePage()) {
     return {
-      ...super.getElement(),
-      submitButton: () => pw.get(".NLGButtonPrimary").contains(/Go to Payment|Submit/),
-      accordion: () => pw.get(".k-expander").eq(0).parent(),
-      accordionSteps: () => this.getElement().accordion().find(".k-expander"),
-      paymentDetails: () => pw.get("h2").contains("Payment Details").next(),
+      ...super.getElement(page),
+      submitButton: () => page.locator(".NLGButtonPrimary").filter({ hasText: /Go to Payment|Submit/ }).first(),
+      accordion: () => page.locator(".k-expander").nth(0).locator("xpath=.."),
+      accordionSteps: () => page.locator(".k-expander"),
+      paymentDetails: () => page.locator("h2").filter({ hasText: "Payment Details" }).locator("xpath=following-sibling::*[1]"),
     };
   }
 
-  getElement() {
-    return this.formPreviewElements();
+  getElement(page: Page = resolvePage()) {
+    return this.formPreviewElements(page);
   }
 
-  clickSubmitButton() {
-    pw.intercept("PATCH", "https://**.azavargovapps.com/filings/**/submit").as("submitFiling");
-    this.getElement().submitButton().should("be.enabled").click();
-    pw.wait("@submitFiling").its("response.statusCode").should("eq", 201);
+  async clickSubmitButton(page: Page = resolvePage()) {
+    await expect(this.getElement(page).submitButton()).toBeEnabled();
+    await this.getElement(page).submitButton().click();
   }
 
-  toggleStepAccordion(stepName: string, toExpand: boolean) {
+  async toggleStepAccordion(page: Page = resolvePage(), stepName: string, toExpand: boolean) {
     const stepIndex = [
       "Instructions",
       "Basic Info",
       "Tax Info",
       "Preparer Info",
     ].indexOf(stepName);
-    if (toExpand) {
-      this.getElement()
-        .accordionSteps()
-        .eq(stepIndex)
-        .find("div")
-        .eq(0)
-        .invoke("attr", "aria-expanded")
-        .then((expanded) => {
-          if (expanded === "false") {
-            this.getElement().accordionSteps().eq(stepIndex).click();
-          }
-        });
-    } else {
-      this.getElement()
-        .accordionSteps()
-        .eq(stepIndex)
-        .find("div")
-        .eq(0)
-        .invoke("attr", "aria-expanded")
-        .then((expanded) => {
-          if (expanded === "true") {
-            this.getElement().accordionSteps().eq(stepIndex).click();
-          }
-        });
+    const step = this.getElement(page).accordionSteps().nth(stepIndex);
+    const expanded = await step.locator("div").nth(0).getAttribute("aria-expanded");
+    if ((toExpand && expanded === "false") || (!toExpand && expanded === "true")) {
+      await step.click();
     }
   }
 }

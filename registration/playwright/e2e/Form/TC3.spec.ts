@@ -1,33 +1,31 @@
-import { test, expect } from '../../support/pwtest';
+import { expect, test } from "@playwright/test";
 import Filing from "../../objects/Filing";
 import Form from "../../objects/Form";
+import { getUniqueRegistrationData, initTestRuntime, login, waitForLoading } from "../../support/runtime";
 
 const randomSeed = Math.floor(Math.random() * 1000);
 
 test.describe("User should not be able to proceed to Location info step if the required details are not provided on the basic info step", () => {
-  test("Initiating test", () => {
+  test("Initiating test", async ({ page, request }, testInfo) => {
+    await initTestRuntime({ page, request, baseURL: testInfo.project.use.baseURL as string });
     const form = new Form({ isRenewal: false });
     const filing = new Filing();
-
-    pw.login({ accountType: "taxpayer", accountIndex: 2 });
-
-    filing.goToSubmitFormsTab();
-    filing.selectGovernment("City of Arrakis");
-    filing.selectForm("Business License (Annual) - E2E #1");
-    filing.clickSubmitNewRegistrationButton();
-    form.clickNextbutton();
-    form.selectIsRegisteringMultipleLocations(false);
-    pw.getUniqueRegistrationData(randomSeed, false, [
+    const customData = await getUniqueRegistrationData(randomSeed, false, [
       "basicInfo.federalIdentificationNumber",
-    ]).then(
-      (customData: { basicInfo: any; locationInfo: { locations: any[] } }) => {
-        form.enterBusinessOwnerInformation(customData.basicInfo);
-        form.enterLegalBusinessInformation(customData.basicInfo);
-        form.checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation();
-        form.enterEmergencyPhoneNumbers(customData.basicInfo);
-        pw.waitForLoading();
-        form.getElement().nextButton().should("be.disabled");
-      }
-    );
+    ]);
+
+    await login({ accountType: "taxpayer", accountIndex: 2 });
+    await filing.goToSubmitFormsTab();
+    await filing.selectGovernment("City of Arrakis");
+    await filing.selectForm("Business License (Annual) - E2E #1");
+    await filing.clickSubmitNewRegistrationButton();
+    await form.clickNextbutton();
+    await form.selectIsRegisteringMultipleLocations(false);
+    await form.enterBusinessOwnerInformation(customData.basicInfo as any);
+    await form.enterLegalBusinessInformation(customData.basicInfo as any);
+    await form.checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation();
+    await form.enterEmergencyPhoneNumbers(customData.basicInfo as any);
+    await waitForLoading();
+    await expect(form.getElement().nextButton()).toBeDisabled();
   });
 });

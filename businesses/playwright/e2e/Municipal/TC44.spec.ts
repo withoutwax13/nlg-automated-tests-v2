@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 
@@ -8,19 +8,19 @@ const randomMonth = Math.floor(Math.random() * 12) + 1;
 const randomDate = Math.floor(Math.random() * 28) + 1;
 
 test.describe("As a municipal user, I should be able to update start date for delinquency tracking in the business details page", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "municipal", accountIndex: 1 });
-    municipalBusinessGrid.init();
-    municipalBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
-    municipalBusinessDetails.clickBusinessStatusTab();
+  test("Initiating test", async () => {
+    await login({ accountType: "municipal", accountIndex: 1 });
+    await municipalBusinessGrid.init();
+    await municipalBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
+    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
+    await municipalBusinessDetails.clickBusinessStatusTab();
 
-    municipalBusinessDetails.setStartDateDelinquencyTracking({
+    await municipalBusinessDetails.setStartDateDelinquencyTracking({
       month: randomMonth,
       date: randomDate,
       year: 2024,
     });
-    municipalBusinessDetails.clickSaveButton();
-    municipalBusinessDetails.getElement().toastComponent().should("exist");
+    await municipalBusinessDetails.clickSaveButton();
+    await expect(municipalBusinessDetails.getElement().toastComponent()).toBeVisible();
   });
 });

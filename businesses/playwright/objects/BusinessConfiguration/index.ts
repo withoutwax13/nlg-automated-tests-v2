@@ -1,47 +1,56 @@
+import { buttonByText, currentPage } from "../../support/runtime";
+
 class BusinessConfiguration {
-    private elements() {
-        return {
-            pageTitle: () => pw.get("h1"),
-            backButton: () => pw.get("button").contains("Back"),
-            allowedFieldsConfigExpander: () => pw.get("#GridFieldsConfig"),
-            searchFieldsConfigExpander: () => pw.get("#SearchFieldsConfig"),
-            allowTaxpayersToFileNotRemmitanceFormsCheckbox: () => pw.get("label").contains("Allow Taxpayers to File Not Remittance Forms"),
-            useUniqueFieldWhenUploadBusinessLiostCheckbox: () => pw.get("label").contains("Use unique field when upload businesses list"),
-            saveButton: () => pw.get("button").contains("Save"),
-            cancelButton: () => pw.get("button").contains("Cancel"),
-        }
-    }
+  private page() {
+    return currentPage();
+  }
 
-    getElement() {
-        return this.elements();
-    }
-    clickAllowedFieldsConfigExpander() {
-        this.getElement().allowedFieldsConfigExpander().click();
-    }
+  private elements() {
+    return {
+      pageTitle: () => this.page().locator("h1").first(),
+      backButton: () => buttonByText("Back"),
+      allowedFieldsConfigExpander: () => this.page().locator("#GridFieldsConfig"),
+      searchFieldsConfigExpander: () => this.page().locator("#SearchFieldsConfig"),
+      allowTaxpayersToFileNotRemmitanceFormsCheckbox: () =>
+        this.page().locator("label").filter({ hasText: "Allow Taxpayers to File Not Remittance Forms" }).first(),
+      useUniqueFieldWhenUploadBusinessLiostCheckbox: () =>
+        this.page().locator("label").filter({ hasText: "Use unique field when upload businesses list" }).first(),
+      saveButton: () => buttonByText("Save"),
+      cancelButton: () => buttonByText("Cancel"),
+    };
+  }
 
-    clickSearchFieldsConfigExpander() {
-        this.getElement().searchFieldsConfigExpander().click();
-    }
+  getElement() {
+    return this.elements();
+  }
 
-    clickAllowTaxpayersToFileNotRemmitanceFormsCheckbox() {
-        this.getElement().allowTaxpayersToFileNotRemmitanceFormsCheckbox().click();
-    }
+  async clickAllowedFieldsConfigExpander() {
+    await this.getElement().allowedFieldsConfigExpander().click();
+  }
 
-    clickUseUniqueFieldWhenUploadBusinessLiostCheckbox() {
-        this.getElement().useUniqueFieldWhenUploadBusinessLiostCheckbox().click();
-    }
+  async clickSearchFieldsConfigExpander() {
+    await this.getElement().searchFieldsConfigExpander().click();
+  }
 
-    clickSaveButton() {
-        this.getElement().saveButton().click();
-    }
+  async clickAllowTaxpayersToFileNotRemmitanceFormsCheckbox() {
+    await this.getElement().allowTaxpayersToFileNotRemmitanceFormsCheckbox().click();
+  }
 
-    clickCancelButton() {
-        this.getElement().cancelButton().click();
-    }
+  async clickUseUniqueFieldWhenUploadBusinessLiostCheckbox() {
+    await this.getElement().useUniqueFieldWhenUploadBusinessLiostCheckbox().click();
+  }
 
-    clickBackButton() {
-        this.getElement().backButton().click();
-    }
+  async clickSaveButton() {
+    await this.getElement().saveButton().click();
+  }
+
+  async clickCancelButton() {
+    await this.getElement().cancelButton().click();
+  }
+
+  async clickBackButton() {
+    await this.getElement().backButton().click();
+  }
 }
 
 export default BusinessConfiguration;

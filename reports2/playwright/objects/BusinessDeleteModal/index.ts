@@ -1,40 +1,48 @@
+import type { Page } from "@playwright/test";
+
 class BusinessDeleteModal {
   userType: string;
-  constructor(props: { userType: string }) {
+  page: Page;
+
+  constructor(props: { userType: string; page: Page }) {
     this.userType = props.userType;
+    this.page = props.page;
   }
   private elements() {
+    const modal = this.page.locator(".k-dialog");
     return {
-      modalTitle: () => pw.get(".k-dialog-title"),
-      modalContent: () => pw.get(".k-dialog-content"),
-      buttonGroup: () => pw.get(".k-dialog-actions"),
+      modalTitle: () => modal.locator(".k-dialog-title"),
+      modalContent: () => modal.locator(".k-dialog-content"),
+      buttonGroup: () => modal.locator(".k-dialog-actions"),
       cancelButton: () =>
         this.getElement()
           .buttonGroup()
-          .find(".NLGButtonPrimary")
-          .contains("Cancel"),
+          .locator(".NLGButtonPrimary")
+          .filter({ hasText: "Cancel" })
+          .first(),
       deleteButton: () =>
         this.getElement()
           .buttonGroup()
-          .find(".NLGButtonSecondary")
-          .contains("Delete Business"),
-      closeModalButton: () => pw.get('button[aria-label="Close"]'),
+          .locator(".NLGButtonSecondary")
+          .filter({ hasText: "Delete Business" })
+          .first(),
+      closeModalButton: () => modal.locator('button[aria-label="Close"]'),
     };
   }
   getElement() {
     return this.elements();
   }
 
-  clickCancelButton() {
-    this.getElement().cancelButton().click();
+  clickCancelButton(): Promise<void> {
+    return this.getElement().cancelButton().click();
   }
 
-  clickDeleteButton() {
-    this.getElement().deleteButton().click();
+  clickDeleteButton(): Promise<void> {
+    return this.getElement().deleteButton().click();
   }
 
-  clickCloseModalButton() {
-    this.getElement().closeModalButton().click();
+  clickCloseModalButton(): Promise<void> {
+    return this.getElement().closeModalButton().click();
   }
 }
 

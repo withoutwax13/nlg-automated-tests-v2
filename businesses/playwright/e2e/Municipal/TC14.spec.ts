@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 
@@ -33,32 +33,32 @@ const newBusinessData = {
 };
 
 test.describe("As a municipal user, I should be able to delete a business.", () => {
-  test.beforeEach(() => {
-    pw.deleteBusinessData({
+  test.beforeEach(async () => {
+    await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
       notFirstLogin: false,
       accountIndex: 5,
     });
   });
-  test("Initiating test", () => {
-    pw.login({
+  test("Initiating test", async () => {
+    await login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 5,
     });
-    businessGrid.init();
-    businessGrid.clickAddBusinessButton();
-    addBusinessPage.fillFields(newBusinessData);
-    addBusinessPage.clickSaveButton();
-    businessGrid.init();
-    businessGrid.clickClearAllFiltersButton();
-    businessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
+    await businessGrid.init();
+    await businessGrid.clickAddBusinessButton();
+    await addBusinessPage.fillFields(newBusinessData);
+    await addBusinessPage.clickSaveButton();
+    await businessGrid.init();
+    await businessGrid.clickClearAllFiltersButton();
+    await businessGrid.viewBusinessDetails(newBusinessData.locationDba);
+    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     // delete business data
-    businessGrid.init(false, false);
-    businessGrid.deleteBusiness(newBusinessData.locationDba);
-    businessGrid.getElement().toastComponent().should("exist");
+    await businessGrid.init(false, false);
+    await businessGrid.deleteBusiness(newBusinessData.locationDba);
+    await expect(businessGrid.getElement().toastComponent()).toBeVisible();
   });
 });

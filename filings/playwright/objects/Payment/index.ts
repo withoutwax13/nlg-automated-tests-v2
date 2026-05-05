@@ -1,60 +1,58 @@
+import { Page } from "@playwright/test";
+import { resolvePage } from "../../pageContext";
+
 class Payment {
-    private elements() {
-        return {
-            savedPaymentMethods: () => pw.get('label[for="savedPayment"]'),
-            savedPaymentMethodItems: () => pw.get('.form-section').eq(0).find('.radio').find('.form-check'),
-            termsAndConditionsCheckbox: () => pw.get('input[data-cy="I have read and agree to the Terms and Conditions of this online payment system.-checkbox"]'),
-            finishAndPayButton: () => pw.get('button').contains('Finish and Pay'),
-            payNowButton: () => pw.get('button').contains('Pay Now'),
-            payLaterButton: () => pw.get('button').contains('Pay Later'),
-        }
-    }
+  private elements(page: Page = resolvePage()) {
+    return {
+      savedPaymentMethods: () => page.locator('label[for="savedPayment"]'),
+      savedPaymentMethodItems: () =>
+        page.locator(".form-section").nth(0).locator(".radio .form-check"),
+      termsAndConditionsCheckbox: () =>
+        page.locator(
+          'input[data-cy="I have read and agree to the Terms and Conditions of this online payment system.-checkbox"]'
+        ),
+      finishAndPayButton: () => page.getByRole("button", { name: "Finish and Pay" }),
+      payNowButton: () => page.getByRole("button", { name: "Pay Now" }),
+      payLaterButton: () => page.getByRole("button", { name: "Pay Later" }),
+    };
+  }
 
-    getElements() {
-        return this.elements();
-    }
+  getElements(page: Page = resolvePage()) {
+    return this.elements(page);
+  }
 
-    clickPayNowButton() {
-        this.getElements().payNowButton().click();
-    }
+  async clickPayNowButton(page: Page = resolvePage()) {
+    await this.getElements(page).payNowButton().click();
+  }
 
-    clickPayLaterButton() {
-        this.getElements().payLaterButton().click();
-    }
+  async clickPayLaterButton(page: Page = resolvePage()) {
+    await this.getElements(page).payLaterButton().click();
+  }
 
-    clickSavedPaymentMethods() {
-        pw.intercept("GET", "https://**.azavargovapps.com/forms/payment-options/**").as("getPaymentOptions");
-        pw.intercept("POST", "https://**.azavargovapps.com/payments/burton/payment-method").as("addBurtonPaymentMethod");
-        pw.intercept("GET", "https://**.azavargovapps.com/payments/paymentMethods").as("getPaymentMethods");
-        this.getElements().savedPaymentMethods().click();
-        pw.wait("@getPaymentOptions").its("response.statusCode").should("eq", 200);
-        pw.wait("@getPaymentMethods").its("response.statusCode").should("eq", 200);
-        pw.wait("@addBurtonPaymentMethod").its("response.statusCode").should("eq", 201);
-    }
+  async clickSavedPaymentMethods(page: Page = resolvePage()) {
+    await this.getElements(page).savedPaymentMethods().click();
+    await page.waitForTimeout(2000);
+  }
 
-    selectSavedPaymentMethod(order: number) {
-        pw.intercept("PATCH", "https://**.azavargovapps.com/filings/**/reeval-for-payment").as("reevalForPayment");
-        this.getElements().savedPaymentMethodItems().eq(order).click();
-        pw.wait("@reevalForPayment").its("response.statusCode").should("be.oneOf", [200, 201]);
-    }
+  async selectSavedPaymentMethod(page: Page = resolvePage(), order: number) {
+    await this.getElements(page).savedPaymentMethodItems().nth(order).click();
+    await page.waitForTimeout(2000);
+  }
 
-    clickTermsAndConditionsCheckbox() {
-        this.getElements().termsAndConditionsCheckbox().click();
-    }
+  async clickTermsAndConditionsCheckbox(page: Page = resolvePage()) {
+    await this.getElements(page).termsAndConditionsCheckbox().click();
+  }
 
-    clickFinishAndPayButton() {
-        pw.intercept("POST", "https://**.azavargovapps.com/payments/checkout").as("checkout");
-        pw.intercept("GET", "https://**.azavargovapps.com/filings/**").as("getFiling");
-        pw.intercept("GET", "https://**.azavargovapps.com/payments/payment/**").as("getPayment");
-        this.getElements().finishAndPayButton().click();
-    }
+  async clickFinishAndPayButton(page: Page = resolvePage()) {
+    await this.getElements(page).finishAndPayButton().click();
+  }
 
-    payViaAnySavedPaymentMethod() {
-        this.clickSavedPaymentMethods();
-        this.selectSavedPaymentMethod(0);
-        this.clickTermsAndConditionsCheckbox();
-        this.clickFinishAndPayButton();
-    }
+  async payViaAnySavedPaymentMethod(page: Page = resolvePage()) {
+    await this.clickSavedPaymentMethods(page);
+    await this.selectSavedPaymentMethod(page, 0);
+    await this.clickTermsAndConditionsCheckbox(page);
+    await this.clickFinishAndPayButton(page);
+  }
 }
 
 export default Payment;

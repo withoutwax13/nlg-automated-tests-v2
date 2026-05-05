@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 
@@ -6,35 +6,21 @@ const agsBusinessGrid = new BusinessGrid({ userType: "ags", municipalitySelectio
 const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 
 test.describe("As a ags user, I should be able to add notes to a business via the business details page", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags", accountIndex: 5 });
-    agsBusinessGrid.init();
-    agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
-    agsBusinessDetails.clickNotesTab();
-    agsBusinessDetails.clickAddNoteButton();
-    agsBusinessDetails.getElement().saveButton().should("be.disabled"); // TC56 assertion
-    agsBusinessDetails.clickCancelNoteButton();
-    agsBusinessDetails.addNote(
+  test("Initiating test", async () => {
+    await login({ accountType: "ags", accountIndex: 5 });
+    await agsBusinessGrid.init();
+    await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
+    await agsBusinessDetails.clickNotesTab();
+    await agsBusinessDetails.clickAddNoteButton();
+    await expect(agsBusinessDetails.getElement().saveButton()).toBeDisabled();
+    await agsBusinessDetails.clickCancelNoteButton();
+    await agsBusinessDetails.addNote(
       `test note for this business data at ${new Date().getTime()}`
     );
-    agsBusinessDetails
-      .getElement()
-      .noteItems()
-      .its("length")
-      .as("noteItemsLength");
-    pw.get("@noteItemsLength").then((noteItemsLength) => {
-      agsBusinessDetails.clickNoteItem(Number(noteItemsLength) - 1);
-      agsBusinessDetails.deleteNoteItem(Number(noteItemsLength) - 1);
-      agsBusinessDetails
-        .getElement()
-        .noteItems()
-        .its("length")
-        .then((newNoteItemsLength) => {
-          // TC58 assertion
-          expect(Number(newNoteItemsLength)).to.be.lessThan(
-            Number(noteItemsLength)
-          );
-        });
-    });
+    const noteItemsLength = await agsBusinessDetails.getElement().noteItems().count();
+    await agsBusinessDetails.clickNoteItem(noteItemsLength - 1);
+    await agsBusinessDetails.deleteNoteItem(noteItemsLength - 1);
+    const newNoteItemsLength = await agsBusinessDetails.getElement().noteItems().count();
+    expect(newNoteItemsLength).toBeLessThan(noteItemsLength);
   });
 });

@@ -1,13 +1,15 @@
-import { test, expect } from '../../../support/pwtest';
+import { test } from "@playwright/test";
 import FormGrid from "../../../objects/FormGrid";
+import { initTestRuntime, login } from "../../../support/runtime";
 
 const agsFormsGrid = new FormGrid({ userType: "ags" });
 
 test.describe("As an AGS user, I should be able to export a workflow of a specific form", () => {
-  test("Initiate test", () => {
-    pw.login({ accountType: "ags", accountIndex: 6 });
-    agsFormsGrid.init();
-    agsFormsGrid.toggleActionButton(
+  test("Initiate test", async ({ page }, testInfo) => {
+    await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
+    await login({ accountType: "ags", accountIndex: 6 });
+    await agsFormsGrid.init();
+    await agsFormsGrid.toggleActionButton(
       "filter",
       "Export Workflow",
       "Form Title",

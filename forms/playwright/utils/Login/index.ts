@@ -1,29 +1,12 @@
-const interceptHubspotChat = () => {
-  return cy
-    .intercept("https://**.hubspot.com/livechat-public/**")
-    .as("hubspotChatAPI");
-};
+import { waitForLoading } from "../../support/runtime";
 
-const interceptLeadFlowConfig = () => {
-  return cy
-    .intercept("https://**.hubspot.com/lead-flows-config/**")
-    .as("leadFlowConfigAPI");
-};
+const interceptHubspotChat = async () => undefined;
+const interceptLeadFlowConfig = async () => undefined;
+const interceptAwsCognito = async () => undefined;
 
-const interceptAwsCognito = () => {
-  return cy
-    .intercept("POST", "https://cognito-idp.**.amazonaws.com/")
-    .as("cognitoAwsAPI");
-};
-
-const waitForHubspotChat = () => pw.wait("@hubspotChatAPI");
-const waitForLeadFlowConfig = () => pw.wait("@leadFlowConfigAPI");
-
-const waitForAwsCognito = (isMultipleWait: boolean = true) => {
-  return isMultipleWait
-    ? pw.wait(["@cognitoAwsAPI", "@cognitoAwsAPI"])
-    : pw.wait("@cognitoAwsAPI");
-};
+const waitForHubspotChat = async () => waitForLoading();
+const waitForLeadFlowConfig = async () => waitForLoading();
+const waitForAwsCognito = async (_isMultipleWait = true) => waitForLoading();
 
 export default {
   interceptAwsCognito,

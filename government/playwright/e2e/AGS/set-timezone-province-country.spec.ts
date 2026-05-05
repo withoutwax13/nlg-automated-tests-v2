@@ -1,90 +1,46 @@
-import { test, expect } from '../../support/pwtest';
+import { expect, test } from '@playwright/test';
 import selector from "../../fixtures/selector.json";
+import viewMunicipalities from "../../helpers/view-municipalities";
+import { waitForApiResponse } from "../../support/native-helpers";
 
-const setupIntercepts = () => {
-  const interceptData = [
-    {
-      method: "GET",
-      url: "https://**.amazonaws.com/municipalities/ActiveTaxAndFeesSubscriptions",
-      alias: "loadMunicipalitiesData",
-    },
-    {
-      method: "GET",
-      url: "https://**.amazonaws.com/municipalities",
-      alias: "municipalList",
-    },
-    {
-      method: "GET",
-      url: "https://**.amazonaws.com/subscriptions",
-      alias: "subsList",
-    },
-    {
-      method: "GET",
-      url: "https://**.amazonaws.com/ReportsListInfo",
-      alias: "addMunicipality",
-    },
-  ];
-  interceptData.forEach((intercept) => {
-    pw.intercept(intercept.method, intercept.url).as(intercept.alias);
+const selectLabeledOption = async (
+  { page }: { page: import("@playwright/test").Page },
+  label: string,
+  optionText: string
+) => {
+  const labelLocator = page.locator(selector.inputLabel).filter({ hasText: label }).first();
+  await labelLocator.locator("xpath=following-sibling::*[1]").click();
+  await page
+    .locator(selector.optionListContainer)
+    .locator(selector.optionList)
+    .locator(selector.optionItem)
+    .filter({ hasText: optionText })
+    .first()
+    .click();
+};
+
+const setTimezoneProvinceCountryNewMunicipality = async ({
+  page,
+}: {
+  page: import("@playwright/test").Page;
+}) => {
+  await viewMunicipalities(page);
+
+  const addMunicipalityResponse = waitForApiResponse(page, {
+    method: "GET",
+    urlPart: "/ReportsListInfo",
   });
-};
 
-const loginAndViewMunicipalities = () => {
-  pw.login({ accountType: "ags" });
-  pw.get(selector.navigateMunicipality).click();
-  pw.url().should("contain", "/municipalityApp/list/");
-};
+  await page.locator(selector.addMunicipalityButton).click();
+  await addMunicipalityResponse;
+  await expect(page.locator(selector.addingMuniForm)).toBeVisible();
+  await expect(
+    page.locator(selector.heading1Title).filter({ hasText: "Create a new Municipality" }).first()
+  ).toBeVisible();
 
-const verifyMunicipality = () => {
-  pw.wait("@municipalList").its("response.statusCode").should("eq", 200);
-  pw.get(selector.dataLink).contains("Municipalities").click();
-  pw.get(selector.heading2Title).contains("Municipalities").should("exist");
-};
-
-const navigateToAddMunicipality = () => {
-  pw.get(selector.addMunicipalityButton).click();
-  pw.wait("@addMunicipality").its("response.statusCode").should("eq", 200);
-  pw.get(selector.addingMuniForm).should("exist").and("be.visible");
-  pw.get(selector.heading1Title)
-    .contains("Create a new Municipality")
-    .should("exist");
-};
-
-const updateCountry = () => {
-  pw.get(selector.inputLabel).contains("Country").next().click();
-  pw.get(selector.optionListContainer)
-    .find(selector.optionList)
-    .find(selector.optionItem)
-    .contains("Canada")
-    .click();
-};
-
-const updateProvince = () => {
-  pw.get(selector.inputLabel).contains("Government Province").next().click();
-  pw.get(selector.optionListContainer)
-    .find(selector.optionList)
-    .find(selector.optionItem)
-    .contains("AB")
-    .click();
-};
-
-const updateTimezone = () => {
-  pw.get(selector.inputLabel).contains("Time Zone").next().click();
-  pw.get(selector.optionListContainer)
-    .find(selector.optionList)
-    .find(selector.optionItem)
-    .contains("America/Edmonton")
-    .click();
-};
-
-const setTimezoneProvinceCountryNewMunicipality = () => {
-  setupIntercepts();
-  loginAndViewMunicipalities();
-  verifyMunicipality();
-  navigateToAddMunicipality();
-  updateCountry();
-  updateProvince();
-  updateTimezone();
+  await selectLabeledOption({ page }, "Country", "Canada");
+  await selectLabeledOption({ page }, "Government Province", "AB");
+  await selectLabeledOption({ page }, "Time Zone", "America/Edmonton");
 };
 
 test.describe("As an AGS user, I want to set the time zone, province and country for a government", () => {

@@ -1,25 +1,17 @@
-import { getOrderOfColumns, validateFilterOperation } from "../../utils/Grid";
+import { expect, Locator, Page } from "@playwright/test";
+import { resolvePage } from "../../pageContext";
+import {
+  applyGridFilter,
+  getColumnOrder,
+  getColumnTexts,
+  getRowByCellText,
+  normalizeCellText,
+} from "../../utils/Grid";
+import { waitForLoading } from "../../utils/runtime";
 import ExportFiling from "../ExportFiling";
 
 const VALID_ITEMS_PER_PAGE = [5, 10, 20, 50];
 const AGS_FILING_COLUMNS = [
-  "Actions",
-  "Filing Period",
-  "Location DBA",
-  "Location Address 1",
-  "Total Due",
-  "Payment Status",
-  "Transaction Date",
-  "Funding Date",
-  "Form Name",
-  "Approval Status",
-  "Filing Date",
-  "Payment Type",
-  "Reference ID",
-  "State Tax ID",
-  "Filing Frequency",
-];
-const MUNICIPAL_FILING_COLUMNS = [
   "Actions",
   "Filing Period",
   "Location DBA",
@@ -55,549 +47,248 @@ const TAXPAYER_FILING_COLUMNS = [
   "Filing Frequency",
 ];
 
-const removeSpaces = (text: string) => text.replace(/\s/g, "");
-
 class FilingGrid {
   userType: string;
   municipalitySelection: string;
-  defaultGridColumnsAlias: string;
   sortType: string;
-  constructor(props: {
-    userType: string;
-    municipalitySelection?: string;
-    sortType?: string;
-  }) {
-    if (["ags", "municipal", "taxpayer"].indexOf(props.userType) === -1) {
-      throw new Error("Invalid user type");
-    }
+  private columnMap: Record<string, number> = {};
+
+  constructor(props: { userType: string; municipalitySelection?: string; sortType?: string }) {
     this.userType = props.userType;
-    this.municipalitySelection =
-      props.municipalitySelection || "City of Arrakis";
-    this.defaultGridColumnsAlias = "defaultFilingGridColumns";
-    this.sortType = props.sortType ? props.sortType : "default";
+    this.municipalitySelection = props.municipalitySelection || "City of Arrakis";
+    this.sortType = props.sortType || "default";
   }
 
-  init() {
-    pw.intercept("GET", "https://**.azavargovapps.com/users/**").as("getUserDetails");
-    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/ActiveTaxAndFeesSubscriptions").as("getMunicipalitiesWithActiveSubscriptions");
-    pw.intercept("GET", "https://**.azavargovapps.com/forms/municipality-forms-names/**").as("getFormNames");
-    pw.intercept("GET", "https://**.azavargovapps.com/forms/municipality/**").as("getActiveForms");
-    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/**").as("getMunicipalityDetails");
-    pw.intercept("GET", "https://**.azavargovapps.com/users/usersGridSettings/**").as("getGridSettings");
-    pw.intercept("GET", "https://**.azavargovapps.com/filings/?municipalityId=**").as("getFilings");
-    pw.visit("/filingApp/filingList");
-    if (this.userType === "ags") {
-      if (this.municipalitySelection === undefined) {
-        throw new Error("Municipality selection is required for AGS user type");
-      }
-      pw.wait("@getUserDetails").its("response.statusCode").should("eq", 200);
-      pw.wait("@getMunicipalitiesWithActiveSubscriptions").its("response.statusCode").should("eq", 200);
-      this.selectMunicipality(this.municipalitySelection);
-      pw.wait("@getFormNames").its("response.statusCode").should("eq", 200);
-      pw.wait("@getActiveForms").its("response.statusCode").should("eq", 200);
-      pw.wait("@getMunicipalityDetails").its("response.statusCode").should("eq", 200);
-      pw.wait("@getGridSettings").its("response.statusCode").should("eq", 200);
-      pw.wait("@getFilings").its("response.statusCode").should("eq", 200);
-      getOrderOfColumns(
-        AGS_FILING_COLUMNS,
-        `${this.userType}_${this.defaultGridColumnsAlias}`
-      );
-    } else if (this.userType === "municipal") {
-      getOrderOfColumns(
-        MUNICIPAL_FILING_COLUMNS,
-        `${this.userType}_${this.defaultGridColumnsAlias}`
-      );
-    } else {
-      getOrderOfColumns(
-        TAXPAYER_FILING_COLUMNS,
-        `${this.userType}_${this.defaultGridColumnsAlias}`
-      );
-    }
-    pw.url().should("include", "/filingApp/filingList");
-    pw.waitForLoading(3);
-  }
-
-  private elements() {
+  private elements(page: Page = resolvePage()) {
     return {
-      searchBox: () => pw.get("div").find(".fa-magnifying-glass").parent(),
-      columns: () => pw.get("thead").find("tr").find("th"),
-      rows: () =>
-        pw.get("tbody").then(($tbody) => {
-          if ($tbody.find("tr").length !== 0) {
-            return $tbody.find("tr");
-          }
-        }),
-      customizeTableViewButton: () =>
-        pw.get("*").contains("Customize"),
-      columnFilter: () => this.getElement().columns().find("span").find("a"),
-      columnSort: () => this.getElement().columns().find("a").find("i"),
+      searchBox: () => page.locator("div").filter({ has: page.locator(".fa-magnifying-glass") }).first(),
+      columns: () => page.locator("thead tr th"),
+      rows: () => page.locator("tbody tr"),
+      customizeTableViewButton: () => page.getByText("Customize").first(),
       specificColumnFilter: (columnOrder: number) =>
-        this.getElement().columns().eq(columnOrder).find("span").find("a"),
-      specificColumnSort: (columnOrder: number) =>
-        this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
+        page.locator("thead tr th").nth(columnOrder).locator("span a").first(),
+      itemsPerPageDropdown: () => page.locator(".k-dropdownlist").first(),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        pw.get("li").contains(itemNumber),
-      pagination: () => pw.get(".k-pager-numbers-wrap"),
-      goToFirstPageButton: () =>
-        this.getElement().pagination().find("button").eq(0),
-      goToPreviousPageButton: () =>
-        this.getElement().pagination().find("button[").eq(1),
-      goToNextPageButton: () =>
-        this.getElement()
-          .pagination()
-          .find('button[title="Go to the next page"]'),
-      goToLastPageButton: () =>
-        this.getElement()
-          .pagination()
-          .find('button[title="Go to the last page"]'),
-      filterOperationsDropdown: () =>
-        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
-      filterOperationsDropdownItem: (item: string) =>
-        cy
-          .get(".k-list-ul")
-          .find("li")
-          .find(".k-list-item-text")
-          .contains(item),
-      filterValueInput: () =>
-        pw.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => pw.get(".k-dateinput"),
-      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
-      filterFilterButton: () =>
-        cy
-          .get(".k-filter-menu-container")
-          .find(".k-actions")
-          .find(".k-button")
-          .contains("Filter"),
+        page.locator("li").filter({ hasText: String(itemNumber) }).first(),
+      clearAllFiltersButton: () => page.getByText("Clear All").first(),
       searchMunicipalityDropdown: () =>
-        pw.get('input[placeholder="Select government..."]'),
-      anyList: () => pw.get("li"),
-      anyButton: () => pw.get("button"),
-      clearAllFiltersButton: () =>
-        pw.get("*").contains("Clear All"),
-      exportButton: () => pw.get(".NLGButtonPrimary").contains("Export"),
-      viewRequestedExtractButton: () =>
-        pw.get("*").contains("View requested extracts"),
+        page.locator('input[placeholder="Select government..."]'),
+      anyList: () => page.locator("li"),
+      exportButton: () => page.locator(".NLGButtonPrimary").filter({ hasText: "Export" }).first(),
+      viewRequestedExtractButton: () => page.getByText("View requested extracts").first(),
     };
   }
 
-  getElement() {
-    return this.elements();
+  getElement(page: Page = resolvePage()) {
+    return this.elements(page);
   }
 
-  selectMunicipality(municipality: string) {
-    this.getElement().searchMunicipalityDropdown().type(municipality);
-    this.getElement().anyList().contains(municipality).click();
+  private async loadColumnMap(page: Page = resolvePage()) {
+    const columns =
+      this.userType === "taxpayer" ? TAXPAYER_FILING_COLUMNS : AGS_FILING_COLUMNS;
+    this.columnMap = await getColumnOrder(columns, this.getElement(page).columns());
+    return this.columnMap;
   }
 
-  private clickColumn(index: number) {
-    this.getElement().columns().eq(index).click();
-  }
-
-  private handleDBASorting(index: number, isAscending: boolean) {
-    if (!isAscending && this.sortType === "default") {
-      this.clickColumn(index);
-      this.sortType = "descending";
-    } else if (isAscending && this.sortType === "descending") {
-      this.clickColumn(index);
-      this.sortType = "ascending";
+  async init(page: Page = resolvePage()) {
+    await page.goto("/filingApp/filingList");
+    if (this.userType === "ags") {
+      await expect(page).toHaveURL(/\/filingApp\/filingList/);
+      await this.selectMunicipality(page, this.municipalitySelection);
     }
+    await waitForLoading(page, 3);
+    await this.loadColumnMap(page);
   }
 
-  private handleGeneralSorting(index: number, isAscending: boolean) {
-    if (
-      isAscending &&
-      (this.sortType === "default" || this.sortType === "descending")
-    ) {
-      this.clickColumn(index);
-      this.sortType = "ascending";
-    } else if (!isAscending && this.sortType === "ascending") {
-      this.clickColumn(index);
-      this.sortType = "descending";
+  async selectMunicipality(page: Page = resolvePage(), municipality: string) {
+    await this.getElement(page).searchMunicipalityDropdown().fill(municipality);
+    await this.getElement(page).anyList().filter({ hasText: municipality }).first().click();
+    await waitForLoading(page);
+  }
+
+  private async getColumnIndex(page: Page = resolvePage(), columnName: string) {
+    if (!this.columnMap[columnName]) {
+      await this.loadColumnMap(page);
     }
-  }
-
-  sortColumn(isAscending: boolean, columnName: string) {
-    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[columnName];
-        this.clickColumn(columnIndex);
-        if (columnName === "DBA") {
-          this.handleDBASorting(columnIndex, isAscending);
-        } else {
-          this.handleGeneralSorting(columnIndex, isAscending);
-        }
-      });
-  }
-
-  private handleTextFilter(
-    columnIndex: number,
-    filterValue: string,
-    filterOperation: string
-  ) {
-    validateFilterOperation("text", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    this.getElement().filterOperationsDropdown().click({ force: true });
-    this.getElement().filterOperationsDropdownItem(filterOperation).click({ force: true });
-    if (filterOperation !== "Is not null" && filterOperation !== "Is null") {
-      this.getElement().filterValueInput().type(filterValue, { force: true });
+    const index = this.columnMap[columnName];
+    if (index === undefined) {
+      throw new Error(`Column not found: ${columnName}`);
     }
-    this.getElement().filterFilterButton().click({ force: true });
+    return index;
   }
 
-  private handleDateFilter(
-    columnIndex: number,
-    filterValue: string,
-    filterOperation: string
-  ) {
-    validateFilterOperation("date", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    this.getElement().filterOperationsDropdown().click({ force: true });
-    this.getElement().filterOperationsDropdownItem(filterOperation).click({ force: true });
-    this.getElement()
-      .filterValueDateInput()
-      .type(filterValue.split("/").join("{rightarrow}"), { force: true });
-    this.getElement().filterFilterButton().click({ force: true });
+  async sortColumn(page: Page = resolvePage(), isAscending: boolean, columnName: string) {
+    const index = await this.getColumnIndex(page, columnName);
+    const header = this.getElement(page).columns().nth(index);
+    await header.click();
+    if (!isAscending) {
+      await header.click();
+    }
+    this.sortType = isAscending ? "ascending" : "descending";
   }
 
-  private handleNumberFilter(
-    columnIndex: number,
-    filterValue: string,
-    filterOperation: string
-  ) {
-    validateFilterOperation("number", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    this.getElement().filterOperationsDropdown().click({ force: true });
-    this.getElement().filterOperationsDropdownItem(filterOperation).click({ force: true });
-    this.getElement().filterValueInput().type(filterValue);
-    this.getElement().filterFilterButton().click({ force: true });
-  }
-
-  private handleMultiSelectFilter(columnIndex: number, filterValue: string) {
-    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    this.getElement()
-      .filterMultiSelectItem()
-      .contains(filterValue)
-      .parent()
-      .find("input")
-      .click({ force: true });
-    this.getElement().filterFilterButton().click({ force: true });
-  }
-
-  filterColumn(
+  async filterColumn(
+    page: Page,
     columnName: string,
     filterValue: string,
-    filterType: string = "text",
-    filterOperation: string = "Contains"
+    filterType = "text",
+    filterOperation = "Contains"
   ) {
-    pw.waitForLoading(1);
-    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[columnName];
-        switch (filterType) {
-          case "text":
-            this.handleTextFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "date":
-            this.handleDateFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "number":
-            this.handleNumberFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "multi-select":
-            this.handleMultiSelectFilter(columnIndex, filterValue);
-            break;
-          default:
-            break;
-        }
-      });
-    pw.waitForLoading();
+    const index = await this.getColumnIndex(page, columnName);
+    await applyGridFilter({
+      page,
+      filterButton: this.getElement(page).specificColumnFilter(index),
+      filterType,
+      filterValue,
+      filterOperation,
+    });
+    await waitForLoading(page);
   }
 
-  changeItemsPerPage(itemNumber: number) {
+  async changeItemsPerPage(page: Page = resolvePage(), itemNumber: number) {
     if (!VALID_ITEMS_PER_PAGE.includes(itemNumber)) {
       throw new Error("Invalid items per page number");
     }
-    this.getElement().itemsPerPageDropdown().click();
-    this.getElement().itemsPerPageDropdownItem(itemNumber).click();
+    await this.getElement(page).itemsPerPageDropdown().click();
+    await this.getElement(page).itemsPerPageDropdownItem(itemNumber).click();
   }
 
-  clickCustomizeTableViewButton() {
-    this.getElement().customizeTableViewButton().click();
+  async clickCustomizeTableViewButton(page: Page = resolvePage()) {
+    await this.getElement(page).customizeTableViewButton().click();
   }
 
-  clickClearAllFiltersButton() {
-    this.getElement().clearAllFiltersButton().click();
+  async clickClearAllFiltersButton(page: Page = resolvePage()) {
+    await this.getElement(page).clearAllFiltersButton().click();
+    await waitForLoading(page);
   }
 
-  getDataOfColumn(
+  async getDataOfColumn(
+    page: Page,
     targetColumnName: string,
     anchorColumnName: string,
-    anchorValue: string,
-    targetColumnDataAlias: string
+    anchorValue: string
   ) {
-    this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[targetColumnName];
-        const anchorColumnIndex = columnIndexes[anchorColumnName];
-        this.getElement()
-          .rows()
-          .each(($row) => {
-            const $columns = $row.find("td");
-            if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              pw.wrap($columns.eq(columnIndex).text()).as(
-                targetColumnDataAlias
-              );
-            }
-          });
-      });
+    await this.filterColumn(page, anchorColumnName, anchorValue, "text", "Contains");
+    const targetColumnIndex = await this.getColumnIndex(page, targetColumnName);
+    const anchorColumnIndex = await this.getColumnIndex(page, anchorColumnName);
+    const row = await getRowByCellText(this.getElement(page).rows(), anchorColumnIndex, anchorValue);
+    return normalizeCellText(await row.locator("td").nth(targetColumnIndex).innerText());
   }
 
-  getElementOfColumn(
+  async getElementOfColumn(
+    page: Page,
     targetColumnName: string,
     anchorColumnName: string,
-    anchorValue: string,
-    targetColumnElementAlias: string
+    anchorValue: string
   ) {
-    this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[targetColumnName];
-        const anchorColumnIndex = columnIndexes[anchorColumnName];
-        this.getElement()
-          .rows()
-          .each(($row) => {
-            const $columns = $row.find("td");
-            if (
-              String($columns.eq(anchorColumnIndex).text())
-                .replace(/\s+/g, " ")
-                .trim() === anchorValue
-            ) {
-              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
-            }
-          });
-      });
+    await this.filterColumn(page, anchorColumnName, anchorValue, "text", "Contains");
+    const targetColumnIndex = await this.getColumnIndex(page, targetColumnName);
+    const anchorColumnIndex = await this.getColumnIndex(page, anchorColumnName);
+    const row = await getRowByCellText(this.getElement(page).rows(), anchorColumnIndex, anchorValue);
+    return row.locator("td").nth(targetColumnIndex);
   }
 
-  toggleActionButton(
+  async toggleActionButton(
+    page: Page,
     action: string,
     anchorColumnName: string,
     anchorValue: string
   ) {
-    this.getElementOfColumn(
-      "Actions",
-      anchorColumnName,
-      anchorValue,
-      `${removeSpaces(action)}${removeSpaces(anchorColumnName)}${removeSpaces(
-        anchorValue
-      )}`
-    );
-    pw.get(
-      `@${removeSpaces(action)}${removeSpaces(anchorColumnName)}${removeSpaces(
-        anchorValue
-      )}`
-    ).click();
-    this.getElement().anyList().contains(action).click();
+    const actionCell = await this.getElementOfColumn(page, "Actions", anchorColumnName, anchorValue);
+    await actionCell.click();
+    await this.getElement(page).anyList().filter({ hasText: action }).first().click();
   }
 
-  deleteFiling(anchorColumnName: string, anchorValue: string) {
-    pw.intercept("DELETE", "https://**.azavargovapps.com/filings/delete/ReferenceId/**/MunicipalityId/**").as("deleteFiling");
+  async deleteFiling(page: Page = resolvePage(), anchorColumnName: string, anchorValue: string) {
     if (this.userType === "taxpayer") {
-      this.toggleActionButton("Delete", anchorColumnName, anchorValue);
-      // TODO: Add delete confirmation POM
-      pw.get(".k-dialog-actions").find("button").contains("Delete").click();
+      await this.toggleActionButton(page, "Delete", anchorColumnName, anchorValue);
+      await page.locator(".k-dialog-actions button").filter({ hasText: "Delete" }).click();
     } else if (this.userType === "ags") {
-      pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
-        .should("exist")
-        .then((columnIndexes: any) => {
-          this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-          const columnIndex = columnIndexes["Payment Status"];
-          const anchorColumnIndex = columnIndexes[anchorColumnName];
-
-          this.getElement()
-            .rows()
-            .each(($row) => {
-              const $columns = $row.find("td");
-              if (
-                String($columns.eq(anchorColumnIndex).text())
-                  .replace(/\s+/g, " ")
-                  .trim() === anchorValue
-              ) {
-                pw.wrap($columns.eq(columnIndex)).find("button[aria-haspopup='menu']").click();
-                this.getElement().anyList().contains("Delete Filing").click();
-                // TODO: Add delete confirmation POM
-                pw.get(".k-dialog-actions")
-                  .find("button")
-                  .contains("Delete")
-                  .click();
-                pw.wait("@deleteFiling").its("response.statusCode").should("eq", 200);
-                return false;
-              }
-            });
-        });
-    } else if (this.userType === "municipal") {
+      const actionCell = await this.getElementOfColumn(page, "Payment Status", anchorColumnName, anchorValue);
+      await actionCell.locator('button[aria-haspopup="menu"]').click();
+      await page.locator("li").filter({ hasText: "Delete Filing" }).first().click();
+      await page.locator(".k-dialog-actions button").filter({ hasText: "Delete" }).click();
+    } else {
       throw new Error("Delete action is not available for this user type");
     }
+    await waitForLoading(page);
   }
 
-  updateStatus(
-    newStatus: string,
-    anchorColumnName: string,
-    anchorValue: string
-  ) {
-    pw.intercept("PATCH", "https://**.azavargovapps.com/filings/filing-status/**/status/**").as("updateFilingStatus");
-    if (this.userType !== "ags") {
-      throw new Error(
-        "Update status action is not available for this user type"
-      );
+  async updateStatus(page: Page = resolvePage(), newStatus: string, anchorColumnName: string, anchorValue: string) {
+    const cell = await this.getElementOfColumn(page, "Payment Status", anchorColumnName, anchorValue);
+    await cell.locator('button[aria-haspopup="menu"]').click();
+    await page.locator("li").filter({ hasText: "Update Status" }).first().click();
+    await page.locator(`.k-window-content .k-radio-list input[value="${newStatus}"]`).click();
+    await page.locator(".k-dialog-actions button").filter({ hasText: "Save" }).click();
+    await waitForLoading(page);
+  }
+
+  async checkAuditLog(page: Page = resolvePage(), anchorColumnName: string, anchorValue: string) {
+    const popup = page.waitForEvent("popup").catch(() => null);
+    const cell = await this.getElementOfColumn(page, "Payment Status", anchorColumnName, anchorValue);
+    await cell.locator('button[aria-haspopup="menu"]').first().click();
+    await page.locator("li").filter({ hasText: "Audit Log" }).first().click();
+    const popupPage = await popup;
+    if (popupPage) {
+      await popupPage.waitForLoadState("domcontentloaded");
+      await popupPage.bringToFront();
     }
-    this.getElementOfColumn(
-      "Payment Status",
-      anchorColumnName,
-      anchorValue,
-      `paymentStatus_${removeSpaces(anchorColumnName)}${removeSpaces(
-        anchorValue
-      )}`
-    );
-    pw.get(
-      `@paymentStatus_${removeSpaces(anchorColumnName)}${removeSpaces(
-        anchorValue
-      )}`
-    )
-      .find("button[aria-haspopup='menu']")
-      .click();
-    this.getElement().anyList().contains("Update Status").click();
-    // TODO: Add update status modal POM
-    pw.get(".k-window-content")
-      .find(".k-radio-list")
-      .find(`input[value="${newStatus}"]`)
-      .click();
-    pw.get(".k-dialog-actions").find("button").contains("Save").click();
-    pw.wait("@updateFilingStatus").its("response.statusCode").should("eq", 200);
   }
 
-  checkAuditLog(anchorColumnName: string, anchorValue: string) {
-    pw.window().then((win) => {
-      pw.stub(win, 'open').as('windowOpen');
-    });
-    this.getElementOfColumn(
-      "Payment Status",
-      anchorColumnName,
-      anchorValue,
-      `paymentStatus_${removeSpaces(anchorColumnName)}${removeSpaces(
-        anchorValue
-      )}`
-    );
-    pw.get(
-      `@paymentStatus_${removeSpaces(anchorColumnName)}${removeSpaces(
-        anchorValue
-      )}`
-    )
-      .find("button[aria-haspopup='menu']")
-      .first()
-      .click();
-    this.getElement().anyList().contains("Audit Log").click();
-    pw.get('@windowOpen').then((stub) => {
-      const newTabUrl = stub.args[0][0]; // Get the first argument (URL) of the first call
-      pw.visit(newTabUrl);
-    });
-    pw.waitForLoading();
-  }
-
-  clickExportButton(
-    isExportFullData: boolean = true,
+  async clickExportButton(
+    page: Page,
+    isExportFullData = true,
     fileType: "CSV" | "Excel" = "CSV"
   ) {
     const filingExportModal = new ExportFiling();
-    this.getElement().exportButton().click();
+    await this.getElement(page).exportButton().click();
     if (this.userType !== "taxpayer") {
-      switch (fileType) {
-        case "CSV":
-          filingExportModal.selectCSVFileType();
-          break;
-        case "Excel":
-          filingExportModal.selectExcelFileType();
-          break;
-        default:
-          filingExportModal.selectCSVFileType();
-          break;
-      }
-
-      if (isExportFullData) {
-        filingExportModal.clickExportFullDataButton();
+      if (fileType === "Excel") {
+        await filingExportModal.selectExcelFileType(page);
       } else {
-        filingExportModal.clickExportViewButton();
+        await filingExportModal.selectCSVFileType(page);
+      }
+      if (isExportFullData) {
+        await filingExportModal.clickExportFullDataButton(page);
+      } else {
+        await filingExportModal.clickExportViewButton(page);
       }
     }
   }
 
-  clickViewRequestedExtractButton() {
-    this.getElement().viewRequestedExtractButton().click();
-    pw.waitForLoading(5);
+  async clickViewRequestedExtractButton(page: Page = resolvePage()) {
+    await this.getElement(page).viewRequestedExtractButton().click();
+    await waitForLoading(page, 5);
   }
 
-  searchFiling(searchValue: string) {
-    this.getElement().searchBox().type(searchValue);
-    pw.waitForLoading(5);
+  async searchFiling(page: Page = resolvePage(), searchValue: string) {
+    await this.getElement(page).searchBox().fill(searchValue);
+    await waitForLoading(page, 5);
   }
 
-  setStartDate({
-    month,
-    day,
-    year,
-  }: {
-    month: string;
-    day: string;
-    year: string;
-  }) {
-    pw.get(".fa-calendar-days").click();
-    pw.get(".k-animation-container input").first().type(`${month}{rightArrow}${day}{rightArrow}${year}`);
-    pw.get(".k-animation-container").find("button").contains("Filter").click();
-    pw.waitForLoading();
+  async setStartDate(
+    page: Page,
+    { month, day, year }: { month: string; day: string; year: string }
+  ) {
+    await page.locator(".fa-calendar-days").click();
+    await page.locator(".k-animation-container input").first().fill(`${month}/${day}/${year}`);
+    await page.locator(".k-animation-container button").filter({ hasText: "Filter" }).click();
+    await waitForLoading(page);
   }
 
-  getColumnCellsData(columnName: string) {
-    pw.wrap([]).as("columnCellsData");
-    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[columnName];
-        this.getElement()
-          .rows()
-          .each(($row) => {
-            const $columns = $row.find("td");
-            pw.get("@columnCellsData").then((columnCellsData: any) => {
-              pw.wrap([...columnCellsData, $columns.eq(columnIndex).text()]).as(
-                "columnCellsData"
-              );
-            });
-          });
-      });
+  async getColumnCellsData(page: Page = resolvePage(), columnName: string) {
+    const columnIndex = await this.getColumnIndex(page, columnName);
+    return getColumnTexts(this.getElement(page).rows(), columnIndex);
   }
 
-  isColumnExist(columnName: string, variableAlias: string) {
-    getOrderOfColumns(
+  async isColumnExist(page: Page = resolvePage(), columnName: string) {
+    const currentMap = await getColumnOrder(
       AGS_FILING_COLUMNS.includes(columnName)
         ? AGS_FILING_COLUMNS
         : [...AGS_FILING_COLUMNS, columnName],
-      `${this.userType}_${this.defaultGridColumnsAlias}AfterAdditionalColumn`
+      this.getElement(page).columns()
     );
-    pw.get(
-      `@${this.userType}_${this.defaultGridColumnsAlias}AfterAdditionalColumn`
-    )
-      .should("exist")
-      .then((columnIndexes: any) => {
-        if (columnIndexes[columnName] !== undefined) {
-          pw.wrap(true).as(variableAlias);
-        } else {
-          pw.wrap(false).as(variableAlias);
-        }
-      });
+    return currentMap[columnName] !== undefined;
   }
 }
 

@@ -1,28 +1,32 @@
-import { test, expect } from '../../support/pwtest';
-import Profile from "../../objects/Profile";
-import { MUNICIPAL_DEFAULT_HOME_PAGE as pageOptions } from "../../objects/Profile";
-
+import { expect, test } from "@playwright/test";
+import Profile, { MUNICIPAL_DEFAULT_HOME_PAGE as pageOptions } from "../../objects/Profile";
+import { bindRuntime, login, logout } from "../../support/runtime";
 
 const profile = new Profile();
+
 test.describe("As a municipal user, I should be able to set my default home page", () => {
-  test("Initiating test", () => {
-      pw.login({
+  test("Initiating test", async ({ page, request }) => {
+    bindRuntime(page, request);
+    await login({
+      accountType: "municipal",
+      accountIndex: 10,
+      customRedirectionAfterLoginAssertion: async () => {
+        await expect(page).toHaveURL(/filingApp\/filingList$/);
+      },
+    });
+
+    for (const pageName of Object.keys(pageOptions)) {
+      await profile.init();
+      await profile.selectDefaultHomePage(pageName);
+      await logout();
+      await login({
         accountType: "municipal",
         accountIndex: 10,
-        customRedirectionAfterLoginAssertion: () =>
-          pw.url().should("contain", "/"),
+        notFirstLogin: true,
+        customRedirectionAfterLoginAssertion: async () => {
+          await expect(page).toHaveURL(new RegExp(`${pageOptions[pageName].replace(/\//g, "\\/")}`));
+        },
       });
-      Object.keys(pageOptions).forEach((page) => {
-        profile.init();
-        profile.selectDefaultHomePage(page);
-        pw.logout();
-        pw.login({
-          accountType: "municipal",
-          accountIndex: 10,
-          notFirstLogin: true,
-          customRedirectionAfterLoginAssertion: () =>
-            pw.url().should("contain", pageOptions[page]),
-        });
-      });
-    });
+    }
+  });
 });

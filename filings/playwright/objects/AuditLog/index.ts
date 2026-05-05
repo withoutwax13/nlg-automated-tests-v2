@@ -1,131 +1,67 @@
-const AUDITLOG_COLUMNS = [
-  "Action",
-  "Role",
-  "Action Taken By",
-  "Created Date",
-  "Amount",
-];
+import { Page } from "@playwright/test";
+import { resolvePage } from "../../pageContext";
+import { getRowByCellText } from "../../utils/Grid";
 
 class AuditLog {
-  private elements() {
+  private elements(page: Page = resolvePage()) {
     return {
-      columns: () => pw.get("thead").find("tr").eq(0).find("th"),
-      filterRow: () => pw.get("thead").find("tr").eq(1),
-      rows: () =>
-        pw.get("tbody").then(($tbody) => {
-          if ($tbody.find("tr").length !== 0) {
-            return $tbody.find("tr");
-          }
-        }),
-      actionFilter: () => this.getElement().filterRow().find("th").eq(1),
-      roleFilter: () => this.getElement().filterRow().find("th").eq(2),
-      actionTakenByFilter: () => this.getElement().filterRow().find("th").eq(3),
-      createdByFilter: () => this.getElement().filterRow().find("th").eq(4),
-      amountFilter: () => this.getElement().filterRow().find("th").eq(5),
+      columns: () => page.locator("thead tr").nth(0).locator("th"),
+      filterRow: () => page.locator("thead tr").nth(1),
+      rows: () => page.locator("tbody tr"),
     };
   }
-  getElement() {
-    return this.elements();
+
+  getElement(page: Page = resolvePage()) {
+    return this.elements(page);
   }
 
-  findRowByAction(action: string, alias: string) {
-    this.getElement()
-      .rows()
-      .then((rows) => {
-        const $columns = rows.find("td");
-        pw.wrap($columns.filter(`:contains(${action})`).eq(0), {
-          timeout: 60000,
-        }).as(alias);
-      });
+  async findRowByAction(page: Page = resolvePage(), action: string) {
+    return getRowByCellText(this.getElement(page).rows(), 1, action);
   }
 
-  findRowByRole(role: string, alias: string) {
-    this.getElement()
-      .rows()
-      .then((rows) => {
-        const $columns = rows.find("td");
-        pw.wrap($columns.filter(`:contains(${role})`).eq(0), {
-          timeout: 60000,
-        }).as(alias);
-      });
+  async findRowByRole(page: Page = resolvePage(), role: string) {
+    return getRowByCellText(this.getElement(page).rows(), 2, role);
   }
 
-  findRowByActionTakenBy(actionTakenBy: string, alias: string) {
-    this.getElement()
-      .rows()
-      .then((rows) => {
-        const $columns = rows.find("td");
-        pw.wrap($columns.filter(`:contains(${actionTakenBy})`).eq(0), {
-          timeout: 60000,
-        }).as(alias);
-      });
+  async findRowByActionTakenBy(page: Page = resolvePage(), actionTakenBy: string) {
+    return getRowByCellText(this.getElement(page).rows(), 3, actionTakenBy);
   }
 
-  findRowByCreatedDate(
-    createdDate: { month: number; day: number; year: number },
-    alias: string
+  async findRowByCreatedDate(
+    page: Page,
+    createdDate: { month: number; day: number; year: number }
   ) {
     const wantedDate = `${createdDate.month}-${createdDate.year}-${createdDate.day}`;
-    this.getElement()
-      .rows()
-      .then((rows) => {
-        const $columns = rows.find("td");
-        pw.wrap($columns.filter(`:contains(${wantedDate})`).eq(0), {
-          timeout: 60000,
-        }).as(alias);
-      });
+    return getRowByCellText(this.getElement(page).rows(), 4, wantedDate);
   }
 
-  expandCollapseRow(
+  async expandCollapseRow(
+    page: Page,
     anchorColumn: string,
     anchorValue: string | { month: number; day: number; year: number }
   ) {
+    let row;
     switch (anchorColumn) {
       case "Action":
-        if (typeof anchorValue === "string") {
-          this.findRowByAction(anchorValue, "actionRow");
-          pw.get("@actionRow").parent("tr").find("td").eq(0).find("a").click();
-        } else {
-          throw new Error("Invalid anchor value for Action column");
-        }
+        row = await this.findRowByAction(page, String(anchorValue));
         break;
       case "Role":
-        if (typeof anchorValue === "string") {
-          this.findRowByRole(anchorValue, "roleRow");
-          pw.get("@roleRow").parent("tr").find("td").eq(0).find("a").click();
-        } else {
-          throw new Error("Invalid anchor value for Role column");
-        }
+        row = await this.findRowByRole(page, String(anchorValue));
         break;
       case "Action Taken By":
-        if (typeof anchorValue === "string") {
-          this.findRowByActionTakenBy(anchorValue, "actionTakenByRow");
-          pw.get("@actionTakenByRow")
-            .parent("tr")
-            .find("td")
-            .eq(0)
-            .find("a")
-            .click();
-        } else {
-          throw new Error("Invalid anchor value for Action Taken By column");
-        }
+        row = await this.findRowByActionTakenBy(page, String(anchorValue));
         break;
       case "Created Date":
-        if (typeof anchorValue === "object") {
-          this.findRowByCreatedDate(anchorValue, "createdDateRow");
-          pw.get("@createdDateRow")
-            .parent("tr")
-            .find("td")
-            .eq(0)
-            .find("a")
-            .click();
-        } else {
-          throw new Error("Invalid anchor value for Created Date column");
-        }
+        row = await this.findRowByCreatedDate(
+          page,
+          anchorValue as { month: number; day: number; year: number }
+        );
         break;
       default:
-        break;
+        throw new Error(`Unsupported anchor column: ${anchorColumn}`);
     }
+
+    await row.locator("td").nth(0).locator("a").click();
   }
 }
 

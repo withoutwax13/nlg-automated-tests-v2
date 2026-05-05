@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 
@@ -36,23 +36,23 @@ const newBusinessData = {
 
 // Skipped, assertions alrady covered in TC24
 test.describe.skip("As a taxpayer, when a business has been added by a municipal user, I should be able to add the business in my account", () => {
-  test.beforeEach(() => {
-    pw.deleteBusinessData({
+  test.beforeEach(async () => {
+    await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
       notFirstLogin: false,
       accountIndex: 2,
     });
 
-    pw.deleteBusinessData({
+    await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "ags",
       notFirstLogin: true,
       accountIndex: 8,
     });
   });
-  test("Initiating test", () => {
-    pw.login({ accountType: "municipal", notFirstLogin: true });
+  test("Initiating test", async () => {
+    await login({ accountType: "municipal", notFirstLogin: true });
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickAddBusinessButton();
     addBusinessPage.fillFields(newBusinessData);
@@ -60,16 +60,16 @@ test.describe.skip("As a taxpayer, when a business has been added by a municipal
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickClearAllFiltersButton();
     municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
+    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
-    pw.logout();
-    pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 2 });
+    await logout();
+    await login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 2 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
+    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
   });
 });

@@ -1,212 +1,86 @@
-export const rearrangeColumns = () => {
-    pw.get(".k-dialog")
-      .find(".k-list-content")
-      .find(".k-list-ul")
-      .find(".k-list-item")
-      .each((_, $index) => {
-        pw.get(".k-dialog")
-          .find(".k-list-content")
-          .find(".k-list-ul")
-          .find(".k-list-item")
-          .eq($index)
-          .find("span")
-          .eq(0)
-          .find("i")
-          .then(($dragIcon) => {
-            if ($index !== 0) {
-              const dataTransfer = new DataTransfer();
-              pw.wrap($dragIcon)
-                .trigger("mousedown", { which: 1 })
-                .trigger("dragstart", { dataTransfer })
-                .trigger("drag", { dataTransfer });
-  
-              pw.wrap($dragIcon)
-                .parent() // Get the parent of the `i` element
-                .parent() // Get the grandparent (the `.k-list-item`)
-                .prev() // Get the next PREV `.k-list-item`
-                .then(($target) => {
-                  pw.wrap($target)
-                    .trigger("dragover", { dataTransfer })
-                    .trigger("drop", { dataTransfer });
-                });
-            }
-          });
-      });
-  };
-  export const freezeColumns = (isToggleFreeze: boolean, columnIndex: number[]) => {
-    pw.get(".k-dialog")
-      .find(".k-list-content")
-      .find(".k-list-ul")
-      .find(".k-list-item ")
-      .each(($el, $index) => {
-        pw.wrap($el)
-          .find("span")
-          .eq(1)
-          .invoke("text")
-          .then(($text: string) => {
-            pw.wrap($el)
-              .find("span[role='switch']")
-              .last()
-              .invoke("attr", "aria-checked")
-              .then((checked) => {
-                // if the column is set to freeze, save the index of the column
-                if (
-                  checked === "true" &&
-                  isToggleFreeze &&
-                  columnIndex.includes($index)
-                ) {
-                  pw.wrap($el).find("span[role='switch']").last().click();
-                }
-                if (
-                  checked === "false" &&
-                  !isToggleFreeze &&
-                  columnIndex.includes($index)
-                ) {
-                  pw.wrap($el).find("span[role='switch']").last().click();
-                }
-              });
-          });
-      });
-  };
-  export const freezeColumnsApproval = (isToggleFreeze: boolean, columnIndex: number[]) => {
-    pw.get(".k-dialog")
-      .find(".k-list-content")
-      .find(".k-list-ul")
-      .find(".k-list-item ")
-      .each(($el, $index) => {
-        pw.wrap($el)
-          .find("span")
-          .eq(1)
-          .invoke("text")
-          .then(($text: string) => {
-            pw.wrap($el)
-              .find("span[role='switch']")
-              .last()
-              .invoke("attr", "aria-checked")
-              .then((checked) => {
-                // if the column is set to freeze, save the index of the column
-                if (
-                  checked === "true" &&
-                  isToggleFreeze &&
-                  columnIndex.includes($index + 1)
-                ) {
-                  pw.wrap($el).find("span[role='switch']").last().click();
-                }
-                if (
-                  checked === "false" &&
-                  !isToggleFreeze &&
-                  columnIndex.includes($index + 1)
-                ) {
-                  pw.wrap($el).find("span[role='switch']").last().click();
-                }
-              });
-          });
-      });
-  };
-  
-  export const verifyFreezeColumns = (enabledColumnCount: number, ) => {
-    let trueSwitchCount = 0; // Counter for the number of enabled switches
-  
-    pw.get(".k-dialog")
-      .find(".k-list-content")
-      .find(".k-list-ul")
-      .find(".k-list-item ")
-      .each(($el) => {
-        pw.wrap($el)
-          .find("span")
-          .eq(1)
-          .invoke("text")
-          .then(($text: string) => {
-            pw.wrap($el)
-              .find("span[role='switch']")
-              .last()
-              .invoke("attr", "aria-checked")
-              .then((checked) => {
-                if (checked === "true") {
-                  trueSwitchCount++; 
-                  expect(trueSwitchCount).to.be.lte(enabledColumnCount); 
-                } else {
-                  // Verify the remaining have class 'k-disabled'
-                  pw.wrap($el)
-                    .find("span[role='switch']")
-                    .last()
-                    .should("have.class", "k-disabled");
-                }
-              });
-          });
-      })
-      .then(() => {
-        // Assert that exactly the expected number of columns have been enabled
-        expect(trueSwitchCount).to.eq(enabledColumnCount);
-      });
-  };
-  export const hideShowColumns = (isToggleHide: boolean, columnIndex: number[]) => {
-    pw.get(".k-dialog")
-      .find(".k-list-content")
-      .find(".k-list-ul")
-      .find(".k-list-item ")
-      .each(($el, $index) => {
-        pw.wrap($el)
-          .find("span")
-          .eq(1)
-          .invoke("text")
-          .then(($text: string) => {
-            pw.wrap($el)
-              .find("span[role='switch']")
-              .first()
-              .invoke("attr", "aria-checked")
-              .then((checked) => {
-                // if the column is set to be visible, save the index of the column
-                if (
-                  checked === "true" &&
-                  isToggleHide &&
-                  columnIndex.includes($index)
-                ) {
-                  pw.wrap($el).find("span[role='switch']").first().click();
-                }
-                if (
-                  checked === "false" &&
-                  !isToggleHide &&
-                  columnIndex.includes($index)
-                ) {
-                  pw.wrap($el).find("span[role='switch']").first().click();
-                }
-              });
-          });
-      });
-  };
-  export const hideShowColumnsApproval = (isToggleHide: boolean, columnIndex: number[]) => {
-    pw.get(".k-dialog")
-      .find(".k-list-content")
-      .find(".k-list-ul")
-      .find(".k-list-item ")
-      .each(($el, $index) => {
-        pw.wrap($el)
-          .find("span")
-          .eq(1)
-          .invoke("text")
-          .then(($text: string) => {
-            pw.wrap($el)
-              .find("span[role='switch']")
-              .first()
-              .invoke("attr", "aria-checked")
-              .then((checked) => {
-                // if the column is set to be visible, save the index of the column
-                if (
-                  checked === "true" &&
-                  isToggleHide &&
-                  columnIndex.includes($index +1 )
-                ) {
-                  pw.wrap($el).find("span[role='switch']").first().click();
-                }
-                if (
-                  checked === "false" &&
-                  !isToggleHide &&
-                  columnIndex.includes($index + 1)
-                ) {
-                  pw.wrap($el).find("span[role='switch']").first().click();
-                }
-              });
-          });
-      });
-  };
+import { expect } from "@playwright/test";
+import { currentPage } from "../../support/runtime";
+
+const dialogItems = () =>
+  currentPage().locator(".k-dialog .k-list-content .k-list-ul .k-list-item");
+
+export const rearrangeColumns = async () => {
+  const items = dialogItems();
+  const count = await items.count();
+
+  for (let index = 1; index < count; index += 1) {
+    const source = items.nth(index);
+    const target = items.nth(index - 1);
+    const sourceBox = await source.boundingBox();
+    const targetBox = await target.boundingBox();
+
+    if (!sourceBox || !targetBox) {
+      continue;
+    }
+
+    await source.dragTo(target);
+  }
+};
+
+const toggleSwitches = async (
+  switchIndex: number,
+  isToggleOn: boolean,
+  columnIndex: number[],
+  offset = 0
+) => {
+  const items = dialogItems();
+  const count = await items.count();
+
+  for (let index = 0; index < count; index += 1) {
+    const item = items.nth(index);
+    const switchLocator = item.locator('span[role="switch"]').nth(switchIndex);
+    const checked = (await switchLocator.getAttribute("aria-checked")) === "true";
+    const targetIndex = index + offset;
+
+    if (checked === isToggleOn && columnIndex.includes(targetIndex)) {
+      await switchLocator.click();
+    }
+  }
+};
+
+export const freezeColumns = async (isToggleFreeze: boolean, columnIndex: number[]) => {
+  await toggleSwitches(1, isToggleFreeze, columnIndex);
+};
+
+export const freezeColumnsApproval = async (
+  isToggleFreeze: boolean,
+  columnIndex: number[]
+) => {
+  await toggleSwitches(1, isToggleFreeze, columnIndex, 1);
+};
+
+export const verifyFreezeColumns = async (enabledColumnCount: number) => {
+  const items = dialogItems();
+  const count = await items.count();
+  let enabledCount = 0;
+
+  for (let index = 0; index < count; index += 1) {
+    const switchLocator = items.nth(index).locator('span[role="switch"]').nth(1);
+    const checked = (await switchLocator.getAttribute("aria-checked")) === "true";
+
+    if (checked) {
+      enabledCount += 1;
+      expect(enabledCount).toBeLessThanOrEqual(enabledColumnCount);
+    } else {
+      await expect(switchLocator).toHaveClass(/k-disabled/);
+    }
+  }
+
+  expect(enabledCount).toBe(enabledColumnCount);
+};
+
+export const hideShowColumns = async (isToggleHide: boolean, columnIndex: number[]) => {
+  await toggleSwitches(0, isToggleHide, columnIndex);
+};
+
+export const hideShowColumnsApproval = async (
+  isToggleHide: boolean,
+  columnIndex: number[]
+) => {
+  await toggleSwitches(0, isToggleHide, columnIndex, 1);
+};

@@ -1,256 +1,161 @@
-/**
- * Page Object Model (POM) class representing the form.
- */
+import { currentPage, fillDateInput, listItem, typeSpecial, withText } from "../../support/runtime";
+
 class Form {
   isRenewal: boolean;
 
-  /**
-   * Create a form.
-   * @param {Object} props - The properties of the form.
-   * @param {boolean} props.isRenewal - Indicates if the form is for renewal.
-   */
   constructor(props: { isRenewal: boolean }) {
     this.isRenewal = props.isRenewal;
   }
 
-  /**
-   * Get the elements used in the form.
-   * @returns {Object} The elements used in the form.
-   */
   private elements() {
+    const page = currentPage();
+
     return {
-      nextButton: () => pw.get(".NLGButtonPrimary").contains("Next"),
-      formTitle: () => pw.get("h1"),
-      stepper: () => pw.get(".k-stepper").find("ol"),
-      backButton: () => pw.get(".NLGButtonSecondary").contains("Back"),
-      saveAndCloseButton: () =>
-        pw.get(".NLGButtonSecondary").contains("Save And Close"),
-      addLocationButton: () =>
-        pw.get(".NLGButtonPrimary").contains("Add Location"),
-      removeLocationButton: () =>
-        pw.get(".NLGButtonSecondary").contains("Remove"),
-      ownerFullName: () => pw.get("#OwnerFullName"),
-      ownerPhoneNumber: () => pw.get("#OwnerPhoneNumber"),
-      ownerEmailAddress: () => pw.get("#OwnerEmailAddress"),
-      businessName: () => pw.get("#BusinessName"),
-      fein: () => pw.get("#FEIN"),
-      businessAddress1: () => pw.get("#BusinessAddress1"),
-      businessAddress2: () => pw.get("#BusinessAddress2"),
-      businessCity: () => pw.get("#BusinessCity"),
-      businessStateDropdown: () =>
-        pw.get('span[data-cy="Legal Business State-dropdown"]'),
-      businessZipCode: () => pw.get("#BusinessZipCode"),
-      noRadioButton: () => pw.get('input[data-cy="No-radio-button"]'),
+      nextButton: () => withText(page.locator(".NLGButtonPrimary"), "Next"),
+      formTitle: () => page.locator("h1").first(),
+      stepper: () => page.locator(".k-stepper ol"),
+      backButton: () => withText(page.locator(".NLGButtonSecondary"), "Back"),
+      saveAndCloseButton: () => withText(page.locator(".NLGButtonSecondary"), "Save And Close"),
+      addLocationButton: () => withText(page.locator(".NLGButtonPrimary"), "Add Location"),
+      removeLocationButton: () => withText(page.locator(".NLGButtonSecondary"), "Remove"),
+      ownerFullName: () => page.locator("#OwnerFullName"),
+      ownerPhoneNumber: () => page.locator("#OwnerPhoneNumber"),
+      ownerEmailAddress: () => page.locator("#OwnerEmailAddress"),
+      businessName: () => page.locator("#BusinessName"),
+      fein: () => page.locator("#FEIN"),
+      businessAddress1: () => page.locator("#BusinessAddress1"),
+      businessAddress2: () => page.locator("#BusinessAddress2"),
+      businessCity: () => page.locator("#BusinessCity"),
+      businessStateDropdown: () => page.locator('span[data-cy="Legal Business State-dropdown"]'),
+      businessZipCode: () => page.locator("#BusinessZipCode"),
       legalBusinessAddressCheckbox: () =>
-        pw.get(
+        page.locator(
           'input[data-cy="Check this box if the Legal Business Address is the same as the Business Mailing Address-checkbox"]'
         ),
       businessOwnerInfoCheckbox: () =>
-        pw.get(
+        page.locator(
           'input[data-cy="Check this box if the Business Owner Information is the same as the Business Management Contact Information-checkbox"]'
         ),
-      emergencyPhoneNumber: () => pw.get("#EmergencyPhoneNumber"),
-      locationOpenDate: () =>
-        cy
-          .get('span[data-cy="Location Open Date-datePicker-input"]')
-          .find("input"),
-      locationDBA: () =>
-        pw.get('span[data-cy="Location Trade Name DBA-masked-input"]'),
-      locationAddress1: () =>
-        pw.get('span[data-cy="Location Address 1-masked-input"]'),
-      locationAddress2: () =>
-        pw.get('span[data-cy="Location Address 2-masked-input"]'),
-      locationCity: () => pw.get('span[data-cy="Location City-masked-input"]'),
-      locationStateDropdown: () =>
-        pw.get('span[data-cy="Location State-dropdown"]'),
-      locationZipCode: () =>
-        pw.get('span[data-cy="Location Zip Code-masked-input"]'),
-      locationMailingAddress1: () =>
-        pw.get('span[data-cy="Business Mailing Address 1-masked-input"]'),
-      locationMailingAddress2: () =>
-        pw.get('span[data-cy="Business Mailing Address 2-masked-input"]'),
-      locationMailingCity: () =>
-        pw.get('span[data-cy="Business Mailing City-masked-input"]'),
-      locationMailingStateDropdown: () =>
-        pw.get('span[data-cy="Business Mailing State-dropdown"]'),
-      locationMailingZipCode: () =>
-        pw.get('span[data-cy="Business Mailing Zip Code-masked-input"]'),
-      managerOperatorFullName: () =>
-        pw.get('span[data-cy="Manager/Operator Full Name-masked-input"]'),
-      managerOperatorTitle: () => pw.get('input[name="OperatorTitleRB"]'),
-      managerOperatorPhoneNumber: () => pw.get('input[name="OperatorPhoneRB"]'),
-      managerOperatorEmail: () =>
-        pw.get('input[name="OperatorEmailAddressRB"]'),
-      managerEmergencyPhoneNumber: () =>
-        pw.get('input[name="EmergencyPhoneNumberRB"]'),
-      agencyName: () => pw.get("#AgencyName"),
-      agencyTypeDropdown: () => pw.get('span[data-cy="Agency Type-dropdown"]'),
-      preparerFullName: () => pw.get("#PreparerFullName"),
-      preparerTitle: () => pw.get("#PreparerTitle"),
-      preparerPhone: () => pw.get("#PreparerPhone"),
-      preparerEmailAddress: () => pw.get("#PreparerEmailAddress"),
-      signature: () => pw.get("#Signature"),
+      emergencyPhoneNumber: () => page.locator("#EmergencyPhoneNumber"),
+      locationOpenDate: () => page.locator('span[data-cy="Location Open Date-datePicker-input"] input'),
+      locationDBA: () => page.locator('input[id^="Locations_"][id$="__BusinessName"]'),
+      locationAddress1: () => page.locator('input[id^="Locations_"][id$="__BusinessAddress1"]'),
+      locationAddress2: () => page.locator('input[id^="Locations_"][id$="__BusinessAddress2"]'),
+      locationCity: () => page.locator('input[id^="Locations_"][id$="__BusinessCity"]'),
+      locationStateDropdown: () => page.locator('span[data-cy="Location State-dropdown"]'),
+      locationZipCode: () => page.locator('input[id^="Locations_"][id$="__BusinessZipCode"]'),
+      locationMailingAddress1: () => page.locator('input[id^="Locations_"][id$="__MailingAddress1"]'),
+      locationMailingAddress2: () => page.locator('input[id^="Locations_"][id$="__MailingAddress2"]'),
+      locationMailingCity: () => page.locator('input[id^="Locations_"][id$="__MailingCity"]'),
+      locationMailingStateDropdown: () => page.locator('span[data-cy="Business Mailing State-dropdown"]'),
+      locationMailingZipCode: () => page.locator('input[id^="Locations_"][id$="__MailingZipCode"]'),
+      managerOperatorFullName: () => page.locator('input[id^="Locations_"][id$="__OperatorFullName"]'),
+      managerOperatorTitle: () => page.locator('input[name="OperatorTitleRB"]'),
+      managerOperatorPhoneNumber: () => page.locator('input[name="OperatorPhoneRB"]'),
+      managerOperatorEmail: () => page.locator('input[name="OperatorEmailAddressRB"]'),
+      managerEmergencyPhoneNumber: () => page.locator('input[name="EmergencyPhoneNumberRB"]'),
+      agencyName: () => page.locator("#AgencyName"),
+      agencyTypeDropdown: () => page.locator('span[data-cy="Agency Type-dropdown"]'),
+      preparerFullName: () => page.locator("#PreparerFullName"),
+      preparerTitle: () => page.locator("#PreparerTitle"),
+      preparerPhone: () => page.locator("#PreparerPhone"),
+      preparerEmailAddress: () => page.locator("#PreparerEmailAddress"),
+      signature: () => page.locator("#Signature"),
       agencyCheckbox: () =>
-        pw.get(
+        page.locator(
           '*[data-cy="Check box if you are a representative of an Agency registering on behalf of a business owner.-checkbox"]'
         ),
       yesMultipleLocationsRadioButton: () =>
-        pw.get(
+        page.locator(
           'input[data-cy="Yes, I will be registering multiple business locations.-radio-button"]'
         ),
       noSingleLocationRadioButton: () =>
-        pw.get(
+        page.locator(
           'input[data-cy="No, I will only be registering a single business.-radio-button"]'
         ),
-      applicantInfoDateData: () => pw.get("#Date"),
+      applicantInfoDateData: () => page.locator("#Date"),
     };
   }
 
-  /**
-   * Get the elements used in the form.
-   * @returns {Object} The elements used in the form.
-   */
   getElement() {
     return this.elements();
   }
 
-  /**
-   * Click the next button.
-   */
-  clickNextbutton() {
-    this.elements().nextButton().click( {force: true} );
+  async clickNextbutton() {
+    await this.elements().nextButton().click({ force: true });
   }
 
-  /**
-   * Click the back button.
-   */
-  clickBackButton() {
-    this.elements().backButton().click( {force: true} );
+  async clickBackButton() {
+    await this.elements().backButton().click({ force: true });
   }
 
-  /**
-   * Click the add location button.
-   */
-  clickAddLocationButton() {
-    this.elements().addLocationButton().click( {force: true} );
+  async clickAddLocationButton() {
+    await this.elements().addLocationButton().click({ force: true });
   }
 
-  /**
-   * Click the remove location button.
-   */
-  clickRemoveLocationButton() {
-    this.elements().removeLocationButton().click( {force: true} );
+  async clickRemoveLocationButton() {
+    await this.elements().removeLocationButton().last().click({ force: true });
   }
 
-  /**
-   * Click the save and close button.
-   */
-  clickSaveAndCloseButton() {
-    this.elements().saveAndCloseButton().click( {force: true} );
+  async clickSaveAndCloseButton() {
+    await this.elements().saveAndCloseButton().click({ force: true });
   }
 
-  /**
-   * Click a step in the stepper.
-   * @param {number} step - The step number to click.
-   */
-  clickStepInStepper(step: number) {
-    this.elements().stepper().find("li").eq(step).click( {force: true} );
+  async clickStepInStepper(step: number) {
+    await this.elements().stepper().locator("li").nth(step).click({ force: true });
   }
 
-  /**
-   * Click the add location button.
-   */
-  addLocation() {
-    this.elements().addLocationButton().click( {force: true} );
-  }
-
-  /**
-   * Enter data into a form field.
-   * @param {string} selector - The selector of the form field.
-   * @param {string} method - The method to use (type, select, click).
-   * @param {any} [data] - The data to enter.
-   * @param {number} [selectorCountOnMultiple] - The index if multiple elements are matched.
-   */
-  enterData(
+  async enterData(
     selector: string,
-    method: string,
-    data?: any,
+    method: "type" | "select" | "click",
+    data?: string,
     selectorCountOnMultiple?: number
   ) {
-    if (["select"].includes(method) && (data === undefined || data === "")) {
-      throw new Error(`Data is required for ${method} method`);
-    }
-
-    const element =
+    const target =
       selectorCountOnMultiple === undefined
-        ? pw.get(selector)
-        : pw.get(selector).eq(selectorCountOnMultiple);
+        ? currentPage().locator(selector).first()
+        : currentPage().locator(selector).nth(selectorCountOnMultiple);
 
-    switch (method) {
-      case "type":
-        if (data) {
-          element.type(data);
-        }
-        break;
-      case "select":
-        element.click( {force: true} );
-        pw.get("li").contains(data).click( {force: true} );
-        break;
-      case "click":
-        element.click( {force: true} );
-        break;
-      default:
-        throw new Error(`Unsupported method: ${method}`);
+    if (method === "type") {
+      await target.fill("");
+      if (data) {
+        await target.type(data);
+      }
+      return;
     }
+
+    if (method === "select") {
+      if (!data) {
+        throw new Error("Data is required for select.");
+      }
+      await target.click({ force: true });
+      await listItem(data).click({ force: true });
+      return;
+    }
+
+    await target.click({ force: true });
   }
 
-  /**
-   * Select if registering multiple locations.
-   * @param {boolean} toRegisterMultipleLocations - Indicates if multiple locations are being registered.
-   */
-  selectIsRegisteringMultipleLocations(toRegisterMultipleLocations: boolean) {
+  async selectIsRegisteringMultipleLocations(toRegisterMultipleLocations: boolean) {
     if (toRegisterMultipleLocations) {
-      this.enterData(
-        'input[data-cy="Yes, I will be registering multiple business locations.-radio-button"]',
-        "click"
-      );
-    } else {
-      this.enterData(
-        'input[data-cy="No, I will only be registering a single business.-radio-button"]',
-        "click"
-      );
+      await this.elements().yesMultipleLocationsRadioButton().click({ force: true });
+      return;
     }
+
+    await this.elements().noSingleLocationRadioButton().click({ force: true });
   }
 
-  /**
-   * Enter business owner information.
-   * @param {Object} data - The business owner information.
-   * @param {string} data.businessOwnerFullName - The full name of the business owner.
-   * @param {string} data.businessOwnerPhoneNumber - The phone number of the business owner.
-   * @param {string} data.businessOwnerEmail - The email of the business owner.
-   */
-  enterBusinessOwnerInformation(data: {
+  async enterBusinessOwnerInformation(data: {
     businessOwnerFullName: string;
     businessOwnerPhoneNumber: string;
     businessOwnerEmail: string;
   }) {
-    this.enterData("#OwnerFullName", "type", data.businessOwnerFullName);
-    this.enterData("#OwnerPhoneNumber", "type", data.businessOwnerPhoneNumber);
-    this.enterData("#OwnerEmailAddress", "type", data.businessOwnerEmail);
+    await this.elements().ownerFullName().fill(data.businessOwnerFullName);
+    await this.elements().ownerPhoneNumber().fill(data.businessOwnerPhoneNumber);
+    await this.elements().ownerEmailAddress().fill(data.businessOwnerEmail);
   }
 
-  /**
-   * Enter legal business information.
-   * @param {Object} data - The legal business information.
-   * @param {string} data.legalBusinessName - The legal business name.
-   * @param {string} data.legalBusinessAddress1 - The first line of the legal business address.
-   * @param {string} data.legalBusinessAddress2 - The second line of the legal business address.
-   * @param {string} data.legalBusinessCity - The city of the legal business.
-   * @param {string} data.legalBusinessState - The state of the legal business.
-   * @param {string} data.legalBusinessZipCode - The ZIP code of the legal business.
-   * @param {string} data.federalIdentificationNumber - The FEIN of the legal business.
-   */
-  enterLegalBusinessInformation(data: {
+  async enterLegalBusinessInformation(data: {
     legalBusinessName: string;
     legalBusinessAddress1: string;
     legalBusinessAddress2: string;
@@ -259,284 +164,75 @@ class Form {
     legalBusinessZipCode: string;
     federalIdentificationNumber: string;
   }) {
-    this.enterData("#BusinessName", "type", data.legalBusinessName);
-    this.enterData("#FEIN", "type", data.federalIdentificationNumber);
-    this.enterData("#BusinessAddress1", "type", data.legalBusinessAddress1);
-    this.enterData("#BusinessAddress2", "type", data.legalBusinessAddress2);
-    this.enterData("#BusinessCity", "type", data.legalBusinessCity);
-    this.enterData(
-      'span[data-cy="Legal Business State-dropdown"]',
-      "select",
-      data.legalBusinessState
-    );
-    this.enterData("#BusinessZipCode", "type", data.legalBusinessZipCode);
+    await this.elements().businessName().fill(data.legalBusinessName);
+    await this.elements().fein().fill(data.federalIdentificationNumber);
+    await this.elements().businessAddress1().fill(data.legalBusinessAddress1);
+    await this.elements().businessAddress2().fill(data.legalBusinessAddress2);
+    await this.elements().businessCity().fill(data.legalBusinessCity);
+    await this.elements().businessStateDropdown().click({ force: true });
+    await listItem(data.legalBusinessState).click({ force: true });
+    await this.elements().businessZipCode().fill(data.legalBusinessZipCode);
   }
 
-  /**
-   * Check for consistent legal business address and business owner information.
-   */
-  checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation() {
-    this.enterData('input[data-cy="No-radio-button"]', "click");
-    pw.waitForLoading();
-    this.enterData(
-      'input[data-cy="Check this box if the Legal Business Address is the same as the Business Mailing Address-checkbox"]',
-      "click"
-    );
-    this.enterData(
-      'input[data-cy="Check this box if the Business Owner Information is the same as the Business Management Contact Information-checkbox"]',
-      "click"
-    );
+  async checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation() {
+    await this.elements().legalBusinessAddressCheckbox().check({ force: true });
+    await this.elements().businessOwnerInfoCheckbox().check({ force: true });
   }
 
-  /**
-   * Enter emergency phone numbers.
-   * @param {Object} data - The emergency phone number information.
-   * @param {string} data.emergencyPhoneNumber - The emergency phone number.
-   */
-  enterEmergencyPhoneNumbers(data: { emergencyPhoneNumber: string }) {
-    this.enterData("#EmergencyPhoneNumber", "type", data.emergencyPhoneNumber);
+  async enterEmergencyPhoneNumbers(data: { emergencyPhoneNumber: string }) {
+    await this.elements().emergencyPhoneNumber().fill(data.emergencyPhoneNumber);
   }
 
-  private recursiveDateInput(props: {
-    date: { month: number; day: number; year: number };
-    selector: string;
-    intendedDateValue: string;
-    index?: number;
-  }) {
-    /**
-     * Recursively enter a date in case flaky behavior occurs.
-     * @param {Object} props.date - The date to enter.
-     * @param {string} props.selector - The selector of the date input.
-     * @param {string} props.intendedDateValue - The intended date value to enter.
-     */
-    const enter = (selector: string, method: string, value: any) =>
-      this.enterData(selector, method, value, props.index);
-
-    enter(props.selector, "type", `${props.date.month}`);
-    this.getElement().formTitle().click( {force: true} );
-    enter(props.selector, "type", `{rightarrow}${props.date.day}`);
-    this.getElement().formTitle().click( {force: true} );
-    enter(props.selector, "type", `{rightarrow}{rightarrow}${props.date.year}`);
-    this.getElement().formTitle().click( {force: true} );
-    pw.get(`${props.selector} input`)
-      .eq(props.index ? props.index : 0)
-      .invoke("attr", "value")
-      .then((dateValue) => {
-        if (dateValue !== props.intendedDateValue) {
-          enter(props.selector, "type", `{backspace}`);
-          enter(props.selector, "type", `{leftArrow}{backspace}`);
-          enter(props.selector, "type", `{leftArrow}{leftArrow}{backspace}`);
-          this.recursiveDateInput(props);
-        }
-      });
-  }
-
-  /**
-   * Enter location details.
-   * @param {Object[]} data - The location details.
-   * @param {Object} data[].locationOpenDate - The open date of the location.
-   * @param {number} data[].locationOpenDate.day - The day of the open date.
-   * @param {number} data[].locationOpenDate.month - The month of the open date.
-   * @param {number} data[].locationOpenDate.year - The year of the open date.
-   * @param {string} data[].locationDBA - The DBA of the location.
-   * @param {string} data[].locationAddress1 - The first line of the location address.
-   * @param {string} data[].locationAddress2 - The second line of the location address.
-   * @param {string} data[].locationCity - The city of the location.
-   * @param {string} data[].locationState - The state of the location.
-   * @param {string} data[].locationZip - The ZIP code of the location.
-   * @param {string} data[].locationMailingAddress1 - The first line of the location mailing address.
-   * @param {string} data[].locationMailingAddress2 - The second line of the location mailing address.
-   * @param {string} data[].locationMailingCity - The city of the location mailing address.
-   * @param {string} data[].locationMailingState - The state of the location mailing address.
-   * @param {string} data[].locationMailingZip - The ZIP code of the location mailing address.
-   * @param {string} data[].managerOperatorFullName - The full name of the manager/operator.
-   * @param {string} data[].managerOperatorPhoneNumber - The phone number of the manager/operator.
-   * @param {string} data[].managerOperatorEmail - The email of the manager/operator.
-   * @param {string} data[].managerOperatorTitle - The title of the manager/operator.
-   * @param {string} data[].emergencyPhoneNumber - The emergency phone number.
-   */
-  enterLocationDetails(
-    data: {
-      locationOpenDate: { day: number; month: number; year: number };
-      locationDBA: string;
-      locationAddress1: string;
-      locationAddress2: string;
-      locationCity: string;
-      locationState: string;
-      locationZip: string;
-      locationMailingAddress1: string;
-      locationMailingAddress2: string;
-      locationMailingCity: string;
-      locationMailingState: string;
-      locationMailingZip: string;
-      managerOperatorFullName: string;
-      managerOperatorPhoneNumber: string;
-      managerOperatorEmail: string;
-      managerOperatorTitle: string;
-      emergencyPhoneNumber: string;
-    }[]
-  ) {
-    data.forEach((location, index) => {
-      const enter = (selector: string, method: string, value: any) =>
-        this.enterData(
-          selector,
-          method,
-          value,
-          data.length > 1 ? index : undefined
-        );
-
-      // enter(
-      //   'span[data-cy="Location Open Date-datePicker-input"] input',
-      //   "type",
-      //   `${location.locationOpenDate.month}{rightarrow}${location.locationOpenDate.day}{rightarrow}${location.locationOpenDate.year}`
-      // );
-
-      this.recursiveDateInput({
-        date: location.locationOpenDate,
-        selector: 'span[data-cy="Location Open Date-datePicker-input"]',
-        intendedDateValue: `${location.locationOpenDate.month}/${location.locationOpenDate.day}/${location.locationOpenDate.year}`,
-        index,
-      });
-
-      enter(
-        'span[data-cy="Location Trade Name DBA-masked-input"]',
-        "type",
-        location.locationDBA
-      );
-      enter(
-        'span[data-cy="Location Address 1-masked-input"]',
-        "type",
-        location.locationAddress1
-      );
-      enter(
-        'span[data-cy="Location Address 2-masked-input"]',
-        "type",
-        location.locationAddress2
-      );
-      enter(
-        'span[data-cy="Location City-masked-input"]',
-        "type",
-        location.locationCity
-      );
-      enter(
-        'span[data-cy="Location State-dropdown"]',
-        "select",
-        location.locationState
-      );
-      enter(
-        'span[data-cy="Location Zip Code-masked-input"]',
-        "type",
-        location.locationZip
-      );
-
-      if (data.length > 1) {
-        enter(
-          'span[data-cy="Business Mailing Address 1-masked-input"]',
-          "type",
-          location.locationMailingAddress1
-        );
-        enter(
-          'span[data-cy="Business Mailing Address 2-masked-input"]',
-          "type",
-          location.locationMailingAddress2
-        );
-        enter(
-          'span[data-cy="Business Mailing City-masked-input"]',
-          "type",
-          location.locationMailingCity
-        );
-        enter(
-          'span[data-cy="Business Mailing State-dropdown"]',
-          "select",
-          location.locationMailingState
-        );
-        enter(
-          'span[data-cy="Business Mailing Zip Code-masked-input"]',
-          "type",
-          location.locationMailingZip
-        );
-        enter(
-          'span[data-cy="Manager/Operator Full Name-masked-input"]',
-          "type",
-          location.managerOperatorFullName
-        );
-        enter(
-          'input[name="OperatorTitleRB"]',
-          "type",
-          location.managerOperatorTitle
-        );
-        enter(
-          'input[name="OperatorPhoneRB"]',
-          "type",
-          location.managerOperatorPhoneNumber
-        );
-        enter(
-          'input[name="OperatorEmailAddressRB"]',
-          "type",
-          location.managerOperatorEmail
-        );
-        enter(
-          'input[name="EmergencyPhoneNumberRB"]',
-          "type",
-          location.emergencyPhoneNumber
-        );
+  async enterLocationDetails(locations: Record<string, any>[]) {
+    for (const [index, location] of locations.entries()) {
+      if (index > 0) {
+        await this.clickAddLocationButton();
       }
-      index < data.length - 1 && this.addLocation();
-      pw.waitForLoading();
-    });
+
+      await fillDateInput(this.elements().locationOpenDate().nth(index), location.locationOpenDate);
+      await this.elements().locationDBA().nth(index).fill(location.locationDBA);
+      await this.elements().locationAddress1().nth(index).fill(location.locationAddress1);
+      await this.elements().locationAddress2().nth(index).fill(location.locationAddress2);
+      await this.elements().locationCity().nth(index).fill(location.locationCity);
+      await this.elements().locationStateDropdown().nth(index).click({ force: true });
+      await listItem(location.locationState).click({ force: true });
+      await this.elements().locationZipCode().nth(index).fill(location.locationZip);
+      await this.elements().locationMailingAddress1().nth(index).fill(location.locationMailingAddress1);
+      await this.elements().locationMailingAddress2().nth(index).fill(location.locationMailingAddress2);
+      await this.elements().locationMailingCity().nth(index).fill(location.locationMailingCity);
+      await this.elements().locationMailingStateDropdown().nth(index).click({ force: true });
+      await listItem(location.locationMailingState).click({ force: true });
+      await this.elements().locationMailingZipCode().nth(index).fill(location.locationMailingZip);
+      await this.elements().managerOperatorFullName().nth(index).fill(location.managerOperatorFullName);
+      await this.elements().managerOperatorTitle().nth(index).fill(location.managerOperatorTitle);
+      await this.elements().managerOperatorPhoneNumber().nth(index).fill(location.managerOperatorPhoneNumber);
+      await this.elements().managerOperatorEmail().nth(index).fill(location.managerOperatorEmail);
+      await this.elements().managerEmergencyPhoneNumber().nth(index).fill(location.emergencyPhoneNumber);
+    }
   }
 
-  /**
-   * Enter applicant details.
-   * @param {Object} data - The applicant details.
-   * @param {string} data.agencyName - The name of the agency.
-   * @param {string} data.agencyType - The type of the agency.
-   * @param {string} data.preparerFullName - The full name of the preparer.
-   * @param {string} data.preparerTitle - The title of the preparer.
-   * @param {string} data.applicantPhoneNumber - The phone number of the applicant.
-   * @param {string} data.applicantEmail - The email of the applicant.
-   * @param {string} data.signature - The signature of the applicant.
-   * @param {boolean} [isRepresentativeOfAgencyOnBehalfOfBusinessOwner=false] - Indicates if the applicant is a representative of an agency on behalf of the business owner.
-   */
-  enterApplicantDetails(
-    data: {
+  async enterApplicantDetails(
+    applicantInfo: {
       agencyName: string;
       agencyType: string;
-      preparerFullName: string;
-      preparerTitle: string;
       applicantPhoneNumber: string;
       applicantEmail: string;
       signature: string;
     },
-    isRepresentativeOfAgencyOnBehalfOfBusinessOwner: boolean
+    isNotAgency: boolean
   ) {
-    if (!isRepresentativeOfAgencyOnBehalfOfBusinessOwner) {
-      this.enterData("#AgencyName", "type", data.agencyName);
-      this.enterData(
-        'span[data-cy="Agency Type-dropdown"]',
-        "select",
-        data.agencyType
-      );
-      this.enterData("#PreparerFullName", "type", data.preparerFullName);
-      this.enterData("#PreparerTitle", "type", data.preparerTitle);
-      this.enterData("#PreparerPhone", "type", data.applicantPhoneNumber);
-      this.enterData("#PreparerEmailAddress", "type", data.applicantEmail);
-      this.enterData("#Signature", "type", data.signature);
-    } else {
-      this.enterData(
-        '*[data-cy="Check box if you are a representative of an Agency registering on behalf of a business owner.-checkbox"]',
-        "click"
-      );
-      this.enterData("#AgencyName", "type", data.agencyName);
-      this.enterData(
-        'span[data-cy="Agency Type-dropdown"]',
-        "select",
-        data.agencyType
-      );
-      this.enterData("#PreparerPhone", "type", data.applicantPhoneNumber);
-      this.enterData("#PreparerEmailAddress", "type", data.applicantEmail);
-      this.enterData("#Signature", "type", data.signature);
+    if (!isNotAgency) {
+      await this.elements().agencyCheckbox().check({ force: true });
+      await this.elements().agencyName().fill(applicantInfo.agencyName);
+      await this.elements().agencyTypeDropdown().click({ force: true });
+      await listItem(applicantInfo.agencyType).click({ force: true });
     }
+
+    await this.elements().preparerFullName().fill(applicantInfo.agencyName);
+    await this.elements().preparerTitle().fill("Applicant");
+    await this.elements().preparerPhone().fill(applicantInfo.applicantPhoneNumber);
+    await this.elements().preparerEmailAddress().fill(applicantInfo.applicantEmail);
+    await this.elements().signature().fill(applicantInfo.signature);
   }
 }
 

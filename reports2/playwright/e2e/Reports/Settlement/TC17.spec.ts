@@ -1,5 +1,6 @@
-import { test, expect } from '../../../support/pwtest';
+import { expect, test } from "@playwright/test";
 import SettlementGrid from "../../../objects/SettlementGrid";
+import Login from "../../../utils/Login";
 
 const nineMonthsFromToday = () => {
   const today = new Date();
@@ -15,22 +16,19 @@ test.describe(
   "As an municipal user, I should be able to generate a distribution details from a date range",
   { tags: ["regression"] },
   () => {
-    test("Initiating test", () => {
-      const settlementGrid = new SettlementGrid({
+    test("Initiating test", async ({ page }) => {
+      const settlementGrid = new SettlementGrid(page, {
         userType: "municipal",
       });
-      pw.login({ accountType: "municipal", accountIndex: 5 });
-      settlementGrid.init();
-      settlementGrid.getElement().noRecordFoundComponent().should("not.exist");
-      settlementGrid.getTotalItems("defaultTotalItems");
-      settlementGrid.setStartDate(nineMonthsFromToday());
-      settlementGrid.getElement().noRecordFoundComponent().should("not.exist");
-      settlementGrid.getTotalItems("newTotalItems");
-      pw.get("@defaultTotalItems").then((defaultTotalItems) => {
-        pw.get("@newTotalItems").then((newTotalItems) => {
-          expect(defaultTotalItems).to.not.equal(newTotalItems);
-        });
-      });
+
+      await Login.login(page, { accountType: "municipal", accountIndex: 5 });
+      await settlementGrid.init();
+      await expect(settlementGrid.getElement().noRecordFoundComponent()).toHaveCount(0);
+      const defaultTotalItems = await settlementGrid.getTotalItems();
+      await settlementGrid.setStartDate(nineMonthsFromToday());
+      await expect(settlementGrid.getElement().noRecordFoundComponent()).toHaveCount(0);
+      const newTotalItems = await settlementGrid.getTotalItems();
+      expect(defaultTotalItems).not.toBe(newTotalItems);
     });
   }
 );

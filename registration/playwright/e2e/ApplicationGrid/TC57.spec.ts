@@ -1,174 +1,66 @@
-import { test, expect } from '../../support/pwtest';
-import Filing from "../../objects/Filing";
-import Form from "../../objects/Form";
-import FormPreview from "../../objects/FormPreview";
-import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
+import { expect, test } from "@playwright/test";
 import ApplicationGrid from "../../objects/ApplicationGrid";
-import ApplicationReview from "../../objects/ApplicationReview";
-import Payment from "../../objects/Payment";
-
-const randomSeed = () => Math.floor(Math.random() * 100000);
+import {
+  approveApplication,
+  createSubmittedApplication,
+  getTaxpayerRegistrationRecordId,
+  payApplicationAsTaxpayer,
+} from "../helpers";
+import { initTestRuntime, textOf } from "../../support/runtime";
 
 test.describe("As an AGS user, I want to be able to update the payment status for an application to Refunded manually", () => {
-  test("Initiating test", () => {
-    const form = new Form({ isRenewal: false });
-    const formPreviewPage = new FormPreview();
-    const filing = new Filing();
-    const paymentPage = new Payment();
-    const applicationConfirmation = new ApplicationConfirmation();
-    const taxpayerApplicationGrid = new ApplicationGrid({
-      userType: "taxpayer",
-    });
+  test("Initiating test", async ({ page, request }, testInfo) => {
+    await initTestRuntime({ page, request, baseURL: testInfo.project.use.baseURL as string });
     const agsApplicationGrid = new ApplicationGrid({
       userType: "ags",
       municipalitySelection: "City of Arrakis",
     });
-    const applicationReview = new ApplicationReview({ userType: "ags" });
 
-    pw.login({ accountType: "taxpayer", accountIndex: 6 });
+    const { customData, referenceId } = await createSubmittedApplication({
+      accountIndex: 6,
+      formName: "Business License (Annual) - E2E #1",
+    });
+    const registrationRecordId = await getTaxpayerRegistrationRecordId(referenceId);
 
-    filing.goToSubmitFormsTab();
-    filing.selectGovernment("City of Arrakis");
-    filing.selectForm("Business License (Annual) - E2E #1");
-    filing.clickSubmitNewRegistrationButton();
-    form.clickNextbutton();
-    form.selectIsRegisteringMultipleLocations(false);
+    const { applicationReview } = await approveApplication({
+      reviewerType: "ags",
+      reviewerIndex: 6,
+      registrationRecordId: String(registrationRecordId),
+      locationAddress1: String(customData.locationInfo.locations[0].locationAddress1),
+    });
+    await expect(
+      await textOf(applicationReview.getElements().applicationStatusData())
+    ).toMatch(/Approval Payment Required|Approved/);
+    await applicationReview.clickGoBackApplicationsButton();
 
-    pw.getUniqueRegistrationData(randomSeed(), false).then(
-      (customData: {
-        basicInfo: any;
-        locationInfo: { locations: any[] };
-        applicantInfo: any;
-      }) => {
-        form.enterBusinessOwnerInformation(customData.basicInfo);
-        form.enterLegalBusinessInformation(customData.basicInfo);
-        form.checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation();
-        form.enterEmergencyPhoneNumbers(customData.basicInfo);
-        form.clickNextbutton();
-        form.enterLocationDetails(customData.locationInfo.locations);
-        form.clickNextbutton();
-        form.enterApplicantDetails(customData.applicantInfo, true);
-        form.clickNextbutton();
-        formPreviewPage.clickSubmitButton();
-        applicationConfirmation
-          .getElement()
-          .referenceIdData()
-          .invoke("text")
-          .then((referenceId) => {
-            pw.wrap(referenceId).as("referenceId");
-          });
-        applicationConfirmation.clickCloseButton();
-        taxpayerApplicationGrid.init();
-        pw.get("@referenceId").then((referenceId) => {
-          taxpayerApplicationGrid.getDataOfColumn(
-            "Registration Record ID",
-            "Reference ID",
-            String(referenceId),
-            "registrationRecordId"
-          );
-        });
-        pw.logout();
-        pw.login({
-          accountType: "ags",
-          notFirstLogin: true,
-          accountIndex: 6,
-        });
-        agsApplicationGrid.init();
-        pw.get("@registrationRecordId").then((registrationRecordId) => {
-          agsApplicationGrid.selectRowToReview({
-            anchorColumnName: "Registration Record ID",
-            anchorValue: String(registrationRecordId),
-          });
-          agsApplicationGrid.clickStartApplicationWorkflowForSelectedApplicationsButton();
-          applicationReview.clickReviewStepTab("Manual Steps");
-          applicationReview.manualStepsTab.clickApproveButton();
-          applicationReview.clickReviewStepTab("Business Details");
-          applicationReview.updateBusinessDetailsTab.clickEditBusinessDetailsButton();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.clickReviewBusinessButton(
-            customData.locationInfo.locations[0].locationAddress1
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.disregardSimilarBusinessRecords();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.clicUpdateAddBusinessDetailsButton();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.clickUpdateFormRequirements(
-            customData.locationInfo.locations[0].locationAddress1
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.enableForm(
-            "Food and Beverage"
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.selectDateDelinquencyTrackingStartDate(
-            1,
-            1,
-            2024
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.clickSaveButton();
-          applicationReview.toggleActions("Approve");
-          applicationReview
-            .getElements()
-            .applicationStatusData()
-            .should(($status) => {
-              expect($status.text().trim()).to.match(
-                /Approval Payment Required|Approved/
-              );
-            });
-          applicationReview.clickGoBackApplicationsButton();
-          pw.logout();
-          pw.login({
-            accountType: "taxpayer",
-            accountIndex: 6,
-            notFirstLogin: true,
-          });
-          taxpayerApplicationGrid.init();
-          taxpayerApplicationGrid.payApplication(
-            "Registration Record ID",
-            String(registrationRecordId)
-          );
-          paymentPage.payViaAnySavedPaymentMethod();
-          applicationConfirmation.clickCloseButton();
-          pw.logout();
-          pw.login({
-            accountType: "ags",
-            accountIndex: 6,
-            notFirstLogin: true,
-          });
-          agsApplicationGrid.init();
-          agsApplicationGrid.getDataOfColumn(
-            "Approval Payment Status",
-            "Registration Record ID",
-            String(registrationRecordId),
-            "approvalPaymentStatusBeforeManualChange"
-          );
-          agsApplicationGrid.clickClearAllFiltersButton();
-          agsApplicationGrid.manuallyChangeApplicationPaymentStatus(
-            "Fully Paid",
-            "Registration Record ID",
-            String(registrationRecordId)
-          );
-          agsApplicationGrid.clickClearAllFiltersButton();
-          agsApplicationGrid.getDataOfColumn(
-            "Approval Payment Status",
-            "Registration Record ID",
-            String(registrationRecordId),
-            "approvalPaymentStatusAfterManualChange"
-          );
-          pw.get("@approvalPaymentStatusBeforeManualChange").then(
-            (approvalPaymentStatusBeforeManualChange) => {
-              pw.get("@approvalPaymentStatusAfterManualChange").then(
-                (approvalPaymentStatusAfterManualChange) => {
-                  expect(approvalPaymentStatusBeforeManualChange).to.not.equal(
-                    approvalPaymentStatusAfterManualChange
-                  );
-                  expect(approvalPaymentStatusBeforeManualChange).to.equal(
-                    "Pending"
-                  );
-                  expect(approvalPaymentStatusAfterManualChange).to.equal(
-                    "Fully Paid"
-                  );
-                }
-              );
-            }
-          );
-        });
-      }
+    await payApplicationAsTaxpayer({
+      registrationRecordId: String(registrationRecordId),
+      taxpayerIndex: 6,
+    });
+
+    await agsApplicationGrid.init();
+    const approvalPaymentStatusBeforeManualChange = await agsApplicationGrid.getDataOfColumn(
+      "Approval Payment Status",
+      "Registration Record ID",
+      String(registrationRecordId),
+      "approvalPaymentStatusBeforeManualChange"
     );
+    await agsApplicationGrid.clickClearAllFiltersButton();
+    await agsApplicationGrid.manuallyChangeApplicationPaymentStatus(
+      "Fully Paid",
+      "Registration Record ID",
+      String(registrationRecordId)
+    );
+    await agsApplicationGrid.clickClearAllFiltersButton();
+    const approvalPaymentStatusAfterManualChange = await agsApplicationGrid.getDataOfColumn(
+      "Approval Payment Status",
+      "Registration Record ID",
+      String(registrationRecordId),
+      "approvalPaymentStatusAfterManualChange"
+    );
+
+    expect(approvalPaymentStatusBeforeManualChange).not.toBe(approvalPaymentStatusAfterManualChange);
+    expect(approvalPaymentStatusBeforeManualChange).toBe("Pending");
+    expect(approvalPaymentStatusAfterManualChange).toBe("Fully Paid");
   });
 });

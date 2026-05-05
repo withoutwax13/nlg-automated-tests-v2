@@ -4,9 +4,9 @@ const path = require("path");
 const os = require("os");
 
 // Function to get all files with "cy.ts" in the directory and subdirectories
-function getAllCyTsFiles(dir, fileList = []) {
-  const files = fs.readdirSync(dir);
-  files.forEach((file) => {
+function getAllCyTsFiles(dir: string, fileList: string[] = []): string[] {
+  const files: string[] = fs.readdirSync(dir);
+  files.forEach((file: string) => {
     const filePath = path.join(dir, file);
     if (fs.statSync(filePath).isDirectory()) {
       getAllCyTsFiles(filePath, fileList);
@@ -18,26 +18,26 @@ function getAllCyTsFiles(dir, fileList = []) {
 }
 
 // Function to divide the files into smaller batches
-function divideFilesIntoBatches(files, batchSize = 3) {
-  const batches = [];
+function divideFilesIntoBatches(files: string[], batchSize = 3): string[][] {
+  const batches: string[][] = [];
   for (let i = 0; i < files.length; i += batchSize) {
     batches.push(files.slice(i, i + batchSize));
   }
-  batches.forEach((batch, index) => {
+  batches.forEach((batch: string[], index: number) => {
     console.log(`Batch ${index + 1}: ${batch}`);
   });
   return batches;
 }
 
 // Function to run Cypress tests in parallel for each batch
-function runCypressTestsInBatches(fileGroups) {
+function runCypressTestsInBatches(fileGroups: string[][]): void {
   const startTime = Date.now();
 
-  const runBatch = (batch) => {
-    const promises = batch.map((file) => {
-      return new Promise((resolve) => {
+  const runBatch = (batch: string[]): Promise<string[]> => {
+    const promises = batch.map((file: string) => {
+      return new Promise<string>((resolve) => {
         console.log(`Executing test file: ${file}`);
-        exec(`npx cypress run --spec ${file}`, (error, stdout, stderr) => {
+        exec(`npx cypress run --spec ${file}`, (error: Error | null, stdout: string, stderr: string) => {
           if (error) {
             console.error(`Error executing file ${file}: ${error.message}`);
           }

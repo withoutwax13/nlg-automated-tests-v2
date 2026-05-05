@@ -1,4 +1,5 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect } from '../../test';
+import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
 import FilingGrid from "../../objects/FilingGrid";
 
 const agsFilingGrid = new FilingGrid({
@@ -7,7 +8,7 @@ const agsFilingGrid = new FilingGrid({
 });
 
 test.describe("As a AGS user, I should be able to see filings in 1 month ago.", () => {
-  test("Initiate test", () => {
+  test("Initiate test", async ({ page }) => {
 
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
@@ -15,9 +16,9 @@ test.describe("As a AGS user, I should be able to see filings in 1 month ago.", 
     const today = new Date();
     today.toLocaleString("en-US", { timeZone: "America/Chicago" });
     
-    pw.login({ accountType: "ags", accountIndex: 8 });
-    agsFilingGrid.init();
-    agsFilingGrid.setStartDate({
+    await login({ accountType: "ags", accountIndex: 8 });
+    await agsFilingGrid.init();
+    await agsFilingGrid.setStartDate({
       month:
         oneMonthAgo.getMonth() + 1 < 10
           ? `0${oneMonthAgo.getMonth() + 1}`
@@ -28,14 +29,12 @@ test.describe("As a AGS user, I should be able to see filings in 1 month ago.", 
           : `${oneMonthAgo.getDate()}`,
       year: `${oneMonthAgo.getFullYear()}`,
     });
-    agsFilingGrid.sortColumn(true ,"Filing Date");
-    agsFilingGrid.getColumnCellsData("Filing Date");
-    pw.get("@columnCellsData").then((columnCellsData) => {
-      Array.from(columnCellsData).forEach((cellData) => {
-        const filingDate = new Date(String(cellData));
-        expect(filingDate).to.be.gte(oneMonthAgo);
-        expect(filingDate).to.be.lte(today);
-      });
-    });
+    await agsFilingGrid.sortColumn(true ,"Filing Date");
+    const columnCellsData = await agsFilingGrid.getColumnCellsData("Filing Date");
+    for (const cellData of columnCellsData) {
+      const filingDate = new Date(String(cellData));
+      expect(filingDate.getTime()).toBeGreaterThanOrEqual(oneMonthAgo.getTime());
+      expect(filingDate.getTime()).toBeLessThanOrEqual(today.getTime());
+    }
   });
 });

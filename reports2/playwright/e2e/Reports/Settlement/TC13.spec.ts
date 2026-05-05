@@ -1,69 +1,45 @@
-import { test, expect } from '../../../support/pwtest';
-import SettlementGrid from "../../../objects/SettlementGrid";
-import { AGS_SETTLEMENT_GRID_COLUMNS as defaultColumns } from "../../../objects/SettlementGrid";
+import { expect, test } from "@playwright/test";
+import SettlementGrid, {
+  AGS_SETTLEMENT_GRID_COLUMNS as defaultColumns,
+} from "../../../objects/SettlementGrid";
+import Login from "../../../utils/Login";
 
 test.describe(
   "As a user, I should be able to reorganize the order of columns on the settlement list",
   { tags: ["sanity", "regression"] },
   () => {
-    test("Initiating test", () => {
-      const settlementGrid = new SettlementGrid({
+    test("Initiating test", async ({ page }) => {
+      const settlementGrid = new SettlementGrid(page, {
         userType: "ags",
         municipalitySelection: "City of Arrakis",
       });
-      pw.login({ accountType: "ags", accountIndex: 9 });
 
-      const columnPairs = [];
-      const columnsToTest = defaultColumns.slice(1, 4); // Limiting to 4 columns to save resource usage
-      for (let i = 0; i < columnsToTest.length; i++) {
-        for (let j = i + 1; j < columnsToTest.length; j++) {
+      await Login.login(page, { accountType: "ags", accountIndex: 9 });
+
+      const columnPairs: Array<[string, string]> = [];
+      const columnsToTest = defaultColumns.slice(1, 4);
+      for (let i = 0; i < columnsToTest.length; i += 1) {
+        for (let j = i + 1; j < columnsToTest.length; j += 1) {
           columnPairs.push([columnsToTest[i], columnsToTest[j]]);
         }
       }
 
-      columnPairs.forEach(([column, targetColumn]) => {
-        settlementGrid.init();
-        settlementGrid.verifyColumnOrder(
-          column,
-          `${column.replace(/\s+/g, "")}IndexBeforeMove`
-        );
-        settlementGrid.verifyColumnOrder(
-          targetColumn,
-          `${targetColumn.replace(/\s+/g, "")}IndexBeforeMove`
-        );
-        settlementGrid.clickCustomizeTableViewButton();
-        settlementGrid.moveColumnToLocationOf(column, targetColumn);
+      for (const [column, targetColumn] of columnPairs) {
+        await settlementGrid.init();
+        const columnIndexBeforeMove = await settlementGrid.verifyColumnOrder(column);
+        const targetColumnIndexBeforeMove = await settlementGrid.verifyColumnOrder(targetColumn);
+        await settlementGrid.clickCustomizeTableViewButton();
+        await settlementGrid.moveColumnToLocationOf(column, targetColumn);
 
-        settlementGrid.init(true);
-        settlementGrid.verifyColumnOrder(
-          targetColumn,
-          `${targetColumn.replace(/\s+/g, "")}IndexAfterMove`
-        );
-        settlementGrid.verifyColumnOrder(
-          column,
-          `${column.replace(/\s+/g, "")}IndexAfterMove`
-        );
-        pw.get(`@${column.replace(/\s+/g, "")}IndexBeforeMove`).then(
-          (beforeMove) => {
-            pw.get(`@${column.replace(/\s+/g, "")}IndexAfterMove`).then(
-              (afterMove) => {
-                expect(beforeMove).to.not.equal(afterMove);
-              }
-            );
-          }
-        );
-        pw.get(`@${targetColumn.replace(/\s+/g, "")}IndexBeforeMove`).then(
-          (beforeMove) => {
-            pw.get(`@${targetColumn.replace(/\s+/g, "")}IndexAfterMove`).then(
-              (afterMove) => {
-                expect(beforeMove).to.not.equal(afterMove);
-              }
-            );
-          }
-        );
-        settlementGrid.clickCustomizeTableViewButton();
-        settlementGrid.restoreDefaultGridSettings();
-      });
+        await settlementGrid.init();
+        const targetColumnIndexAfterMove = await settlementGrid.verifyColumnOrder(targetColumn);
+        const columnIndexAfterMove = await settlementGrid.verifyColumnOrder(column);
+        expect(columnIndexBeforeMove).not.toBe(columnIndexAfterMove);
+        expect(targetColumnIndexBeforeMove).not.toBe(targetColumnIndexAfterMove);
+
+        await settlementGrid.clickCustomizeTableViewButton();
+        await settlementGrid.restoreDefaultGridSettings();
+      }
     });
   }
 );

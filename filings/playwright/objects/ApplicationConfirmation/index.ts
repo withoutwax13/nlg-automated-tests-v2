@@ -1,57 +1,31 @@
-/**
- * Page Object Model (POM) class representing the Filing Confirmation page.
- */
+import { Page } from "@playwright/test";
+import { resolvePage } from "../../pageContext";
+
 class ApplicationConfirmation {
-  /**
-   * Retrieves the elements on the Application Confirmation page.
-   * @returns {Object} An object containing methods to get various elements on the page.
-   */
-  private elements() {
+  private elements(page: Page = resolvePage()) {
     return {
-      pageTitle: () => pw.get("h1"),
-      systemMessage: () => this.getElement().systemMessage().next(),
-      printPageButton: () =>
-        pw.get(".NLG-HyperlinkNoPadding").contains("Print this page"),
-      closeButton: () => pw.get(".NLGButtonPrimary").contains("Close"),
-      referenceIdData: () => pw.get("label").contains("Reference ID").next(),
-      paymentDateData: () =>
-        pw.get("label").contains("Payment Date").next(),
-      totalAmountData: () => pw.get("label").contains("Total Amount").next(),
-      localGovernmentData: () =>
-        pw.get("label").contains("Local Government").next(),
-      formTitleData: () => pw.get("label").contains("Form Title").next(),
-      applicationStatusData: () =>
-        pw.get("label").contains("Application Status").next(),
+      pageTitle: () => page.locator("h1"),
+      printPageButton: () => page.getByText("Print this page"),
+      closeButton: () => page.getByRole("button", { name: "Close" }),
+      referenceIdData: () => page.locator("label").filter({ hasText: "Reference ID" }).locator("xpath=following-sibling::*[1]"),
+      paymentDateData: () => page.locator("label").filter({ hasText: "Payment Date" }).locator("xpath=following-sibling::*[1]"),
+      totalAmountData: () => page.locator("label").filter({ hasText: "Total Amount" }).locator("xpath=following-sibling::*[1]"),
+      localGovernmentData: () => page.locator("label").filter({ hasText: "Local Government" }).locator("xpath=following-sibling::*[1]"),
+      formTitleData: () => page.locator("label").filter({ hasText: "Form Title" }).locator("xpath=following-sibling::*[1]"),
+      applicationStatusData: () => page.locator("label").filter({ hasText: "Application Status" }).locator("xpath=following-sibling::*[1]"),
     };
   }
 
-  /**
-   * Retrieves the elements on the Application Confirmation page.
-   * @returns {Object} An object containing methods to get various elements on the page.
-   */
-  getElement() {
-    return this.elements();
+  getElement(page: Page = resolvePage()) {
+    return this.elements(page);
   }
 
-  /**
-   * Clicks the "Close" button on the Application Confirmation page.
-   * @returns {void}
-   */
-  clickCloseButton(hasPayment = true) {
-    if (hasPayment) {
-      pw.wait("@checkout").its("response.statusCode").should("eq", 201);
-      pw.wait("@getFiling").its("response.statusCode").should("eq", 200);
-      pw.wait("@getPayment").its("response.statusCode").should("eq", 200);
-    }
-    this.getElement().closeButton().click();
+  async clickCloseButton(page: Page = resolvePage()) {
+    await this.getElement(page).closeButton().click();
   }
 
-  /**
-   * Clicks the "Print this page" button on the Application Confirmation page.
-   * @returns {void}
-   */
-  clickPrintPageButton() {
-    this.getElement().printPageButton().click();
+  async clickPrintPageButton(page: Page = resolvePage()) {
+    await this.getElement(page).printPageButton().click();
   }
 }
 

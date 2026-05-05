@@ -1,117 +1,123 @@
-import ApplicationDetail from "./ApplicationDetail";
-import Attachment from "./Attachment";
-import ManualStep from "./ManualSteps";
-import Messages from "./Messages";
-import UpdateBusinessDetails from "./UpdateBusinessDetails";
+import { currentPage, fillDateInput, listItem, waitForLoading, withText } from "../../support/runtime";
 
-/**
- * Page Object Model (POM) class representing the Application Review page.
- */
 class ApplicationReview {
   userType: string;
-  applicationDetailTab: ApplicationDetail;
-  manualStepsTab: ManualStep;
-  messagesTab: Messages;
-  updateBusinessDetailsTab: UpdateBusinessDetails;
-  attachmentTab: Attachment;
 
-  /**
-   * Create a new Application Review page object.
-   * @param {Object} props - The properties of the Application Review page object.
-   * @param {string} props.userType - The type of user that is logged in.
-   * @remarks
-   * This constructor initializes the following tabs:
-   * - applicationDetailTab - The application details tab.
-   * - manualStepsTab - The manual steps tab.
-   * - messagesTab - The messages tab.
-   * - updateBusinessDetailsTab - The update business details tab.
-   * - attachmentTab - The attachment tab.
-   */
   constructor(props: { userType: string }) {
     this.userType = props.userType;
-    this.applicationDetailTab = new ApplicationDetail();
-    this.manualStepsTab = new ManualStep();
-    this.messagesTab = new Messages();
-    this.updateBusinessDetailsTab = new UpdateBusinessDetails();
-    this.attachmentTab = new Attachment();
   }
 
-  /**
-   * Get the elements used in the Application Review page.
-   * @returns {Object} The elements used in the Application Review page.
-   */
-  private elements() {
+  private page() {
+    return currentPage();
+  }
+
+  getElements() {
+    const page = this.page();
+
     return {
-      pageTitle: () => pw.get("h1").first(),
-      goBackToApplicationGridButton: () =>
-        pw.get(".NLGButtonSecondary").contains("Applications"),
-      nextApplicationButton: () =>
-        pw.get(".NLGButtonSecondary").contains("Next"),
-      applicationFormTitle: () => pw.get("h1").eq(1),
-      registrationTypeAndReferenceIdData: () => pw.get("h3"),
-      addressData: () => pw.get("h3").next(),
-      applicationStatusData: () => pw.get("h3").parent().next(),
-      actionsDropdown: () => pw.get(".NLG-PrimaryDropdown").contains("Actions"),
-      reviewStepperTab: () =>
-        pw.get("main").find("div").first().find("div").first(),
-      reviewChecklist: () =>
-        pw.get("main").find("div").first().find("div").eq(1),
-      anyList: () => pw.get("li"),
-      actionDropdownActionItems: () =>
-        pw.get(".k-animation-container").find("li"),
-      actionConfirmationModal: () => pw.get(".k-dialog"),
-      actionConfirmationModalPrimaryButton: () =>
-        this.getElements().actionConfirmationModal().find(".NLGButtonPrimary"),
+      applicationStatusData: () => page.locator("h3").first().locator("xpath=..").locator("xpath=following-sibling::*[1]"),
+      linkExistingComponent: () => page.getByText("You have linked similar business location:", { exact: false }).first(),
     };
   }
 
-  /**
-   * Get the elements used in the Application Review page.
-   * @returns {Object} The elements used in the Application Review page.
-   */
-  getElements() {
-    return this.elements();
+  manualStepsTab = {
+    clickApproveButton: async () => {
+      await withText(this.page().locator(".NLGButtonPrimary"), "Approve").click({ force: true });
+      await waitForLoading();
+    },
+    clickRejectButton: async () => {
+      await withText(this.page().locator(".NLGButtonSecondary"), "Reject").click({ force: true });
+      await waitForLoading();
+    },
+  };
+
+  updateBusinessDetailsTab = {
+    clickEditBusinessDetailsButton: async () => {
+      await withText(this.page().locator(".NLGButtonSecondaryDanger, .NLGButtonSecondary"), "Update Business Details").click({ force: true });
+      await waitForLoading();
+    },
+    updateBusinessList: {
+      clickReviewBusinessButton: async (address: string) => {
+        const row = this.page().locator("button").filter({ hasText: "Review Business" }).filter({
+          has: this.page().locator("xpath=ancestor::*[contains(., '" + address + "')]"),
+        }).first();
+        await row.click({ force: true }).catch(async () => {
+          await this.page().locator("button").filter({ hasText: "Review Business" }).first().click({ force: true });
+        });
+        await waitForLoading();
+      },
+      clickUpdateFormRequirements: async (address: string) => {
+        const button = this.page()
+          .locator("button")
+          .filter({ hasText: /Update Form Requirements|Set Form Requirements/ })
+          .filter({ has: this.page().locator("xpath=ancestor::*[contains(., '" + address + "')]") })
+          .first();
+        await button.click({ force: true }).catch(async () => {
+          await this.page().locator("button").filter({ hasText: /Update Form Requirements|Set Form Requirements/ }).first().click({ force: true });
+        });
+        await waitForLoading();
+      },
+      formRequirementsModal: {
+        enableForm: async (formName: string) => {
+          const formRow = this.page().locator(".k-dialog-content").locator("div").filter({ hasText: formName }).first();
+          const toggle = formRow.locator("input[type='checkbox']").first();
+          const checked = await toggle.isChecked().catch(() => false);
+          if (!checked) {
+            await formRow.click({ force: true });
+          }
+        },
+        selectDateDelinquencyTrackingStartDate: async (month: number, day: number, year: number) => {
+          await fillDateInput(this.page().locator(".k-dateinput input").first(), { month, day, year });
+        },
+        clickSaveButton: async () => {
+          await withText(this.page().locator(".NLGButtonPrimary, .k-dialog-actions button"), "Save").click({ force: true });
+          await waitForLoading();
+        },
+      },
+      reviewBusinessListModal: {
+        getElements: () => this.getElements(),
+        disregardSimilarBusinessRecords: async () => {
+          await this.page().getByText("Proceed without linking", { exact: false }).first().click({ force: true }).catch(() => undefined);
+        },
+        toggleLinkExistingBusiness: async () => {
+          await this.page().locator("label").filter({ hasText: "Link Existing Business" }).first().click({ force: true });
+        },
+        selectBusinessLocationToLink: async (value: string) => {
+          await this.page().locator("span, label, div").filter({ hasText: value }).first().click({ force: true });
+        },
+        clickLinkUpdateLinkedBusinessButton: async () => {
+          await this.page().locator(".NLGButtonPrimary").filter({ hasText: /Link|Update Linked Business/ }).first().click({ force: true });
+          await waitForLoading();
+        },
+        clickUndoLinkingButton: async () => {
+          await this.page().locator("button").filter({ hasText: /Undo Linking|Undo/ }).first().click({ force: true });
+        },
+        clicUpdateAddBusinessDetailsButton: async () => {
+          await this.page().locator(".NLGButtonPrimary").filter({ hasText: /Update|Add Business Details/ }).last().click({ force: true });
+          await waitForLoading();
+        },
+      },
+    },
+  };
+
+  async clickReviewStepTab(step: string) {
+    await this.page().locator("li, a, button").filter({ hasText: step }).first().click({ force: true });
+    await waitForLoading();
   }
 
-  /**
-   * Click the "Go back to applications" button.
-   */
-  clickGoBackApplicationsButton() {
-    this.getElements().goBackToApplicationGridButton().click( {force: true} );
+  async toggleActions(action: "Approve" | "Reject") {
+    await withText(this.page().locator(".NLG-PrimaryDropdown, button"), "Actions").click({ force: true });
+    await listItem(action).click({ force: true });
+    const confirm = this.page().locator(".k-dialog-actions button").filter({ hasText: action }).first();
+    if (await confirm.count()) {
+      await confirm.click({ force: true });
+    }
+    await waitForLoading();
   }
 
-  /**
-   * Click the "Next" button to review the next application.
-   */
-  clickNextApplicationToReviewButton() {
-    this.getElements().nextApplicationButton().click( {force: true} );
-  }
-
-  /**
-   * Toggles the actions dropdown and clicks the action item with the given name.
-   * @param actionName - The name of the action item to click.
-   */
-  toggleActions(actionName: string) {
-    this.getElements().actionsDropdown().click( {force: true} );
-    this.getElements().actionDropdownActionItems().contains(actionName).click( {force: true} );
-    this.getElements()
-      .actionConfirmationModalPrimaryButton()
-      .contains(actionName)
-      .click( {force: true} );
-    pw.waitForLoading();
-  }
-
-  /**
-   * Clicks the tab with the given name.
-   * @param stepTabName - The name of the tab to click.
-   */
-  clickReviewStepTab(stepTabName: string) {
-    this.getElements()
-      .reviewStepperTab()
-      .find("button")
-      .find("span")
-      .contains(stepTabName)
-      .click( {force: true} );
+  async clickGoBackApplicationsButton() {
+    await withText(this.page().locator(".NLGButtonSecondary, .NLGButtonSecondaryFlat"), "Applications").click({ force: true });
+    await waitForLoading();
   }
 }
 

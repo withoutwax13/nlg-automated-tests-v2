@@ -1,69 +1,57 @@
-import { test, expect } from '../../support/pwtest';
-const interceptSearchResults = () => {
-  pw.intercept(
-    "GET",
-    "https://audit.api.localgov.org/v1/audits?**keyword=**"
-  ).as("searchResults");
+import { expect, Page, test } from "@playwright/test";
+import { login, waitForSearchResults } from "../../support/native-helpers";
+
+const searchInput = 'input[placeholder="Search..."]';
+
+const loginAndSearch = async (page: Page, searchTerm: string) => {
+  await login(page);
+  await page.locator(searchInput).fill(searchTerm);
+  await waitForSearchResults(page);
+
+  const rows = page.locator("tbody > tr");
+  const count = await rows.count();
+  for (let rowIndex = 0; rowIndex < count; rowIndex++) {
+    const caseName = (
+      await rows.nth(rowIndex).locator("td").nth(1).innerText()
+    )
+      .toLowerCase()
+      .trim();
+    expect(caseName).toContain(searchTerm.toLowerCase());
+  }
 };
 
-const waitForSearchResults = () => {
-  pw.wait("@searchResults").its("response.statusCode").should("eq", 200);
-  pw.wait(3000);
+const collectColumnValues = async (page: Page, columnIndex: number): Promise<string[]> => {
+  const values: string[] = [];
+  const rows = page.locator("tbody tr");
+  const rowCount = await rows.count();
+  for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+    values.push(await rows.nth(rowIndex).locator("td").nth(columnIndex).innerText());
+  }
+  return values;
 };
 
-const loginAndSearch = (searchTerm) => {
-  pw.login();
-  interceptSearchResults();
-  pw.get(`input[placeholder="Search..."]`).type(searchTerm);
-  waitForSearchResults();
-  pw.get("tbody > tr").each(($row) => {
-    pw.wrap($row)
-      .find("td")
-      .eq(1)
-      .invoke("text")
-      .then(($caseName) => {
-        expect($caseName.toLowerCase()).to.include(searchTerm.toLowerCase());
-      });
-  });
+const sortAndCollectCases = async (page: Page, columnIndex: number) => {
+  await page.locator("tr").locator("th").nth(columnIndex).click();
+  await waitForSearchResults(page);
+  const ascendingCases = await collectColumnValues(page, columnIndex);
+
+  await page.locator("tr").locator("th").nth(columnIndex).click();
+  await waitForSearchResults(page);
+  const descendingCases = await collectColumnValues(page, columnIndex);
+
+  return { ascendingCases, descendingCases };
 };
 
-const sortAndCollectCases = (columnIndex, ascendingCases, descendingCases) => {
-  const collectCases = (casesArray) => {
-    pw.get("tbody")
-      .find("tr")
-      .each(($row) => {
-        pw.wrap($row)
-          .find("td")
-          .eq(columnIndex)
-          .invoke("text")
-          .then(($case) => {
-            casesArray.push($case);
-          });
-      });
-  };
-
-  // ascending
-  pw.get("tr").find("th").eq(columnIndex).click();
-  waitForSearchResults();
-  collectCases(ascendingCases);
-
-  // descending
-  pw.get("tr").find("th").eq(columnIndex).click();
-  waitForSearchResults();
-  collectCases(descendingCases);
-};
-
-const verifySorting = (ascendingCases, descendingCases) => {
-  pw.wrap(ascendingCases).each((caseItem, index) => {
-    pw.wrap(caseItem).should(
-      "eq",
+const verifySorting = (ascendingCases: string[], descendingCases: string[]) => {
+  for (let index = 0; index < ascendingCases.length; index++) {
+    expect(ascendingCases[index]).toBe(
       descendingCases[descendingCases.length - 1 - index]
     );
-  });
+  }
 };
 
 test.describe("Data Grid Scenarios", () => {
-  test("As a user, I should be able to view the data grid", () => {
+  test("As a user, I should be able to view the data grid", async ({ page }) => {
     const columnHeaders = [
       "Case Name",
       "Government",
@@ -72,20 +60,22 @@ test.describe("Data Grid Scenarios", () => {
       "Status",
       "Last Updated",
     ];
-    pw.login();
-    pw.get("table").should("be.visible");
-    pw.get("thead").find("tr").find("th").its("length").should("eq", 8);
-    columnHeaders.forEach((header, headerIndex) => {
-      pw.get("thead")
-        .find("tr")
-        .find("th")
-        .eq(headerIndex + 1)
-        .should("contain.text", header);
-    });
-    pw.get("tbody").should("be.visible");
+
+    await login(page);
+
+    await expect(page.locator("table")).toBeVisible();
+    await expect(page.locator("thead tr th")).toHaveCount(8);
+
+    for (let headerIndex = 0; headerIndex < columnHeaders.length; headerIndex++) {
+      await expect(page.locator("thead tr th").nth(headerIndex + 1)).toContainText(
+        columnHeaders[headerIndex]
+      );
+    }
+
+    await expect(page.locator("tbody")).toBeVisible();
   });
 
-  test("As a user, I should be able to search the data grid", () => {
+  test("As a user, I should be able to search the data grid", async ({ page }) => {
     const searchItems = [
       "dwight",
       "creve",
@@ -94,22 +84,25 @@ test.describe("Data Grid Scenarios", () => {
       "not started",
       "2024-03-05",
     ];
-    pw.login();
-    interceptSearchResults();
-    searchItems.forEach((searchItem, index) => {
-      pw.get(`input[placeholder="Search..."]`).type(searchItem);
-      waitForSearchResults();
-      pw.get("tbody > tr").each(($row) => {
-        pw.wrap($row)
-          .find("td")
-          .eq(index + 1)
-          .invoke("text")
-          .then(($caseName) => {
-            expect($caseName.toLowerCase()).to.include(searchItem);
-          });
-      });
-      pw.get(`input[placeholder="Search..."]`).clear();
-    });
+
+    await login(page);
+
+    for (let index = 0; index < searchItems.length; index++) {
+      const searchItem = searchItems[index];
+      await page.locator(searchInput).fill(searchItem);
+      await waitForSearchResults(page);
+
+      const rows = page.locator("tbody > tr");
+      const count = await rows.count();
+      for (let rowIndex = 0; rowIndex < count; rowIndex++) {
+        const cellText = (
+          await rows.nth(rowIndex).locator("td").nth(index + 1).innerText()
+        ).toLowerCase();
+        expect(cellText).toContain(searchItem);
+      }
+
+      await page.locator(searchInput).clear();
+    }
   });
 
   const sortTests = [
@@ -120,19 +113,15 @@ test.describe("Data Grid Scenarios", () => {
     { description: "Status", columnIndex: 5 },
   ];
 
-  sortTests.forEach(({ description, columnIndex }) => {
-    test(`As a user, I should be able to sort the data grid by ${description}`, () => {
-      loginAndSearch("dwight");
-
-      let ascendingCases = [];
-      let descendingCases = [];
-
-      sortAndCollectCases(columnIndex, ascendingCases, descendingCases);
+  for (const { description, columnIndex } of sortTests) {
+    test(`As a user, I should be able to sort the data grid by ${description}`, async ({ page }) => {
+      await loginAndSearch(page, "dwight");
+      const { ascendingCases, descendingCases } = await sortAndCollectCases(page, columnIndex);
       verifySorting(ascendingCases, descendingCases);
     });
-  });
+  }
 
-  test("As a user, I should see different colors on each status data", () => {
+  test("As a user, I should see different colors on each status data", async ({ page }) => {
     const status = [
       { name: "not started", color: "rgb(215, 86, 72)" },
       { name: "audit onboarding", color: "rgb(246, 189, 69)" },
@@ -144,26 +133,26 @@ test.describe("Data Grid Scenarios", () => {
       { name: "audit complete", color: "rgb(85, 153, 112)" },
     ];
 
-    pw.login();
-    interceptSearchResults();
+    await login(page);
 
-    pw.wrap(status).each((status) => {
-      pw.get(`input[placeholder="Search..."]`).clear().type(status.name);
-      waitForSearchResults();
-      pw.get("tbody > tr").each(($row) => {
-        pw.wrap($row)
-          .find("td")
-          .eq(5)
-          .invoke("text")
-          .then(($status) => {
-            expect($status.toLowerCase()).to.include(status.name);
-            pw.wrap($row)
-              .find("td")
-              .eq(5)
-              .find("p")
-              .should("have.css", "color", status.color);
-          });
-      });
-    });
+    for (const item of status) {
+      await page.locator(searchInput).clear();
+      await page.locator(searchInput).fill(item.name);
+      await waitForSearchResults(page);
+
+      const rows = page.locator("tbody > tr");
+      const count = await rows.count();
+      for (let rowIndex = 0; rowIndex < count; rowIndex++) {
+        const row = rows.nth(rowIndex);
+        const statusText = (
+          await row.locator("td").nth(5).innerText()
+        ).toLowerCase();
+        expect(statusText).toContain(item.name);
+        await expect(row.locator("td").nth(5).locator("p")).toHaveCSS(
+          "color",
+          item.color
+        );
+      }
+    }
   });
 });

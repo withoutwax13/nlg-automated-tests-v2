@@ -1,28 +1,28 @@
-import { test, expect } from '../../support/pwtest';
-import selector from '../../fixtures/selector.json';
+import { expect, test, type Page } from "@playwright/test";
+import selector from "../../fixtures/selector.json";
+import { login, waitForApiResponse } from "../../utils/Login";
 
-const checkUnreadNotification = () => {
-  pw.intercept(
-    "GET",
-    "https://**.amazonaws.com/Notifications?notificationStatus=undefined"
-  ).as("municipalNotification");
-  pw.intercept(
-    "GET",
-    "https://**.amazonaws.com/Notifications?notificationStatus=UNREAD"
-  ).as("municipalUnreadNotification");
+const checkUnreadNotification = async ({ page }: { page: Page }) => {
+  await login(page, { accountType: "municipal" });
 
-  pw.login({ accountType: "municipal" });
-  pw.get(selector.notificationIcon).should('exist');
-  pw.get(selector.notificationIcon).click();
+  const notificationResponse = waitForApiResponse(page, {
+    method: "GET",
+    urlPart: "/Notifications?notificationStatus=undefined",
+  });
+  await expect(page.locator(selector.notificationIcon)).toBeVisible();
+  await page.locator(selector.notificationIcon).click();
+  await notificationResponse;
+  await expect(page).toHaveURL(/\/NotificationsApp\/NotificationsList/);
 
-  pw.wait("@municipalNotification").its("response.statusCode").should("eq", 200);
-  pw.url().should('contain', "/NotificationsApp/NotificationsList");
-
-  //Click the Switch for unread notifications only
-  pw.get(selector.switchUnreadNotif).should('exist').click()
-  //Verify the xhr that it shows the unread notifs
-  pw.wait("@municipalUnreadNotification").its("response.statusCode").should("eq", 200);
+  const unreadNotificationResponse = waitForApiResponse(page, {
+    method: "GET",
+    urlPart: "/Notifications?notificationStatus=UNREAD",
+  });
+  await expect(page.locator(selector.switchUnreadNotif)).toBeVisible();
+  await page.locator(selector.switchUnreadNotif).click();
+  await unreadNotificationResponse;
 };
+
 
 test.describe("As a municipal, I should be able to view unread notifications.", () => {
   test("Initiating test", checkUnreadNotification);

@@ -1,34 +1,37 @@
+import { currentPage, listItem, waitForLoading } from "../../support/runtime";
+
 class InviteUserModal {
+  private modal() {
+    return currentPage().locator(".k-dialog").first();
+  }
+
   private elements() {
     return {
-      modal: () => pw.get(".k-dialog"),
-      title: () => this.getElement().modal().find(".k-dialog-title"),
-      closeModalButton: () =>
-        this.getElement().modal().find('button[aria-label="Close"]'),
-      modalContent: () => this.getElement().modal().find(".k-dialog-content"),
-      cancelButton: () =>
-        this.getElement().modal().find("button").contains("Cancel"),
-      inviteButton: () =>
-        this.getElement().modal().find("button").contains("Invite"),
+      modal: () => this.modal(),
+      title: () => this.modal().locator(".k-dialog-title").first(),
+      closeModalButton: () => this.modal().locator('button[aria-label="Close"]').first(),
+      modalContent: () => this.modal().locator(".k-dialog-content").first(),
+      cancelButton: () => this.modal().locator("button").filter({ hasText: "Cancel" }).first(),
+      inviteButton: () => this.modal().locator("button").filter({ hasText: "Invite" }).first(),
       userTypeRadioButton: (userGroup: string) =>
-        this.getElement().modal().find(".k-radio-item").contains(userGroup),
-      emailInput: () => this.getElement().modal().find("input[id='Email']"),
+        this.modal().locator(".k-radio-item").filter({ hasText: userGroup }).first(),
+      emailInput: () => this.modal().locator("input#Email").first(),
       subscriptionTypeDropdown: () =>
-        this.getElement()
-          .modal()
-          .find("label")
-          .contains("Select subscription type")
-          .parent()
-          .next()
-          .find(".k-dropdownlist"),
+        this.modal()
+          .locator("label")
+          .filter({ hasText: "Select subscription type" })
+          .first()
+          .locator("xpath=../following-sibling::*[1]")
+          .locator(".k-dropdownlist")
+          .first(),
       municipalityDropdown: () =>
-        this.getElement()
-          .modal()
-          .find("label")
-          .contains("Select Municipality")
-          .parent()
-          .next()
-          .find(".k-dropdownlist"),
+        this.modal()
+          .locator("label")
+          .filter({ hasText: "Select Municipality" })
+          .first()
+          .locator("xpath=../following-sibling::*[1]")
+          .locator(".k-dropdownlist")
+          .first(),
     };
   }
 
@@ -36,55 +39,55 @@ class InviteUserModal {
     return this.elements();
   }
 
-  selectSubscriptionType(subscriptionType: string) {
-    this.getElement().subscriptionTypeDropdown().click();
-    pw.get(".k-list-item").contains(subscriptionType).click();
+  async selectSubscriptionType(subscriptionType: string) {
+    await this.getElement().subscriptionTypeDropdown().click();
+    await listItem(subscriptionType).click();
   }
 
-  selectMunicipality(municipality: string) {
-    this.getElement().municipalityDropdown().click();
-    pw.get(".k-list-item").contains(municipality).click();
+  async selectMunicipality(municipality: string) {
+    await this.getElement().municipalityDropdown().click();
+    await listItem(municipality).click();
   }
 
-  clickCloseModalButton() {
-    this.getElement().closeModalButton().click();
+  async clickCloseModalButton() {
+    await this.getElement().closeModalButton().click();
   }
 
-  clickCancelButton() {
-    this.getElement().cancelButton().click();
+  async clickCancelButton() {
+    await this.getElement().cancelButton().click();
   }
 
-  clickInviteButton() {
-    this.getElement().inviteButton().click();
+  async clickInviteButton() {
+    await this.getElement().inviteButton().click();
   }
 
-  checkAGSUserTypeRadioButton() {
-    this.getElement().userTypeRadioButton("AGS User").click();
+  async checkAGSUserTypeRadioButton() {
+    await this.getElement().userTypeRadioButton("AGS User").click();
   }
 
-  checkMunicipalUserTypeRadioButton() {
-    this.getElement().userTypeRadioButton("Municipal User").click();
+  async checkMunicipalUserTypeRadioButton() {
+    await this.getElement().userTypeRadioButton("Municipal User").click();
   }
 
-  checkTaxpayerUserTypeRadioButton() {
-    this.getElement().userTypeRadioButton("Taxpayer User").click();
+  async checkTaxpayerUserTypeRadioButton() {
+    await this.getElement().userTypeRadioButton("Taxpayer User").click();
   }
 
-  checkSuperUserTypeRadioButton() {
-    this.getElement().userTypeRadioButton("Super User").click();
+  async checkSuperUserTypeRadioButton() {
+    await this.getElement().userTypeRadioButton("Super User").click();
   }
 
-  checkAuditAdminUserTypeRadioButton() {
-    this.getElement().userTypeRadioButton("Audit Admin User").click();
+  async checkAuditAdminUserTypeRadioButton() {
+    await this.getElement().userTypeRadioButton("Audit Admin User").click();
   }
 
-  checkCaseManagementUserTypeRadioButton() {
-    this.getElement().userTypeRadioButton("Case Management").click();
+  async checkCaseManagementUserTypeRadioButton() {
+    await this.getElement().userTypeRadioButton("Case Management").click();
   }
 
-  typeEmail(email: string) {
-    this.getElement().emailInput().type(email);
-    pw.wait(3000); // Wait for the email input to be processed
+  async typeEmail(email: string) {
+    await this.getElement().emailInput().fill(email);
+    await waitForLoading(3);
   }
 }
 

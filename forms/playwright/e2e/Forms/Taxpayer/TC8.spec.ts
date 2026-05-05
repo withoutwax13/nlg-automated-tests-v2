@@ -1,10 +1,11 @@
-import { test, expect } from '../../../support/pwtest';
+import { expect, test } from "@playwright/test";
+import ApplicationConfirmation from "../../../objects/ApplicationConfirmation";
+import Filing from "../../../objects/Filing";
+import FilingGrid from "../../../objects/FilingGrid";
 import Form from "../../../objects/Form";
 import FormPreview from "../../../objects/FormPreview";
 import Payment from "../../../objects/Payment";
-import Filing from "../../../objects/Filing";
-import FilingGrid from "../../../objects/FilingGrid";
-import ApplicationConfirmation from "../../../objects/ApplicationConfirmation";
+import { initTestRuntime, login, logout } from "../../../support/runtime";
 
 const form = new Form();
 const formPreview = new FormPreview();
@@ -16,59 +17,56 @@ const agsFilingGrid = new FilingGrid({
   municipalitySelection: "City of Arrakis",
 });
 
-const deleteMultipleFiling = (
+const deleteMultipleFiling = async (
   count: number,
   filterParams: [string, string, string?, string?],
   filingParams: [string, string]
 ) => {
-  agsFilingGrid.clickClearAllFiltersButton();
-  agsFilingGrid.filterColumn(...filterParams);
-  agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
+  await agsFilingGrid.clickClearAllFiltersButton();
+  await agsFilingGrid.filterColumn(...filterParams);
+  await agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
   if (count > 1) {
-    deleteMultipleFiling(count - 1, filterParams, filingParams);
+    await deleteMultipleFiling(count - 1, filterParams, filingParams);
   }
 };
 
 test.describe("As a taxpayer, I should not be able to submit to a closed business when submitting a form.", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags", accountIndex: 7 });
-    agsFilingGrid.init();
-    agsFilingGrid.filterColumn(
+  test("Initiating test", async ({ page }, testInfo) => {
+    await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
+    await login({ accountType: "ags", accountIndex: 7 });
+    await agsFilingGrid.init();
+    await agsFilingGrid.filterColumn(
       "Location DBA",
       "Arrakis Sand Company 34855",
       "text",
       "Contains"
     );
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Form Name",
       "Food and Beverage",
       "multi-select"
     );
-    agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    pw.get("@rowsLength").then((rowsLength) => {
-      if (Number(rowsLength) > 0) {
-        deleteMultipleFiling(
-          Number(rowsLength),
-          ["Form Name", "Food and Beverage", "multi-select"],
-          ["Location DBA", "Arrakis Sand Company 34855"]
-        );
-      }
-    });
-    pw.logout();
+    const rowsLength = await agsFilingGrid.getElement().rows().count();
+    if (rowsLength > 0) {
+      await deleteMultipleFiling(
+        rowsLength,
+        ["Form Name", "Food and Beverage", "multi-select"],
+        ["Location DBA", "Arrakis Sand Company 34855"]
+      );
+    }
+    await logout();
 
-    pw.login({ accountType: "taxpayer", accountIndex: 5, notFirstLogin: true });
-    filing.goToSubmitFormsTab();
-    filing.selectGovernment("City of Arrakis");
-    filing.selectForm("Food and Beverage");
-    filing.getElements().businessSelectionDropdown().click();
-    filing
+    await login({ accountType: "taxpayer", accountIndex: 5, notFirstLogin: true });
+    await filing.goToSubmitFormsTab();
+    await filing.selectGovernment("City of Arrakis");
+    await filing.selectForm("Food and Beverage");
+    await filing.getElements().businessSelectionDropdown().click();
+    await filing
       .getElements()
       .businessSelectionDropdown()
-      .type("Arrakis Sand Company 34855");
-    filing
-      .getElements()
-      .anyList()
-      .contains("Arrakis Sand Company 34855")
-      .should("not.exist");
+      .fill("Arrakis Sand Company 34855");
+    await expect(
+      filing.getElements().anyList().filter({ hasText: "Arrakis Sand Company 34855" })
+    ).toHaveCount(0);
   });
 });

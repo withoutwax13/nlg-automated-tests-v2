@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
 
 const agsBusinessGrid = new BusinessGrid({
@@ -6,51 +6,30 @@ const agsBusinessGrid = new BusinessGrid({
   municipalitySelection: "City of Arrakis",
 });
 
-const cleanTestData = (businessName: string, requiredForm: string) => {
-  agsBusinessGrid.init();
-  agsBusinessGrid.clickClearAllFiltersButton();
-  agsBusinessGrid.checkEnabledRequiredForms(
-    businessName,
-    "requiredFormsBeforeCleaning"
-  );
-  pw.get("@requiredFormsBeforeCleaning").then((requiredFormsBeforeCleaning) => {
-    if(!requiredFormsBeforeCleaning.includes(requiredForm)) {
-      agsBusinessGrid.clickClearAllFiltersButton();
-      agsBusinessGrid.addRequiredForms(businessName, [requiredForm]);
-    }
-  });
+const cleanTestData = async (businessName: string, requiredForm: string) => {
+  await agsBusinessGrid.init();
+  await agsBusinessGrid.clickClearAllFiltersButton();
+  const requiredFormsBeforeCleaning = await agsBusinessGrid.checkEnabledRequiredForms(businessName);
+  if (!requiredFormsBeforeCleaning.includes(requiredForm)) {
+    await agsBusinessGrid.clickClearAllFiltersButton();
+    await agsBusinessGrid.addRequiredForms(businessName, [requiredForm]);
+  }
 };
 
 test.describe("As an AGS user, I should be able to remove required forms from the grid", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags", accountIndex: 3 });
-    cleanTestData("Arrakis Spice Company 17829", "Food and Beverage Tax Return (Monthly)");
-    agsBusinessGrid.clickClearAllFiltersButton();
-    // check the enabled required forms of a business
-    agsBusinessGrid.checkEnabledRequiredForms(
-      "Arrakis Spice Company 17829",
-      "beforeRemovingRequiredForms"
-    );
-    pw.get("@beforeRemovingRequiredForms").then((beforeRemovingRequiredForms) => {
-      expect(beforeRemovingRequiredForms).to.be.include(
-        "Food and Beverage Tax Return (Monthly)"
-      );
-    });
-    agsBusinessGrid.clickClearAllFiltersButton();
-    agsBusinessGrid.removeRequiredForms("Arrakis Spice Company 17829", [
+  test("Initiating test", async () => {
+    await login({ accountType: "ags", accountIndex: 3 });
+    await cleanTestData("Arrakis Spice Company 17829", "Food and Beverage Tax Return (Monthly)");
+    await agsBusinessGrid.clickClearAllFiltersButton();
+    const beforeRemovingRequiredForms = await agsBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");
+    expect(beforeRemovingRequiredForms).toContain("Food and Beverage Tax Return (Monthly)");
+    await agsBusinessGrid.clickClearAllFiltersButton();
+    await agsBusinessGrid.removeRequiredForms("Arrakis Spice Company 17829", [
       "Food and Beverage Tax Return (Monthly)",
     ]);
-    agsBusinessGrid.getElement().toastComponent().should("exist");
-    agsBusinessGrid.clickClearAllFiltersButton();
-    // re-check the enabled required forms of a business
-    agsBusinessGrid.checkEnabledRequiredForms(
-      "Arrakis Spice Company 17829",
-      "afterRemovingRequiredForms"
-    );
-    pw.get("@afterRemovingRequiredForms").then((afterRemovingRequiredForms) => {
-      expect(afterRemovingRequiredForms).to.not.be.include(
-        "Food and Beverage Tax Return (Monthly)"
-      );
-    });
+    await expect(agsBusinessGrid.getElement().toastComponent()).toBeVisible();
+    await agsBusinessGrid.clickClearAllFiltersButton();
+    const afterRemovingRequiredForms = await agsBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");
+    expect(afterRemovingRequiredForms).not.toContain("Food and Beverage Tax Return (Monthly)");
   });
 });

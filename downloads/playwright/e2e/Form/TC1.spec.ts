@@ -1,29 +1,37 @@
-import { test, expect } from '../../support/pwtest';
+import { expect, test } from "@playwright/test";
+import path from "path";
 import FormGrid from "../../objects/FormGrid";
-import { deleteDownloadsFolder } from "../../utils/Files";
+import {
+  deleteDownloadsFolder,
+  ensureDownloadsFolder,
+  getDownloadsFolder,
+} from "../../utils/Files";
+import { login, readXlsx } from "../../support/native-helpers";
 
 test.describe("As municipal user, exported file should match the filtered grid's row items", () => {
-  test("Initiate test", () => {
-    const formGrid = new FormGrid({ userType: "municipal" });
-    pw.login({ accountType: "municipal" });
-    formGrid.init();
-    formGrid.filterColumn("Form Title", "Annual");
-    formGrid.getTotalItems("rowLength");
-    formGrid.clickExportButton();
+  test("Initiate test", async ({ page }) => {
+    const formGrid = new FormGrid(page, { userType: "municipal" });
+    await login(page, { accountType: "municipal" });
+    await formGrid.init();
+    await formGrid.filterColumn("Form Title", "Annual");
+    const rowLength = await formGrid.getTotalItems();
+
+    ensureDownloadsFolder();
+    const downloadPromise = page.waitForEvent("download");
+    await formGrid.clickExportButton();
+    const download = await downloadPromise;
 
     const today = new Date();
     const month = today.toLocaleString("default", { month: "short" });
     const day = String(today.getDate()).padStart(2, "0");
     const year = today.getFullYear();
     const fileName = `Localgov-Forms-Export-${month}-${day}-${year}.xlsx`;
-    const downloadedFilePath = `playwright/downloads/${fileName}`;
+    const downloadedFilePath = path.join(getDownloadsFolder(), fileName);
 
-    pw.readXlsx(downloadedFilePath).then((excelData) => {
-      // Perform assertions on excelData
-      pw.get("@rowLength").then((rowLength) => {
-        expect(excelData.length).to.equal(rowLength);
-      });
-    });
+    await download.saveAs(downloadedFilePath);
+
+    const excelData = readXlsx(downloadedFilePath);
+    expect(excelData.length).toBe(rowLength);
 
     deleteDownloadsFolder();
   });

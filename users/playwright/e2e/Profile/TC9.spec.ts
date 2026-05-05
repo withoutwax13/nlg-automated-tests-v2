@@ -1,21 +1,22 @@
-import { test, expect } from '../../support/pwtest';
+import { expect, test } from "@playwright/test";
 import Profile from "../../objects/Profile";
+import { bindRuntime, getValidCredentials, login, logout } from "../../support/runtime";
 
 const profile = new Profile();
-test.describe("As a taxpayer user, I should be able to reset my password.", () => {
-  test("Initiating test", () => {
-    const accountPassword =
-      PW.env("validCredentials").taxpayer[4].password;
-    pw.login({ accountType: "taxpayer", accountIndex: 4 });
-    profile.init();
-    profile.clickResetPassword();
-    profile.typeOldPassword(accountPassword);
-    profile.typeNewPassword(accountPassword);
-    profile.typeConfirmPassword(accountPassword);
-    profile.clickUpdatePasswordButton();
-    profile.getElement().toastComponent().should("exist");
 
-    pw.logout();
-    pw.login({ accountType: "taxpayer", accountIndex: 4, notFirstLogin: true });
+test.describe("As a taxpayer user, I should be able to reset my password.", () => {
+  test("Initiating test", async ({ page, request }) => {
+    bindRuntime(page, request);
+    const accountPassword = getValidCredentials().taxpayer[4].password;
+    await login({ accountType: "taxpayer", accountIndex: 4 });
+    await profile.init();
+    await profile.clickResetPassword();
+    await profile.typeOldPassword(accountPassword);
+    await profile.typeNewPassword(accountPassword);
+    await profile.typeConfirmPassword(accountPassword);
+    await profile.clickUpdatePasswordButton();
+    await expect(profile.getElement().toastComponent()).toBeVisible();
+    await logout();
+    await login({ accountType: "taxpayer", accountIndex: 4, notFirstLogin: true });
   });
 });

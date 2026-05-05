@@ -1,4 +1,6 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect } from '../../test';
+import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
+import { legacy } from '../../utils/legacy';
 import Filing from "../../objects/Filing";
 import FilingGrid from "../../objects/FilingGrid";
 import Form from "../../objects/Form";
@@ -13,36 +15,36 @@ const agsFilingGrid = new FilingGrid({
   municipalitySelection: "City of Arrakis",
 });
 
-const deleteMultipleFiling = (
+const deleteMultipleFiling = async (
   count: number,
   filterParams: [string, string, string?, string?],
   filingParams: [string, string]
 ) => {
-  agsFilingGrid.clickClearAllFiltersButton();
-  agsFilingGrid.filterColumn(...filterParams);
-  agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
+  await agsFilingGrid.clickClearAllFiltersButton();
+  await agsFilingGrid.filterColumn(...filterParams);
+  await agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
   if (count > 1) {
-    deleteMultipleFiling(count - 1, filterParams, filingParams);
+    await deleteMultipleFiling(count - 1, filterParams, filingParams);
   }
 };
 
 test.describe("As a taxpayer, I should be able to resume a draft filing.", () => {
-  test("Initiate test", () => {
-    pw.login({ accountType: "ags", accountIndex: 5 });
+  test("Initiate test", async ({ page }) => {
+    await login({ accountType: "ags", accountIndex: 5 });
     agsFilingGrid.init();
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Location DBA",
       "Arrakis Spice Company 40337",
       "text",
       "Contains"
     );
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Form Name",
       "Food and Beverage",
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    pw.get("@rowsLength").then((rowsLength) => {
+    legacy.get("").then(async (rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -51,9 +53,9 @@ test.describe("As a taxpayer, I should be able to resume a draft filing.", () =>
         );
       }
     });
-    pw.logout();
+    await logout();
 
-    pw.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
+    await login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -68,6 +70,6 @@ test.describe("As a taxpayer, I should be able to resume a draft filing.", () =>
       "multi-select"
     );
     taxpayerFilingGrid.toggleActionButton("Resume", "Location DBA", "Arrakis Spice Company 40337");
-    pw.url().should("include", "/filingApp/filings");
+    legacy.url().assert("include", "/filingApp/filings");
   });
 });

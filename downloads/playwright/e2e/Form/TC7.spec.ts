@@ -1,34 +1,40 @@
-import { test, expect } from '../../support/pwtest';
+import { expect, test } from "@playwright/test";
+import path from "path";
 import FormGrid from "../../objects/FormGrid";
-import { deleteDownloadsFolder } from "../../utils/Files";
+import {
+  deleteDownloadsFolder,
+  ensureDownloadsFolder,
+  getDownloadsFolder,
+} from "../../utils/Files";
+import { login, readXlsx } from "../../support/native-helpers";
 
 test.describe("As municipal user, exported file's filing frequency data should match the grid", () => {
-  test("Initiate test", () => {
+  test("Initiate test", async ({ page }) => {
     const columnName = "Filing Frequency";
-    const columnDataAlias = "filingFrequencyList";
-    const formGrid = new FormGrid({ userType: "municipal" });
-    pw.login({ accountType: "municipal" });
-    formGrid.init();
-    formGrid.getArrayDataOfColumn(columnName, columnDataAlias);
-    formGrid.clickExportButton();
+    const formGrid = new FormGrid(page, { userType: "municipal" });
+    await login(page, { accountType: "municipal" });
+    await formGrid.init();
+    const columnValues = await formGrid.getArrayDataOfColumn(columnName);
+
+    ensureDownloadsFolder();
+    const downloadPromise = page.waitForEvent("download");
+    await formGrid.clickExportButton();
+    const download = await downloadPromise;
 
     const today = new Date();
     const month = today.toLocaleString("default", { month: "short" });
     const day = String(today.getDate()).padStart(2, "0");
     const year = today.getFullYear();
     const fileName = `Localgov-Forms-Export-${month}-${day}-${year}.xlsx`;
-    const downloadedFilePath = `playwright/downloads/${fileName}`;
+    const downloadedFilePath = path.join(getDownloadsFolder(), fileName);
 
-    pw.readXlsx(downloadedFilePath).then((excelData) => {
-      pw.get(`@${columnDataAlias}`).then((columnDataAlias) => {
-        columnDataAlias.forEach((aliasStringItem) => {
-          const found = excelData.some(
-            (row) => row[columnName] === aliasStringItem
-          );
-          expect(found).to.be.true;
-        });
-      });
-    });
+    await download.saveAs(downloadedFilePath);
+
+    const excelData = readXlsx(downloadedFilePath);
+    for (const columnValue of columnValues) {
+      const found = excelData.some((row) => row[columnName] === columnValue);
+      expect(found).toBe(true);
+    }
 
     deleteDownloadsFolder();
   });

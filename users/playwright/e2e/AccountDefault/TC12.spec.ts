@@ -1,28 +1,32 @@
-import { test, expect } from '../../support/pwtest';
-import Profile from "../../objects/Profile";
-import { TAXPAYER_DEFAULT_HOME_PAGE as pageOptions } from "../../objects/Profile";
+import { expect, test } from "@playwright/test";
+import Profile, { TAXPAYER_DEFAULT_HOME_PAGE as pageOptions } from "../../objects/Profile";
+import { bindRuntime, login, logout } from "../../support/runtime";
 
 const profile = new Profile();
 
 test.describe("As a taxpayer user, I should be able to set my default home page", () => {
-  test("Initiating test", () => {
-    pw.login({
+  test("Initiating test", async ({ page, request }) => {
+    bindRuntime(page, request);
+    await login({
       accountType: "taxpayer",
       accountIndex: 10,
-      customRedirectionAfterLoginAssertion: () =>
-        pw.url().should("contain", "/"),
+      customRedirectionAfterLoginAssertion: async () => {
+        await expect(page).toHaveURL(/\/$/);
+      },
     });
-    Object.keys(pageOptions).forEach((page) => {
-      profile.init();
-      profile.selectDefaultHomePage(page);
-      pw.logout();
-      pw.login({
+
+    for (const pageName of Object.keys(pageOptions)) {
+      await profile.init();
+      await profile.selectDefaultHomePage(pageName);
+      await logout();
+      await login({
         accountType: "taxpayer",
         accountIndex: 10,
         notFirstLogin: true,
-        customRedirectionAfterLoginAssertion: () =>
-          pw.url().should("contain", pageOptions[page]),
+        customRedirectionAfterLoginAssertion: async () => {
+          await expect(page).toHaveURL(new RegExp(`${pageOptions[pageName].replace(/\//g, "\\/")}`));
+        },
       });
-    });
+    }
   });
 });

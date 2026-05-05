@@ -1,32 +1,31 @@
-const interceptHubspotChat = () => {
-  return cy
-    .intercept("https://**.hubspot.com/livechat-public/**")
-    .as("hubspotChatAPI");
-};
-const interceptLeadFlowConfig = () => {
-  return cy
-    .intercept("https://**.hubspot.com/lead-flows-config/**")
-    .as("leadFlowConfigAPI");
-};
-const interceptAwsCognito = () => {
-  return cy
-    .intercept("POST", "https://cognito-idp.**.amazonaws.com/")
-    .as("cognitoAwsAPI");
-};
+import type { Page, Response } from "@playwright/test";
+import { login as nativeLogin } from "../../support/native-helpers";
 
-const waitForHubspotChat = () => pw.wait("@hubspotChatAPI");
-const waitForLeadFlowConfig = () => pw.wait("@leadFlowConfigAPI");
-const waitForAwsCognito = (isMultipleWait = true) => {
-  return isMultipleWait
-    ? pw.wait(["@cognitoAwsAPI", "@cognitoAwsAPI"])
-    : pw.wait("@cognitoAwsAPI");
-};
+const isHubspotChat = (response: Response) =>
+  response.request().method() === "GET" &&
+  response.url().includes("hubspot.com/livechat-public/");
+
+const isLeadFlowConfig = (response: Response) =>
+  response.request().method() === "GET" &&
+  response.url().includes("hubspot.com/lead-flows-config/");
+
+const isAwsCognito = (response: Response) =>
+  response.request().method() === "POST" &&
+  response.url().includes("cognito-idp.") &&
+  response.url().includes(".amazonaws.com/");
+
+const interceptHubspotChat = (page: Page) =>
+  page.waitForResponse((response) => isHubspotChat(response));
+
+const interceptLeadFlowConfig = (page: Page) =>
+  page.waitForResponse((response) => isLeadFlowConfig(response));
+
+const interceptAwsCognito = (page: Page) =>
+  page.waitForResponse((response) => isAwsCognito(response));
 
 export default {
   interceptAwsCognito,
   interceptHubspotChat,
   interceptLeadFlowConfig,
-  waitForAwsCognito,
-  waitForHubspotChat,
-  waitForLeadFlowConfig,
+  login: nativeLogin,
 };

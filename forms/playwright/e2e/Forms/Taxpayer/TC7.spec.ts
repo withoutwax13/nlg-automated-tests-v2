@@ -1,11 +1,12 @@
-import { test, expect } from '../../../support/pwtest';
+import { expect, test } from "@playwright/test";
+import ApplicationConfirmation from "../../../objects/ApplicationConfirmation";
+import Business from "../../../objects/Business";
+import Filing from "../../../objects/Filing";
+import FilingGrid from "../../../objects/FilingGrid";
 import Form from "../../../objects/Form";
 import FormPreview from "../../../objects/FormPreview";
 import Payment from "../../../objects/Payment";
-import Filing from "../../../objects/Filing";
-import FilingGrid from "../../../objects/FilingGrid";
-import ApplicationConfirmation from "../../../objects/ApplicationConfirmation";
-import Business from "../../../objects/Business";
+import { initTestRuntime, login, logout, textOf, waitForLoading } from "../../../support/runtime";
 
 const form = new Form();
 const formPreview = new FormPreview();
@@ -18,90 +19,83 @@ const agsFilingGrid = new FilingGrid({
 });
 const business = new Business();
 
-const deleteMultipleFiling = (
+const deleteMultipleFiling = async (
   count: number,
   filterParams: [string, string, string?, string?],
   filingParams: [string, string]
 ) => {
-  agsFilingGrid.clickClearAllFiltersButton();
-  agsFilingGrid.filterColumn(...filterParams);
-  agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
+  await agsFilingGrid.clickClearAllFiltersButton();
+  await agsFilingGrid.filterColumn(...filterParams);
+  await agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
   if (count > 1) {
-    deleteMultipleFiling(count - 1, filterParams, filingParams);
+    await deleteMultipleFiling(count - 1, filterParams, filingParams);
   }
 };
 
-const deleteBusiness = (businessDba: string) => {
-  business.init();
-  business.filterColumn("DBA", businessDba, "text", "Contains");
-  pw.waitForLoading();
-  business.getElement().rows().its("length").as("businessRowsLength");
-  business.clickClearAllFiltersButton();
-  pw.get("@businessRowsLength").then((businessRowsLength) => {
-    pw.log("businessRowsLength: " + businessRowsLength);
-    if (Number(businessRowsLength) > 0) {
-      business.deleteBusiness(businessDba);
-    }
-  });
+const deleteBusiness = async (businessDba: string) => {
+  await business.init();
+  await business.filterColumn("DBA", businessDba, "text", "Contains");
+  await waitForLoading();
+  const businessRowsLength = await business.getElement().rows().count();
+  await business.clickClearAllFiltersButton();
+  if (businessRowsLength > 0) {
+    await business.deleteBusiness(businessDba);
+  }
 };
 
 test.describe("As a taxpayer, I should be able to submit a tax form for a non-listed business.", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags", accountIndex: 9 });
-    agsFilingGrid.init();
-    agsFilingGrid.filterColumn(
+  test("Initiating test", async ({ page }, testInfo) => {
+    await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
+    await login({ accountType: "ags", accountIndex: 9 });
+    await agsFilingGrid.init();
+    await agsFilingGrid.filterColumn(
       "Location DBA",
       "Test DBA #4884",
       "text",
       "Contains"
     );
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Form Name",
       "Food and Beverage",
       "multi-select"
     );
-    agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    pw.get("@rowsLength").then((rowsLength) => {
-      if (Number(rowsLength) > 0) {
-        deleteMultipleFiling(
-          Number(rowsLength),
-          ["Form Name", "Food and Beverage", "multi-select"],
-          ["Location DBA", "Test DBA #4884"]
-        );
-      }
-    });
-    pw.logout();
+    const rowsLength = await agsFilingGrid.getElement().rows().count();
+    if (rowsLength > 0) {
+      await deleteMultipleFiling(
+        rowsLength,
+        ["Form Name", "Food and Beverage", "multi-select"],
+        ["Location DBA", "Test DBA #4884"]
+      );
+    }
+    await logout();
 
-    pw.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
-    filing.goToSubmitFormsTab();
-    filing.selectGovernment("City of Arrakis");
-    filing.selectForm("Food and Beverage");
-    filing.clickAddBusinessButton();
-    business.addBusinessOnAccount("Test DBA #4884");
+    await login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
+    await filing.goToSubmitFormsTab();
+    await filing.selectGovernment("City of Arrakis");
+    await filing.selectForm("Food and Beverage");
+    await filing.clickAddBusinessButton();
+    await business.addBusinessOnAccount("Test DBA #4884");
 
-    form.clickNextbutton();
-    form.enterBasicInformation();
-    form.clickNextbutton();
-    form.enterTaxInformation();
-    form.clickNextbutton();
-    form.enterPreparerInformation();
-    form.clickNextbutton();
-    formPreview.clickSubmitButton();
-    payment.clickSavedPaymentMethods();
-    payment.selectSavedPaymentMethod(0);
-    payment.clickTermsAndConditionsCheckbox();
-    payment.clickFinishAndPayButton();
-    applicationConfirmation
-      .getElement()
-      .referenceIdData()
-      .invoke("text")
-      .then((referenceId) => {
-        pw.wrap(referenceId).as("referenceId");
-      });
-    applicationConfirmation.clickCloseButton();
-    pw.logout();
+    await form.clickNextbutton();
+    await form.enterBasicInformation();
+    await form.clickNextbutton();
+    await form.enterTaxInformation();
+    await form.clickNextbutton();
+    await form.enterPreparerInformation();
+    await form.clickNextbutton();
+    await formPreview.clickSubmitButton();
+    await payment.clickSavedPaymentMethods();
+    await payment.selectSavedPaymentMethod(0);
+    await payment.clickTermsAndConditionsCheckbox();
+    await payment.clickFinishAndPayButton();
+    const referenceId = await textOf(
+      applicationConfirmation.getElement().referenceIdData()
+    );
+    expect(referenceId).not.toBe("");
+    await applicationConfirmation.clickCloseButton();
+    await logout();
 
-    pw.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
-    deleteBusiness("Test DBA #4884");
+    await login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
+    await deleteBusiness("Test DBA #4884");
   });
 });

@@ -1,52 +1,63 @@
-import { test, expect } from '../../support/pwtest';
+import { expect, test } from "@playwright/test";
 import InviteUserModal from "../../objects/InviteUserModal";
 import UserGrid from "../../objects/UserGrid";
+import { bindRuntime, fetchJson, getTestmail, login, normalizeWhitespace, waitForLoading } from "../../support/runtime";
+
+type TestmailResponse = {
+  emails: Array<{
+    from: string;
+    html: string;
+  }>;
+};
 
 test.describe("As a superuser, when I invited any user type in user service, the email address must receive an email with correct content", () => {
-  test("Initiating test for municipal user", () => {
+  test("Initiating test for municipal user", async ({ page, request }) => {
     const user = new UserGrid();
     const inviteUserModal = new InviteUserModal();
-    const testmailVars = PW.env("testmail");
+    bindRuntime(page, request);
+    const testmailVars = getTestmail();
     const randomTag = Math.floor(Math.random() * 1000000);
     const ENDPOINT = `${testmailVars.endpoint}?apikey=${testmailVars.apiKey}&namespace=${testmailVars.namespace}&tag=${randomTag}`;
 
-    pw.login({ accountType: "ags" });
-    user.init();
-    user.clickInviteUserButton();
-    inviteUserModal.typeEmail(
+    await login({ accountType: "ags" });
+    await user.init();
+    await user.clickInviteUserButton();
+    await inviteUserModal.typeEmail(
       `${testmailVars.namespace}.${randomTag}@${testmailVars.domain}`
     );
-    inviteUserModal.checkMunicipalUserTypeRadioButton();
-    inviteUserModal.selectSubscriptionType("Municipal user");
-    inviteUserModal.selectMunicipality("City of Arrakis");
-    inviteUserModal.clickInviteButton();
-    pw.wait(5000); // Wait for the email to be sent
-    pw.request("GET", `${ENDPOINT}&livequery=true`).then((response) => {
-      const email = response.body.emails[0];
-      console.log(email);
+    await inviteUserModal.checkMunicipalUserTypeRadioButton();
+    await inviteUserModal.selectSubscriptionType("Municipal user");
+    await inviteUserModal.selectMunicipality("City of Arrakis");
+    await inviteUserModal.clickInviteButton();
+    await waitForLoading();
+    await page.waitForTimeout(5000);
 
-      // Verify text content of the email
-      pw.wrap(email.from).should(
-        "equal",
-        "Localgov <no-reply@azavargovapps.com>"
-      );
+    const response = await fetchJson<TestmailResponse>(`${ENDPOINT}&livequery=true`);
+    const email = response.emails[0];
+    const actualText = normalizeWhitespace(
+      await page.evaluate((html) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        return doc.body.textContent || "";
+      }, email.html)
+    );
 
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(email.html, "text/html");
-      const actualText = doc.body.textContent?.trim();
-      pw.wrap(actualText).should(
-        "include",
-        "Welcome!\n          \n          \n          \n            You have been invited to Localgov. A new account is awaiting your activation. Click the link below to login\n            using the email and temporary password provided.\n          \n          \n          \n            \n              https://dev.azavargovapps.com/"
-      );
-      pw.wrap(actualText).should(
-        "include",
-        `Email: ${testmailVars.namespace}.${randomTag}@${testmailVars.domain}`
-      );
-      pw.wrap(actualText).should("include", "Temporary Password");
-      pw.wrap(actualText).should(
-        "include",
-        "Please Note: When you login for the first time using the credentials above, you will be required to create a\n            new password. Your temporary password will expire in 10 days from the date of this email.\n            If you are unable to log in and reset your password within those 10 days, please reach out to our support team to get a new temporary password.\n          \n          \n          \n            Thank you for using Localgov!\n          \n          \n          \n            Sincerely,\n          \n          \n          Localgov Service Team\n          \n          \n            If you encounter any issues or would like to ask any questions regarding Localgov, please send an email to\n            \n              service@localgov.org\n            \n            and we will respond within one business day.\n          \n        \n      \n                \n                \n                    \n                    \n                    \n                    © Copyright 2025. All Rights Reserved."
-      );
-    });
+    expect(email.from).toBe("Localgov <no-reply@azavargovapps.com>");
+    expect(actualText).toContain("Welcome! You have been invited to Localgov. A new account is awaiting your activation.");
+    expect(actualText).toContain("https://dev.azavargovapps.com/");
+    expect(actualText).toContain(
+      `Email: ${testmailVars.namespace}.${randomTag}@${testmailVars.domain}`
+    );
+    expect(actualText).toContain("Temporary Password");
+    expect(actualText).toContain(
+      "Please Note: When you login for the first time using the credentials above, you will be required to create a new password."
+    );
+    expect(actualText).toContain(
+      "Your temporary password will expire in 10 days from the date of this email."
+    );
+    expect(actualText).toContain("Thank you for using Localgov!");
+    expect(actualText).toContain("Sincerely, Localgov Service Team");
+    expect(actualText).toContain("service@localgov.org");
+    expect(actualText).toContain("Copyright 2025. All Rights Reserved.");
   });
 });

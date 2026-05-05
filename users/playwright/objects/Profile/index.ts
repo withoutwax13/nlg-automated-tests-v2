@@ -1,3 +1,5 @@
+import { currentPage, labelValue, listItem, waitForLoading } from "../../support/runtime";
+
 export const TAXPAYER_DEFAULT_HOME_PAGE = {
   "Submit Forms": "/formsApp/ListMunicipalityForms",
   Filings: "/filingApp/filingList",
@@ -9,90 +11,63 @@ export const TAXPAYER_DEFAULT_HOME_PAGE = {
 
 export const MUNICIPAL_DEFAULT_HOME_PAGE = {
   "Filing List": "/filingApp/filingList",
-  "Forms": "/formsApp",
-  "Businesses": "/BusinessesApp/BusinessesList",
-  "Delinquencies": "/reports/delinquency",
-  "Transactions": "/reports/transactionsReport",
-  "Settlements": "/reports/settlementReport",
+  Forms: "/formsApp",
+  Businesses: "/BusinessesApp/BusinessesList",
+  Delinquencies: "/reports/delinquency",
+  Transactions: "/reports/transactionsReport",
+  Settlements: "/reports/settlementReport",
 };
 
 class Profile {
   private elements() {
     return {
-      pageTitle: () => pw.get("h1"),
-      sectionTitle: () => pw.get("h2"),
-      firstNameInput: () => pw.get("input").eq(0),
-      lastNameInput: () => pw.get("input").eq(1),
-      emailInput: () => pw.get("input").eq(2),
+      pageTitle: () => currentPage().locator("h1").first(),
+      sectionTitle: () => currentPage().locator("h2"),
+      firstNameInput: () => currentPage().locator("input").nth(0),
+      lastNameInput: () => currentPage().locator("input").nth(1),
+      emailInput: () => currentPage().locator("input").nth(2),
       currentEmailAddressData: () =>
-        pw.get("label").contains("Current Email Address").next().find("b"),
+        currentPage().locator("label").filter({ hasText: "Current Email Address" }).first().locator("xpath=following-sibling::*[1]").locator("b").first(),
       mfaSwitch: () =>
-        cy
-          .get("label")
-          .contains("Multi-factor authentication (MFA)")
-          .parent()
-          .next()
-          .find("span[role='switch']"),
-      resetPasswordButton: () => pw.get("button").contains("Reset Password"),
-      oldPasswordInput: () => pw.get("#OldPassword"),
-      newPasswordInput: () => pw.get("#NewPassword"),
+        currentPage()
+          .locator("label")
+          .filter({ hasText: "Multi-factor authentication (MFA)" })
+          .first()
+          .locator("xpath=../following-sibling::*[1]")
+          .locator('span[role="switch"]')
+          .first(),
+      resetPasswordButton: () => currentPage().locator("button").filter({ hasText: "Reset Password" }).first(),
+      oldPasswordInput: () => currentPage().locator("#OldPassword").first(),
+      newPasswordInput: () => currentPage().locator("#NewPassword").first(),
       confirmPasswordInput: () =>
-        cy
-          .get("label")
-          .contains("Confirm The New Password")
-          .next()
-          .find("input"),
-      updatePasswordButton: () => pw.get("button").contains("Update"),
-      cancelUpdatePasswordButton: () => pw.get("button").contains("Cancel"),
+        currentPage()
+          .locator("label")
+          .filter({ hasText: "Confirm The New Password" })
+          .first()
+          .locator("xpath=following-sibling::*[1]")
+          .locator("input")
+          .first(),
+      updatePasswordButton: () => currentPage().locator("button").filter({ hasText: "Update" }).first(),
+      cancelUpdatePasswordButton: () => currentPage().locator("button").filter({ hasText: "Cancel" }).first(),
       savedBankAccountsAccordion: () =>
-        pw.get(".k-expander-header").contains("Saved Bank Accounts"),
+        currentPage().locator(".k-expander-header").filter({ hasText: "Saved Bank Accounts" }).first(),
       savedCreditDebitCardsAccordion: () =>
-        pw.get(".k-expander-header").contains("Saved Credit/Debit Cards"),
+        currentPage().locator(".k-expander-header").filter({ hasText: "Saved Credit/Debit Cards" }).first(),
       savedBankAccountItems: () =>
-        this.getElement()
-          .savedBankAccountsAccordion()
-          .parent()
-          .next()
-          .find(".k-expander-content > div"),
+        currentPage().locator(".k-expander-content > div").filter({ has: currentPage().locator("a").filter({ hasText: "Delete" }) }),
       savedCreditDebitCardItems: () =>
-        this.getElement()
-          .savedCreditDebitCardsAccordion()
-          .parent()
-          .next()
-          .find(".k-expander-content > div"),
-      savedBankAccountItem: (order: number) =>
-        this.getElement()
-          .savedBankAccountsAccordion()
-          .parent()
-          .next()
-          .find(".k-expander-content")
-          .find("div")
-          .eq(order),
-      savedCreditDebitCardItem: (order: number) =>
-        this.getElement()
-          .savedCreditDebitCardsAccordion()
-          .parent()
-          .next()
-          .find(".k-expander-content")
-          .find("div")
-          .eq(order),
+        currentPage().locator(".k-expander-content > div").filter({ has: currentPage().locator("a").filter({ hasText: "Delete" }) }),
+      savedBankAccountItem: (order: number) => currentPage().locator(".k-expander-content > div").nth(order),
+      savedCreditDebitCardItem: (order: number) => currentPage().locator(".k-expander-content > div").nth(order),
       deleteBankAccountItem: (order: number) =>
-        this.getElement()
-          .savedBankAccountItem(order)
-          .find("a")
-          .contains("Delete"),
+        currentPage().locator(".k-expander-content > div").nth(order).locator("a").filter({ hasText: "Delete" }).first(),
       deleteCreditDebitCardItem: (order: number) =>
-        this.getElement()
-          .savedCreditDebitCardItem(order)
-          .find("a")
-          .contains("Delete"),
-      defaultHomePageDropdown: () =>
-        pw.get("label").contains("Default Home Page").next(),
-      anyList: () => pw.get("li"),
-      saveChangesButton: () => pw.get("button").contains("Save Changes"),
-      saveDefaultHomePageButton: () => pw.get("button").contains("Save"),
-      defaultHomePageDropdownItems: () => pw.get(".k-list-item"),
-      toastComponent: () => pw.get(".Toastify"),
+        currentPage().locator(".k-expander-content > div").nth(order).locator("a").filter({ hasText: "Delete" }).first(),
+      defaultHomePageDropdown: () => labelValue("Default Home Page"),
+      saveChangesButton: () => currentPage().locator("button").filter({ hasText: "Save Changes" }).first(),
+      saveDefaultHomePageButton: () => currentPage().locator("button").filter({ hasText: /^Save$/ }).first(),
+      defaultHomePageDropdownItems: () => currentPage().locator(".k-list-item"),
+      toastComponent: () => currentPage().locator(".Toastify").first(),
     };
   }
 
@@ -100,88 +75,82 @@ class Profile {
     return this.elements();
   }
 
-  init() {
-    pw.visit("/profile");
-    pw.waitForLoading();
+  async init() {
+    await currentPage().goto("/profile");
+    await waitForLoading();
   }
 
-  deleteSavedPaymentMethod(type: "bank" | "card", order: number) {
+  async deleteSavedPaymentMethod(type: "bank" | "card", order: number) {
     if (type === "bank") {
-      this.getElement().deleteBankAccountItem(order).click();
+      await this.getElement().deleteBankAccountItem(order).click();
     } else {
-      this.getElement().deleteCreditDebitCardItem(order).click();
+      await this.getElement().deleteCreditDebitCardItem(order).click();
     }
-    pw.waitForLoading();
+    await waitForLoading();
   }
 
-  clickResetPassword() {
-    this.getElement().resetPasswordButton().click();
+  async clickResetPassword() {
+    await this.getElement().resetPasswordButton().click();
   }
 
-  typeOldPassword(value: string) {
-    this.getElement().oldPasswordInput().clear();
-    this.getElement().oldPasswordInput().type(value);
+  async typeOldPassword(value: string) {
+    await this.getElement().oldPasswordInput().fill(value);
   }
 
-  typeNewPassword(value: string) {
-    this.getElement().newPasswordInput().clear();
-    this.getElement().newPasswordInput().type(value);
+  async typeNewPassword(value: string) {
+    await this.getElement().newPasswordInput().fill(value);
   }
 
-  typeConfirmPassword(value: string) {
-    this.getElement().confirmPasswordInput().clear();
-    this.getElement().confirmPasswordInput().type(value);
+  async typeConfirmPassword(value: string) {
+    await this.getElement().confirmPasswordInput().fill(value);
   }
 
-  clickUpdatePasswordButton() {
-    this.getElement().updatePasswordButton().click();
+  async clickUpdatePasswordButton() {
+    await this.getElement().updatePasswordButton().click();
   }
 
-  clickCancelUpdatePasswordButton() {
-    this.getElement().cancelUpdatePasswordButton().click();
+  async clickCancelUpdatePasswordButton() {
+    await this.getElement().cancelUpdatePasswordButton().click();
   }
 
-  typeFirstName(value: string) {
-    this.getElement().firstNameInput().clear();
-    this.getElement().firstNameInput().type(value);
+  async typeFirstName(value: string) {
+    await this.getElement().firstNameInput().fill(value);
   }
 
-  typeLastName(value: string) {
-    this.getElement().lastNameInput().clear();
-    this.getElement().lastNameInput().type(value);
+  async typeLastName(value: string) {
+    await this.getElement().lastNameInput().fill(value);
   }
 
-  typeEmail(value: string) {
-    this.getElement().emailInput().clear();
-    this.getElement().emailInput().type(value);
+  async typeEmail(value: string) {
+    await this.getElement().emailInput().fill(value);
   }
 
-  toggleMFA() {
-    this.getElement().mfaSwitch().click();
+  async toggleMFA() {
+    await this.getElement().mfaSwitch().click();
   }
 
-  clickSavedBankAccountsAccordion() {
-    this.getElement().savedBankAccountsAccordion().click();
+  async clickSavedBankAccountsAccordion() {
+    await this.getElement().savedBankAccountsAccordion().click();
   }
 
-  clickSavedCreditDebitCardsAccordion() {
-    this.getElement().savedCreditDebitCardsAccordion().click();
+  async clickSavedCreditDebitCardsAccordion() {
+    await this.getElement().savedCreditDebitCardsAccordion().click();
   }
 
-  selectDefaultHomePage(value: string) {
-    this.getElement().defaultHomePageDropdown().click();
-    this.getElement().defaultHomePageDropdownItems().contains(value).click();
-    pw.waitForLoading();
-    pw.get("body").then(($body) => {
-      if ($body.find("button").text().includes("Save")) {
-        this.getElement().saveDefaultHomePageButton().click();
-      }
-    });
+  async selectDefaultHomePage(value: string) {
+    await this.getElement().defaultHomePageDropdown().click();
+    await listItem(value).click();
+    await waitForLoading();
+
+    const saveButton = this.getElement().saveDefaultHomePageButton();
+    if (await saveButton.isVisible().catch(() => false)) {
+      await saveButton.click();
+    }
   }
 
-  clickSaveChanges() {
-    this.getElement().saveChangesButton().click();
-    pw.waitForLoading();
+  async clickSaveChanges() {
+    await this.getElement().saveChangesButton().click();
+    await waitForLoading();
   }
 }
 

@@ -1,58 +1,69 @@
-import { test, expect } from '../../../support/pwtest';
-import FormGrid from "../../../objects/FormGrid";
+import { expect, test } from "@playwright/test";
 import Form from "../../../objects/Form";
+import FormGrid from "../../../objects/FormGrid";
+import {
+  currentPage,
+  initTestRuntime,
+  login,
+  waitForLoading,
+  wasStubCalled,
+  stubNewWindow,
+} from "../../../support/runtime";
 
 const municipalFormsGrid = new FormGrid({ userType: "municipal" });
 const previewForm = new Form();
 
-const stepperNameShouldBeCurrent = (stepperName) => {
-  previewForm
-    .getElement()
-    .getStepper(stepperName)
-    .invoke("attr", "aria-current")
-    .should("eq", "true");
+const expectStepToBeCurrent = async (stepperName: string) => {
+  await expect(previewForm.getElement().getStepper(stepperName)).toHaveAttribute(
+    "aria-current",
+    "true"
+  );
 };
 
 test.describe("As an muinicipal user, I want to be able to navigate the form pages without validation", () => {
-  test("Initiate test", () => {
-    pw.login({ accountType: "municipal", accountIndex: 2 });
-    municipalFormsGrid.init();
-    pw.stubNewWindow("previewFormWindow");
-    municipalFormsGrid.toggleActionButton(
+  test("Initiate test", async ({ page }, testInfo) => {
+    await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
+    await login({ accountType: "municipal", accountIndex: 2 });
+    await municipalFormsGrid.init();
+    await stubNewWindow("previewFormWindow");
+    await municipalFormsGrid.toggleActionButton(
       "filter",
       "Preview",
       "Form Title",
       "Food and Beverage Tax Return (Monthly)"
     );
-    pw.get("@previewFormWindow").should("be.called");
-    pw.url().should("include", "?preview=yes");
-    stepperNameShouldBeCurrent("Instructions");
-    previewForm.getElement().nextButton().should("be.enabled");
-    previewForm.clickNextbutton();
-    pw.waitForLoading();
-    previewForm.getElement().nextButton().should("be.disabled");
-    previewForm.clickSkipRequiredFieldsCheckbox();
-    previewForm.getElement().nextButton().should("be.enabled");
-    previewForm.getElement().overrideEnabledInfoText().should("be.visible");
-    previewForm
-      .getElement()
-      .overrideEnabledInfoText()
-      .should(
-        "contain.text",
-        "The required fields override is enabled. During this preview, the form will not behave the same as it would for business users."
-      );
-    stepperNameShouldBeCurrent("Basic Info");
-    previewForm.getElement().nextButton().should("be.enabled");
-    previewForm.clickNextbutton();
-    pw.waitForLoading();
-    stepperNameShouldBeCurrent("Tax Info");
-    previewForm.getElement().nextButton().should("be.enabled");
-    previewForm.clickNextbutton();
-    pw.waitForLoading();
-    stepperNameShouldBeCurrent("Preparer Info");
-    previewForm.getElement().nextButton().should("be.enabled");
-    previewForm.clickNextbutton();
-    pw.waitForLoading();
-    stepperNameShouldBeCurrent("Preview");
+
+    expect(wasStubCalled("previewFormWindow")).toBe(true);
+    await expect(currentPage()).toHaveURL(/\?preview=yes/);
+    await expectStepToBeCurrent("Instructions");
+    await expect(previewForm.getElement().nextButton()).toBeEnabled();
+
+    await previewForm.clickNextbutton();
+    await waitForLoading();
+    await expect(previewForm.getElement().nextButton()).toBeDisabled();
+
+    await previewForm.clickSkipRequiredFieldsCheckbox();
+    await expect(previewForm.getElement().nextButton()).toBeEnabled();
+    await expect(previewForm.getElement().overrideEnabledInfoText()).toBeVisible();
+    await expect(previewForm.getElement().overrideEnabledInfoText()).toContainText(
+      "The required fields override is enabled. During this preview, the form will not behave the same as it would for business users."
+    );
+
+    await expectStepToBeCurrent("Basic Info");
+    await expect(previewForm.getElement().nextButton()).toBeEnabled();
+    await previewForm.clickNextbutton();
+    await waitForLoading();
+
+    await expectStepToBeCurrent("Tax Info");
+    await expect(previewForm.getElement().nextButton()).toBeEnabled();
+    await previewForm.clickNextbutton();
+    await waitForLoading();
+
+    await expectStepToBeCurrent("Preparer Info");
+    await expect(previewForm.getElement().nextButton()).toBeEnabled();
+    await previewForm.clickNextbutton();
+    await waitForLoading();
+
+    await expectStepToBeCurrent("Preview");
   });
 });

@@ -1,3 +1,5 @@
+import { attrOf, currentPage, getAlias, setAlias, waitForLoading, withText } from "../../support/runtime";
+
 class GridSetting {
   columnOrderAlias: string;
   visibilityStatusAlias: string;
@@ -11,39 +13,34 @@ class GridSetting {
   }
 
   private elements() {
+    const modal = currentPage().locator(".k-dialog");
+    const gridSettings = currentPage().locator(".NLG-GridSettings");
     return {
-      modal: () => pw.get(".k-dialog"),
-      modalTitle: () => this.getElement().modal().find(".k-dialog-title"),
-      closeButton: () => this.getElement().modal().find('[aria-label="Close"]'),
-      buttonGroup: () => this.getElement().modal().find(".k-dialog-actions"),
-      cancelButton: () =>
-        this.getElement().buttonGroup().find("button").contains("Cancel"),
-      saveChangesButton: () =>
-        this.getElement().buttonGroup().find("button").contains("Save Changes"),
-      gridSettingMainContainer: () => pw.get(".NLG-GridSettings"),
+      modal: () => modal,
+      modalTitle: () => modal.locator(".k-dialog-title"),
+      closeButton: () => modal.locator('[aria-label="Close"]'),
+      buttonGroup: () => modal.locator(".k-dialog-actions"),
+      cancelButton: () => withText(modal.locator("button"), "Cancel"),
+      saveChangesButton: () => withText(modal.locator("button"), "Save Changes"),
+      gridSettingMainContainer: () => gridSettings,
       restoreDefaulSettingsButton: () =>
-        this.getElement()
-          .gridSettingMainContainer()
-          .find("button")
-          .contains("Restore Default Settings"),
+        withText(gridSettings.locator("button"), "Restore Default Settings"),
       columnRowSetting: (columnName: string) =>
-        this.getElement()
-          .gridSettingMainContainer()
-          .find(".k-list-item")
-          .contains(columnName)
-          .parent(),
+        withText(gridSettings.locator(".k-list-item"), columnName).locator("xpath=.."),
       columnRowVisibilityToggle: (columnName: string) =>
-        this.getElement()
-          .columnRowSetting(columnName)
-          .find("[role='switch']")
-          .eq(0),
+        withText(gridSettings.locator(".k-list-item"), columnName)
+          .locator("xpath=..")
+          .locator("[role='switch']")
+          .nth(0),
       columnRowFreezeToggle: (columnName: string) =>
-        this.getElement()
-          .columnRowSetting(columnName)
-          .find("[role='switch']")
-          .eq(1),
+        withText(gridSettings.locator(".k-list-item"), columnName)
+          .locator("xpath=..")
+          .locator("[role='switch']")
+          .nth(1),
       columnRowDragIcon: (columnName: string) =>
-        this.getElement().columnRowSetting(columnName).find(".fa-grip-lines"),
+        withText(gridSettings.locator(".k-list-item"), columnName)
+          .locator("xpath=..")
+          .locator(".fa-grip-lines"),
     };
   }
 
@@ -51,102 +48,89 @@ class GridSetting {
     return this.elements();
   }
 
-  clickSaveChangesButton() {
-    this.getElement().saveChangesButton().click();
+  async clickSaveChangesButton() {
+    await this.getElement().saveChangesButton().click();
   }
 
-  clickCancelButton() {
-    this.getElement().cancelButton().click();
+  async clickCancelButton() {
+    await this.getElement().cancelButton().click();
   }
 
-  clickCloseButton() {
-    this.getElement().closeButton().click();
+  async clickCloseButton() {
+    await this.getElement().closeButton().click();
   }
 
-  showColumn(columnName: string) {
-    this.getElement()
-      .columnRowVisibilityToggle(columnName)
-      .invoke("attr", "aria-checked")
-      .then((checked) => {
-        if (checked === "false") {
-          this.getElement().columnRowVisibilityToggle(columnName).click();
-          pw.get(`@${this.visibilityStatusAlias}`).then((visibilityStatus) => {
-            pw.wrap({ ...visibilityStatus, [columnName]: true }).as(
-              this.visibilityStatusAlias
-            );
-          });
-        } else {
-          pw.log(`Column ${columnName} is already visible`);
-        }
+  async showColumn(columnName: string) {
+    const checked = await attrOf(
+      this.getElement().columnRowVisibilityToggle(columnName),
+      "aria-checked"
+    );
+    if (checked === "false") {
+      await this.getElement().columnRowVisibilityToggle(columnName).click();
+      const visibilityStatus = getAlias<Record<string, boolean>>(
+        this.visibilityStatusAlias
+      );
+      setAlias(this.visibilityStatusAlias, {
+        ...visibilityStatus,
+        [columnName]: true,
       });
-    this.clickSaveChangesButton();
+    }
+    await this.clickSaveChangesButton();
   }
 
-  hideColumn(columnName: string) {
-    this.getElement()
-      .columnRowVisibilityToggle(columnName)
-      .invoke("attr", "aria-checked")
-      .then((checked) => {
-        if (checked === "true") {
-          this.getElement().columnRowVisibilityToggle(columnName).click();
-          pw.get(`@${this.visibilityStatusAlias}`).then((visibilityStatus) => {
-            pw.wrap({ ...visibilityStatus, [columnName]: false }).as(
-              this.visibilityStatusAlias
-            );
-          });
-        } else {
-          pw.log(`Column ${columnName} is already hidden`);
-        }
+  async hideColumn(columnName: string) {
+    const checked = await attrOf(
+      this.getElement().columnRowVisibilityToggle(columnName),
+      "aria-checked"
+    );
+    if (checked === "true") {
+      await this.getElement().columnRowVisibilityToggle(columnName).click();
+      const visibilityStatus = getAlias<Record<string, boolean>>(
+        this.visibilityStatusAlias
+      );
+      setAlias(this.visibilityStatusAlias, {
+        ...visibilityStatus,
+        [columnName]: false,
       });
-    this.clickSaveChangesButton();
+    }
+    await this.clickSaveChangesButton();
   }
 
-  freezeColumn(columnName: string) {
-    this.getElement()
-      .columnRowFreezeToggle(columnName)
-      .invoke("attr", "aria-checked")
-      .then((checked) => {
-        if (checked === "false") {
-          this.getElement().columnRowFreezeToggle(columnName).click();
-        } else {
-          pw.log(`Column ${columnName} is already frozen`);
-        }
-      });
-    this.clickSaveChangesButton();
+  async freezeColumn(columnName: string) {
+    const checked = await attrOf(
+      this.getElement().columnRowFreezeToggle(columnName),
+      "aria-checked"
+    );
+    if (checked === "false") {
+      await this.getElement().columnRowFreezeToggle(columnName).click();
+    }
+    await this.clickSaveChangesButton();
   }
 
-  unfreezeColumn(columnName: string) {
-    this.getElement()
-      .columnRowFreezeToggle(columnName)
-      .invoke("attr", "aria-checked")
-      .then((checked) => {
-        if (checked === "true") {
-          this.getElement().columnRowFreezeToggle(columnName).click();
-        } else {
-          pw.log(`Column ${columnName} is already unfrozen`);
-        }
-      });
-    this.clickSaveChangesButton();
+  async unfreezeColumn(columnName: string) {
+    const checked = await attrOf(
+      this.getElement().columnRowFreezeToggle(columnName),
+      "aria-checked"
+    );
+    if (checked === "true") {
+      await this.getElement().columnRowFreezeToggle(columnName).click();
+    }
+    await this.clickSaveChangesButton();
   }
 
-  restoreDefaultSettings() {
-    this.getElement().restoreDefaulSettingsButton().scrollIntoView();
-    this.getElement().restoreDefaulSettingsButton().click();
-    this.clickSaveChangesButton();
+  async restoreDefaultSettings() {
+    await this.getElement().restoreDefaulSettingsButton().scrollIntoViewIfNeeded();
+    await this.getElement().restoreDefaulSettingsButton().click();
+    await this.clickSaveChangesButton();
+    await waitForLoading();
   }
 
-  moveColumnToLocationOf(columnName: string, targetColumnName: string) {
-    const dataTransfer = new DataTransfer();
-    this.getElement()
+  async moveColumnToLocationOf(columnName: string, targetColumnName: string) {
+    await this.getElement()
       .columnRowDragIcon(columnName)
-      .trigger("mousedown", { which: 1 })
-      .trigger("dragstart", { dataTransfer })
-      .trigger("drag", { dataTransfer });
-    this.getElement()
-      .columnRowSetting(targetColumnName)
-      .trigger("dragover", { dataTransfer })
-      .trigger("drop", { dataTransfer });
-    this.clickSaveChangesButton();
+      .dragTo(this.getElement().columnRowSetting(targetColumnName));
+    await this.clickSaveChangesButton();
+    await waitForLoading();
   }
 }
 

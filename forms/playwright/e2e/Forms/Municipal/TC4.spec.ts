@@ -1,12 +1,14 @@
-import { test, expect } from '../../../support/pwtest';
+import { test } from "@playwright/test";
 import FormGrid from "../../../objects/FormGrid";
+import { initTestRuntime, login } from "../../../support/runtime";
 
 const municipalFormGrid = new FormGrid({ userType: "municipal" });
 
 test.describe("As a municipal user, I should be able to export forms.", () => {
-  test("Initiate test", () => {
-    pw.login({ accountType: "municipal" });
-    municipalFormGrid.init();
-    municipalFormGrid.clickExportButton();
+  test("Initiate test", async ({ page }, testInfo) => {
+    await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
+    await login({ accountType: "municipal" });
+    await municipalFormGrid.init();
+    await municipalFormGrid.clickExportButton();
   });
 });

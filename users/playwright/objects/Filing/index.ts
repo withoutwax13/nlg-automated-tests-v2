@@ -1,110 +1,85 @@
-/**
- * Class representing the Filing process.
- */
+import { currentPage, listItem, waitForLoading } from "../../support/runtime";
+
 class Filing {
   isResumingDraftApplication: boolean;
+
   constructor(props: { isResumingDraftApplication: boolean }) {
     this.isResumingDraftApplication = props.isResumingDraftApplication;
   }
 
-  /**
-   * Get the elements used in the filing process.
-   * @returns {Object} The elements used in the filing process.
-   */
   private elements() {
     return {
-      submitFormsTab: () => pw.get('a[href="/formsApp/ListMunicipalityForms"]'),
+      submitFormsTab: () => currentPage().locator('a[href="/formsApp/ListMunicipalityForms"]').first(),
       governmentSelection: () =>
-        pw.get('input[placeholder="Search government and press enter …"]'),
-      formList: () => pw.get('ul[data-cy="ListForms"]'),
+        currentPage().locator('input[placeholder="Search government and press enter …"]').first(),
+      formList: () => currentPage().locator('ul[data-cy="ListForms"]').first(),
       formLinkItem: (formName: string) =>
-        this.getElements().formList().find("li").contains(formName),
-      modalTitle: () => pw.get("k-dialog-title"),
-      closeModalButton: () => pw.get(".k-dialog-titlebar-actions"),
-      modalContent: () => pw.get(".k-dialog-content"),
-      renewCancelButton: () => pw.get("NLGSecondaryButton").contains("Cancel"),
-      anyList: () => pw.get("li"),
+        currentPage().locator('ul[data-cy="ListForms"] li').filter({ hasText: formName }).first(),
+      closeModalButton: () => currentPage().locator(".k-dialog-titlebar-actions").first(),
       createNewFilingButton: () =>
-        pw.get(".NLGButtonSecondary").contains("Create a New Filing"),
+        currentPage().locator(".NLGButtonSecondary").filter({ hasText: "Create a New Filing" }).first(),
       resumeDraftFilingButton: () =>
-        pw.get(".NLGButtonPrimary").contains("Resume Draft Filing"),
+        currentPage().locator(".NLGButtonPrimary").filter({ hasText: "Resume Draft Filing" }).first(),
       businessSelectionDropdown: () =>
-        pw.get('*[data-cy="business-dialog-choose-business-comboBox"]'),
-      nextButton: () => pw.get(".NLGButtonPrimary").contains("Next"),
-      cancelButton: () => pw.get(".NLGButtonSecondary").contains("Cancel"),
+        currentPage().locator('*[data-cy="business-dialog-choose-business-comboBox"]').first(),
+      nextButton: () => currentPage().locator(".NLGButtonPrimary").filter({ hasText: "Next" }).first(),
+      cancelButton: () => currentPage().locator(".NLGButtonSecondary").filter({ hasText: "Cancel" }).first(),
     };
   }
 
-  /**
-   * Get the elements used in the filing process.
-   * @returns {Object} The elements used in the filing process.
-   */
   getElements() {
     return this.elements();
   }
 
-  /**
-   * Navigate to the submit forms tab.
-   */
-  goToSubmitFormsTab() {
-    this.getElements().submitFormsTab().click();
-    pw.waitForLoading();
+  async goToSubmitFormsTab() {
+    await this.getElements().submitFormsTab().click();
+    await waitForLoading();
   }
 
-  /**
-   * Handles accounts with draft filings.
-   */
-  private startFiling() {
-    pw.get("body").then(($body) => {
-      const modal = $body.find(".k-dialog-titlebar");
-      if (modal.length > 0) {
-        if (modal.text().includes("Resume Draft Filing")) {
-          if (!this.isResumingDraftApplication) {
-            this.getElements().createNewFilingButton().click();
-          } else {
-            this.getElements().resumeDraftFilingButton().click();
-          }
-        }
-      }
-    });
+  private async startFiling() {
+    const modalTitle = currentPage().locator(".k-dialog-titlebar").first();
+    if (!(await modalTitle.isVisible().catch(() => false))) {
+      return;
+    }
+
+    const text = (await modalTitle.textContent()) || "";
+    if (!text.includes("Resume Draft Filing")) {
+      return;
+    }
+
+    if (!this.isResumingDraftApplication) {
+      await this.getElements().createNewFilingButton().click();
+      return;
+    }
+
+    await this.getElements().resumeDraftFilingButton().click();
   }
 
-  /**
-   * Select a government from the list.
-   * @param {string} government - The name of the government to select.
-   */
-  selectGovernment(government: string) {
-    this.getElements().governmentSelection().click();
-    this.getElements().governmentSelection().type(government);
-    this.getElements().anyList().contains(government).click();
+  async selectGovernment(government: string) {
+    await this.getElements().governmentSelection().click();
+    await this.getElements().governmentSelection().fill(government);
+    await listItem(government).click();
   }
 
-  /**
-   * Select a form from the list.
-   * @param {string} formName - The name of the form to select.
-   */
-  selectForm(formName: string) {
-    this.getElements().formLinkItem(formName).click();
+  async selectForm(formName: string) {
+    await this.getElements().formLinkItem(formName).click();
   }
 
-  /**
-   * Select a business to file.
-   * @param {string} businessDba - The name of the business to file.
-   */
-  selectBusinessToFile(businessDba: string) {
-    this.getElements().businessSelectionDropdown().click();
-    this.getElements().businessSelectionDropdown().type(businessDba);
-    this.getElements().anyList().contains(businessDba).click();
-    this.clickNextButton();
-    this.startFiling();
-  }
-  clickNextButton() {
-    this.getElements().nextButton().click();
-    pw.waitForLoading();
+  async selectBusinessToFile(businessDba: string) {
+    await this.getElements().businessSelectionDropdown().click();
+    await this.getElements().businessSelectionDropdown().fill(businessDba);
+    await listItem(businessDba).click();
+    await this.clickNextButton();
+    await this.startFiling();
   }
 
-  clickCancelButton() {
-    this.getElements().cancelButton().click();
+  async clickNextButton() {
+    await this.getElements().nextButton().click();
+    await waitForLoading();
+  }
+
+  async clickCancelButton() {
+    await this.getElements().cancelButton().click();
   }
 }
 

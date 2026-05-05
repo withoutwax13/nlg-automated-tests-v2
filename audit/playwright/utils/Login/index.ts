@@ -1,36 +1,37 @@
-const interceptAuditAuthLogin = () => {
-  return cy
-    .intercept("POST", "https://audit.api.localgov.org/v1/auth/login")
-    .as("AuditAuthLogin");
+import { expect, Page, Response } from "@playwright/test";
+
+type ResponseWaiter = Promise<Response>;
+
+const waitFor = (page: Page, method: string, pattern: RegExp): ResponseWaiter =>
+  page.waitForResponse(
+    (response) =>
+      response.request().method() === method && pattern.test(response.url())
+  );
+
+export const interceptAuditAuthLogin = (page: Page): ResponseWaiter =>
+  waitFor(page, "POST", /https:\/\/audit\.api\.localgov\.org\/v1\/auth\/login/);
+
+export const waitForAuditAuthLogin = async (waiter: ResponseWaiter) => {
+  expect((await waiter).status()).toBe(201);
 };
 
-const waitForAuditAuthLogin = () => {
-  return pw.wait("@AuditAuthLogin");
+export const interceptDepartments = (page: Page): ResponseWaiter[] => [
+  waitFor(page, "GET", /https:\/\/audit\.api\.localgov\.org\/v1\/departments(?:\?.*)?$/),
+  waitFor(page, "GET", /https:\/\/audit\.api\.localgov\.org\/v1\/departments(?:\?.*)?$/),
+  waitFor(page, "GET", /https:\/\/audit\.api\.localgov\.org\/v1\/departments(?:\?.*)?$/),
+];
+
+export const waitForDepartments = async (waiters: ResponseWaiter[]) => {
+  for (const waiter of waiters) {
+    expect((await waiter).status()).toBe(200);
+  }
 };
 
-const interceptDepartments = () => {
-  return cy
-    .intercept("GET", "https://audit.api.localgov.org/v1/departments/**")
-    .as("getDepartments");
-};
+export const interceptSelectedDepartment = (page: Page): ResponseWaiter =>
+  waitFor(page, "GET", /https:\/\/audit\.api\.localgov\.org\/v1\/departments$/);
 
-const waitForDepartments = () => {
-  pw.wait("@getDepartments").its("response.statusCode").should("eq", 200);
-  pw.wait("@getDepartments").its("response.statusCode").should("eq", 200);
-  return cy
-    .wait("@getDepartments")
-    .its("response.statusCode")
-    .should("eq", 200);
-};
-
-const interceptSelectedDepartment = () => {
-  return cy
-    .intercept("GET", "https://audit.api.localgov.org/v1/departments")
-    .as("getSelectedDepartment");
-};
-
-const waitForSelectedDepartment = () => {
-  return pw.wait("@getSelectedDepartment");
+export const waitForSelectedDepartment = async (waiter: ResponseWaiter) => {
+  expect((await waiter).status()).toBe(200);
 };
 
 export default {

@@ -1,21 +1,20 @@
+import type { Locator, Page } from "@playwright/test";
+
 class ExportDelinquencies {
+  constructor(private readonly page: Page) {}
+
   private elements() {
+    const modal = this.page.locator(".k-dialog");
     return {
-      modal: () => pw.get(".k-dialog"),
-      modalTitle: () => this.getElement().modal().find(".k-dialog-title"),
-      closeButton: () =>
-        this.getElement().modal().find('button[aria-label="Close"]'),
-      modalContent: () => this.getElement().modal().find(".k-dialog-content"),
+      modal: () => modal,
+      modalTitle: () => modal.locator(".k-dialog-title"),
+      closeButton: () => modal.locator('button[aria-label="Close"]'),
+      modalContent: () => modal.locator(".k-dialog-content"),
       fileTypeRadioButton: (type: "CSV" | "Excel") =>
-        this.getElement()
-          .modal()
-          .find(".k-radio-list")
-          .find("label")
-          .contains(type),
+        modal.locator(".k-radio-list label").filter({ hasText: type }).first(),
       exportFullDataButton: () =>
-        this.getElement().modal().find("button").contains("Export Full Data"),
-      exportViewButton: () =>
-        this.getElement().modal().find("button").contains("Export View"),
+        modal.getByRole("button", { name: "Export Full Data" }),
+      exportViewButton: () => modal.getByRole("button", { name: "Export View" }),
     };
   }
 
@@ -23,24 +22,24 @@ class ExportDelinquencies {
     return this.elements();
   }
 
-  clickExportFullDataButton() {
-    this.getElement().exportFullDataButton().click();
+  clickExportFullDataButton(): Promise<void> {
+    return this.getElement().exportFullDataButton().click();
   }
 
-  clickExportViewButton() {
-    this.getElement().exportViewButton().click();
+  clickExportViewButton(): Promise<void> {
+    return this.getElement().exportViewButton().click();
   }
 
-  clickCloseButton() {
-    this.getElement().closeButton().click();
+  clickCloseButton(): Promise<void> {
+    return this.getElement().closeButton().click();
   }
 
-  selectCSVFileType() {
-    this.getElement().fileTypeRadioButton("CSV").click();
+  selectCSVFileType(): Promise<void> {
+    return this.getElement().fileTypeRadioButton("CSV").click();
   }
 
-  selectExcelFileType() {
-    this.getElement().fileTypeRadioButton("Excel").click();
+  selectExcelFileType(): Promise<void> {
+    return this.getElement().fileTypeRadioButton("Excel").click();
   }
 }
 

@@ -1,4 +1,5 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect } from '../../test';
+import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
 import FilingGrid from "../../objects/FilingGrid";
 import RequestedExtracts from "../../objects/RequestedExtracts";
 
@@ -8,22 +9,16 @@ const municipalFilingGrid = new FilingGrid({
 const requestedExtractPage = new RequestedExtracts();
 
 test.describe("As a municipal user, I should be able to export full filing data.", () => {
-  test("Initiate test", () => {
-    pw.login({ accountType: "municipal", accountIndex: 2 });
-    municipalFilingGrid.init();
-    municipalFilingGrid.clickViewRequestedExtractButton();
-    requestedExtractPage.getTotalItems("preClickItemTotal");
+  test("Initiate test", async ({ page }) => {
+    await login({ accountType: "municipal", accountIndex: 2 });
+    await municipalFilingGrid.init();
+    await municipalFilingGrid.clickViewRequestedExtractButton();
+    const preClickItemTotal = await requestedExtractPage.getTotalItems(page);
 
-    municipalFilingGrid.init();
-    municipalFilingGrid.clickExportButton(true, "Excel");
-    municipalFilingGrid.clickViewRequestedExtractButton();
-    requestedExtractPage.getTotalItems("postClickItemTotal");
-    pw.get("@preClickItemTotal").then((preClickItemTotal) => {
-      pw.get("@postClickItemTotal").then((postClickItemTotal) => {
-        expect(Number(postClickItemTotal)).to.be.greaterThan(
-          Number(preClickItemTotal)
-        );
-      });
-    });
+    await municipalFilingGrid.init();
+    await municipalFilingGrid.clickExportButton(page, true, "Excel");
+    await municipalFilingGrid.clickViewRequestedExtractButton();
+    const postClickItemTotal = await requestedExtractPage.getTotalItems(page);
+    expect(postClickItemTotal).toBeGreaterThan(preClickItemTotal);
   });
 });

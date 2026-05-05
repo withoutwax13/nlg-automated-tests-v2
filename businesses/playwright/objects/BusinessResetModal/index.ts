@@ -1,35 +1,41 @@
+import { buttonByText, currentPage } from "../../support/runtime";
+
 class BusinessResetModal {
+  private page() {
+    return currentPage();
+  }
+
   private elements() {
     return {
-      modal: () => pw.get(".k-dialog"),
-      modalTitle: () => pw.get(".k-dialog-title"),
-      modalContent: () => pw.get(".k-dialog-content"),
-      cancelButton: () => pw.get("button").contains("Cancel"),
-      deleteDataButton: () => pw.get("button").contains("Delete Data"),
-      sureWantToDeleteDataCheckbox: () => pw.get(".k-checkbox-label"),
-      closeModalButton: () => pw.get('button[aria-label="Close"]'),
+      modal: () => this.page().locator(".k-dialog").first(),
+      modalTitle: () => this.page().locator(".k-dialog-title").first(),
+      modalContent: () => this.page().locator(".k-dialog-content").first(),
+      cancelButton: () => buttonByText("Cancel"),
+      deleteDataButton: () => buttonByText("Delete Data"),
+      sureWantToDeleteDataCheckbox: () => this.page().locator(".k-checkbox-label").first(),
+      closeModalButton: () => this.page().locator('button[aria-label="Close"]').first(),
     };
   }
 
-    getElement() {
-        return this.elements();
-    }
+  getElement() {
+    return this.elements();
+  }
 
-    clickCancelButton() {
-        this.getElement().cancelButton().click();
-    }
+  async clickCancelButton() {
+    await this.getElement().cancelButton().click();
+  }
 
-    clickDeleteDataButton() {
-        this.getElement().deleteDataButton().click();
-    }
+  async clickDeleteDataButton() {
+    await this.getElement().deleteDataButton().click();
+  }
 
-    clickSureWantToDeleteDataCheckbox() {
-        this.getElement().sureWantToDeleteDataCheckbox().click();
-    }
+  async clickSureWantToDeleteDataCheckbox() {
+    await this.getElement().sureWantToDeleteDataCheckbox().click();
+  }
 
-    clickCloseModalButton() {
-        this.getElement().closeModalButton().click();
-    }
+  async clickCloseModalButton() {
+    await this.getElement().closeModalButton().click();
+  }
 }
 
 export default BusinessResetModal;

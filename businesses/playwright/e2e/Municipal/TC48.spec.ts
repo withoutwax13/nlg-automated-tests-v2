@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessAdd from "../../objects/BusinessAdd";
@@ -37,11 +37,11 @@ const newBusinessData = {
   businessOwnerZipCode: "90210",
 };
 
-const addBusiness = () => {
-  municipalBusinessGrid.init();
-  municipalBusinessGrid.clickAddBusinessButton();
-  addBusinessPage.fillFields(newBusinessData);
-  addBusinessPage.clickSaveButton();
+const addBusiness = async () => {
+  await municipalBusinessGrid.init();
+  await municipalBusinessGrid.clickAddBusinessButton();
+  await addBusinessPage.fillFields(newBusinessData);
+  await addBusinessPage.clickSaveButton();
 };
 
 const operatingStatus = [
@@ -52,26 +52,26 @@ const operatingStatus = [
 ];
 
 test.describe("As a municipal user, I should be able to update operating status in the business details page", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "municipal" });
-    municipalBusinessGrid.init();
-    addBusiness();
-    municipalBusinessGrid.init();
-    municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    operatingStatus.forEach((status) => {
+  test("Initiating test", async () => {
+    await login({ accountType: "municipal" });
+    await municipalBusinessGrid.init();
+    await addBusiness();
+    await municipalBusinessGrid.init();
+    await municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
+    for (const status of operatingStatus) {
       if (status === "Active/Seasonal" || status === "Inactive") {
-        municipalBusinessDetails.clickBusinessStatusTab();
-        municipalBusinessDetails.getElement().operatingStatusDropdown().click();
-        municipalBusinessDetails.getElement().anyList().contains(status).click();
-        setBusinessStatusModal.getElement().modal().should("exist");
-        setBusinessStatusModal.getElement().cancelButton().click();
+        await municipalBusinessDetails.clickBusinessStatusTab();
+        await municipalBusinessDetails.getElement().operatingStatusDropdown().click();
+        await municipalBusinessDetails.getElement().anyList().filter({ hasText: status }).first().click();
+        await expect(setBusinessStatusModal.getElement().modal()).toBeVisible();
+        await setBusinessStatusModal.getElement().cancelButton().click();
       } else {
-        municipalBusinessDetails.clickBusinessStatusTab();
-        municipalBusinessDetails.getElement().operatingStatusDropdown().click();
-        municipalBusinessDetails.getElement().anyList().contains(status).click();
-        setBusinessStatusModal.getElement().modal().should("exist");
-        setBusinessStatusModal.clickCloseButton();
+        await municipalBusinessDetails.clickBusinessStatusTab();
+        await municipalBusinessDetails.getElement().operatingStatusDropdown().click();
+        await municipalBusinessDetails.getElement().anyList().filter({ hasText: status }).first().click();
+        await expect(setBusinessStatusModal.getElement().modal()).toBeVisible();
+        await setBusinessStatusModal.clickCloseButton();
       }
-    });
+    }
   });
 });

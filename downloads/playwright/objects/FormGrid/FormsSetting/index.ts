@@ -1,41 +1,49 @@
+import type { Page } from "@playwright/test";
+
 class FormsSetting {
+  page: Page;
+
+  constructor(page: Page) {
+    this.page = page;
+  }
+
   private elements() {
     return {
-      saveButton: () => pw.get(".k-actions").find("button").contains("Save"),
-      cancelButton: () =>
-        pw.get(".k-actions").find("button").contains("Cancel"),
+      saveButton: () => this.page.locator(".k-actions button").filter({ hasText: "Save" }).first(),
+      cancelButton: () => this.page.locator(".k-actions button").filter({ hasText: "Cancel" }).first(),
       municipalityDropdown: () =>
-        pw.get('input[placeholder="Search government and press enter …"]'),
-      anyList: () => pw.get("li"),
-      forrms: () => pw.get(".k-list-item"),
+        this.page.locator('input[placeholder="Search government and press enter …"]').first(),
+      anyList: () => this.page.locator("li"),
+      forms: () => this.page.locator(".k-list-item"),
     };
   }
+
   getElement() {
     return this.elements();
   }
 
-  clickSaveButton() {
-    this.getElement().saveButton().click();
+  async clickSaveButton() {
+    await this.getElement().saveButton().click();
   }
 
-  clickCancelButton() {
-    this.getElement().cancelButton().click();
+  async clickCancelButton() {
+    await this.getElement().cancelButton().click();
   }
 
-  selectMunicipality(municipality: string) {
-    this.getElement().municipalityDropdown().type(municipality);
-    this.getElement().anyList().contains(municipality).click();
+  async selectMunicipality(municipality: string) {
+    await this.getElement().municipalityDropdown().fill(municipality);
+    await this.getElement().anyList().filter({ hasText: municipality }).first().click();
   }
 
-  saveFormOrders(aliasName: string) {
-    pw.wrap([]).as(aliasName);
-    this.getElement()
-      .forrms()
-      .each(($el) => {
-        pw.get(`@${aliasName}`).then((formsOrder) => {
-          pw.wrap([...formsOrder, $el.text()]).as(aliasName);
-        });
-      });
+  async saveFormOrders() {
+    const count = await this.getElement().forms().count();
+    const formsOrder: string[] = [];
+
+    for (let index = 0; index < count; index += 1) {
+      formsOrder.push((await this.getElement().forms().nth(index).innerText()).trim());
+    }
+
+    return formsOrder;
   }
 }
 

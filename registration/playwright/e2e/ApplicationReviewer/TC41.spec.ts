@@ -1,108 +1,30 @@
-import { test, expect } from '../../support/pwtest';
-import Filing from "../../objects/Filing";
-import Form from "../../objects/Form";
-import FormPreview from "../../objects/FormPreview";
-import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
-import ApplicationGrid from "../../objects/ApplicationGrid";
-import ApplicationReview from "../../objects/ApplicationReview";
-
-const randomSeed = () => Math.floor(Math.random() * 100000);
+import { expect, test } from "@playwright/test";
+import {
+  approveApplication,
+  createSubmittedApplication,
+  getTaxpayerRegistrationRecordId,
+} from "../helpers";
+import { initTestRuntime, textOf } from "../../support/runtime";
 
 test.describe("As a gov user, I want to be able to do final approval", () => {
-  test("Initiating test", () => {
-    const form = new Form({ isRenewal: false });
-    const formPreviewPage = new FormPreview();
-    const filing = new Filing();
-    const applicationConfirmation = new ApplicationConfirmation();
-    const taxpayerApplicationGrid = new ApplicationGrid({
-      userType: "taxpayer",
+  test("Initiating test", async ({ page, request }, testInfo) => {
+    await initTestRuntime({ page, request, baseURL: testInfo.project.use.baseURL as string });
+
+    const { customData, referenceId } = await createSubmittedApplication({
+      accountIndex: 6,
+      formName: "Business License (Annual) - E2E #1",
     });
-    const municipalApplicationGrid = new ApplicationGrid({
-      userType: "municipal",
+    const registrationRecordId = await getTaxpayerRegistrationRecordId(referenceId);
+
+    const { applicationReview } = await approveApplication({
+      reviewerType: "municipal",
+      reviewerIndex: 6,
+      registrationRecordId: String(registrationRecordId),
+      locationAddress1: String(customData.locationInfo.locations[0].locationAddress1),
     });
-    const applicationReview = new ApplicationReview({ userType: "municipal" });
 
-    pw.login({ accountType: "taxpayer", accountIndex: 6 });
-
-    filing.goToSubmitFormsTab();
-    filing.selectGovernment("City of Arrakis");
-    filing.selectForm("Business License (Annual) - E2E #1");
-    filing.clickSubmitNewRegistrationButton();
-    form.clickNextbutton();
-    form.selectIsRegisteringMultipleLocations(false);
-
-    pw.getUniqueRegistrationData(randomSeed(), false).then(
-      (customData: {
-        basicInfo: any;
-        locationInfo: { locations: any[] };
-        applicantInfo: any;
-      }) => {
-        form.enterBusinessOwnerInformation(customData.basicInfo);
-        form.enterLegalBusinessInformation(customData.basicInfo);
-        form.checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation();
-        form.enterEmergencyPhoneNumbers(customData.basicInfo);
-        form.clickNextbutton();
-        form.enterLocationDetails(customData.locationInfo.locations);
-        form.clickNextbutton();
-        form.enterApplicantDetails(customData.applicantInfo, true);
-        form.clickNextbutton();
-        formPreviewPage.clickSubmitButton();
-        applicationConfirmation
-          .getElement()
-          .referenceIdData()
-          .invoke("text")
-          .then((referenceId) => {
-            pw.wrap(referenceId).as("referenceId");
-          });
-        applicationConfirmation.clickCloseButton();
-        taxpayerApplicationGrid.init();
-        pw.get("@referenceId").then((referenceId) => {
-          taxpayerApplicationGrid.getDataOfColumn(
-            "Registration Record ID",
-            "Reference ID",
-            String(referenceId),
-            "registrationRecordId"
-          );
-        });
-        pw.logout();
-        pw.login({ accountType: "municipal", notFirstLogin: true, accountIndex: 6 });
-        municipalApplicationGrid.init();
-        pw.get("@registrationRecordId").then((registrationRecordId) => {
-          municipalApplicationGrid.selectRowToReview({
-            anchorColumnName: "Registration Record ID",
-            anchorValue: String(registrationRecordId),
-          });
-          municipalApplicationGrid.clickStartApplicationWorkflowForSelectedApplicationsButton();
-          applicationReview.clickReviewStepTab("Manual Steps");
-          applicationReview.manualStepsTab.clickApproveButton();
-          applicationReview.clickReviewStepTab("Business Details");
-          applicationReview.updateBusinessDetailsTab.clickEditBusinessDetailsButton();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.clickReviewBusinessButton(
-            customData.locationInfo.locations[0].locationAddress1
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.disregardSimilarBusinessRecords();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.clicUpdateAddBusinessDetailsButton();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.clickUpdateFormRequirements(
-            customData.locationInfo.locations[0].locationAddress1
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.enableForm(
-            "Food and Beverage"
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.selectDateDelinquencyTrackingStartDate(
-            1,
-            1,
-            2024
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.clickSaveButton();
-          applicationReview.toggleActions("Approve");
-            applicationReview
-            .getElements()
-            .applicationStatusData()
-            .should(($status) => {
-              expect($status.text().trim()).to.match(/Approval Payment Required|Approved/);
-            });
-        });
-      }
-    );
+    await expect(
+      await textOf(applicationReview.getElements().applicationStatusData())
+    ).toMatch(/Approval Payment Required|Approved/);
   });
 });

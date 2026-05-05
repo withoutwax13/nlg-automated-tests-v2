@@ -1,4 +1,5 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect } from '../../test';
+import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
 import Form from "../../objects/Form";
 import FormPreview from "../../objects/FormPreview";
 import Payment from "../../objects/Payment";
@@ -16,78 +17,68 @@ const agsFilingGrid = new FilingGrid({
   municipalitySelection: "City of Arrakis",
 });
 
-const deleteMultipleFiling = (
+const deleteMultipleFiling = async (
   count: number,
   filterParams: [string, string, string?, string?],
   filingParams: [string, string]
 ) => {
-  agsFilingGrid.clickClearAllFiltersButton();
-  agsFilingGrid.filterColumn(...filterParams);
-  agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
+  await agsFilingGrid.clickClearAllFiltersButton();
+  await agsFilingGrid.filterColumn(...filterParams);
+  await agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
   if (count > 1) {
-    deleteMultipleFiling(count - 1, filterParams, filingParams);
+    await deleteMultipleFiling(count - 1, filterParams, filingParams);
   }
 };
 
 test.describe("As a ags, I should be able to search filing list with data from its columns", () => {
-  test("Initiate test", () => {
-    pw.login({ accountType: "ags", accountIndex: 7 });
-    agsFilingGrid.init();
-    agsFilingGrid.filterColumn(
+  test("Initiate test", async ({ page }) => {
+    await login({ accountType: "ags", accountIndex: 7 });
+    await agsFilingGrid.init();
+    await agsFilingGrid.filterColumn(
       "Location DBA",
       "Arrakis Spice Company 13685",
       "text",
       "Contains"
     );
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Form Name",
       "Food and Beverage",
       "multi-select"
     );
-    agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    pw.get("@rowsLength").then((rowsLength) => {
-      if (Number(rowsLength) > 0) {
-        deleteMultipleFiling(
-          Number(rowsLength),
-          ["Form Name", "Food and Beverage", "multi-select"],
-          ["Location DBA", "Arrakis Spice Company 13685"]
-        );
-      }
-    });
-    pw.logout();
+    const rowsLength = await agsFilingGrid.getElement(page).rows().count();
+    if (rowsLength > 0) {
+      await deleteMultipleFiling(
+        rowsLength,
+        ["Form Name", "Food and Beverage", "multi-select"],
+        ["Location DBA", "Arrakis Spice Company 13685"]
+      );
+    }
+    await logout();
 
-    pw.login({ accountType: "taxpayer", accountIndex: 3, notFirstLogin: true });
-    filing.goToSubmitFormsTab();
-    filing.selectGovernment("City of Arrakis");
-    filing.selectForm("Food and Beverage");
-    filing.selectBusinessToFile("Arrakis Spice Company 13685");
-    form.clickNextbutton(false);
-    form.enterBasicInformation();
-    form.clickNextbutton();
-    form.enterTaxInformation();
-    form.clickNextbutton();
-    form.enterPreparerInformation();
-    form.clickNextbutton();
-    formPreview.clickSubmitButton();
-    payment.clickSavedPaymentMethods();
-    payment.selectSavedPaymentMethod(0);
-    payment.clickTermsAndConditionsCheckbox();
-    payment.clickFinishAndPayButton();
-    applicationConfirmation
-      .getElement()
-      .referenceIdData()
-      .invoke("text")
-      .then((referenceId) => {
-        pw.wrap(referenceId).as("referenceId");
-      });
-    applicationConfirmation.clickCloseButton();
-    pw.logout();
+    await login({ accountType: "taxpayer", accountIndex: 3, notFirstLogin: true });
+    await filing.goToSubmitFormsTab();
+    await filing.selectGovernment("City of Arrakis");
+    await filing.selectForm("Food and Beverage");
+    await filing.selectBusinessToFile("Arrakis Spice Company 13685");
+    await form.clickNextbutton(page, false);
+    await form.enterBasicInformation(page);
+    await form.clickNextbutton(page);
+    await form.enterTaxInformation(page);
+    await form.clickNextbutton(page);
+    await form.enterPreparerInformation(page);
+    await form.clickNextbutton(page);
+    await formPreview.clickSubmitButton(page);
+    await payment.clickSavedPaymentMethods(page);
+    await payment.selectSavedPaymentMethod(page, 0);
+    await payment.clickTermsAndConditionsCheckbox(page);
+    await payment.clickFinishAndPayButton(page);
+    const referenceId = await applicationConfirmation.getElement(page).referenceIdData().innerText();
+    await applicationConfirmation.clickCloseButton(page);
+    await logout();
 
-    pw.get("@referenceId").then((referenceId) => {
-      pw.login({ accountType: "ags", accountIndex: 7, notFirstLogin: true });
-      agsFilingGrid.init();
-      agsFilingGrid.searchFiling(String(referenceId));
-      agsFilingGrid.getElement().rows().its("length").should("be.eq", 1);
-    });
+    await login({ accountType: "ags", accountIndex: 7, notFirstLogin: true });
+    await agsFilingGrid.init();
+    await agsFilingGrid.searchFiling(String(referenceId).trim());
+    expect(await agsFilingGrid.getElement(page).rows().count()).toBe(1);
   });
 });

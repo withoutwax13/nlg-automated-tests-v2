@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessResetModal from "../../objects/BusinessResetModal";
 import BusinessAdd from "../../objects/BusinessAdd";
@@ -37,22 +37,22 @@ const newBusinessData = {
   businessOwnerZipCode: "90210",
 };
 
-const addBusiness = () => {
-  agsBusinessGrid.init(false, false);
-  agsBusinessGrid.clickAddBusinessButton();
-  addBusinessPage.fillFields(newBusinessData);
-  addBusinessPage.clickSaveButton();
+const addBusiness = async () => {
+  await agsBusinessGrid.init(false, false);
+  await agsBusinessGrid.clickAddBusinessButton();
+  await addBusinessPage.fillFields(newBusinessData);
+  await addBusinessPage.clickSaveButton();
 };
 
 test.describe("I should be able to reset all data of a specific municipality", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags" });
-    addBusiness();
-    agsBusinessGrid.init();
-    agsBusinessGrid.clickResetDataButton();
-    businessResetModal.clickSureWantToDeleteDataCheckbox();
-    businessResetModal.clickDeleteDataButton();
-    agsBusinessGrid.getElement().noRecordFoundComponent().should("exist");
+  test("Initiating test", async () => {
+    await login({ accountType: "ags" });
+    await addBusiness();
+    await agsBusinessGrid.init();
+    await agsBusinessGrid.clickResetDataButton();
+    await businessResetModal.clickSureWantToDeleteDataCheckbox();
+    await businessResetModal.clickDeleteDataButton();
+    await expect(agsBusinessGrid.getElement().noRecordFoundComponent()).toBeVisible();
 
     // TODO: Assert that all other data in the municipality has been deleted as well (e.g. registration, filings, etc.)
   });

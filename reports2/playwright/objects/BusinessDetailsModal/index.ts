@@ -1,26 +1,22 @@
+import type { Page } from "@playwright/test";
+import { normalizeText } from "../../support/native-helpers";
+
 class BusinessDetailsModal {
+  constructor(private readonly page: Page) {}
+
   private elements() {
+    const modal = this.page.locator(".k-dialog");
     return {
-      modal: () => pw.get(".k-dialog"),
-      modalTitle: () => this.getElement().modal().find(".k-dialog-title"),
-      closeModalButton: () =>
-        this.getElement().modal().find('button[aria-label="Close"]'),
+      modal: () => modal,
+      modalTitle: () => modal.locator(".k-dialog-title"),
+      closeModalButton: () => modal.locator('button[aria-label="Close"]'),
       businessNameData: () =>
-        this.getElement()
-          .modal()
-          .find("label")
-          .contains("Business Name")
-          .next(),
-      dbaData: () =>
-        this.getElement().modal().find("label").contains("DBA").next(),
+        modal.locator("label", { hasText: "Business Name" }).locator("xpath=following-sibling::*[1]"),
+      dbaData: () => modal.locator("label", { hasText: "DBA" }).locator("xpath=following-sibling::*[1]"),
       businessPropertyData: (propertyName: string) =>
-        this.getElement().modal().find("label").contains(propertyName).next(),
+        modal.locator("label", { hasText: propertyName }).locator("xpath=following-sibling::*[1]"),
       remittanceRequirementsList: () =>
-        this.getElement()
-          .modal()
-          .find("h3")
-          .contains("Remittance Requirements")
-          .next(),
+        modal.locator("h3", { hasText: "Remittance Requirements" }).locator("xpath=following-sibling::*[1]"),
     };
   }
 
@@ -28,28 +24,23 @@ class BusinessDetailsModal {
     return this.elements();
   }
 
-  clickCloseModalButton() {
-    this.getElement().closeModalButton().click();
+  clickCloseModalButton(): Promise<void> {
+    return this.getElement().closeModalButton().click();
   }
 
   getBusinessPropertyData(propertyName: string) {
     return this.getElement().businessPropertyData(propertyName);
   }
 
-  getRemittanceRequirements(aliasVariable: string) {
-    pw.wrap([]).as(aliasVariable);
-    this.getElement()
-      .remittanceRequirementsList()
-      .then(($list) => {
-        $list.find("li").each(($li) => {
-          pw.wrap($li)
-            .invoke("text")
-            .then((text) => {
-              pw.get(`@${aliasVariable}`).then((remittanceRequirements) => {
-                pw.wrap([...remittanceRequirements, text]).as(aliasVariable);
-              });
-            });
-        });
-      });
+  async getRemittanceRequirements(_aliasVariable?: string) {
+    const listItems = this.getElement().remittanceRequirementsList().locator("li");
+    const count = await listItems.count();
+    const values: string[] = [];
+
+    for (let index = 0; index < count; index += 1) {
+      values.push(normalizeText(await listItems.nth(index).textContent()));
+    }
+
+    return values;
   }
 }

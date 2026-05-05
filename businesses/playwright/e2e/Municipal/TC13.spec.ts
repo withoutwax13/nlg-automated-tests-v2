@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 
@@ -33,8 +33,8 @@ const newBusinessData = {
 };
 
 test.describe("As a municipal user, I should be able to add a business.", () => {
-  test("Initiating test", () => {
-    pw.login({
+  test("Initiating test", async () => {
+    await login({
       accountType: "municipal",
       accountIndex: 4,
     });
@@ -45,7 +45,7 @@ test.describe("As a municipal user, I should be able to add a business.", () => 
     businessGrid.init();
     businessGrid.clickClearAllFiltersButton();
     businessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
-    pw.logout();
+    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
+    await logout();
   });
 });

@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
 import { AGS_COLUMNS as defaultColumns } from "../../objects/BusinessGrid";
 
@@ -8,50 +8,23 @@ const businessGrid = new BusinessGrid({
 });
 
 test.describe("As a user, I should be able to hide/show columns", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags", accountIndex: 9 });
-    defaultColumns.slice(2, 4).forEach((column) => {
-      businessGrid.init();
-      businessGrid.clickCustomizeTableViewButton();
-      businessGrid.verifyColumnVisibility(
-        column,
-        `${column.replace(/\s+/g, "")}VisibilityBeforeHide`
-      );
-      businessGrid.hideColumn(column);
-      businessGrid.init();
-      businessGrid.verifyColumnVisibility(
-        column,
-        `${column.replace(/\s+/g, "")}VisibilityAfterHide`
-      );
-      pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeHide`).then(
-        (beforeToggle) => {
-          pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterHide`).then(
-            (afterToggle) => {
-              expect(beforeToggle).to.not.equal(afterToggle);
-            }
-          );
-        }
-      );
-      businessGrid.clickCustomizeTableViewButton();
-      businessGrid.verifyColumnVisibility(
-        column,
-        `${column.replace(/\s+/g, "")}VisibilityBeforeShow`
-      );
-      businessGrid.showColumn(column);
-      businessGrid.init();
-      businessGrid.verifyColumnVisibility(
-        column,
-        `${column.replace(/\s+/g, "")}VisibilityAfterShow`
-      );
-      pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeShow`).then(
-        (beforeToggle) => {
-          pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterShow`).then(
-            (afterToggle) => {
-              expect(beforeToggle).to.not.equal(afterToggle);
-            }
-          );
-        }
-      );
-    });
+  test("Initiating test", async () => {
+    await login({ accountType: "ags", accountIndex: 9 });
+    for (const column of defaultColumns.slice(2, 4)) {
+      await businessGrid.init();
+      await businessGrid.clickCustomizeTableViewButton();
+      const beforeHide = await businessGrid.verifyColumnVisibility(column);
+      await businessGrid.hideColumn(column);
+      await businessGrid.init();
+      const afterHide = await businessGrid.verifyColumnVisibility(column);
+      expect(beforeHide).not.toEqual(afterHide);
+
+      await businessGrid.clickCustomizeTableViewButton();
+      const beforeShow = await businessGrid.verifyColumnVisibility(column);
+      await businessGrid.showColumn(column);
+      await businessGrid.init();
+      const afterShow = await businessGrid.verifyColumnVisibility(column);
+      expect(beforeShow).not.toEqual(afterShow);
+    }
   });
 });

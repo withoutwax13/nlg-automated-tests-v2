@@ -1,195 +1,133 @@
-/**
- * Page Object Model (POM) class representing the form.
- */
+import { Page } from "@playwright/test";
+import { resolvePage } from "../../pageContext";
+import { waitForLoading } from "../../utils/runtime";
+
 class Form {
-  /**
-   * Get the elements used in the form.
-   * @returns {Object} The elements used in the form.
-   */
-  private elements() {
+  private elements(page: Page = resolvePage()) {
     return {
-      nextButton: () => pw.get(".NLGButtonPrimary").contains("Next"),
-      formTitle: () => pw.get("h1"),
-      stepper: () => pw.get(".k-stepper").find("ol"),
-      backButton: () => pw.get(".NLGButtonSecondary").contains("Back"),
-      saveAndCloseButton: () =>
-        pw.get(".NLGButtonSecondary").contains("Save And Close"),
-      managerOperatorFullName: () =>
-        pw.get('span[data-cy="Manager/Operator Full Name-masked-input"]'),
-      managerOperatorTitle: () => pw.get('input[name="OperatorTitleRB"]'),
-      managerOperatorPhoneNumber: () => pw.get('input[name="OperatorPhoneRB"]'),
-      managerOperatorEmail: () =>
-        pw.get('input[name="OperatorEmailAddressRB"]'),
-      managerEmergencyPhoneNumber: () =>
-        pw.get('input[name="EmergencyPhoneNumberRB"]'),
-      agencyName: () => pw.get("#AgencyName"),
-      agencyTypeDropdown: () => pw.get('div[data-cy="Agency Type-dropdown"]'),
-      preparerFullName: () => pw.get("#TaxPreparerFullName"),
-      preparerTitle: () => pw.get("#Title"),
-      preparerPhone: () => pw.get("#TaxPreparerPhoneNumber"),
-      preparerEmailAddress: () => pw.get("#PreparerEmail"),
-      signature: () => pw.get("#Signature"),
-      agencyCheckbox: () =>
-        pw.get(
-          '*[data-cy="Check box if you are a representative of an Agency registering on behalf of a business owner.-checkbox"]'
-        ),
-      applicantInfoDateData: () => pw.get("#Date"),
+      nextButton: () => page.getByRole("button", { name: "Next" }),
+      formTitle: () => page.locator("h1"),
+      stepper: () => page.locator(".k-stepper ol"),
+      backButton: () => page.getByRole("button", { name: "Back" }),
+      saveAndCloseButton: () => page.getByRole("button", { name: "Save And Close" }),
+      applicantInfoDateData: () => page.locator("#Date"),
     };
   }
 
-  /**
-   * Get the elements used in the form.
-   * @returns {Object} The elements used in the form.
-   */
-  getElement() {
-    return this.elements();
+  getElement(page: Page = resolvePage()) {
+    return this.elements(page);
   }
 
-  /**
-   * Click the next button.
-   */
-  clickNextbutton(isFromFormSteps = true) {
-    pw.intercept("PATCH", "https://**.azavargovapps.com/filings/**/input?form-id=**").as("saveFormInput");
-    this.elements().nextButton().click();
+  async clickNextbutton(page: Page = resolvePage(), isFromFormSteps = true) {
+    await this.elements(page).nextButton().click();
     if (isFromFormSteps) {
-      pw.wait("@saveFormInput").its("response.statusCode").should("eq", 200);
+      await waitForLoading(page, 1);
     }
   }
 
-  /**
-   * Click the back button.
-   */
-  clickBackButton() {
-    this.elements().backButton().click();
+  async clickBackButton(page: Page = resolvePage()) {
+    await this.elements(page).backButton().click();
   }
 
-  /**
-   * Click the save and close button.
-   */
-  clickSaveAndCloseButton() {
-    this.elements().saveAndCloseButton().click();
+  async clickSaveAndCloseButton(page: Page = resolvePage()) {
+    await this.elements(page).saveAndCloseButton().click();
   }
 
-  /**
-   * Click a step in the stepper.
-   * @param {number} step - The step number to click.
-   */
-  clickStepInStepper(step: number) {
-    this.elements().stepper().find("li").eq(step).click();
+  async clickStepInStepper(page: Page = resolvePage(), step: number) {
+    await this.elements(page).stepper().locator("li").nth(step).click();
   }
 
-  /**
-   * Enter data into a form field.
-   * @param {string} selector - The selector of the form field.
-   * @param {string} method - The method to use (type, select, click).
-   * @param {any} [data] - The data to enter.
-   * @param {number} [selectorCountOnMultiple] - The index if multiple elements are matched.
-   */
-  enterData(
+  async enterData(
+    page: Page,
     selector: string,
     method: string,
-    data?: any,
+    data?: string,
     selectorCountOnMultiple?: number
   ) {
-    if (["select"].includes(method) && (data === undefined || data === "")) {
-      throw new Error(`Data is required for ${method} method`);
-    }
-
     const element =
       selectorCountOnMultiple === undefined
-        ? pw.get(selector)
-        : pw.get(selector).eq(selectorCountOnMultiple);
+        ? page.locator(selector)
+        : page.locator(selector).nth(selectorCountOnMultiple);
 
     switch (method) {
       case "type":
-        if (data) {
-          element.type(data);
+        if (data !== undefined) {
+          await element.fill(data);
         }
         break;
       case "select":
-        element.click();
-        pw.get("li").contains(data).click();
+        await element.click();
+        await page.locator("li").filter({ hasText: data ?? "" }).first().click();
         break;
       case "click":
-        element.click();
+        await element.click();
         break;
       default:
         throw new Error(`Unsupported method: ${method}`);
     }
   }
 
-  handleSelectingUnavailableFilingPeriod(_counter: number) {
-    let counter = _counter;
-    const getValidDate = (): string => {
+  async handleSelectingUnavailableFilingPeriod(page: Page = resolvePage(), counter: number) {
+    const getValidDate = (monthsBack: number): string => {
       const date = new Date();
-      date.setMonth(date.getMonth() - counter);
-
-      const options = { year: "numeric", month: "long" } as const;
-      return date.toLocaleDateString("en-US", options);
+      date.setMonth(date.getMonth() - monthsBack);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+      });
     };
 
-    this.enterData(
+    await this.enterData(
+      page,
       '*[data-cy="Filing Period-dropdown"]',
       "select",
-      getValidDate()
+      getValidDate(counter)
     );
-    pw.waitForLoading();
-    pw.get("div").then(($el) => {
-      if ($el.text().includes("You have already filed for this period")) {
-        this.handleSelectingUnavailableFilingPeriod(++counter);
-      }
-    });
+    await waitForLoading(page);
+
+    if ((await page.getByText("You have already filed for this period").count()) > 0) {
+      await this.handleSelectingUnavailableFilingPeriod(page, counter + 1);
+    }
   }
 
-  enterBasicInformation(data?: any) {
-    pw.wait("@createFiling").its("response.statusCode").should("eq", 201);
-    pw.wait("@visitFormPage").its("response.statusCode").should("eq", 200);
-    this.handleSelectingUnavailableFilingPeriod(1); // 4 months ago
-    // this.enterData(
-    //   '*[data-cy="Business Location State-dropdown"]',
-    //   "select",
-    //   data ? data : "AK"
-    // );
-    this.enterData("#FEIN", "type", data ? data : "123456789");
-    this.enterData("#IllinoisBusinessTax", "type", data ? data : "12345678");
-    this.enterData(
+  async enterBasicInformation(page: Page = resolvePage(), data?: string) {
+    await this.handleSelectingUnavailableFilingPeriod(page, 1);
+    await this.enterData(page, "#FEIN", "type", data ?? "123456789");
+    await this.enterData(page, "#IllinoisBusinessTax", "type", data ?? "12345678");
+    await this.enterData(
+      page,
       '*[data-cy="No, I remit taxes for only ONE location on my ST-1 form-radio-button"]',
       "click"
     );
-    this.enterData(
+    await this.enterData(
+      page,
       '*[data-cy="No, I did not file a State ST-1-X form for this filing period-radio-button"]',
       "click"
     );
   }
 
-  enterTaxInformation(data?: any) {
-    this.enterData("#TotalSales", "type", data ? data : "123456");
+  async enterTaxInformation(page: Page = resolvePage(), data?: string) {
+    await this.enterData(page, "#TotalSales", "type", data ?? "123456");
   }
 
-  enterPreparerInformation(data?: any) {
-    this.enterData("#TaxPreparerFullName", "type", data ? data : "John Doe");
-    this.enterData("#Title", "type", data ? data : "Tax Preparer");
-    this.enterData(
-      "#TaxPreparerPhoneNumber",
-      "type",
-      data ? data : "1234567890"
-    );
-    this.enterData("#PreparerEmail", "type", data ? data : "test1@test.com");
-    this.enterData("#Signature", "type", data ? data : "John Doe");
+  async enterPreparerInformation(page: Page = resolvePage(), data?: string) {
+    await this.enterData(page, "#TaxPreparerFullName", "type", data ?? "John Doe");
+    await this.enterData(page, "#Title", "type", data ?? "Tax Preparer");
+    await this.enterData(page, "#TaxPreparerPhoneNumber", "type", data ?? "1234567890");
+    await this.enterData(page, "#PreparerEmail", "type", data ?? "test1@test.com");
+    await this.enterData(page, "#Signature", "type", data ?? "John Doe");
   }
 
-  saveAndCloseFiling() {
-    this.getElement().saveAndCloseButton().click();
-    // TODO: Add save and close modal POM
-    pw.get('.k-actions').find('button').contains('Save and Close').click();
-    pw.waitForLoading();
+  async saveAndCloseFiling(page: Page = resolvePage()) {
+    await this.getElement(page).saveAndCloseButton().click();
+    await page.locator(".k-actions button").filter({ hasText: "Save and Close" }).click();
+    await waitForLoading(page);
   }
 
-  deleteAndCloseFiling() {
-    this.getElement().saveAndCloseButton().click();
-    // TODO: Add save and close modal POM
-    pw.get('.k-actions').find('button').contains('Delete And Close').click();
-    pw.waitForLoading();
+  async deleteAndCloseFiling(page: Page = resolvePage()) {
+    await this.getElement(page).saveAndCloseButton().click();
+    await page.locator(".k-actions button").filter({ hasText: "Delete And Close" }).click();
+    await waitForLoading(page);
   }
 }
 

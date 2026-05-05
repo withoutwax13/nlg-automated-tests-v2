@@ -1,13 +1,16 @@
+import { expect, type Locator, type Page } from "@playwright/test";
 import {
   getOrderOfColumns,
-  validateFilterOperation,
   getVisibilityStatusOfColumns,
+  validateFilterOperation,
 } from "../../utils/Grid";
+import { currentPage, fillDateInput, listItem, waitForLoading } from "../../support/runtime";
 import BusinessDeleteModal from "../BusinessDeleteModal";
 import GridSetting from "../GridSetting";
 import SetBusinessStatusModal from "../SetBusinessStatusModal";
 
 const VALID_ITEMS_PER_PAGE = [5, 10, 20, 50];
+
 export const AGS_COLUMNS = [
   "Actions",
   "Business Name",
@@ -48,6 +51,7 @@ export const AGS_COLUMNS = [
   "Manager Phone Number",
   "Emergency Phone Number",
 ];
+
 export const TAXPAYER_COLUMNS = [
   "Actions",
   "Government Name",
@@ -83,6 +87,7 @@ export const TAXPAYER_COLUMNS = [
   "Manager Phone Number",
   "Emergency Phone Number",
 ];
+
 export const MUNICIPAL_COLUMNS = [
   "Actions",
   "Business Name",
@@ -93,7 +98,6 @@ export const MUNICIPAL_COLUMNS = [
   "Delinquency Start Date",
   "FEIN",
   "Close Date",
-
   "Location Address 1",
   "Location Address 2",
   "Location City",
@@ -137,672 +141,523 @@ class BusinessGrid {
   defaultGridColumnAlias: string;
   userType: string;
   sortType: string;
-  municipalitySelection: string;
+  municipalitySelection?: string;
   businessDeleteModal: BusinessDeleteModal;
+  private columnIndexes: Record<string, number> = {};
+  private columnVisibility: Record<string, boolean> = {};
 
   constructor(props: { userType: string; municipalitySelection?: string }) {
     this.userType = props.userType;
     this.defaultGridColumnAlias = `${this.userType}_defaultBusinessGrid`;
     this.sortType = "default";
     this.municipalitySelection = props.municipalitySelection;
-    this.businessDeleteModal = new BusinessDeleteModal({
-      userType: this.userType,
-    });
+    this.businessDeleteModal = new BusinessDeleteModal({ userType: this.userType });
   }
+
+  private page(): Page {
+    return currentPage();
+  }
+
+  private expectedColumns() {
+    if (this.userType === "taxpayer") {
+      return TAXPAYER_COLUMNS;
+    }
+
+    if (this.userType === "municipal") {
+      return AGS_COLUMNS;
+    }
+
+    return AGS_COLUMNS;
+  }
+
+  private normalize(value: string) {
+    return value.replace(/\s+/g, " ").trim();
+  }
+
+  private async refreshGridMetadata(resetSavedGridSettingsInMemory?: boolean) {
+    if (!Object.keys(this.columnIndexes).length || resetSavedGridSettingsInMemory) {
+      this.columnIndexes = await getOrderOfColumns(this.expectedColumns());
+    }
+
+    if (!Object.keys(this.columnVisibility).length || resetSavedGridSettingsInMemory) {
+      this.columnVisibility = await getVisibilityStatusOfColumns(this.expectedColumns());
+    }
+  }
+
+  private async getColumnIndex(columnName: string) {
+    await this.refreshGridMetadata();
+    const columnIndex = this.columnIndexes[columnName];
+
+    if (columnIndex === undefined) {
+      throw new Error(`Column not found: ${columnName}`);
+    }
+
+    return columnIndex;
+  }
+
   private elements() {
     return {
-      pageTitle: () => pw.get("h2"),
-      pageHelpContent: () => this.getElement().pageTitle().next(),
-      anyList: () => pw.get("li"),
-      noRecordFoundComponent: () => pw.get(".k-grid-norecords-template"),
-      addBusinessButton: () =>
-        pw.get(".NLGNewLayoutSecondaryButton").contains("Add a Business"),
-      uploadBusinessButton: () =>
-        pw.get(".NLGNewLayoutSecondaryButton").contains("Upload Businesses"),
-      exportButton: () => pw.get(".NLGNewLayoutSecondaryButton").contains("Export"),
-      resetDataButton: () =>
-        pw.get(".NLGNewLayoutSecondaryButton").contains("Reset All Data"),
-      businessConfigurationButton: () =>
-        pw.get(".NLGNewLayoutSecondaryButton").find(".a-magnifying-glass-plus"),
-      searchBox: () => pw.get("span").find(".fa-magnifying-glass").parent(),
-      columns: () => pw.get("thead").find("tr").find("th"),
-      rows: () =>
-        pw.get("tbody").then(($tbody) => {
-          if ($tbody.find("tr").length !== 0) {
-            return $tbody.find("tr");
-          }
-        }),
-      customizeTableViewButton: () =>
-        pw.get("*").contains("Customize"),
-      columnFilter: () => this.getElement().columns().find("span").find("a"),
-      columnSort: () => this.getElement().columns().find("a").find("i"),
-      specificColumnFilter: (columnOrder: number) =>
-        this.getElement().columns().eq(columnOrder).find("span").find("a"),
-      specificColumnSort: (columnOrder: number) =>
-        this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
-      itemsPerPageDropdownItem: (itemNumber: number) =>
-        pw.get("li").contains(itemNumber),
-      pagination: () => pw.get(".k-pager-numbers-wrap"),
-      goToFirstPageButton: () =>
-        this.getElement().pagination().find("button").eq(0),
-      goToPreviousPageButton: () =>
-        this.getElement().pagination().find("button[").eq(1),
-      goToNextPageButton: () =>
-        this.getElement()
-          .pagination()
-          .find('button[title="Go to the next page"]'),
-      goToLastPageButton: () =>
-        this.getElement()
-          .pagination()
-          .find('button[title="Go to the last page"]'),
-      filterOperationsDropdown: () =>
-        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
+      pageTitle: () => this.page().locator("h2").first(),
+      pageHelpContent: () => this.getElement().pageTitle().locator("xpath=following-sibling::*[1]").first(),
+      anyList: () => this.page().locator("li"),
+      noRecordFoundComponent: () => this.page().locator(".k-grid-norecords-template").first(),
+      addBusinessButton: () => this.page().locator(".NLGNewLayoutSecondaryButton").filter({ hasText: "Add a Business" }).first(),
+      uploadBusinessButton: () => this.page().locator(".NLGNewLayoutSecondaryButton").filter({ hasText: "Upload Businesses" }).first(),
+      exportButton: () => this.page().locator(".NLGNewLayoutSecondaryButton").filter({ hasText: "Export" }).first(),
+      resetDataButton: () => this.page().locator(".NLGNewLayoutSecondaryButton").filter({ hasText: "Reset All Data" }).first(),
+      businessConfigurationButton: () => this.page().locator(".NLGNewLayoutSecondaryButton .a-magnifying-glass-plus").first(),
+      searchBox: () => this.page().locator("span").filter({ has: this.page().locator(".fa-magnifying-glass") }).first(),
+      columns: () => this.page().locator("thead tr th"),
+      rows: () => this.page().locator("tbody tr"),
+      customizeTableViewButton: () => this.page().getByText("Customize", { exact: false }).first(),
+      specificColumnFilter: (columnOrder: number) => this.getElement().columns().nth(columnOrder).locator("span a").first(),
+      itemsPerPageDropdown: () => this.page().locator(".k-dropdownlist").first(),
+      itemsPerPageDropdownItem: (itemNumber: number) => this.page().locator("li").filter({ hasText: String(itemNumber) }).first(),
+      pagination: () => this.page().locator(".k-pager-numbers-wrap").first(),
+      filterOperationsDropdown: () => this.page().locator(".k-filter-menu-container .k-dropdownlist").first(),
       filterOperationsDropdownItem: (item: string) =>
-        cy
-          .get(".k-list-ul")
-          .find("li")
-          .find(".k-list-item-text")
-          .contains(item),
-      filterValueInput: () =>
-        pw.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => pw.get(".k-dateinput"),
-      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
-      filterFilterButton: () =>
-        cy
-          .get(".k-filter-menu-container")
-          .find(".k-actions")
-          .find(".k-button")
-          .contains("Filter"),
-      searchMunicipalityDropdown: () =>
-        pw.get('input[placeholder="Search government ..."]'),
-      anyButton: () => pw.get("button"),
-      clearAllFiltersButton: () => pw.get("*").contains("Clear All"),
-      toastComponent: () => pw.get(".Toastify"),
-      gridPopup: () => pw.get(".k-popup"),
-      gridPopupTitle: () =>
-        this.getElement().gridPopup().find("div").find("div").find("div"),
-      gridPopupContent: () => this.getElement().gridPopupTitle().next(),
+        this.page().locator(".k-list-ul .k-list-item-text").filter({ hasText: item }).first(),
+      filterValueInput: () => this.page().locator(".k-filter-menu-container .k-input").first(),
+      filterValueDateInput: () => this.page().locator(".k-filter-menu-container .k-dateinput input").first(),
+      filterMultiSelectItem: () => this.page().locator(".k-multicheck-wrap li"),
+      filterFilterButton: () => this.page().locator(".k-filter-menu-container .k-actions .k-button").filter({ hasText: "Filter" }).first(),
+      searchMunicipalityDropdown: () => this.page().locator('input[placeholder="Search government ..."]'),
+      anyButton: () => this.page().locator("button"),
+      clearAllFiltersButton: () => this.page().getByText("Clear All", { exact: false }).first(),
+      toastComponent: () => this.page().locator(".Toastify").first(),
+      gridPopup: () => this.page().locator(".k-popup").last(),
+      gridPopupTitle: () => this.getElement().gridPopup().locator(".k-popup, .k-animation-container").locator("div").first(),
+      gridPopupContent: () => this.getElement().gridPopup(),
       gridPopupSelectionItem: (labelName: string) =>
-        this.getElement()
-          .gridPopupContent()
-          .find(".k-label")
-          .contains(labelName)
-          .parent()
-          .scrollIntoView(),
-      gridPopupDateInput: () =>
-        this.getElement()
-          .gridPopupTitle()
-          .next()
-          .find(".k-dateinput")
-          .find("input"),
-      gridPopupSaveButton: () =>
-        this.getElement().gridPopup().find("button").contains("Save"),
-      gridPopupCancelButton: () =>
-        this.getElement().gridPopup().find("button").contains("Cancel"),
-      activeFilterChipsContainer: () =>
-        pw.get("label").contains("Filtered By:").parent(),
-      activeFilterChipsLabel: () => pw.get("label").contains("Filtered By:"),
+        this.getElement().gridPopup().locator(".k-label").filter({ hasText: labelName }).first().locator("xpath=.."),
+      gridPopupDateInput: () => this.getElement().gridPopup().locator(".k-dateinput input").first(),
+      gridPopupSaveButton: () => this.getElement().gridPopup().locator("button").filter({ hasText: "Save" }).first(),
+      gridPopupCancelButton: () => this.getElement().gridPopup().locator("button").filter({ hasText: "Cancel" }).first(),
+      activeFilterChipsContainer: () => this.page().locator("label").filter({ hasText: "Filtered By:" }).first().locator("xpath=.."),
+      activeFilterChipsLabel: () => this.page().locator("label").filter({ hasText: "Filtered By:" }).first(),
       activeFilterChip: (columnName: string) =>
-        this.getElement()
-          .activeFilterChipsLabel()
-          .parent()
-          .next()
-          .find("div")
-          .contains(columnName),
+        this.getElement().activeFilterChipsLabel().locator("xpath=../following-sibling::*[1]").locator("div").filter({ hasText: columnName }).first(),
     };
   }
 
-  init(resetSavedGridSettingsInMemory?: boolean, isFirstTimeGridSettingsLoading: boolean = true) {
-    pw.intercept(
-      "GET",
-      "https://**.azavargovapps.com/businesses/municipalityBusinessConfig/**"
-    ).as("govBusinessConfig");
-    pw.intercept("GET", "https://**.lambda-url.us-east-1.on.aws/?municipalityId=**").as("lambdaRequestMunicipalityId");
-    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/ActiveTaxAndFeesSubscriptions").as("activeTaxAndFeesSubscriptions");
-    pw.intercept(
-      "GET",
-      "https://**.azavargovapps.com/users/usersGridSettings/**"
-    ).as("userGridSettings");
-    pw.intercept("GET", "https://**.azavargovapps.com/users/**").as("userDetailsRequest");
-    pw.visit("/BusinessesApp/BusinessesList");
-    if (this.userType === "ags") {
-      pw.wait("@activeTaxAndFeesSubscriptions");
-      pw.get("@activeTaxAndFeesSubscriptions").its("response.statusCode").should("eq", 200);
-    }
-    const isArrakisMunicipality = String(this.municipalitySelection).includes(
-      "Arrakis"
-    );
-    switch (this.userType) {
-      case "taxpayer":
-        pw.wait("@userDetailsRequest");
-        pw.get("@userDetailsRequest").its("response.statusCode").should("eq", 200);
-        if (isFirstTimeGridSettingsLoading) {
-          pw.get("@userGridSettings").its("response.statusCode").should("eq", 200);
-        }
-        this.getElement().noRecordFoundComponent().should("not.exist");
-        getOrderOfColumns(
-          TAXPAYER_COLUMNS,
-          this.defaultGridColumnAlias,
-          resetSavedGridSettingsInMemory ? true : false
-        );
-        getVisibilityStatusOfColumns(
-          TAXPAYER_COLUMNS,
-          `${this.defaultGridColumnAlias}_visibility`
-        );
-        break;
-      case "municipal":
-        pw.wait("@govBusinessConfig");
-        pw.wait("@lambdaRequestMunicipalityId");
-        if (isFirstTimeGridSettingsLoading) {
-          pw.wait("@userGridSettings");
-        }
-        pw.get("@govBusinessConfig").its("response.statusCode").should("eq", 200);
-        pw.get("@lambdaRequestMunicipalityId").its("response.statusCode").should("eq", 200);
-        if (isFirstTimeGridSettingsLoading) {
-          pw.get("@userGridSettings").its("response.statusCode").should("eq", 200);
-        }
-        this.getElement().noRecordFoundComponent().should("not.exist");
-        getOrderOfColumns(
-          AGS_COLUMNS,
-          this.defaultGridColumnAlias,
-          resetSavedGridSettingsInMemory ? true : false
-        );
-        getVisibilityStatusOfColumns(
-          AGS_COLUMNS,
-          `${this.defaultGridColumnAlias}_visibility`
-        );
-        break;
-      case "ags":
-        this.searchMunicipality(this.municipalitySelection);
-        pw.wait("@govBusinessConfig");
-        pw.wait("@lambdaRequestMunicipalityId");
-        if (isFirstTimeGridSettingsLoading) {
-          pw.wait("@userGridSettings");
-        }
-        pw.get("@govBusinessConfig").its("response.statusCode").should("eq", 200);
-        pw.get("@lambdaRequestMunicipalityId").its("response.statusCode").should("eq", 200);
-        if (isFirstTimeGridSettingsLoading) {
-          pw.get("@userGridSettings").its("response.statusCode").should("eq", 200);
-        }
+  async init(resetSavedGridSettingsInMemory?: boolean, isFirstTimeGridSettingsLoading = true) {
+    const govBusinessConfig = this.page()
+      .waitForResponse((response) => response.request().method() === "GET" && response.url().includes("/businesses/municipalityBusinessConfig/"))
+      .catch(() => undefined);
+    const municipalityId = this.page()
+      .waitForResponse((response) => response.request().method() === "GET" && response.url().includes("lambda-url.us-east-1.on.aws/?municipalityId="))
+      .catch(() => undefined);
+    const activeTaxAndFees = this.page()
+      .waitForResponse((response) => response.request().method() === "GET" && response.url().includes("/municipalities/ActiveTaxAndFeesSubscriptions"))
+      .catch(() => undefined);
+    const userGridSettings = isFirstTimeGridSettingsLoading
+      ? this.page()
+          .waitForResponse((response) => response.request().method() === "GET" && response.url().includes("/users/usersGridSettings/"))
+          .catch(() => undefined)
+      : Promise.resolve(undefined);
+    const userDetailsRequest = this.page()
+      .waitForResponse((response) => response.request().method() === "GET" && /\/users\/[^/]+/.test(response.url()))
+      .catch(() => undefined);
 
+    await this.page().goto("/BusinessesApp/BusinessesList");
+
+    if (this.userType === "ags") {
+      const activeResponse = await activeTaxAndFees;
+      if (activeResponse) {
+        expect(activeResponse.status()).toBe(200);
+      }
+    }
+
+    const isArrakisMunicipality = String(this.municipalitySelection).includes("Arrakis");
+
+    switch (this.userType) {
+      case "taxpayer": {
+        const detailsResponse = await userDetailsRequest;
+        if (detailsResponse) {
+          expect(detailsResponse.status()).toBe(200);
+        }
+        const settingsResponse = await userGridSettings;
+        if (settingsResponse) {
+          expect(settingsResponse.status()).toBe(200);
+        }
+        await expect(this.getElement().noRecordFoundComponent()).not.toBeVisible({ timeout: 1000 }).catch(() => undefined);
+        break;
+      }
+      case "municipal": {
+        const [configResponse, municipalityResponse, settingsResponse] = await Promise.all([
+          govBusinessConfig,
+          municipalityId,
+          userGridSettings,
+        ]);
+        if (configResponse) expect(configResponse.status()).toBe(200);
+        if (municipalityResponse) expect(municipalityResponse.status()).toBe(200);
+        if (settingsResponse) expect(settingsResponse.status()).toBe(200);
+        await expect(this.getElement().noRecordFoundComponent()).not.toBeVisible({ timeout: 1000 }).catch(() => undefined);
+        break;
+      }
+      case "ags": {
+        if (this.municipalitySelection) {
+          await this.searchMunicipality(this.municipalitySelection);
+        }
+        const [configResponse, municipalityResponse, settingsResponse] = await Promise.all([
+          govBusinessConfig,
+          municipalityId,
+          userGridSettings,
+        ]);
+        if (configResponse) expect(configResponse.status()).toBe(200);
+        if (municipalityResponse) expect(municipalityResponse.status()).toBe(200);
+        if (settingsResponse) expect(settingsResponse.status()).toBe(200);
         if (isArrakisMunicipality) {
-          this.getElement().noRecordFoundComponent().should("not.exist");
-          getOrderOfColumns(
-            AGS_COLUMNS,
-            this.defaultGridColumnAlias,
-            resetSavedGridSettingsInMemory ? true : false
-          );
-          getVisibilityStatusOfColumns(
-            AGS_COLUMNS,
-            `${this.defaultGridColumnAlias}_visibility`
-          );
+          await expect(this.getElement().noRecordFoundComponent()).not.toBeVisible({ timeout: 1000 }).catch(() => undefined);
         }
         break;
+      }
       default:
         break;
     }
+
+    await this.refreshGridMetadata(resetSavedGridSettingsInMemory);
   }
 
   getElement() {
     return this.elements();
   }
 
-  searchMunicipality(municipalityName: string) {
-    this.getElement().searchMunicipalityDropdown().type(municipalityName);
-    this.getElement().anyList().contains(municipalityName).click();
+  async searchMunicipality(municipalityName: string) {
+    await this.getElement().searchMunicipalityDropdown().fill(municipalityName);
+    await listItem(municipalityName).click();
   }
 
-  private clickColumn(index: number) {
-    this.getElement().columns().eq(index).click();
+  private async clickColumn(index: number) {
+    await this.getElement().columns().nth(index).click();
   }
 
-  private handleDBASorting(index: number, isAscending: boolean) {
+  private async handleDBASorting(index: number, isAscending: boolean) {
     if (!isAscending && this.sortType === "default") {
-      this.clickColumn(index);
+      await this.clickColumn(index);
       this.sortType = "descending";
     } else if (isAscending && this.sortType === "descending") {
-      this.clickColumn(index);
+      await this.clickColumn(index);
       this.sortType = "ascending";
     }
   }
 
-  private handleGeneralSorting(index: number, isAscending: boolean) {
-    if (
-      isAscending &&
-      (this.sortType === "default" || this.sortType === "descending")
-    ) {
-      this.clickColumn(index);
+  private async handleGeneralSorting(index: number, isAscending: boolean) {
+    if (isAscending && (this.sortType === "default" || this.sortType === "descending")) {
+      await this.clickColumn(index);
       this.sortType = "ascending";
     } else if (!isAscending && this.sortType === "ascending") {
-      this.clickColumn(index);
+      await this.clickColumn(index);
       this.sortType = "descending";
     }
   }
 
-  sortColumn(isAscending: boolean, columnName: string) {
-    pw.get(`@${this.defaultGridColumnAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[columnName];
-        this.clickColumn(columnIndex);
-        if (columnName === "DBA") {
-          this.handleDBASorting(columnIndex, isAscending);
-        } else {
-          this.handleGeneralSorting(columnIndex, isAscending);
-        }
-      });
-  }
-
-  private handleTextFilter(
-    columnIndex: number,
-    filterValue: string,
-    filterOperation: string
-  ) {
-    validateFilterOperation("text", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    this.getElement().filterOperationsDropdown().click();
-    this.getElement().filterOperationsDropdownItem(filterOperation).click();
-    if (filterOperation !== "Is not null" && filterOperation !== "Is null") {
-      this.getElement().filterValueInput().type(filterValue);
+  async sortColumn(isAscending: boolean, columnName: string) {
+    const columnIndex = await this.getColumnIndex(columnName);
+    await this.clickColumn(columnIndex);
+    if (columnName === "DBA") {
+      await this.handleDBASorting(columnIndex, isAscending);
+    } else {
+      await this.handleGeneralSorting(columnIndex, isAscending);
     }
-    this.getElement().filterFilterButton().click();
   }
 
-  private handleDateFilter(
-    columnIndex: number,
-    filterValue: string,
-    filterOperation: string
-  ) {
+  private async handleTextFilter(columnIndex: number, filterValue: string, filterOperation: string) {
+    validateFilterOperation("text", filterOperation);
+    await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await this.getElement().filterOperationsDropdown().click();
+    await this.getElement().filterOperationsDropdownItem(filterOperation).click();
+    if (filterOperation !== "Is not null" && filterOperation !== "Is null") {
+      await this.getElement().filterValueInput().fill(filterValue);
+    }
+    await this.getElement().filterFilterButton().click();
+  }
+
+  private async handleDateFilter(columnIndex: number, filterValue: string, filterOperation: string) {
     validateFilterOperation("date", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    this.getElement().filterOperationsDropdown().click();
-    this.getElement().filterOperationsDropdownItem(filterOperation).click();
-    this.getElement()
-      .filterValueDateInput()
-      .type(filterValue.split("/").join("{rightarrow}"));
-    this.getElement().filterFilterButton().click();
+    await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await this.getElement().filterOperationsDropdown().click();
+    await this.getElement().filterOperationsDropdownItem(filterOperation).click();
+    await this.getElement().filterValueDateInput().fill(filterValue);
+    await this.getElement().filterFilterButton().click();
   }
 
-  private handleNumberFilter(
-    columnIndex: number,
-    filterValue: string,
-    filterOperation: string
-  ) {
+  private async handleNumberFilter(columnIndex: number, filterValue: string, filterOperation: string) {
     validateFilterOperation("number", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    this.getElement().filterOperationsDropdown().click();
-    this.getElement().filterOperationsDropdownItem(filterOperation).click();
-    this.getElement().filterValueInput().type(filterValue);
-    this.getElement().filterFilterButton().click();
+    await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await this.getElement().filterOperationsDropdown().click();
+    await this.getElement().filterOperationsDropdownItem(filterOperation).click();
+    await this.getElement().filterValueInput().fill(filterValue);
+    await this.getElement().filterFilterButton().click();
   }
 
-  private handleMultiSelectFilter(columnIndex: number, filterValue: string) {
-    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    this.getElement().filterMultiSelectItem().contains(filterValue).click();
-    this.getElement().filterFilterButton().click();
+  private async handleMultiSelectFilter(columnIndex: number, filterValue: string) {
+    await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await this.getElement().filterMultiSelectItem().filter({ hasText: filterValue }).first().click();
+    await this.getElement().filterFilterButton().click();
   }
 
-  isGridFiltered() {
-    return pw.get("body").then($body => {
-      if ($body.find("label:contains('Filtered By:')").length > 0) {
-        return pw.wrap(true);
-      } else {
-        return pw.wrap(false);
-      }
-    });
+  async isGridFiltered() {
+    return (await this.getElement().activeFilterChipsLabel().count()) > 0;
   }
 
-  filterColumn(
+  async isNoRecordsVisible() {
+    return await this.getElement().noRecordFoundComponent().isVisible().catch(() => false);
+  }
+
+  async filterColumn(
     columnName: string,
     filterValue: string,
-    filterType: string = "text",
-    filterOperation: string = "Contains"
+    filterType = "text",
+    filterOperation = "Contains",
   ) {
-    pw.get(`@${this.defaultGridColumnAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[columnName];
-        switch (filterType) {
-          case "text":
-            pw.wait(1500); // wait to avoid jquery delay issue causing flakiness
-            this.handleTextFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "date":
-            pw.wait(1500); // wait to avoid jquery delay issue causing flakiness
-            this.handleDateFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "number":
-            pw.wait(1500); // wait to avoid jquery delay issue causing flakiness
-            this.handleNumberFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "multi-select":
-            pw.wait(1500); // wait to avoid jquery delay issue causing flakiness
-            this.handleMultiSelectFilter(columnIndex, filterValue);
-            break;
-          default:
-            break;
-        }
-      });
+    const columnIndex = await this.getColumnIndex(columnName);
+    await this.page().waitForTimeout(1500);
+
+    switch (filterType) {
+      case "text":
+        await this.handleTextFilter(columnIndex, filterValue, filterOperation);
+        break;
+      case "date":
+        await this.handleDateFilter(columnIndex, filterValue, filterOperation);
+        break;
+      case "number":
+        await this.handleNumberFilter(columnIndex, filterValue, filterOperation);
+        break;
+      case "multi-select":
+        await this.handleMultiSelectFilter(columnIndex, filterValue);
+        break;
+      default:
+        throw new Error(`Unsupported filter type: ${filterType}`);
+    }
   }
 
-  changeItemsPerPage(itemNumber: number) {
+  async changeItemsPerPage(itemNumber: number) {
     if (!VALID_ITEMS_PER_PAGE.includes(itemNumber)) {
       throw new Error("Invalid items per page number");
     }
-    this.getElement().itemsPerPageDropdown().click();
-    this.getElement().itemsPerPageDropdownItem(itemNumber).click();
+    await this.getElement().itemsPerPageDropdown().click();
+    await this.getElement().itemsPerPageDropdownItem(itemNumber).click();
   }
 
-  clickCustomizeTableViewButton() {
-    this.getElement().customizeTableViewButton().click();
+  async clickCustomizeTableViewButton() {
+    await this.getElement().customizeTableViewButton().click();
   }
 
-  clickClearAllFiltersButton() {
-    this.getElement().clearAllFiltersButton().click();
+  async clickClearAllFiltersButton() {
+    if (await this.getElement().clearAllFiltersButton().isVisible().catch(() => false)) {
+      await this.getElement().clearAllFiltersButton().click();
+    }
   }
 
-  getDataOfColumn(
-    targetColumnName: string,
-    anchorColumnName: string,
-    anchorValue: string,
-    targetColumnDataAlias: string
-  ) {
-    this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    pw.get(`@${this.defaultGridColumnAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[targetColumnName];
-        const anchorColumnIndex = columnIndexes[anchorColumnName];
-        this.getElement()
-          .rows()
-          .each(($row) => {
-            const $columns = $row.find("td");
-            if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              pw.wrap($columns.eq(columnIndex).text()).as(
-                targetColumnDataAlias
-              );
-            }
-          });
-      });
+  async getDataOfColumn(targetColumnName: string, anchorColumnName: string, anchorValue: string) {
+    await this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
+    const targetColumn = await this.getElementOfColumn(targetColumnName, anchorColumnName, anchorValue);
+    return this.normalize(await targetColumn.innerText());
   }
 
-  getElementOfColumn(
-    targetColumnName: string,
-    anchorColumnName: string,
-    anchorValue: string,
-    targetColumnElementAlias: string
-  ) {
-    this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    pw.get(`@${this.defaultGridColumnAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[targetColumnName];
-        const anchorColumnIndex = columnIndexes[anchorColumnName];
-        this.getElement()
-          .rows()
-          .each(($row) => {
-            const $columns = $row.find("td");
-            console.log(columnIndex);
-            console.log($columns.eq(anchorColumnIndex));
-            if (
-              String($columns.eq(anchorColumnIndex).text())
-                .replace(/\s+/g, " ")
-                .trim() === anchorValue
-            ) {
-              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
-            }
-          });
-      });
+  async getElementOfColumn(targetColumnName: string, anchorColumnName: string, anchorValue: string) {
+    const columnIndex = await this.getColumnIndex(targetColumnName);
+    const anchorColumnIndex = await this.getColumnIndex(anchorColumnName);
+    const rows = this.getElement().rows();
+    const rowCount = await rows.count();
+
+    for (let index = 0; index < rowCount; index += 1) {
+      const row = rows.nth(index);
+      const columns = row.locator("td");
+      const cellText = this.normalize(await columns.nth(anchorColumnIndex).innerText());
+      if (cellText === anchorValue) {
+        return columns.nth(columnIndex);
+      }
+    }
+
+    throw new Error(`Unable to find row with ${anchorColumnName}=${anchorValue}`);
   }
 
-  clickAddBusinessButton() {
-    this.getElement().addBusinessButton().click();
+  async clickAddBusinessButton() {
+    await this.getElement().addBusinessButton().click();
   }
 
-  clickExportButton() {
-    this.getElement().exportButton().click();
+  async clickExportButton() {
+    await this.getElement().exportButton().click();
   }
 
-  clickUploadBusinessButton() {
-    this.getElement().uploadBusinessButton().click();
+  async clickUploadBusinessButton() {
+    await this.getElement().uploadBusinessButton().click();
   }
 
-  clickResetDataButton() {
-    this.getElement().resetDataButton().click();
+  async clickResetDataButton() {
+    await this.getElement().resetDataButton().click();
   }
 
-  clickBusinessConfigurationButton() {
-    this.getElement().businessConfigurationButton().click();
+  async clickBusinessConfigurationButton() {
+    await this.getElement().businessConfigurationButton().click();
   }
 
-  deleteBusiness(businessDba: string) {
-    pw.intercept("DELETE", this.userType !== "taxpayer" ? "https://**.azavargovapps.com/businesses/municipalityBusiness/**" : "https://**.azavargovapps.com/businesses/taxpayerBusiness/**").as("deleteBusiness");
-    this.getElementOfColumn("Actions", "DBA", businessDba, "actionButton");
-    pw.get("@actionButton").click();
-    this.getElement().anyList().contains("Delete").click();
-    this.businessDeleteModal.clickDeleteButton();
-    this.getElement().toastComponent().should("exist");
-    pw.wait("@deleteBusiness");
-    pw.get("@deleteBusiness").its("response.statusCode").should("eq", 200);
-  }
-
-  viewBusinessDetails(businessDba: string) {
-    this.getElementOfColumn(
-      "Actions",
-      "DBA",
-      businessDba,
-      "actionButton"
+  async deleteBusiness(businessDba: string) {
+    const deleteBusiness = this.page().waitForResponse(
+      (response) =>
+        response.request().method() === "DELETE" &&
+        response.url().includes(this.userType !== "taxpayer" ? "/businesses/municipalityBusiness/" : "/businesses/taxpayerBusiness/"),
     );
-    pw.get("@actionButton").click();
-    this.getElement().anyList().contains("View Details").click();
+    const actionButton = await this.getElementOfColumn("Actions", "DBA", businessDba);
+    await actionButton.click();
+    await this.getElement().anyList().filter({ hasText: "Delete" }).first().click();
+    await this.businessDeleteModal.clickDeleteButton();
+    expect((await deleteBusiness).status()).toBe(200);
   }
 
-  setDelinquencyStartDate(
-    businessDba: string,
-    date: { month: number; date: number; year: number }
-  ) {
-    pw.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("updateBusiness");
-    this.getElementOfColumn(
-      "Delinquency Start Date",
-      "DBA",
-      businessDba,
-      "delinquencyStartDateInput"
+  async viewBusinessDetails(businessDba: string) {
+    const actionButton = await this.getElementOfColumn("Actions", "DBA", businessDba);
+    await actionButton.click();
+    await this.getElement().anyList().filter({ hasText: "View Details" }).first().click();
+  }
+
+  async setDelinquencyStartDate(businessDba: string, date: { month: number; date: number; year: number }) {
+    const updateBusiness = this.page().waitForResponse(
+      (response) => response.request().method() === "PUT" && response.url().includes("/businesses/municipalityBusiness/update"),
     );
-    pw.get("@delinquencyStartDateInput").click();
-    this.getElement().gridPopupDateInput().click();
-    this.getElement().gridPopupDateInput().type(`${date.month}`);
-
-    this.getElement().gridPopupDateInput().click();
-    this.getElement().gridPopupDateInput().type(`{rightarrow}${date.date}`);
-
-    this.getElement().gridPopupDateInput().click();
-    this.getElement()
-      .gridPopupDateInput()
-      .type(`{rightarrow}{rightarrow}0000${date.year}`);
-    this.getElement().gridPopupSaveButton().should("not.be.disabled").click();
-    pw.wait("@updateBusiness");
-    pw.get("@updateBusiness").its("response.statusCode").should("eq", 200);
+    const delinquencyCell = await this.getElementOfColumn("Delinquency Start Date", "DBA", businessDba);
+    await delinquencyCell.click();
+    await fillDateInput(this.getElement().gridPopupDateInput(), date);
+    await expect(this.getElement().gridPopupSaveButton()).toBeEnabled();
+    await this.getElement().gridPopupSaveButton().click();
+    expect((await updateBusiness).status()).toBe(200);
   }
 
-  setCloseDate(
-    businessDba: string,
-    date: { month: number; date: number; year: number }
-  ) {
+  async setCloseDate(businessDba: string, date: { month: number; date: number; year: number }) {
     const setCloseDateModal = new SetBusinessStatusModal();
-
-    pw.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("updateBusiness");
-    this.getElementOfColumn("Close Date", "DBA", businessDba, "closeDateInput");
-    pw.get("@closeDateInput").click();
-    setCloseDateModal.setBusinessCloseDate({
-      month: date.month,
-      date: date.date,
-      year: date.year,
-    });
-    pw.waitForLoading();
-    setCloseDateModal.setBusinessStatus("Closed");
-    pw.waitForLoading();
-    setCloseDateModal.clickSaveButton();
-    pw.wait("@updateBusiness");
-    pw.get("@updateBusiness").its("response.statusCode").should("eq", 200);
-  }
-
-  addRequiredForms(businessDba: string, forms: string[]) {
-    this.getElementOfColumn(
-      "Required Forms",
-      "DBA",
-      businessDba,
-      "requiredFormsCellAdd"
+    const updateBusiness = this.page().waitForResponse(
+      (response) => response.request().method() === "PUT" && response.url().includes("/businesses/municipalityBusiness/update"),
     );
-    pw.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("updateBusiness");
-    pw.get("@requiredFormsCellAdd").click();
-    forms.forEach((form) => {
-      this.getElement()
-        .gridPopupSelectionItem(form)
-        .find(".k-switch")
-        .invoke("attr", "aria-checked")
-        .then((isChecked) => {
-          if (isChecked === "false") {
-            this.getElement()
-              .gridPopupSelectionItem(form)
-              .find("input")
-              .scrollIntoView()
-              .click({ force: true });
-          }
-        });
-    });
-    this.getElement().pageTitle().click();
-    pw.wait("@updateBusiness");
-    pw.get("@updateBusiness").its("response.statusCode").should("eq", 200);
+
+    await (await this.getElementOfColumn("Close Date", "DBA", businessDba)).click();
+    await setCloseDateModal.setBusinessCloseDate(date);
+    await waitForLoading();
+    await setCloseDateModal.setBusinessStatus("Closed");
+    await waitForLoading();
+    await setCloseDateModal.clickSaveButton();
+    expect((await updateBusiness).status()).toBe(200);
   }
 
-  removeRequiredForms(businessDba: string, forms: string[]) {
-    this.getElementOfColumn(
-      "Required Forms",
-      "DBA",
-      businessDba,
-      "requiredFormsCellRemove"
+  async addRequiredForms(businessDba: string, forms: string[]) {
+    const updateBusiness = this.page().waitForResponse(
+      (response) => response.request().method() === "PUT" && response.url().includes("/businesses/municipalityBusiness/update"),
     );
-    pw.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("updateBusiness");
-    pw.get("@requiredFormsCellRemove").click();
-    forms.forEach((form) => {
-      this.getElement()
-        .gridPopupSelectionItem(form)
-        .find(".k-switch")
-        .invoke("attr", "aria-checked")
-        .then((isChecked) => {
-          if (isChecked === "true") {
-            this.getElement()
-              .gridPopupSelectionItem(form)
-              .find(".k-switch")
-              .scrollIntoView()
-              .click();
-          }
-        });
-    });
-    this.getElement().pageTitle().click();
-    pw.wait("@updateBusiness");
-    pw.get("@updateBusiness").its("response.statusCode").should("eq", 200);
+    await (await this.getElementOfColumn("Required Forms", "DBA", businessDba)).click();
+
+    for (const form of forms) {
+      const row = this.getElement().gridPopupSelectionItem(form);
+      if ((await row.locator(".k-switch").getAttribute("aria-checked")) === "false") {
+        await row.locator("input").scrollIntoViewIfNeeded();
+        await row.locator("input").click({ force: true });
+      }
+    }
+
+    await this.getElement().pageTitle().click();
+    expect((await updateBusiness).status()).toBe(200);
   }
 
-  checkEnabledRequiredForms(businessDba: string, aliasVariable: string) {
-    pw.wrap([]).as(aliasVariable);
-    this.getElementOfColumn(
-      "Required Forms",
-      "DBA",
-      businessDba,
-      "requiredFormsCellCheck"
+  async removeRequiredForms(businessDba: string, forms: string[]) {
+    const updateBusiness = this.page().waitForResponse(
+      (response) => response.request().method() === "PUT" && response.url().includes("/businesses/municipalityBusiness/update"),
     );
-    pw.get("@requiredFormsCellCheck").click();
-    this.getElement()
-      .gridPopupContent()
-      .find(".k-switch")
-      .parent()
-      .each(($form, $index) => {
-        const label = $form.find(".k-label").text();
-        this.getElement()
-          .gridPopupContent()
-          .find(".k-switch")
-          .eq($index)
-          .invoke("attr", "aria-checked")
-          .then((isChecked) => {
-            if (isChecked === "true") {
-              pw.get(`@${aliasVariable}`).then((forms) => {
-                pw.wrap([...forms, label]).as(aliasVariable);
-              });
-            }
-          });
-      });
+    await (await this.getElementOfColumn("Required Forms", "DBA", businessDba)).click();
+
+    for (const form of forms) {
+      const row = this.getElement().gridPopupSelectionItem(form);
+      if ((await row.locator(".k-switch").getAttribute("aria-checked")) === "true") {
+        await row.locator(".k-switch").scrollIntoViewIfNeeded();
+        await row.locator(".k-switch").click();
+      }
+    }
+
+    await this.getElement().pageTitle().click();
+    expect((await updateBusiness).status()).toBe(200);
   }
 
-  showColumn(columnName: string) {
+  async checkEnabledRequiredForms(businessDba: string) {
+    await (await this.getElementOfColumn("Required Forms", "DBA", businessDba)).click();
+    const forms = this.getElement().gridPopupContent().locator(".k-switch").locator("xpath=..");
+    const enabledForms: string[] = [];
+    const count = await forms.count();
+
+    for (let index = 0; index < count; index += 1) {
+      const form = forms.nth(index);
+      if ((await form.locator(".k-switch").getAttribute("aria-checked")) === "true") {
+        enabledForms.push(this.normalize(await form.locator(".k-label").innerText()));
+      }
+    }
+
+    return enabledForms;
+  }
+
+  async showColumn(columnName: string) {
     const gridSetting = new GridSetting({
       columnOrderAlias: this.defaultGridColumnAlias,
       visibilityStatusAlias: `${this.defaultGridColumnAlias}_visibility`,
     });
-    gridSetting.showColumn(columnName);
-    pw.waitForLoading();
+    await gridSetting.showColumn(columnName);
+    await waitForLoading();
+    this.columnVisibility[columnName] = true;
   }
 
-  hideColumn(columnName: string) {
+  async hideColumn(columnName: string) {
     const gridSetting = new GridSetting({
       columnOrderAlias: this.defaultGridColumnAlias,
       visibilityStatusAlias: `${this.defaultGridColumnAlias}_visibility`,
     });
-    gridSetting.hideColumn(columnName);
-    pw.waitForLoading();
+    await gridSetting.hideColumn(columnName);
+    await waitForLoading();
+    this.columnVisibility[columnName] = false;
   }
 
-  feezeColumn(columnName: string) {
+  async feezeColumn(columnName: string) {
     const gridSetting = new GridSetting({
       columnOrderAlias: this.defaultGridColumnAlias,
       visibilityStatusAlias: `${this.defaultGridColumnAlias}_visibility`,
     });
-    gridSetting.freezeColumn(columnName);
-    pw.waitForLoading();
+    await gridSetting.freezeColumn(columnName);
+    await waitForLoading();
   }
 
-  unfreezeColumn(columnName: string) {
+  async unfreezeColumn(columnName: string) {
     const gridSetting = new GridSetting({
       columnOrderAlias: this.defaultGridColumnAlias,
       visibilityStatusAlias: `${this.defaultGridColumnAlias}_visibility`,
     });
-    gridSetting.unfreezeColumn(columnName);
-    pw.waitForLoading();
+    await gridSetting.unfreezeColumn(columnName);
+    await waitForLoading();
   }
 
-  verifyColumnVisibility(columnName: string, isVisibleAlias: string) {
-    pw.get(`@${this.defaultGridColumnAlias}_visibility`)
-      .should("exist")
-      .then((visibilityStatus: any) => {
-        pw.wrap(visibilityStatus[columnName]).as(isVisibleAlias);
-      });
+  async verifyColumnVisibility(columnName: string) {
+    await this.refreshGridMetadata(true);
+    return this.columnVisibility[columnName];
   }
 
-  verifyColumnOrder(columnName: string, orderAlias: string) {
-    pw.get(`@${this.defaultGridColumnAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        pw.wrap(columnIndexes[columnName]).as(orderAlias);
-      });
+  async verifyColumnOrder(columnName: string) {
+    await this.refreshGridMetadata(true);
+    return this.columnIndexes[columnName];
   }
 
-  restoreDefaultGridSettings() {
+  async restoreDefaultGridSettings() {
     const gridSetting = new GridSetting({
       columnOrderAlias: this.defaultGridColumnAlias,
       visibilityStatusAlias: `${this.defaultGridColumnAlias}_visibility`,
     });
-    gridSetting.restoreDefaultSettings();
-    pw.waitForLoading();
+    await gridSetting.restoreDefaultSettings();
+    await waitForLoading();
+    await this.refreshGridMetadata(true);
   }
 
-  moveColumnToLocationOf(columnName: string, targetColumnName: string) {
+  async moveColumnToLocationOf(columnName: string, targetColumnName: string) {
     const gridSetting = new GridSetting({
       columnOrderAlias: this.defaultGridColumnAlias,
       visibilityStatusAlias: `${this.defaultGridColumnAlias}_visibility`,
     });
-    gridSetting.moveColumnToLocationOf(columnName, targetColumnName);
-    pw.waitForLoading();
+    await gridSetting.moveColumnToLocationOf(columnName, targetColumnName);
+    await waitForLoading();
+    await this.refreshGridMetadata(true);
   }
 }
 

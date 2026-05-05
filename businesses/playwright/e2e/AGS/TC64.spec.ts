@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
 import { AGS_COLUMNS as defaultColumns } from "../../objects/BusinessGrid";
 
@@ -8,9 +8,9 @@ const businessGrid = new BusinessGrid({
 });
 
 test.describe("As a user, I should be able to reorganize the order of the columns.", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags", accountIndex: 9 });
-    const columnPairs = [];
+  test("Initiating test", async () => {
+    await login({ accountType: "ags", accountIndex: 9 });
+    const columnPairs: [string, string][] = [];
     const columnsToTest = defaultColumns.slice(2, 4); // Limiting to 2 columns to save resource usage
     for (let i = 0; i < columnsToTest.length; i++) {
       for (let j = i + 1; j < columnsToTest.length; j++) {
@@ -18,48 +18,20 @@ test.describe("As a user, I should be able to reorganize the order of the column
       }
     }
 
-    columnPairs.forEach(([column, targetColumn]) => {
-      businessGrid.init();
-      businessGrid.verifyColumnOrder(
-        column,
-        `${column.replace(/\s+/g, "")}IndexBeforeMove`
-      );
-      businessGrid.verifyColumnOrder(
-        targetColumn,
-        `${targetColumn.replace(/\s+/g, "")}IndexBeforeMove`
-      );
-      businessGrid.clickCustomizeTableViewButton();
-      businessGrid.moveColumnToLocationOf(column, targetColumn);
+    for (const [column, targetColumn] of columnPairs) {
+      await businessGrid.init();
+      const beforeColumnMove = await businessGrid.verifyColumnOrder(column);
+      const beforeTargetMove = await businessGrid.verifyColumnOrder(targetColumn);
+      await businessGrid.clickCustomizeTableViewButton();
+      await businessGrid.moveColumnToLocationOf(column, targetColumn);
 
-      businessGrid.init(true);
-      businessGrid.verifyColumnOrder(
-        targetColumn,
-        `${targetColumn.replace(/\s+/g, "")}IndexAfterMove`
-      );
-      businessGrid.verifyColumnOrder(
-        column,
-        `${column.replace(/\s+/g, "")}IndexAfterMove`
-      );
-      pw.get(`@${column.replace(/\s+/g, "")}IndexBeforeMove`).then(
-        (beforeMove) => {
-          pw.get(`@${column.replace(/\s+/g, "")}IndexAfterMove`).then(
-            (afterMove) => {
-              expect(beforeMove).to.not.equal(afterMove);
-            }
-          );
-        }
-      );
-      pw.get(`@${targetColumn.replace(/\s+/g, "")}IndexBeforeMove`).then(
-        (beforeMove) => {
-          pw.get(`@${targetColumn.replace(/\s+/g, "")}IndexAfterMove`).then(
-            (afterMove) => {
-              expect(beforeMove).to.not.equal(afterMove);
-            }
-          );
-        }
-      );
-      businessGrid.clickCustomizeTableViewButton();
-      businessGrid.restoreDefaultGridSettings();
-    });
+      await businessGrid.init(true);
+      const afterTargetMove = await businessGrid.verifyColumnOrder(targetColumn);
+      const afterColumnMove = await businessGrid.verifyColumnOrder(column);
+      expect(beforeColumnMove).not.toEqual(afterColumnMove);
+      expect(beforeTargetMove).not.toEqual(afterTargetMove);
+      await businessGrid.clickCustomizeTableViewButton();
+      await businessGrid.restoreDefaultGridSettings();
+    }
   });
 });

@@ -1,9 +1,17 @@
-import { test, expect } from '../support/pwtest';
-import BusinessAdd from "../../../businesses/playwright/objects/BusinessAdd";
-import BusinessGrid from "../../../businesses/playwright/objects/BusinessGrid";
+import { test } from "@playwright/test";
+import {
+  addBusinessToTaxpayerAccount,
+  clearAllGridFilters,
+  clickAddBusinessButton,
+  filterGridColumn,
+  gridHasNoRecords,
+  login,
+  openTaxpayerBusinessGrid,
+  waitForLoading,
+} from "../support/native-helpers";
 
 test.describe("Add Business", () => {
-  let accounts = [
+  const accounts = [
     "Test Trade Name 98068 1",
     "Test Trade Name 14793 1",
     "Test Trade Name 47910 1",
@@ -25,24 +33,28 @@ test.describe("Add Business", () => {
     "Test Trade Name 26887 1",
     "Arrakis Spice Company 18516",
   ];
+
   for (let i = 4; i < 10; i++) {
-    test(`should add business to taxpayer account index ${i}`, () => {
-      const businessGridTaxpayer = new BusinessGrid({ userType: "taxpayer" });
-      const businessAdd = new BusinessAdd({ userType: "taxpayer" });
-      pw.login({ accountType: "taxpayer", accountIndex: i });
-      businessGridTaxpayer.init();
-      accounts.forEach((account, index) => {
-        businessGridTaxpayer.filterColumn("DBA", account);
-        pw.get("body").then(($body) => {
-          if ($body.find(".k-grid-norecords-template").length !== 0) {
-            businessGridTaxpayer.clickAddBusinessButton();
-            businessAdd.addBusinessOnAccount(account);
-            pw.waitForLoading(5);
-          } else {
-            businessGridTaxpayer.clickClearAllFiltersButton();
-          }
+    test(`should add business to taxpayer account index ${i}`, async ({ page }) => {
+      await login(page, { accountType: "taxpayer", accountIndex: i });
+      await openTaxpayerBusinessGrid(page);
+
+      for (const account of accounts) {
+        await filterGridColumn(page, {
+          columnName: "DBA",
+          filterValue: account,
+          filterType: "text",
+          filterOperation: "Contains",
         });
-      });
+
+        if (await gridHasNoRecords(page)) {
+          await clickAddBusinessButton(page);
+          await addBusinessToTaxpayerAccount(page, account);
+          await waitForLoading(page, 5);
+        } else {
+          await clearAllGridFilters(page);
+        }
+      }
     });
   }
 });

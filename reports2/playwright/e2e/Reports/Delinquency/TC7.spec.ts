@@ -1,28 +1,26 @@
-import { test, expect } from '../../../support/pwtest';
+import { expect, test } from "@playwright/test";
 import DelinquencyGrid from "../../../objects/DelinquencyGrid";
+import Login from "../../../utils/Login";
 
 test.describe(
   "As a taxpayer, I should be able to submit a filing via delinquency list action button",
   { tags: ["sanity", "regression"] },
   () => {
-    test("Initiating test", () => {
-      pw.intercept("GET", "https://**.azavargovapps.com/forms/municipality/**").as(
-        "getFilingForm"
-      );
-      const taxpayerDelinquencyGrid = new DelinquencyGrid({
+    test("Initiating test", async ({ page }) => {
+      const taxpayerDelinquencyGrid = new DelinquencyGrid(page, {
         userType: "taxpayer",
       });
-      pw.login({ accountType: "taxpayer" });
-      taxpayerDelinquencyGrid.init();
-      taxpayerDelinquencyGrid
-        .getElement()
-        .noRecordFoundComponent()
-        .should("not.exist");
-      taxpayerDelinquencyGrid.toggleActionButtonForNthDelinquencyItem(
-        "Submit Now",
-        1
+      const getFilingForm = page.waitForResponse((response) =>
+        response.request().method() === "GET" &&
+        response.url().includes("/forms/municipality/")
       );
-      pw.get("@getFilingForm").its("response.statusCode").should("eq", 200);
+
+      await Login.login(page, { accountType: "taxpayer" });
+      await taxpayerDelinquencyGrid.init();
+      await expect(taxpayerDelinquencyGrid.getElement().noRecordFoundComponent()).toHaveCount(0);
+      await taxpayerDelinquencyGrid.toggleActionButtonForNthDelinquencyItem("Submit Now", 1);
+
+      expect((await getFilingForm).status()).toBe(200);
     });
   }
 );

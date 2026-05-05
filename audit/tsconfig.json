@@ -1,8 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es5", "dom"],
-    "types": ["cypress", "node", "cypress-xpath"]
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "types": ["node", "@playwright/test"],
+    "skipLibCheck": true
   },
   "include": ["**/*.ts"]
 }

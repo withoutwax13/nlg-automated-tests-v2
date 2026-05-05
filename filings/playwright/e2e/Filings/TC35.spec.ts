@@ -1,4 +1,6 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect } from '../../test';
+import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
+import { legacy } from '../../utils/legacy';
 import Form from "../../objects/Form";
 import FormPreview from "../../objects/FormPreview";
 import Payment from "../../objects/Payment";
@@ -17,36 +19,36 @@ const agsFilingGrid = new FilingGrid({
   municipalitySelection: "City of Arrakis",
 });
 
-const deleteMultipleFiling = (
+const deleteMultipleFiling = async (
   count: number,
   filterParams: [string, string, string?, string?],
   filingParams: [string, string]
 ) => {
-  agsFilingGrid.clickClearAllFiltersButton();
-  agsFilingGrid.filterColumn(...filterParams);
-  agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
+  await agsFilingGrid.clickClearAllFiltersButton();
+  await agsFilingGrid.filterColumn(...filterParams);
+  await agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
   if (count > 1) {
-    deleteMultipleFiling(count - 1, filterParams, filingParams);
+    await deleteMultipleFiling(count - 1, filterParams, filingParams);
   }
 };
 
 test.describe("As a taxpayer, I should be able to to view a specific filing by selecting the “View” in the action dropdown button", () => {
-  test("Initiate test", () => {
-    pw.login({ accountType: "ags", accountIndex: 2 });
+  test("Initiate test", async ({ page }) => {
+    await login({ accountType: "ags", accountIndex: 2 });
     agsFilingGrid.init();
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Location DBA",
       "Arrakis Spice Company 34754",
       "text",
       "Contains"
     );
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Form Name",
       "Food and Beverage",
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    pw.get("@rowsLength").then((rowsLength) => {
+    legacy.get("").then(async (rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -55,9 +57,9 @@ test.describe("As a taxpayer, I should be able to to view a specific filing by s
         );
       }
     });
-    pw.logout();
+    await logout();
 
-    pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
+    await login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -79,11 +81,11 @@ test.describe("As a taxpayer, I should be able to to view a specific filing by s
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        pw.wrap(referenceId).as("referenceId");
+        legacy.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
 
-    pw.get("@referenceId").then((referenceId) => {
+    legacy.get("").then(async (referenceId) => {
       taxpayerFilingGrid.init();
       taxpayerFilingGrid.toggleActionButton(
         "View",

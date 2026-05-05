@@ -1,55 +1,38 @@
-import { test, expect } from '../../support/pwtest';
+import { expect, test } from "@playwright/test";
 import Filing from "../../objects/Filing";
 import Form from "../../objects/Form";
+import { getUniqueRegistrationData, initTestRuntime, login } from "../../support/runtime";
 
 const randomSeed = Math.floor(Math.random() * 1000);
 
 test.describe("If user clicks the 'Remove' button on the location info step, the corresponding set of input fields must be removed", () => {
-  test("Initiating test", () => {
+  test("Initiating test", async ({ page, request }, testInfo) => {
+    await initTestRuntime({ page, request, baseURL: testInfo.project.use.baseURL as string });
     const form = new Form({ isRenewal: false });
     const filing = new Filing();
+    const customData = await getUniqueRegistrationData(randomSeed, true);
 
-    pw.login({ accountType: "taxpayer", accountIndex: 6 });
-
-    filing.goToSubmitFormsTab();
-    filing.selectGovernment("City of Arrakis");
-    filing.selectForm("Business License (Annual) - E2E #1");
-    filing.clickSubmitNewRegistrationButton();
-    form.clickNextbutton();
-    form.selectIsRegisteringMultipleLocations(true);
-    pw.getUniqueRegistrationData(randomSeed, true).then(
-      (customData: { basicInfo: any; locationInfo: { locations: any[] } }) => {
-        form.enterBusinessOwnerInformation(customData.basicInfo);
-        form.enterLegalBusinessInformation(customData.basicInfo);
-        form.checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation();
-        form.enterEmergencyPhoneNumbers(customData.basicInfo);
-        form.clickNextbutton();
-        form.getElement().addLocationButton().should("exist");
-        form.clickAddLocationButton();
-        form.getElement().locationAddress1().eq(1).should("exist");
-        form.getElement().locationAddress2().eq(1).should("exist");
-        form.getElement().locationCity().eq(1).should("exist");
-        form.getElement().locationMailingStateDropdown().eq(1).should("exist");
-        form.getElement().locationMailingZipCode().eq(1).should("exist");
-        form.getElement().managerOperatorFullName().eq(1).should("exist");
-        form.getElement().managerOperatorPhoneNumber().eq(1).should("exist");
-        form.clickRemoveLocationButton();
-        form.getElement().locationAddress1().eq(1).should("not.exist");
-        form.getElement().locationAddress2().eq(1).should("not.exist");
-        form.getElement().locationCity().eq(1).should("not.exist");
-        form
-          .getElement()
-          .locationMailingStateDropdown()
-          .eq(1)
-          .should("not.exist");
-        form.getElement().locationMailingZipCode().eq(1).should("not.exist");
-        form.getElement().managerOperatorFullName().eq(1).should("not.exist");
-        form
-          .getElement()
-          .managerOperatorPhoneNumber()
-          .eq(1)
-          .should("not.exist");
-      }
-    );
+    await login({ accountType: "taxpayer", accountIndex: 6 });
+    await filing.goToSubmitFormsTab();
+    await filing.selectGovernment("City of Arrakis");
+    await filing.selectForm("Business License (Annual) - E2E #1");
+    await filing.clickSubmitNewRegistrationButton();
+    await form.clickNextbutton();
+    await form.selectIsRegisteringMultipleLocations(true);
+    await form.enterBusinessOwnerInformation(customData.basicInfo as any);
+    await form.enterLegalBusinessInformation(customData.basicInfo as any);
+    await form.checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation();
+    await form.enterEmergencyPhoneNumbers(customData.basicInfo as any);
+    await form.clickNextbutton();
+    await form.clickAddLocationButton();
+    await expect(form.getElement().locationAddress1().nth(1)).toBeVisible();
+    await form.clickRemoveLocationButton();
+    await expect(form.getElement().locationAddress1().nth(1)).toHaveCount(0);
+    await expect(form.getElement().locationAddress2().nth(1)).toHaveCount(0);
+    await expect(form.getElement().locationCity().nth(1)).toHaveCount(0);
+    await expect(form.getElement().locationMailingStateDropdown().nth(1)).toHaveCount(0);
+    await expect(form.getElement().locationMailingZipCode().nth(1)).toHaveCount(0);
+    await expect(form.getElement().managerOperatorFullName().nth(1)).toHaveCount(0);
+    await expect(form.getElement().managerOperatorPhoneNumber().nth(1)).toHaveCount(0);
   });
 });

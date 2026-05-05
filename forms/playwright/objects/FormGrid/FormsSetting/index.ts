@@ -1,61 +1,48 @@
+import { collectTexts, currentPage, setAlias, waitForLoading, withText } from "../../../support/runtime";
+
 class FormsSetting {
   private elements() {
+    const page = currentPage();
     return {
-      saveButton: () => pw.get(".k-actions").find("button").contains("Save"),
-      cancelButton: () =>
-        pw.get(".k-actions").find("button").contains("Cancel"),
+      saveButton: () => withText(page.locator(".k-actions button"), "Save"),
+      cancelButton: () => withText(page.locator(".k-actions button"), "Cancel"),
       municipalityDropdown: () =>
-        pw.get('input[placeholder="Search government and press enter …"]'),
-      anyList: () => pw.get("li"),
-      forms: () => pw.get(".k-list-item"),
+        page.locator('input[placeholder="Search government and press enter …"]'),
+      anyList: () => page.locator("li"),
+      forms: () => page.locator(".k-list-item"),
       formRowDragIcon: (columnName: string) =>
-        this.getElement()
-          .forms()
-          .contains(columnName)
-          .parent()
-          .find(".fa-grip-lines"),
+        withText(page.locator(".k-list-item"), columnName)
+          .locator("xpath=..")
+          .locator(".fa-grip-lines"),
     };
   }
+
   getElement() {
     return this.elements();
   }
 
-  clickSaveButton() {
-    this.getElement().saveButton().click();
+  async clickSaveButton() {
+    await this.getElement().saveButton().click();
   }
 
-  clickCancelButton() {
-    this.getElement().cancelButton().click();
+  async clickCancelButton() {
+    await this.getElement().cancelButton().click();
   }
 
-  selectMunicipality(municipality: string) {
-    this.getElement().municipalityDropdown().type(municipality);
-    this.getElement().anyList().contains(municipality).click();
-    pw.waitForLoading();
+  async selectMunicipality(municipality: string) {
+    await this.getElement().municipalityDropdown().fill(municipality);
+    await withText(this.getElement().anyList(), municipality).click();
+    await waitForLoading();
   }
 
-  saveFormOrders(aliasName: string) {
-    pw.wrap([]).as(aliasName);
-    this.getElement()
-      .forms()
-      .each(($el) => {
-        pw.get(`@${aliasName}`).then((formsOrder) => {
-          pw.wrap([...formsOrder, $el.text()]).as(aliasName);
-        });
-      });
+  async saveFormOrders(aliasName: string) {
+    setAlias(aliasName, await collectTexts(this.getElement().forms()));
   }
 
-  moveFormToLocationOf(formName: string, targetFormName: string) {
-    const dataTransfer = new DataTransfer();
-    this.getElement()
+  async moveFormToLocationOf(formName: string, targetFormName: string) {
+    await this.getElement()
       .formRowDragIcon(formName)
-      .trigger("mousedown", { which: 1 })
-      .trigger("dragstart", { dataTransfer })
-      .trigger("drag", { dataTransfer });
-    this.getElement()
-      .formRowDragIcon(targetFormName)
-      .trigger("dragover", { dataTransfer })
-      .trigger("drop", { dataTransfer });
+      .dragTo(this.getElement().formRowDragIcon(targetFormName));
   }
 }
 

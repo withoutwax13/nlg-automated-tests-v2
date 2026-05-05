@@ -1,8 +1,9 @@
-import { test, expect } from '../../support/pwtest';
-import RegistrationGrid from "../../objects/RegistrationGrid";
+import { expect, test } from "@playwright/test";
 import BusinessAdd from "../../objects/BusinessAdd";
-import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessDetails from "../../objects/BusinessDetails";
+import BusinessGrid from "../../objects/BusinessGrid";
+import RegistrationGrid from "../../objects/RegistrationGrid";
+import { currentPage, initTestRuntime, login, logout, waitForLoading } from "../../support/runtime";
 
 const randomSeed = Math.floor(Math.random() * 100000);
 const customData = {
@@ -32,7 +33,8 @@ const customData = {
 };
 
 test.describe.skip("As an AGS User, If I delete a business record associated to an ACTIVE Registration record, the Registration Status of the said registration record should be deleted.", () => {
-  test("Initiating test", () => {
+  test("Initiating test", async ({ page, request }, testInfo) => {
+    await initTestRuntime({ page, request, baseURL: testInfo.project.use.baseURL as string });
     const registrationGrid = new RegistrationGrid({
       userType: "ags",
       municipalitySelection: "Arrakis",
@@ -44,51 +46,47 @@ test.describe.skip("As an AGS User, If I delete a business record associated to 
     });
     const businessDetailsPage = new BusinessDetails({ userType: "ags" });
 
-    pw.login({ accountType: "ags", accountIndex: 2 });
-    businessGrid.init();
-    businessGrid.clickAddBusinessButton();
-    businessAddPage.fillFields(customData);
-    businessAddPage.clickSaveButton();
-    businessGrid.init();
-    businessGrid.viewBusinessDetails(customData.locationDba);
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
-    businessDetailsPage.clickFormsTab();
-    businessDetailsPage.enableForm("Business License (Annual) - E2E #1");
+    await login({ accountType: "ags", accountIndex: 2 });
+    await businessGrid.init();
+    await businessGrid.clickAddBusinessButton();
+    await businessAddPage.fillFields(customData);
+    await businessAddPage.clickSaveButton();
+    await businessGrid.init();
+    await businessGrid.viewBusinessDetails(customData.locationDba);
+    await expect(currentPage()).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
+    await businessDetailsPage.clickFormsTab();
+    await businessDetailsPage.enableForm("Business License (Annual) - E2E #1");
 
-    pw.waitForLoading(); // wait for the backend to finish processing the form enablement
-    registrationGrid.init();
-    registrationGrid.getDataOfColumn(
+    await waitForLoading();
+    await registrationGrid.init();
+    const regRecordId = await registrationGrid.getDataOfColumn(
       "Registration Record ID",
       "Location DBA",
       customData.locationDba,
       "regRecordId"
     );
-    registrationGrid.clickClearAllFiltersButton();
-    registrationGrid.manuallyChangeRegistrationStatus(
+    await registrationGrid.clickClearAllFiltersButton();
+    await registrationGrid.manuallyChangeRegistrationStatus(
       "Active",
       "Location DBA",
       customData.locationDba
     );
-    registrationGrid.clickClearAllFiltersButton();
-    pw.get("@regRecordId").then(($regRecordId) => {
-      registrationGrid.getDataOfColumn(
-        "Registration Status",
-        "Registration Record ID",
-        String($regRecordId),
-        "registrationStatus"
-      );
-    });
-    pw.get("@registrationStatus").then(($registrationStatus) => {
-      expect($registrationStatus).to.equal("Active");
-    });
+    await registrationGrid.clickClearAllFiltersButton();
+    const registrationStatus = await registrationGrid.getDataOfColumn(
+      "Registration Status",
+      "Registration Record ID",
+      String(regRecordId),
+      "registrationStatus"
+    );
+    expect(registrationStatus).toBe("Active");
 
-    businessGrid.init();
-    businessGrid.deleteBusiness(customData.locationDba);
+    await businessGrid.init();
+    await businessGrid.deleteBusiness(customData.locationDba);
 
-    pw.logout();
-    pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 2 });
-    registrationGrid.init();
-    registrationGrid.filterColumn("Location DBA", customData.locationDba);
-    registrationGrid.getElement().noRecordFoundComponent().should("exist");
+    await logout();
+    await login({ accountType: "ags", notFirstLogin: true, accountIndex: 2 });
+    await registrationGrid.init();
+    await registrationGrid.filterColumn("Location DBA", customData.locationDba);
+    await expect(registrationGrid.getElement().noRecordFoundComponent()).toBeVisible();
   });
 });

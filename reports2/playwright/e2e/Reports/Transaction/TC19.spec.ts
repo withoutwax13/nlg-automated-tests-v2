@@ -1,69 +1,45 @@
-import { test, expect } from '../../../support/pwtest';
-import TransactionGrid from "../../../objects/TransactionGrid";
-import { AGS_TRANSACTION_GRID_COLUMNS as defaultColumns } from "../../../objects/TransactionGrid";
+import { expect, test } from "@playwright/test";
+import TransactionGrid, {
+  AGS_TRANSACTION_GRID_COLUMNS as defaultColumns,
+} from "../../../objects/TransactionGrid";
+import Login from "../../../utils/Login";
 
 test.describe(
   "As a user, I should be able to reorganize the order of columns on the transaction list",
   { tags: ["sanity", "regression"] },
   () => {
-    test.skip("Initiating test", () => {
-      const transactionGrid = new TransactionGrid({
+    test.skip("Initiating test", async ({ page }) => {
+      const transactionGrid = new TransactionGrid(page, {
         userType: "ags",
         municipalitySelection: "City of Arrakis",
       });
-      pw.login({ accountType: "ags", accountIndex: 9 });
 
-      const columnPairs = [];
-      const columnsToTest = defaultColumns.slice(1, 4); // Limiting to 4 columns to save resource usage
-      for (let i = 0; i < columnsToTest.length; i++) {
-        for (let j = i + 1; j < columnsToTest.length; j++) {
+      await Login.login(page, { accountType: "ags", accountIndex: 9 });
+
+      const columnPairs: Array<[string, string]> = [];
+      const columnsToTest = defaultColumns.slice(1, 4);
+      for (let i = 0; i < columnsToTest.length; i += 1) {
+        for (let j = i + 1; j < columnsToTest.length; j += 1) {
           columnPairs.push([columnsToTest[i], columnsToTest[j]]);
         }
       }
 
-      columnPairs.forEach(([column, targetColumn]) => {
-        transactionGrid.init();
-        transactionGrid.verifyColumnOrder(
-          column,
-          `${column.replace(/\s+/g, "")}IndexBeforeMove`
-        );
-        transactionGrid.verifyColumnOrder(
-          targetColumn,
-          `${targetColumn.replace(/\s+/g, "")}IndexBeforeMove`
-        );
-        transactionGrid.clickCustomizeTableViewButton();
-        transactionGrid.moveColumnToLocationOf(column, targetColumn);
+      for (const [column, targetColumn] of columnPairs) {
+        await transactionGrid.init();
+        const columnIndexBeforeMove = await transactionGrid.verifyColumnOrder(column);
+        const targetColumnIndexBeforeMove = await transactionGrid.verifyColumnOrder(targetColumn);
+        await transactionGrid.clickCustomizeTableViewButton();
+        await transactionGrid.moveColumnToLocationOf(column, targetColumn);
 
-        transactionGrid.init(true);
-        transactionGrid.verifyColumnOrder(
-          targetColumn,
-          `${targetColumn.replace(/\s+/g, "")}IndexAfterMove`
-        );
-        transactionGrid.verifyColumnOrder(
-          column,
-          `${column.replace(/\s+/g, "")}IndexAfterMove`
-        );
-        pw.get(`@${column.replace(/\s+/g, "")}IndexBeforeMove`).then(
-          (beforeMove) => {
-            pw.get(`@${column.replace(/\s+/g, "")}IndexAfterMove`).then(
-              (afterMove) => {
-                expect(beforeMove).to.not.equal(afterMove);
-              }
-            );
-          }
-        );
-        pw.get(`@${targetColumn.replace(/\s+/g, "")}IndexBeforeMove`).then(
-          (beforeMove) => {
-            pw.get(`@${targetColumn.replace(/\s+/g, "")}IndexAfterMove`).then(
-              (afterMove) => {
-                expect(beforeMove).to.not.equal(afterMove);
-              }
-            );
-          }
-        );
-        transactionGrid.clickCustomizeTableViewButton();
-        transactionGrid.restoreDefaultGridSettings();
-      });
+        await transactionGrid.init();
+        const targetColumnIndexAfterMove = await transactionGrid.verifyColumnOrder(targetColumn);
+        const columnIndexAfterMove = await transactionGrid.verifyColumnOrder(column);
+        expect(columnIndexBeforeMove).not.toBe(columnIndexAfterMove);
+        expect(targetColumnIndexBeforeMove).not.toBe(targetColumnIndexAfterMove);
+
+        await transactionGrid.clickCustomizeTableViewButton();
+        await transactionGrid.restoreDefaultGridSettings();
+      }
     });
   }
 );

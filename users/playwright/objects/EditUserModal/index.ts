@@ -1,16 +1,18 @@
+import { buttonByText, currentPage } from "../../support/runtime";
+
 class EditUserModal {
   private elements() {
     return {
-      modal: () => pw.get(".k-dialog"),
-      title: () => pw.get(".k-dialog-title"),
-      closeModalButton: () => pw.get('button[aria-label="Close"]'),
-      modalContent: () => pw.get(".k-dialog-content"),
-      isEnabledRadioButton: () => pw.get(".k-checkbox-wrap"),
-      isEnabledLabel: () => pw.get(".k-checkbox-label"),
-      cancelButton: () => pw.get("button").contains("Cancel"),
-      updateButton: () => pw.get("button").contains("Update"),
-      firstNameInput: () => pw.find("input[name='FirstName']"),
-      lastNameInput: () => pw.find("input[name='LastName']"),
+      modal: () => currentPage().locator(".k-dialog").first(),
+      title: () => currentPage().locator(".k-dialog-title").first(),
+      closeModalButton: () => currentPage().locator('button[aria-label="Close"]').first(),
+      modalContent: () => currentPage().locator(".k-dialog-content").first(),
+      isEnabledRadioButton: () => currentPage().locator(".k-checkbox-wrap").first(),
+      isEnabledLabel: () => currentPage().locator(".k-checkbox-label").first(),
+      cancelButton: () => buttonByText("Cancel"),
+      updateButton: () => buttonByText("Update"),
+      firstNameInput: () => currentPage().locator("input[name='FirstName']").first(),
+      lastNameInput: () => currentPage().locator("input[name='LastName']").first(),
     };
   }
 
@@ -18,28 +20,28 @@ class EditUserModal {
     return this.elements();
   }
 
-  clickCloseModalButton() {
-    this.elements().closeModalButton().click();
+  async clickCloseModalButton() {
+    await this.elements().closeModalButton().click();
   }
 
-  clickCancelButton() {
-    this.elements().cancelButton().click();
+  async clickCancelButton() {
+    await this.elements().cancelButton().click();
   }
 
-  clickUpdateButton() {
-    this.elements().updateButton().click();
+  async clickUpdateButton() {
+    await this.elements().updateButton().click();
   }
 
-  checkIsEnabledRadioButton() {
-    this.elements().isEnabledRadioButton().click();
+  async checkIsEnabledRadioButton() {
+    await this.elements().isEnabledRadioButton().click();
   }
 
-  typeFirstName(firstName: string) {
-    this.elements().firstNameInput().type(firstName);
+  async typeFirstName(firstName: string) {
+    await this.elements().firstNameInput().fill(firstName);
   }
 
-  typeLastName(lastName: string) {
-    this.elements().lastNameInput().type(lastName);
+  async typeLastName(lastName: string) {
+    await this.elements().lastNameInput().fill(lastName);
   }
 }
 

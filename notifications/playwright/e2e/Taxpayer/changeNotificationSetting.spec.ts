@@ -1,41 +1,41 @@
-import { test, expect } from '../../support/pwtest';
-import selector from '../../fixtures/selector.json';
+import { expect, test, type Page, type Response } from "@playwright/test";
+import selector from "../../fixtures/selector.json";
+import { login, waitForApiResponse } from "../../utils/Login";
 
-const changeNotificationSetting = () => {
-  pw.intercept(
-    "GET",
-    "https://**.amazonaws.com/Notifications?notificationStatus=undefined"
-  ).as("taxpayerNotification");
-  pw.intercept(
-    "GET",
-    "https://**.amazonaws.com/Notifications?notificationStatus=UNREAD"
-  ).as("taxpayerUnreadNotification");
-  pw.intercept(
-    "GET",
-    "https://**.amazonaws.com/NotificationsSetting"
-  ).as("changeSetting");
-  pw.intercept(
-    "PUT",
-    "https://**.amazonaws.com/NotificationsSetting"
-  ).as("updateSetting")
+const changeNotificationSetting = async ({ page }: { page: Page }) => {
+  await login(page, { accountType: "taxpayer" });
 
-  pw.login({ accountType: "taxpayer" });
+  const notificationResponse = page.waitForResponse(
+    (response: Response) =>
+      response.request().method() === "GET" &&
+      response.url().includes("/Notifications?notificationStatus=undefined")
+  );
+  await expect(page.locator(selector.notificationIcon)).toBeVisible();
+  await page.locator(selector.notificationIcon).click();
+  expect((await notificationResponse).status()).toBe(200);
+  await expect(page).toHaveURL(/\/NotificationsApp\/NotificationsList/);
 
-  //Click the notification button
-  pw.get(selector.notificationIcon).should('exist');
-  pw.get(selector.notificationIcon).click();
+  const changeSettingResponse = waitForApiResponse(page, {
+    method: "GET",
+    urlPart: "/NotificationsSetting",
+  });
+  await expect(page.locator(selector.settingButton)).toBeVisible();
+  await page.locator(selector.settingButton).click();
+  await changeSettingResponse;
 
-  pw.wait("@taxpayerNotification").its("response.statusCode").should("eq", 200);
-  pw.url().should('contain', "/NotificationsApp/NotificationsList");
-
-  //Click the setting button
-  pw.get(selector.settingButton).should('exist').click();
-  pw.wait("@changeSetting").its("response.statusCode").should("eq", 200);
-
-  //Click the update button
-  pw.get(selector.updateButton).click()
-  pw.wait("@updateSetting").its("response.statusCode").should("eq", 200);
+  const updateSettingResponse = waitForApiResponse(page, {
+    method: "PUT",
+    urlPart: "/NotificationsSetting",
+  });
+  await page.locator(selector.updateButton).click();
+  await updateSettingResponse;
 };
+
+
+
+
+
+
 
 test.describe("As a taxpayer, I should be able to change notifications settings.", () => {
   test("Initiating test", changeNotificationSetting);

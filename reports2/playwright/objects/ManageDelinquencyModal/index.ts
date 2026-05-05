@@ -1,137 +1,100 @@
+import type { Page } from "@playwright/test";
+import { expectStatus, normalizeText, waitForResponse } from "../../support/native-helpers";
+
 class ManageDelinquencyModal {
+  constructor(private readonly page: Page) {}
+
   private elements() {
+    const modal = this.page.locator(".k-dialog");
     return {
-      modal: () => pw.get(".k-dialog"),
-      modalTitle: () => this.getElement().modal().find(".k-dialog-title"),
-      closeModalButton: () =>
-        this.getElement().modal().find('button[aria-label="Close"]'),
-      explanationTextarea: () => this.getElement().modal().find("textarea"),
-      notRequiredToSubmitFormsCheckbox: () =>
-        this.getElement().modal().find('input[type="checkbox"]'),
-      dismissButton: () =>
-        this.getElement().modal().find("button").contains("Dismiss"),
-      cancelButton: () =>
-        this.getElement().modal().find("button").contains("Cancel"),
+      modal: () => modal,
+      modalTitle: () => modal.locator(".k-dialog-title"),
+      closeModalButton: () => modal.locator('button[aria-label="Close"]'),
+      explanationTextarea: () => modal.locator("textarea"),
+      notRequiredToSubmitFormsCheckbox: () => modal.locator('input[type="checkbox"]'),
+      dismissButton: () => modal.getByRole("button", { name: "Dismiss" }),
+      cancelButton: () => modal.getByRole("button", { name: "Cancel" }),
       businessNameData: () =>
-        this.getElement()
-          .modal()
-          .find("label")
-          .contains("Business Name (DBA)")
-          .next(),
+        modal.locator("label", { hasText: "Business Name (DBA)" }).locator("xpath=following-sibling::*[1]"),
       formTitleData: () =>
-        this.getElement().modal().find("label").contains("Form Title").next(),
+        modal.locator("label", { hasText: "Form Title" }).locator("xpath=following-sibling::*[1]"),
       filingPeriodData: () =>
-        this.getElement()
-          .modal()
-          .find("label")
-          .contains("Filing Period")
-          .next(),
+        modal.locator("label", { hasText: "Filing Period" }).locator("xpath=following-sibling::*[1]"),
       dueDateData: () =>
-        this.getElement().modal().find("label").contains("Due Date").next(),
+        modal.locator("label", { hasText: "Due Date" }).locator("xpath=following-sibling::*[1]"),
       dismissalExplanationData: () =>
-        this.getElement()
-          .modal()
-          .find("label")
-          .contains("Dismissal Explanation")
-          .next(),
+        modal.locator("label", { hasText: "Dismissal Explanation" }).locator("xpath=following-sibling::*[1]"),
       dismisseByData: () =>
-        this.getElement().modal().find("label").contains("Dismissed By").next(),
+        modal.locator("label", { hasText: "Dismissed By" }).locator("xpath=following-sibling::*[1]"),
       revertDismissalButton: () =>
-        this.getElement().modal().find("button").contains("Revert Dismissal"),
+        modal.getByRole("button", { name: "Revert Dismissal" }),
     };
   }
   getElement() {
     return this.elements();
   }
 
-  clickDismissButton() {
-    pw.intercept("POST", "https://**.azavargovapps.com/reports/DismissDelinquencyReport/**").as("dismissDelinquencyReport");
-    pw.intercept("GET", "https://**.azavargovapps.com/reports/DelinquencyReports/**").as("getDelinquencyReportAfterDismissal");
-    this.getElement().dismissButton().click();
-    pw.wait("@dismissDelinquencyReport").its("response.statusCode").should("eq", 200);
-    pw.wait("@getDelinquencyReportAfterDismissal").its("response.statusCode").should("eq", 200);
-    pw.wait(2000); // Wait for 2 seconds to ensure that the dismissal action is fully processed before proceeding with the next steps in the test
+  async clickDismissButton() {
+    const dismissPromise = waitForResponse(
+      this.page,
+      (response) =>
+        response.request().method() === "POST" &&
+        response.url().includes("/reports/DismissDelinquencyReport/"),
+      () => this.getElement().dismissButton().click()
+    );
+    const refreshPromise = this.page.waitForResponse(
+      (response) =>
+        response.request().method() === "GET" &&
+        response.url().includes("/reports/DelinquencyReports/")
+    );
+
+    await expectStatus(dismissPromise, 200);
+    await expectStatus(refreshPromise, 200);
+    await this.page.waitForTimeout(2000);
   }
 
-  clickCancelButton() {
-    this.getElement().cancelButton().click();
+  clickCancelButton(): Promise<void> {
+    return this.getElement().cancelButton().click();
   }
 
-  clickCloseModalButton() {
-    this.getElement().closeModalButton().click();
+  clickCloseModalButton(): Promise<void> {
+    return this.getElement().closeModalButton().click();
   }
 
-  typeExplanation(text: string) {
-    this.getElement().explanationTextarea().type(text);
+  typeExplanation(text: string): Promise<void> {
+    return this.getElement().explanationTextarea().fill(text);
   }
 
-  checkNotRequiredToSubmitFormsCheckbox() {
-    this.getElement().notRequiredToSubmitFormsCheckbox().check();
+  checkNotRequiredToSubmitFormsCheckbox(): Promise<void> {
+    return this.getElement().notRequiredToSubmitFormsCheckbox().check();
   }
 
-  saveBusinessDetails(variableAlias: string) {
-    pw.wrap({}).as(variableAlias);
-    this.getElement()
-      .businessNameData()
-      .invoke("text")
-      .then(($businessName) => {
-        pw.get(`@${variableAlias}`).then((testBusinessData) => {
-          pw.wrap({ ...testBusinessData, businessName: $businessName }).as(
-            variableAlias
-          );
-        });
-      });
-    this.getElement()
-      .formTitleData()
-      .invoke("text")
-      .then(($formTitle) => {
-        pw.get(`@${variableAlias}`).then((testBusinessData) => {
-          pw.wrap({ ...testBusinessData, formTitle: $formTitle }).as(
-            variableAlias
-          );
-        });
-      });
-    this.getElement()
-      .filingPeriodData()
-      .invoke("text")
-      .then(($filingPeriod) => {
-        pw.get(`@${variableAlias}`).then((testBusinessData) => {
-          pw.wrap({ ...testBusinessData, filingPeriod: $filingPeriod }).as(
-            variableAlias
-          );
-        });
-      });
+  async saveBusinessDetails(_variableAlias?: string) {
+    return {
+      businessName: normalizeText(await this.getElement().businessNameData().textContent()),
+      formTitle: normalizeText(await this.getElement().formTitleData().textContent()),
+      filingPeriod: normalizeText(await this.getElement().filingPeriodData().textContent()),
+    };
   }
 
-  saveDismissalDetails(variableAlias: string) {
-    pw.wrap({}).as(variableAlias);
-    this.getElement()
-      .dismissalExplanationData()
-      .invoke("text")
-      .then(($dismissalExplanation) => {
-        pw.get(`@${variableAlias}`).then((dismissalData) => {
-          pw.wrap({
-            ...dismissalData,
-            dismissalExplanation: $dismissalExplanation,
-          }).as(variableAlias);
-        });
-      });
-    this.getElement()
-      .dismisseByData()
-      .invoke("text")
-      .then(($dismissedBy) => {
-        pw.get(`@${variableAlias}`).then((dismissalData) => {
-          pw.wrap({ ...dismissalData, dismissedBy: $dismissedBy }).as(
-            variableAlias
-          );
-        });
-      });
+  async saveDismissalDetails(_variableAlias?: string) {
+    return {
+      dismissalExplanation: normalizeText(
+        await this.getElement().dismissalExplanationData().textContent()
+      ),
+      dismissedBy: normalizeText(await this.getElement().dismisseByData().textContent()),
+    };
   }
 
-  clickRevertDismissalButton() {
-    pw.intercept("POST", "https://**.azavargovapps.com/reports/RevertDismissDelinquencyReport/**").as("revertDismissal");
-    this.getElement().revertDismissalButton().click();
-    pw.wait("@revertDismissal").its("response.statusCode").should("eq", 200);
+  async clickRevertDismissalButton() {
+    const revertPromise = waitForResponse(
+      this.page,
+      (response) =>
+        response.request().method() === "POST" &&
+        response.url().includes("/reports/RevertDismissDelinquencyReport/"),
+      () => this.getElement().revertDismissalButton().click()
+    );
+    await expectStatus(revertPromise, 200);
   }
 }
 

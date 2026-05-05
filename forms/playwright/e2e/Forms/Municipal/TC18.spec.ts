@@ -1,56 +1,49 @@
-import { test, expect } from '../../../support/pwtest';
-import { MUNICIPAL_FORM_GRID_COLUMNS as defaultColumns } from "../../../objects/FormGrid";
-import FormGrid from "../../../objects/FormGrid";
+import { expect, test } from "@playwright/test";
+import FormGrid, { MUNICIPAL_FORM_GRID_COLUMNS as defaultColumns } from "../../../objects/FormGrid";
+import { getAlias, initTestRuntime, login } from "../../../support/runtime";
 
 test.describe("As a municipal user, I should be able to hide/show columns in the form list", () => {
-  test("Initiating test", () => {
+  test("Initiating test", async ({ page }, testInfo) => {
     const municipalityFormGrid = new FormGrid({
       userType: "municipal",
     });
-    pw.login({ accountType: "municipal", accountIndex: 3 });
-    defaultColumns.slice(1, 3).forEach((column) => {
-      // Limiting to 2 columns to save resource usage
-      municipalityFormGrid.init();
-      municipalityFormGrid.clickCustomizeTableViewButton();
-      municipalityFormGrid.verifyColumnVisibility(
+
+    await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
+    await login({ accountType: "municipal", accountIndex: 3 });
+
+    for (const column of defaultColumns.slice(1, 3)) {
+      const aliasBase = column.replace(/\s+/g, "");
+
+      await municipalityFormGrid.init();
+      await municipalityFormGrid.clickCustomizeTableViewButton();
+      await municipalityFormGrid.verifyColumnVisibility(
         column,
-        `${column.replace(/\s+/g, "")}VisibilityBeforeHide`
+        `${aliasBase}VisibilityBeforeHide`
       );
-      municipalityFormGrid.hideColumn(column);
-      municipalityFormGrid.init();
-      municipalityFormGrid.verifyColumnVisibility(
+      await municipalityFormGrid.hideColumn(column);
+      await municipalityFormGrid.init();
+      await municipalityFormGrid.verifyColumnVisibility(
         column,
-        `${column.replace(/\s+/g, "")}VisibilityAfterHide`
+        `${aliasBase}VisibilityAfterHide`
       );
-      pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeHide`).then(
-        (beforeToggle) => {
-          pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterHide`).then(
-            (afterToggle) => {
-              expect(beforeToggle).to.not.equal(afterToggle);
-            }
-          );
-        }
+      expect(getAlias<boolean>(`${aliasBase}VisibilityBeforeHide`)).not.toBe(
+        getAlias<boolean>(`${aliasBase}VisibilityAfterHide`)
       );
-      municipalityFormGrid.clickCustomizeTableViewButton();
-      municipalityFormGrid.verifyColumnVisibility(
+
+      await municipalityFormGrid.clickCustomizeTableViewButton();
+      await municipalityFormGrid.verifyColumnVisibility(
         column,
-        `${column.replace(/\s+/g, "")}VisibilityBeforeShow`
+        `${aliasBase}VisibilityBeforeShow`
       );
-      municipalityFormGrid.showColumn(column);
-      municipalityFormGrid.init();
-      municipalityFormGrid.verifyColumnVisibility(
+      await municipalityFormGrid.showColumn(column);
+      await municipalityFormGrid.init();
+      await municipalityFormGrid.verifyColumnVisibility(
         column,
-        `${column.replace(/\s+/g, "")}VisibilityAfterShow`
+        `${aliasBase}VisibilityAfterShow`
       );
-      pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeShow`).then(
-        (beforeToggle) => {
-          pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterShow`).then(
-            (afterToggle) => {
-              expect(beforeToggle).to.not.equal(afterToggle);
-            }
-          );
-        }
+      expect(getAlias<boolean>(`${aliasBase}VisibilityBeforeShow`)).not.toBe(
+        getAlias<boolean>(`${aliasBase}VisibilityAfterShow`)
       );
-    });
+    }
   });
 });

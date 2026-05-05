@@ -1,20 +1,22 @@
-import { test, expect } from '../../../support/pwtest';
+import { expect, test } from "@playwright/test";
 import TransactionGrid from "../../../objects/TransactionGrid";
+import Login from "../../../utils/Login";
 
 test.describe(
   "As a municipal user, I should be able to export the transaction report",
   { tags: ["sanity", "regression"] },
   () => {
-    test("Initiating test", () => {
-      const transactionGrid = new TransactionGrid({
+    test("Initiating test", async ({ page }) => {
+      const transactionGrid = new TransactionGrid(page, {
         userType: "municipal",
       });
-      pw.login({ accountType: "municipal", accountIndex: 6 });
-      transactionGrid.init();
-      transactionGrid.getElement().exportButton().should("be.visible");
-      transactionGrid.getElement().exportButton().should("not.be.disabled");
-      transactionGrid.clickExportButton();
-      transactionGrid.getElement().pageTitle().should("be.visible");
+
+      await Login.login(page, { accountType: "municipal", accountIndex: 6 });
+      await transactionGrid.init();
+      await expect(transactionGrid.getElement().exportButton()).toBeVisible();
+      await expect(transactionGrid.getElement().exportButton()).toBeEnabled();
+      await transactionGrid.clickExportButton();
+      await expect(transactionGrid.getElement().pageTitle()).toBeVisible();
     });
   }
 );

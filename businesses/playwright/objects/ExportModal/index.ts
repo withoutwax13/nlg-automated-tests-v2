@@ -1,20 +1,22 @@
+import { buttonByText, currentPage } from "../../support/runtime";
+
 class ExportModal {
+  private page() {
+    return currentPage();
+  }
+
   private elements() {
     return {
-      modal: () => pw.get(".k-dialog"),
-      modalTitle: () => pw.get(".k-dialog-title"),
-      closeButton: () => pw.get('button[aria-label="Close"]'),
-      csvOption: () => pw.get(".k-radio-item").eq(0),
-      excelOption: () => pw.get(".k-radio-item").eq(1),
-      exportFullOption: () => pw.get(".k-radio-item").eq(2),
-      exportViewOption: () => pw.get(".k-radio-item").eq(3),
-      exportWithUsersInfoYesOption: () => pw.get(".k-radio-item").eq(4),
-      exportWithUsersInfoNoOption: () => pw.get(".k-radio-item").eq(5),
-      exportButton: () =>
-        this.getElement()
-          .modal()
-          .find(".NLGButtonSecondary")
-          .contains("Export"),
+      modal: () => this.page().locator(".k-dialog").first(),
+      modalTitle: () => this.page().locator(".k-dialog-title").first(),
+      closeButton: () => this.page().locator('button[aria-label="Close"]').first(),
+      csvOption: () => this.page().locator(".k-radio-item").nth(0),
+      excelOption: () => this.page().locator(".k-radio-item").nth(1),
+      exportFullOption: () => this.page().locator(".k-radio-item").nth(2),
+      exportViewOption: () => this.page().locator(".k-radio-item").nth(3),
+      exportWithUsersInfoYesOption: () => this.page().locator(".k-radio-item").nth(4),
+      exportWithUsersInfoNoOption: () => this.page().locator(".k-radio-item").nth(5),
+      exportButton: () => this.getElement().modal().locator(".NLGButtonSecondary").filter({ hasText: "Export" }).first(),
     };
   }
 
@@ -22,43 +24,36 @@ class ExportModal {
     return this.elements();
   }
 
-  clickCloseButton() {
-    this.getElement().closeButton().click();
+  async clickCloseButton() {
+    await this.getElement().closeButton().click();
   }
 
-  clickCsvOption() {
-    this.getElement().csvOption().click();
+  async clickCsvOption() {
+    await this.getElement().csvOption().click();
   }
 
-  clickExcelOption() {
-    this.getElement().excelOption().click();
+  async clickExcelOption() {
+    await this.getElement().excelOption().click();
   }
 
-  clickExportWithUsersInfoOption() {
-    // pw.intercept("GET", 'https://**.azavargovapps.com/businesses/municipalityBusinesses/**/withTaxpayersInfo').as('exportWithUsersInfo');
-    // pw.intercept("GET", "https://**.azavargovapps.com/businesses/LastUploadedHeaders/**").as("exportFull");
-    this.getElement().exportWithUsersInfoYesOption().click();
-    // pw.wait('@exportWithUsersInfo');
-    // pw.get("@exportWithUsersInfo").its("response.statusCode").should("eq", 200);
-    // pw.wait('@exportFull');
-    // pw.get("@exportFull").its("response.statusCode").should("eq", 200);
+  async clickExportWithUsersInfoOption() {
+    await this.getElement().exportWithUsersInfoYesOption().click();
   }
 
-  clickExportWithoutUsersInfoOption() {
-    this.getElement().exportWithUsersInfoNoOption().click();
+  async clickExportWithoutUsersInfoOption() {
+    await this.getElement().exportWithUsersInfoNoOption().click();
   }
 
-  clickExportViewOption() {
-    this.getElement().exportViewOption().click();
+  async clickExportViewOption() {
+    await this.getElement().exportViewOption().click();
   }
 
-  clickExportFullOption() {
-    pw.log("Clicking Export Full Option");
-    this.getElement().exportFullOption().click();
+  async clickExportFullOption() {
+    await this.getElement().exportFullOption().click();
   }
 
-  clickExportButton() {
-    this.getElement().exportButton().click();
+  async clickExportButton() {
+    await this.getElement().exportButton().click();
   }
 }
 

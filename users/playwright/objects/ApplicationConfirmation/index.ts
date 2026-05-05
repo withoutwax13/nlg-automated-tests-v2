@@ -1,52 +1,31 @@
-/**
- * Page Object Model (POM) class representing the Filing Confirmation page.
- */
+import { buttonByText, currentPage, labelValue } from "../../support/runtime";
+
 class ApplicationConfirmation {
-  /**
-   * Retrieves the elements on the Application Confirmation page.
-   * @returns {Object} An object containing methods to get various elements on the page.
-   */
   private elements() {
     return {
-      pageTitle: () => pw.get("h1"),
-      systemMessage: () => this.getElement().systemMessage().next(),
+      pageTitle: () => currentPage().locator("h1"),
       printPageButton: () =>
-        pw.get(".NLG-HyperlinkNoPadding").contains("Print this page"),
-      closeButton: () => pw.get(".NLGButtonPrimary").contains("Close"),
-      referenceIdData: () => pw.get("label").contains("Reference ID").next(),
-      paymentDateData: () =>
-        pw.get("label").contains("Payment Date").next(),
-      totalAmountData: () => pw.get("label").contains("Total Amount").next(),
-      localGovernmentData: () =>
-        pw.get("label").contains("Local Government").next(),
-      formTitleData: () => pw.get("label").contains("Form Title").next(),
-      applicationStatusData: () =>
-        pw.get("label").contains("Application Status").next(),
+        currentPage().locator(".NLG-HyperlinkNoPadding").filter({ hasText: "Print this page" }).first(),
+      closeButton: () => buttonByText("Close"),
+      referenceIdData: () => labelValue("Reference ID"),
+      paymentDateData: () => labelValue("Payment Date"),
+      totalAmountData: () => labelValue("Total Amount"),
+      localGovernmentData: () => labelValue("Local Government"),
+      formTitleData: () => labelValue("Form Title"),
+      applicationStatusData: () => labelValue("Application Status"),
     };
   }
 
-  /**
-   * Retrieves the elements on the Application Confirmation page.
-   * @returns {Object} An object containing methods to get various elements on the page.
-   */
   getElement() {
     return this.elements();
   }
 
-  /**
-   * Clicks the "Close" button on the Application Confirmation page.
-   * @returns {void}
-   */
-  clickCloseButton() {
-    this.getElement().closeButton().click();
+  async clickCloseButton() {
+    await this.getElement().closeButton().click();
   }
 
-  /**
-   * Clicks the "Print this page" button on the Application Confirmation page.
-   * @returns {void}
-   */
-  clickPrintPageButton() {
-    this.getElement().printPageButton().click();
+  async clickPrintPageButton() {
+    await this.getElement().printPageButton().click();
   }
 }
 

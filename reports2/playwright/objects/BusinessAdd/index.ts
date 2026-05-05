@@ -1,85 +1,76 @@
+import type { Page } from "@playwright/test";
+import { clickByText, expectStatus, setMaskedDateInput } from "../../support/native-helpers";
+
 class BusinessAdd {
   userType: string;
-  constructor(props: { userType: string }) {
+  page: Page;
+
+  constructor(page: Page, props: { userType: string }) {
+    this.page = page;
     this.userType = props.userType;
   }
 
   private elements() {
     return {
-      anyList: () => pw.get("li"),
-      pageTitle: () => pw.get("h1"),
-      pageHelpContent: () => this.getElement().pageTitle().next(),
-      businessDetailsDropdown: () => pw.get(".BusinessDetailsComboBox"),
-      addBusinessButton: () =>
-        pw.get(".NLGButtonPrimary").contains("Add Business"),
-      governmentSearchBox: () => pw.get(".k-combobox").find("input"),
-      warningMessage: () => pw.get(".text-danger"),
-      backButton: () => pw.get(".NLGButtonSecondaryFlat").contains("Back"),
-      saveButton: () => pw.get("button").contains("Save"),
-      cancelButton: () => pw.get("button").contains("Cancel"),
-      addCustomFieldButton: () => pw.get("button").contains("Add Custom Field"),
-      legalBusinessNameField: () => pw.get('input[name="BusinessName"]'),
-      feinField: () => pw.get('input[name="FEIN"]'),
+      anyList: () => this.page.locator("li"),
+      pageTitle: () => this.page.locator("h1"),
+      pageHelpContent: () => this.page.locator("h1").locator("xpath=following-sibling::*[1]"),
+      businessDetailsDropdown: () => this.page.locator(".BusinessDetailsComboBox"),
+      addBusinessButton: () => this.page.getByRole("button", { name: "Add Business" }),
+      governmentSearchBox: () => this.page.locator(".k-combobox input"),
+      warningMessage: () => this.page.locator(".text-danger"),
+      backButton: () => this.page.getByRole("button", { name: "Back" }),
+      saveButton: () => this.page.getByRole("button", { name: "Save" }),
+      cancelButton: () => this.page.getByRole("button", { name: "Cancel" }),
+      addCustomFieldButton: () => this.page.getByRole("button", { name: "Add Custom Field" }),
+      legalBusinessNameField: () => this.page.locator('input[name="BusinessName"]'),
+      feinField: () => this.page.locator('input[name="FEIN"]'),
       legalBusinessAddress1Field: () =>
-        pw.get('input[name="LegalBusiness.LegalBusinessAddress1"]'),
+        this.page.locator('input[name="LegalBusiness.LegalBusinessAddress1"]'),
       legalBusinessAddress2Field: () =>
-        pw.get('input[name="LegalBusiness.LegalBusinessAddress2"]'),
+        this.page.locator('input[name="LegalBusiness.LegalBusinessAddress2"]'),
       legalBusinessCityField: () =>
-        pw.get('input[name="LegalBusiness.LegalBusinessCity"]'),
+        this.page.locator('input[name="LegalBusiness.LegalBusinessCity"]'),
       legalBusinessStateDropdown: () =>
-        this.getElement()
-          .legalBusinessCityField()
-          .parent()
-          .next()
-          .find(".k-dropdownlist"),
+        this.page.locator('input[name="LegalBusiness.LegalBusinessCity"]').locator("xpath=../../following-sibling::*[1]//*[contains(@class,'k-dropdownlist')]"),
       legalBusinessZipCodeField: () =>
-        pw.get('input[name="LegalBusiness.LegalBusinessZipCode"]'),
-      locationDbaField: () => pw.get('input[name="DBA"]'),
-      stateTaxIdField: () => pw.get('input[name="StateTaxId"]'),
+        this.page.locator('input[name="LegalBusiness.LegalBusinessZipCode"]'),
+      locationDbaField: () => this.page.locator('input[name="DBA"]'),
+      stateTaxIdField: () => this.page.locator('input[name="StateTaxId"]'),
       locationOpenDateField: () =>
-        pw.get("label").contains("Location Open Date").next().find("input"),
+        this.page.locator("label", { hasText: "Location Open Date" }).locator("xpath=following-sibling::*[1]//input"),
       sameBusinessLocationAddressForLegalBusinessAddressCheckbox: () =>
-        cy
-          .get("label")
-          .contains(
-            "Check this box if the business location address is the same as the legal business address."
-          ),
+        this.page.getByText(
+          "Check this box if the business location address is the same as the legal business address."
+        ),
       businessOwnerFullNameField: () =>
-        pw.get('input[name="Owner.OwnerFullName"]'),
+        this.page.locator('input[name="Owner.OwnerFullName"]'),
       businessOwnerEmailAddressField: () =>
-        pw.get('input[name="Owner.OwnerEmailAddress"]'),
+        this.page.locator('input[name="Owner.OwnerEmailAddress"]'),
       businessOwnerPhoneNumberField: () =>
-        pw.get('input[name="Owner.OwnerPhoneNumber"]'),
-      businessOwnerSSNField: () => pw.get('input[name="Owner.OwnerSSN"]'),
+        this.page.locator('input[name="Owner.OwnerPhoneNumber"]'),
+      businessOwnerSSNField: () => this.page.locator('input[name="Owner.OwnerSSN"]'),
       businessOwnerAddress1Field: () =>
-        pw.get('input[name="Owner.OwnerAddress1"]'),
+        this.page.locator('input[name="Owner.OwnerAddress1"]'),
       businessOwnerAddress2Field: () =>
-        pw.get('input[name="Owner.OwnerAddress2"]'),
-      businessOwnerCityField: () => pw.get('input[name="Owner.OwnerCity"]'),
+        this.page.locator('input[name="Owner.OwnerAddress2"]'),
+      businessOwnerCityField: () => this.page.locator('input[name="Owner.OwnerCity"]'),
       businessOwnerStateDropdown: () =>
-        this.getElement()
-          .businessOwnerCityField()
-          .parent()
-          .next()
-          .find(".k-dropdownlist"),
+        this.page.locator('input[name="Owner.OwnerCity"]').locator("xpath=../../following-sibling::*[1]//*[contains(@class,'k-dropdownlist')]"),
       businessOwnerZipCodeField: () =>
-        pw.get('input[name="Owner.OwnerZipCode"]'),
+        this.page.locator('input[name="Owner.OwnerZipCode"]'),
       sameBusinessMailingAddressAsLegalBusinessAddressCheckbox: () =>
-        cy
-          .get("label")
-          .contains(
-            "Check this box if the business mailing address is the same as the legal business address."
-          ),
+        this.page.getByText(
+          "Check this box if the business mailing address is the same as the legal business address."
+        ),
       sameBusinessManagementContactInformationAsOwnerCheckbox: () =>
-        cy
-          .get("label")
-          .contains(
-            "Check this box if the business management contact information is the same as the owner information."
-          ),
+        this.page.getByText(
+          "Check this box if the business management contact information is the same as the owner information."
+        ),
       customFieldSection: () =>
-        pw.get("h5").contains("Other Information").parent().next(),
+        this.page.locator("h5", { hasText: "Other Information" }).locator("xpath=../following-sibling::*[1]"),
       customFieldBlocks: () =>
-        this.getElement().customFieldSection().find("div"),
+        this.page.locator("h5", { hasText: "Other Information" }).locator("xpath=../following-sibling::*[1]/div"),
     };
   }
 
@@ -87,121 +78,77 @@ class BusinessAdd {
     return this.elements();
   }
 
-  fillFields(data: any) {
+  async fillFields(data: any) {
     if (this.userType === "taxpayer") {
       throw new Error("Taxpayer cannot proceed with this user flow.");
     }
-    pw.wait(["@govBusinessConfig", "@govBusinessConfig", "@govBusinessConfig"]).then(
-      (interceptions) => {
-        interceptions.forEach((interception) => {
-          expect(interception.response.statusCode).to.eq(200);
-        });
-      }
-    );
-    this.getElement().legalBusinessNameField().type(data.legalBusinessName);
-    this.getElement().feinField().type(data.fein);
-    this.getElement()
-      .legalBusinessAddress1Field()
-      .type(data.legalBusinessAddress1);
-    this.getElement()
-      .legalBusinessAddress2Field()
-      .type(data.legalBusinessAddress2);
-    this.getElement().legalBusinessCityField().type(data.legalBusinessCity);
-    this.getElement().legalBusinessStateDropdown().click();
-    pw.get("li").contains(data.legalBusinessState).click();
-    this.getElement()
-      .legalBusinessZipCodeField()
-      .type(data.legalBusinessZipCode);
 
-    this.getElement().locationDbaField().type(data.locationDba);
-    this.getElement().stateTaxIdField().type(data.stateTaxId);
-    this.getElement()
-      .locationOpenDateField()
-      .type(`${data.locationOpenDate.month}`);
-    this.getElement()
-      .locationOpenDateField()
-      .type(`{rightArrow}${data.locationOpenDate.day}`);
-    this.getElement()
-      .locationOpenDateField()
-      .type(`{rightArrow}{rightArrow}${data.locationOpenDate.year}`);
-    this.getElement()
-      .sameBusinessLocationAddressForLegalBusinessAddressCheckbox()
-      .click();
+    const configResponses = await Promise.all([
+      this.page.waitForResponse((response) => response.url().includes("/municipalityBusinessConfig/")),
+      this.page.waitForResponse((response) => response.url().includes("/municipalityBusinessConfig/")),
+      this.page.waitForResponse((response) => response.url().includes("/municipalityBusinessConfig/")),
+    ]);
+    await Promise.all(configResponses.map((response) => expectStatus(Promise.resolve(response), 200)));
 
-    this.getElement()
-      .businessOwnerFullNameField()
-      .type(data.businessOwnerFullName);
-    this.getElement()
-      .businessOwnerEmailAddressField()
-      .type(data.businessOwnerEmailAddress);
-    this.getElement()
-      .businessOwnerPhoneNumberField()
-      .type(data.businessOwnerPhoneNumber);
-    this.getElement().businessOwnerSSNField().type(data.businessOwnerSSN);
-    this.getElement()
-      .businessOwnerAddress1Field()
-      .type(data.businessOwnerAddress1);
-    this.getElement()
-      .businessOwnerAddress2Field()
-      .type(data.businessOwnerAddress2);
-    this.getElement().businessOwnerCityField().type(data.businessOwnerCity);
-    this.getElement().businessOwnerStateDropdown().click();
-    pw.get("li").contains(data.businessOwnerState).click();
-    this.getElement()
-      .businessOwnerZipCodeField()
-      .type(data.businessOwnerZipCode);
-
-    this.getElement()
-      .sameBusinessMailingAddressAsLegalBusinessAddressCheckbox()
-      .click();
-    this.getElement()
-      .sameBusinessManagementContactInformationAsOwnerCheckbox()
-      .click();
+    await this.getElement().legalBusinessNameField().fill(data.legalBusinessName);
+    await this.getElement().feinField().fill(data.fein);
+    await this.getElement().legalBusinessAddress1Field().fill(data.legalBusinessAddress1);
+    await this.getElement().legalBusinessAddress2Field().fill(data.legalBusinessAddress2);
+    await this.getElement().legalBusinessCityField().fill(data.legalBusinessCity);
+    await this.getElement().legalBusinessStateDropdown().click();
+    await clickByText(this.getElement().anyList(), data.legalBusinessState);
+    await this.getElement().legalBusinessZipCodeField().fill(data.legalBusinessZipCode);
+    await this.getElement().locationDbaField().fill(data.locationDba);
+    await this.getElement().stateTaxIdField().fill(data.stateTaxId);
+    await setMaskedDateInput(this.getElement().locationOpenDateField(), data.locationOpenDate);
+    await this.getElement().sameBusinessLocationAddressForLegalBusinessAddressCheckbox().click();
+    await this.getElement().businessOwnerFullNameField().fill(data.businessOwnerFullName);
+    await this.getElement().businessOwnerEmailAddressField().fill(data.businessOwnerEmailAddress);
+    await this.getElement().businessOwnerPhoneNumberField().fill(data.businessOwnerPhoneNumber);
+    await this.getElement().businessOwnerSSNField().fill(data.businessOwnerSSN);
+    await this.getElement().businessOwnerAddress1Field().fill(data.businessOwnerAddress1);
+    await this.getElement().businessOwnerAddress2Field().fill(data.businessOwnerAddress2);
+    await this.getElement().businessOwnerCityField().fill(data.businessOwnerCity);
+    await this.getElement().businessOwnerStateDropdown().click();
+    await clickByText(this.getElement().anyList(), data.businessOwnerState);
+    await this.getElement().businessOwnerZipCodeField().fill(data.businessOwnerZipCode);
+    await this.getElement().sameBusinessMailingAddressAsLegalBusinessAddressCheckbox().click();
+    await this.getElement().sameBusinessManagementContactInformationAsOwnerCheckbox().click();
   }
 
-  addCustomField(customName: string, customValue: string) {
+  async addCustomField(customName: string, customValue: string) {
     if (this.userType === "taxpayer") {
       throw new Error("Taxpayer cannot proceed with this user flow.");
     }
-    this.getElement().addCustomFieldButton().click();
-    this.getElement()
-      .customFieldBlocks()
-      .last()
-      .find("input")
-      .eq(0)
-      .type(customName);
-    this.getElement()
-      .customFieldBlocks()
-      .last()
-      .find("input")
-      .eq(1)
-      .type(customValue);
+
+    await this.getElement().addCustomFieldButton().click();
+    const block = this.getElement().customFieldBlocks().last();
+    await block.locator("input").nth(0).fill(customName);
+    await block.locator("input").nth(1).fill(customValue);
   }
 
-  clickSaveButton() {
-    this.getElement().saveButton().click();
-    pw.waitForLoading();
+  clickSaveButton(): Promise<void> {
+    return this.getElement().saveButton().click();
   }
 
-  clickCancelButton() {
-    this.getElement().cancelButton().click();
+  clickCancelButton(): Promise<void> {
+    return this.getElement().cancelButton().click();
   }
 
-  clickBackButton() {
-    this.getElement().backButton().click();
+  clickBackButton(): Promise<void> {
+    return this.getElement().backButton().click();
   }
 
-  addBusinessOnAccount(businessDba: string) {
+  async addBusinessOnAccount(businessDba: string) {
     if (this.userType !== "taxpayer") {
       throw new Error("Only taxpayer can proceed with this user flow.");
     }
-    this.getElement().governmentSearchBox().type("Arrakis");
-    this.getElement().anyList().contains("Arrakis").click();
-    pw.waitForLoading();
-    this.getElement().businessDetailsDropdown().type(businessDba);
-    this.getElement().anyList().contains(businessDba).click();
-    this.getElement().addBusinessButton().click();
-    pw.waitForLoading();
+
+    await this.getElement().governmentSearchBox().fill("Arrakis");
+    await clickByText(this.getElement().anyList(), "Arrakis");
+    await this.getElement().businessDetailsDropdown().fill(businessDba);
+    await clickByText(this.getElement().anyList(), businessDba);
+    await this.getElement().addBusinessButton().click();
   }
 }
 

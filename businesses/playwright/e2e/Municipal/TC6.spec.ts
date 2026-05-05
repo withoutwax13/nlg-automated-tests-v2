@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
 
 const municipalBusinessGrid = new BusinessGrid({
@@ -10,36 +10,28 @@ const randomDate = {
 };
 
 test.describe("As a municipal user, I should be able to set close date from the grid", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "municipal", accountIndex: 1 });
-    municipalBusinessGrid.init();
-    municipalBusinessGrid.clickClearAllFiltersButton();
-    municipalBusinessGrid.getDataOfColumn(
+  test("Initiating test", async () => {
+    await login({ accountType: "municipal", accountIndex: 1 });
+    await municipalBusinessGrid.init();
+    await municipalBusinessGrid.clickClearAllFiltersButton();
+    const beforeCloseDate = await municipalBusinessGrid.getDataOfColumn(
       "Close Date",
       "DBA",
-      "Arrakis Spice Company 13857",
-      "beforeCloseDate"
+      "Arrakis Spice Company 13857"
     );
-    municipalBusinessGrid.clickClearAllFiltersButton();
-    municipalBusinessGrid.setCloseDate("Arrakis Spice Company 13857", {
+    await municipalBusinessGrid.clickClearAllFiltersButton();
+    await municipalBusinessGrid.setCloseDate("Arrakis Spice Company 13857", {
       month: 1,
       date: randomDate.date,
       year: 2029,
     });
-    municipalBusinessGrid.getElement().toastComponent().should("exist");
-    municipalBusinessGrid.clickClearAllFiltersButton();
-    municipalBusinessGrid.getDataOfColumn(
+    await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
+    await municipalBusinessGrid.clickClearAllFiltersButton();
+    const afterCloseDate = await municipalBusinessGrid.getDataOfColumn(
       "Close Date",
       "DBA",
-      "Arrakis Spice Company 13857",
-      "afterCloseDate"
+      "Arrakis Spice Company 13857"
     );
-    pw.get("@beforeCloseDate").then((beforeCloseDate) => {
-      pw.get("@afterCloseDate").then((afterCloseDate) => {
-        expect(beforeCloseDate).to.be.not.equal(
-          afterCloseDate
-        );
-      });
-    });
+    expect(beforeCloseDate).not.toEqual(afterCloseDate);
   });
 });

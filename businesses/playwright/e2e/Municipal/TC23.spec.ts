@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 
@@ -34,32 +34,32 @@ const newBusinessData = {
 };
 
 test.describe("As a municipal user, I should be able to delete a business.", () => {
-  test.beforeEach(() => {
-    pw.deleteBusinessData({
+  test.beforeEach(async () => {
+    await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
       notFirstLogin: false,
       accountIndex: 9,
     });
   });
-  test("Initiating test", () => {
-    pw.login({
+  test("Initiating test", async () => {
+    await login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 9,
     });
-    municipalBusinessGrid.init();
-    municipalBusinessGrid.clickAddBusinessButton();
-    addBusinessPage.fillFields(newBusinessData);
-    addBusinessPage.clickSaveButton();
-    municipalBusinessGrid.init(false, false);
-    municipalBusinessGrid.clickClearAllFiltersButton();
-    municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
+    await municipalBusinessGrid.init();
+    await municipalBusinessGrid.clickAddBusinessButton();
+    await addBusinessPage.fillFields(newBusinessData);
+    await addBusinessPage.clickSaveButton();
+    await municipalBusinessGrid.init(false, false);
+    await municipalBusinessGrid.clickClearAllFiltersButton();
+    await municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
+    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     // delete business data
-    municipalBusinessGrid.init(false, false);
-    municipalBusinessGrid.deleteBusiness(newBusinessData.locationDba);
-    municipalBusinessGrid.getElement().toastComponent().should("exist");
+    await municipalBusinessGrid.init(false, false);
+    await municipalBusinessGrid.deleteBusiness(newBusinessData.locationDba);
+    await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
   });
 });

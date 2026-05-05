@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 
@@ -36,23 +36,23 @@ const newBusinessData = {
 
 // Skipped, assertions alrady covered in TC26
 test.describe.skip("As a taxpayer user, I should be able to add a business.", () => {
-  test.beforeEach(() => {
-    pw.deleteBusinessData({
+  test.beforeEach(async () => {
+    await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
       notFirstLogin: false,
       accountIndex: 4,
     });
 
-    pw.deleteBusinessData({
+    await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
       notFirstLogin: true,
       accountIndex: 2,
     });
   });
-  test("Initiating test", () => {
-    pw.login({
+  test("Initiating test", async () => {
+    await login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 2,
@@ -64,16 +64,16 @@ test.describe.skip("As a taxpayer user, I should be able to add a business.", ()
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickClearAllFiltersButton();
     municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
+    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
-    pw.logout();
-    pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
+    await logout();
+    await login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
+    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
   });
 });

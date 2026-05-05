@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 
@@ -11,19 +11,19 @@ const randomMonth = Math.floor(Math.random() * 12) + 1;
 const randomDate = Math.floor(Math.random() * 28) + 1;
 
 test.describe("As a ags user, I should be able to update start date for delinquency tracking in the business details page", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags", accountIndex: 1 });
-    agsBusinessGrid.init();
-    agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 74829");
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
-    agsBusinessDetails.clickBusinessStatusTab();
+  test("Initiating test", async () => {
+    await login({ accountType: "ags", accountIndex: 1 });
+    await agsBusinessGrid.init();
+    await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 74829");
+    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
+    await agsBusinessDetails.clickBusinessStatusTab();
 
-    agsBusinessDetails.setStartDateDelinquencyTracking({
+    await agsBusinessDetails.setStartDateDelinquencyTracking({
       month: randomMonth,
       date: randomDate,
       year: 2024,
     });
-    agsBusinessDetails.clickSaveButton();
-    agsBusinessDetails.getElement().toastComponent().should("exist");
+    await agsBusinessDetails.clickSaveButton();
+    await expect(agsBusinessDetails.getElement().toastComponent()).toBeVisible();
   });
 });

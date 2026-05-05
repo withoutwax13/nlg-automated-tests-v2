@@ -1,106 +1,55 @@
-import { test, expect } from '../../support/pwtest';
-import Filing from "../../objects/Filing";
-import Form from "../../objects/Form";
-import FormPreview from "../../objects/FormPreview";
-import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
+import { expect, test } from "@playwright/test";
 import ApplicationGrid from "../../objects/ApplicationGrid";
 import ApplicationReview from "../../objects/ApplicationReview";
-
-const randomSeed = () => Math.floor(Math.random() * 100000);
+import {
+  createSubmittedApplication,
+  getTaxpayerRegistrationRecordId,
+} from "../helpers";
+import { initTestRuntime, login, logout } from "../../support/runtime";
 
 test.describe("As a reviewer user, I should be able to link/unlink an application record to a business/registration record.", () => {
-  test("Initiating test", () => {
-    const form = new Form({ isRenewal: false });
-    const formPreviewPage = new FormPreview();
-    const filing = new Filing();
-    const applicationConfirmation = new ApplicationConfirmation();
-    const taxpayerApplicationGrid = new ApplicationGrid({
-      userType: "taxpayer",
-    });
-    const municipalApplicationGrid = new ApplicationGrid({
-      userType: "municipal",
-    });
+  test("Initiating test", async ({ page, request }, testInfo) => {
+    await initTestRuntime({ page, request, baseURL: testInfo.project.use.baseURL as string });
+    const municipalApplicationGrid = new ApplicationGrid({ userType: "municipal" });
     const applicationReview = new ApplicationReview({ userType: "municipal" });
 
-    pw.login({ accountType: "taxpayer", accountIndex: 7 });
+    const { customData, referenceId } = await createSubmittedApplication({
+      accountIndex: 7,
+      formName: "Business License (Annual) - E2E #1",
+    });
+    const registrationRecordId = await getTaxpayerRegistrationRecordId(referenceId);
 
-    filing.goToSubmitFormsTab();
-    filing.selectGovernment("City of Arrakis");
-    filing.selectForm("Business License (Annual) - E2E #1");
-    filing.clickSubmitNewRegistrationButton();
-    form.clickNextbutton();
-    form.selectIsRegisteringMultipleLocations(false);
-
-    pw.getUniqueRegistrationData(randomSeed(), false).then(
-      (customData: {
-        basicInfo: any;
-        locationInfo: { locations: any[] };
-        applicantInfo: any;
-      }) => {
-        form.enterBusinessOwnerInformation(customData.basicInfo);
-        form.enterLegalBusinessInformation(customData.basicInfo);
-        form.checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation();
-        form.enterEmergencyPhoneNumbers(customData.basicInfo);
-        form.clickNextbutton();
-        form.enterLocationDetails(customData.locationInfo.locations);
-        form.clickNextbutton();
-        form.enterApplicantDetails(customData.applicantInfo, true);
-        form.clickNextbutton();
-        formPreviewPage.clickSubmitButton();
-        applicationConfirmation
-          .getElement()
-          .referenceIdData()
-          .invoke("text")
-          .then((referenceId) => {
-            pw.wrap(referenceId).as("referenceId");
-          });
-        applicationConfirmation.clickCloseButton();
-        taxpayerApplicationGrid.init();
-        pw.get("@referenceId").then((referenceId) => {
-          taxpayerApplicationGrid.getDataOfColumn(
-            "Registration Record ID",
-            "Reference ID",
-            String(referenceId),
-            "registrationRecordId"
-          );
-        });
-        pw.logout();
-        pw.login({
-          accountType: "municipal",
-          notFirstLogin: true,
-          accountIndex: 7,
-        });
-        municipalApplicationGrid.init();
-        pw.get("@registrationRecordId").then((registrationRecordId) => {
-          municipalApplicationGrid.selectRowToReview({
-            anchorColumnName: "Registration Record ID",
-            anchorValue: String(registrationRecordId),
-          });
-          municipalApplicationGrid.clickStartApplicationWorkflowForSelectedApplicationsButton();
-          applicationReview.clickReviewStepTab("Manual Steps");
-          applicationReview.manualStepsTab.clickApproveButton();
-          applicationReview.clickReviewStepTab("Business Details");
-          applicationReview.updateBusinessDetailsTab.clickEditBusinessDetailsButton();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.clickReviewBusinessButton(
-            customData.locationInfo.locations[0].locationAddress1
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.disregardSimilarBusinessRecords();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.toggleLinkExistingBusiness();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.selectBusinessLocationToLink(
-            "11038"
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.clickLinkUpdateLinkedBusinessButton();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal
-            .getElements()
-            .linkExistingComponent()
-            .should("exist");
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.clickUndoLinkingButton();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal
-            .getElements()
-            .linkExistingComponent()
-            .should("not.exist");
-        });
-      }
+    await logout();
+    await login({ accountType: "municipal", notFirstLogin: true, accountIndex: 7 });
+    await municipalApplicationGrid.init();
+    await municipalApplicationGrid.selectRowToReview({
+      anchorColumnName: "Registration Record ID",
+      anchorValue: String(registrationRecordId),
+    });
+    await municipalApplicationGrid.clickStartApplicationWorkflowForSelectedApplicationsButton();
+    await applicationReview.clickReviewStepTab("Manual Steps");
+    await applicationReview.manualStepsTab.clickApproveButton();
+    await applicationReview.clickReviewStepTab("Business Details");
+    await applicationReview.updateBusinessDetailsTab.clickEditBusinessDetailsButton();
+    await applicationReview.updateBusinessDetailsTab.updateBusinessList.clickReviewBusinessButton(
+      String(customData.locationInfo.locations[0].locationAddress1)
     );
+    await applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.disregardSimilarBusinessRecords();
+    await applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.toggleLinkExistingBusiness();
+    await applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.selectBusinessLocationToLink(
+      "11038"
+    );
+    await applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.clickLinkUpdateLinkedBusinessButton();
+    await expect(
+      applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal
+        .getElements()
+        .linkExistingComponent()
+    ).toBeVisible();
+    await applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.clickUndoLinkingButton();
+    await expect(
+      applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal
+        .getElements()
+        .linkExistingComponent()
+    ).toHaveCount(0);
   });
 });

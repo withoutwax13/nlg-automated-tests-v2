@@ -1,36 +1,25 @@
-import { test, expect } from '../../support/pwtest';
+import { expect, test } from "@playwright/test";
 import Profile from "../../objects/Profile";
+import { bindRuntime, login } from "../../support/runtime";
 
 const randomSeed = Math.floor(Math.random() * 10000);
-
 const profile = new Profile();
-test.describe("As a user, I should be able to edit my account details", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "taxpayer", accountIndex: 3 });
-    profile.init();
-    profile.typeFirstName(`QA #${randomSeed}`);
-    profile
-      .getElement()
-      .firstNameInput()
-      .should("have.value", `QA #${randomSeed}`);
-    profile.getElement().saveChangesButton().should("exist");
-    profile.clickSaveChanges();
-    profile.typeLastName(`Specialist #${randomSeed}`);
-    profile
-      .getElement()
-      .lastNameInput()
-      .should("have.value", `Specialist #${randomSeed}`);
-    profile.getElement().saveChangesButton().should("exist");
-    profile.clickSaveChanges();
 
-    profile.init(); // Refresh the page
-    profile
-      .getElement()
-      .firstNameInput()
-      .should("have.value", `QA #${randomSeed}`);
-    profile
-      .getElement()
-      .lastNameInput()
-      .should("have.value", `Specialist #${randomSeed}`);
+test.describe("As a user, I should be able to edit my account details", () => {
+  test("Initiating test", async ({ page, request }) => {
+    bindRuntime(page, request);
+    await login({ accountType: "taxpayer", accountIndex: 3 });
+    await profile.init();
+    await profile.typeFirstName(`QA #${randomSeed}`);
+    await expect(profile.getElement().firstNameInput()).toHaveValue(`QA #${randomSeed}`);
+    await expect(profile.getElement().saveChangesButton()).toBeVisible();
+    await profile.clickSaveChanges();
+    await profile.typeLastName(`Specialist #${randomSeed}`);
+    await expect(profile.getElement().lastNameInput()).toHaveValue(`Specialist #${randomSeed}`);
+    await expect(profile.getElement().saveChangesButton()).toBeVisible();
+    await profile.clickSaveChanges();
+    await profile.init();
+    await expect(profile.getElement().firstNameInput()).toHaveValue(`QA #${randomSeed}`);
+    await expect(profile.getElement().lastNameInput()).toHaveValue(`Specialist #${randomSeed}`);
   });
 });

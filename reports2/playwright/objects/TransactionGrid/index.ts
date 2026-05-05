@@ -1,8 +1,6 @@
-import {
-  getOrderOfColumns,
-  validateFilterOperation,
-  getVisibilityStatusOfColumns,
-} from "../../utils/Grid";
+import type { Locator, Page } from "@playwright/test";
+import { clickByText, findRowByCellValue, getColumnOrder, getPagerTotal, getVisibilityStatus, setMaskedDateInput, waitForLoading } from "../../support/native-helpers";
+import { validateFilterOperation } from "../../utils/Grid";
 import GridSetting from "../GridSetting";
 
 const VALID_ITEMS_PER_PAGE = [5, 10, 20, 50];
@@ -26,28 +24,7 @@ export const AGS_TRANSACTION_GRID_COLUMNS = [
   "Transaction ID",
   "Reference ID",
 ];
-export const MUNICIPAL_TRANSACTION_GRID_COLUMNS = [
-  "Actions",
-  "Transaction Date",
-  "DBA",
-  "Location Address",
-  "Payment Status",
-  "Period",
-  "Total Due",
-  "Base Tax/Fee Amount",
-  "Interest",
-  "Penalty",
-  "Transaction Fee",
-  "Funding Date",
-  "Form Name",
-  "Payment Method",
-  "Payment Category",
-  "Distribution ID",
-  "Transaction ID",
-  "Reference ID",
-];
-
-const removeSpaces = (text: string) => text.replace(/\s/g, "");
+export const MUNICIPAL_TRANSACTION_GRID_COLUMNS = [...AGS_TRANSACTION_GRID_COLUMNS];
 
 class TransactionGrid {
   userType: string;
@@ -58,15 +35,23 @@ class TransactionGrid {
   };
   sortType?: string;
   defaultGridColumnsAlias: string;
-  constructor(props: {
-    userType: string;
-    municipalitySelection?: string;
-    dateRange?: {
-      startDate: { month: number; date: number; year: number };
-      endDate: { month: number; date: number; year: number };
-    };
-    sortType?: string;
-  }) {
+  private columnOrder: Record<string, number> = {};
+  private visibilityStatus: Record<string, boolean> = {};
+  private readonly page: Page;
+
+  constructor(
+    page: Page,
+    props: {
+      userType: string;
+      municipalitySelection?: string;
+      dateRange?: {
+        startDate: { month: number; date: number; year: number };
+        endDate: { month: number; date: number; year: number };
+      };
+      sortType?: string;
+    }
+  ) {
+    this.page = page;
     this.userType = props.userType;
     this.municipalitySelection = props.municipalitySelection;
     this.dateRange = props.dateRange;
@@ -74,71 +59,36 @@ class TransactionGrid {
     this.sortType = props.sortType ? props.sortType : "default";
   }
 
+  private get defaultColumns() {
+    return this.userType === "ags" ? AGS_TRANSACTION_GRID_COLUMNS : MUNICIPAL_TRANSACTION_GRID_COLUMNS;
+  }
+
   private elements() {
     return {
-      pageTitle: () => pw.get("h2"),
-      noRecordFoundComponent: () => pw.get(".k-grid-norecords-template"),
-      searchBox: () => pw.get("span").find(".fa-magnifying-glass").parent(),
-      startDateInput: () => pw.get(".k-datepicker").first(),
-      endDateInput: () => pw.get(".k-datepicker").last(),
-      columns: () => pw.get("thead").find("tr").find("th"),
-      rows: () =>
-        pw.get("tbody").then(($tbody) => {
-          if ($tbody.find("tr").length !== 0) {
-            return $tbody.find("tr");
-          }
-        }),
-      customizeTableViewButton: () =>
-        pw.get("*").contains("Customize"),
-      columnFilter: () => this.getElement().columns().find("span").find("a"),
-      columnSort: () => this.getElement().columns().find("a").find("i"),
-      specificColumnFilter: (columnOrder: number) =>
-        this.getElement().columns().eq(columnOrder).find("span").find("a"),
-      specificColumnSort: (columnOrder: number) =>
-        this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
-      itemsPerPageDropdownItem: (itemNumber: number) =>
-        pw.get("li").contains(itemNumber),
-      pagination: () => pw.get(".k-pager-numbers-wrap"),
-      goToFirstPageButton: () =>
-        this.getElement().pagination().find("button").eq(0),
-      goToPreviousPageButton: () =>
-        this.getElement().pagination().find("button[").eq(1),
-      goToNextPageButton: () =>
-        this.getElement()
-          .pagination()
-          .find('button[title="Go to the next page"]'),
-      goToLastPageButton: () =>
-        this.getElement()
-          .pagination()
-          .find('button[title="Go to the last page"]'),
-      filterOperationsDropdown: () =>
-        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
+      pageTitle: () => this.page.locator("h2"),
+      noRecordFoundComponent: () => this.page.locator(".k-grid-norecords-template"),
+      searchBox: () => this.page.locator("span").filter({ has: this.page.locator(".fa-magnifying-glass") }).first(),
+      startDateInput: () => this.page.locator(".k-datepicker").first(),
+      endDateInput: () => this.page.locator(".k-datepicker").last(),
+      columns: () => this.page.locator("thead tr th"),
+      rows: () => this.page.locator("tbody tr"),
+      customizeTableViewButton: () => this.page.getByText("Customize"),
+      specificColumnFilter: (columnOrder: number) => this.page.locator("thead tr th").nth(columnOrder).locator("span a"),
+      itemsPerPageDropdown: () => this.page.locator(".k-dropdownlist"),
+      itemsPerPageDropdownItem: (itemNumber: number) => this.page.locator("li").filter({ hasText: String(itemNumber) }).first(),
+      filterOperationsDropdown: () => this.page.locator(".k-filter-menu-container .k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
-        cy
-          .get(".k-list-ul")
-          .find("li")
-          .find(".k-list-item-text")
-          .contains(item),
-      filterValueInput: () =>
-        pw.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => pw.get(".k-dateinput"),
-      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
-      filterFilterButton: () =>
-        cy
-          .get(".k-filter-menu-container")
-          .find(".k-actions")
-          .find(".k-button")
-          .contains("Filter"),
-      searchMunicipalityDropdown: () =>
-        pw.get('input[placeholder="Select government..."]'),
-      anyList: () => pw.get("li"),
-      anyButton: () => pw.get("button"),
-      clearAllFiltersButton: () =>
-        pw.get("*").contains("Clear All"),
-      exportButton: () => pw.get(".NLGButtonPrimary").contains("Export"),
-      searchButton: () => pw.get(".NLGButtonPrimary").contains("Search"),
-      itemsData: () => pw.get(".k-pager-info"),
+        this.page.locator(".k-list-ul .k-list-item-text").filter({ hasText: item }).first(),
+      filterValueInput: () => this.page.locator(".k-filter-menu-container .k-input").first(),
+      filterValueDateInput: () => this.page.locator(".k-dateinput input").first(),
+      filterMultiSelectItem: () => this.page.locator(".k-multicheck-wrap li"),
+      filterFilterButton: () => this.page.locator(".k-filter-menu-container .k-actions .k-button").filter({ hasText: "Filter" }).first(),
+      searchMunicipalityDropdown: () => this.page.locator('input[placeholder="Select government..."]'),
+      anyList: () => this.page.locator("li"),
+      clearAllFiltersButton: () => this.page.getByText("Clear All").first(),
+      exportButton: () => this.page.getByRole("button", { name: "Export" }),
+      searchButton: () => this.page.getByRole("button", { name: "Search" }),
+      itemsData: () => this.page.locator(".k-pager-info"),
     };
   }
 
@@ -146,357 +96,240 @@ class TransactionGrid {
     return this.elements();
   }
 
-  init(resetSavedGridSettingsInMemory?: boolean) {
-    pw.visit("/reports/transactionsReport");
-    pw.waitForLoading(10);
+  private async refreshGridState() {
+    this.columnOrder = await getColumnOrder(this.getElement().columns(), this.defaultColumns);
+    this.visibilityStatus = getVisibilityStatus(this.defaultColumns, this.columnOrder);
+  }
+
+  async init() {
+    await this.page.goto("/reports/transactionsReport");
+    await waitForLoading(this.page, 10);
     if (!["ags", "municipal"].includes(this.userType)) {
       throw new Error("Invalid user type");
     }
-    if (this.userType === "ags") {
-      this.selectMunicipality(this.municipalitySelection);
+    if (this.userType === "ags" && this.municipalitySelection) {
+      await this.selectMunicipality(this.municipalitySelection);
     }
-    pw.waitForLoading(20);
-    getOrderOfColumns(
-      this.userType === "ags"
-        ? AGS_TRANSACTION_GRID_COLUMNS
-        : MUNICIPAL_TRANSACTION_GRID_COLUMNS,
-      `${this.userType}_${this.defaultGridColumnsAlias}`,
-      resetSavedGridSettingsInMemory ? true : false
-    );
-    getVisibilityStatusOfColumns(
-      this.userType === "ags"
-        ? AGS_TRANSACTION_GRID_COLUMNS
-        : MUNICIPAL_TRANSACTION_GRID_COLUMNS,
-      `${this.userType}_${this.defaultGridColumnsAlias}_visibility`
-    );
+    await waitForLoading(this.page, 20);
+    await this.refreshGridState();
   }
 
-  selectMunicipality(municipality: string) {
-    this.getElement().searchMunicipalityDropdown().clear();
-    this.getElement().searchMunicipalityDropdown().type(municipality);
-    this.getElement().anyList().contains(municipality).click();
-    pw.waitForLoading();
+  async selectMunicipality(municipality: string) {
+    await this.getElement().searchMunicipalityDropdown().fill(municipality);
+    await clickByText(this.getElement().anyList(), municipality);
+    await waitForLoading(this.page);
   }
 
-  private clickColumn(index: number) {
-    this.getElement().columns().eq(index).click();
-  }
-
-  private handleDBASorting(index: number, isAscending: boolean) {
-    if (!isAscending && this.sortType === "default") {
-      this.clickColumn(index);
-      this.sortType = "descending";
-    } else if (isAscending && this.sortType === "descending") {
-      this.clickColumn(index);
-      this.sortType = "ascending";
+  private async getColumnIndex(columnName: string) {
+    if (this.columnOrder[columnName] === undefined) {
+      await this.refreshGridState();
     }
+    return this.columnOrder[columnName];
   }
 
-  private handleGeneralSorting(index: number, isAscending: boolean) {
-    if (
-      isAscending &&
-      (this.sortType === "default" || this.sortType === "descending")
-    ) {
-      this.clickColumn(index);
-      this.sortType = "ascending";
-    } else if (!isAscending && this.sortType === "ascending") {
-      this.clickColumn(index);
-      this.sortType = "descending";
-    }
-  }
-
-  sortColumn(isAscending: boolean, columnName: string) {
-    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[columnName];
-        this.clickColumn(columnIndex);
-        if (columnName === "DBA") {
-          this.handleDBASorting(columnIndex, isAscending);
-        } else {
-          this.handleGeneralSorting(columnIndex, isAscending);
-        }
-      });
-  }
-
-  private handleTextFilter(
-    columnIndex: number,
-    filterValue: string,
-    filterOperation: string
-  ) {
+  private async handleTextFilter(columnIndex: number, filterValue: string, filterOperation: string) {
     validateFilterOperation("text", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    this.getElement().filterOperationsDropdown().click();
-    this.getElement().filterOperationsDropdownItem(filterOperation).click();
-    if (filterOperation !== "Is not null" && filterOperation !== "Is null") {
-      this.getElement().filterValueInput().type(filterValue);
+    await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await this.getElement().filterOperationsDropdown().click();
+    await this.getElement().filterOperationsDropdownItem(filterOperation).click();
+    if (!["Is not null", "Is null"].includes(filterOperation)) {
+      await this.getElement().filterValueInput().fill(filterValue);
     }
-    this.getElement().filterFilterButton().click();
+    await this.getElement().filterFilterButton().click();
   }
 
-  private handleDateFilter(
-    columnIndex: number,
-    filterValue: string,
-    filterOperation: string
-  ) {
+  private async handleDateFilter(columnIndex: number, filterValue: string, filterOperation: string) {
     validateFilterOperation("date", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    this.getElement().filterOperationsDropdown().click();
-    this.getElement().filterOperationsDropdownItem(filterOperation).click();
-    this.getElement()
-      .filterValueDateInput()
-      .type(filterValue.split("/").join("{rightarrow}"));
-    this.getElement().filterFilterButton().click();
+    await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await this.getElement().filterOperationsDropdown().click();
+    await this.getElement().filterOperationsDropdownItem(filterOperation).click();
+    await this.getElement().filterValueDateInput().fill(filterValue);
+    await this.getElement().filterFilterButton().click();
   }
 
-  private handleNumberFilter(
-    columnIndex: number,
-    filterValue: string,
-    filterOperation: string
-  ) {
+  private async handleNumberFilter(columnIndex: number, filterValue: string, filterOperation: string) {
     validateFilterOperation("number", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    this.getElement().filterOperationsDropdown().click();
-    this.getElement().filterOperationsDropdownItem(filterOperation).click();
-    this.getElement().filterValueInput().type(filterValue);
-    this.getElement().filterFilterButton().click();
+    await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await this.getElement().filterOperationsDropdown().click();
+    await this.getElement().filterOperationsDropdownItem(filterOperation).click();
+    await this.getElement().filterValueInput().fill(filterValue);
+    await this.getElement().filterFilterButton().click();
   }
 
-  private handleMultiSelectFilter(columnIndex: number, filterValue: string) {
-    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    this.getElement().filterMultiSelectItem().contains(filterValue).click();
-    this.getElement().filterFilterButton().click();
+  private async handleMultiSelectFilter(columnIndex: number, filterValue: string) {
+    await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await clickByText(this.getElement().filterMultiSelectItem(), filterValue);
+    await this.getElement().filterFilterButton().click();
   }
 
-  filterColumn(
+  async filterColumn(
     columnName: string,
     filterValue: string,
-    filterType: string = "text",
-    filterOperation: string = "Contains"
+    filterType = "text",
+    filterOperation = "Contains"
   ) {
-    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[columnName];
-        switch (filterType) {
-          case "text":
-            this.handleTextFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "date":
-            this.handleDateFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "number":
-            this.handleNumberFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "multi-select":
-            this.handleMultiSelectFilter(columnIndex, filterValue);
-            break;
-          default:
-            break;
-        }
-      });
+    const columnIndex = await this.getColumnIndex(columnName);
+    switch (filterType) {
+      case "text":
+        await this.handleTextFilter(columnIndex, filterValue, filterOperation);
+        break;
+      case "date":
+        await this.handleDateFilter(columnIndex, filterValue, filterOperation);
+        break;
+      case "number":
+        await this.handleNumberFilter(columnIndex, filterValue, filterOperation);
+        break;
+      case "multi-select":
+        await this.handleMultiSelectFilter(columnIndex, filterValue);
+        break;
+      default:
+        break;
+    }
   }
 
-  changeItemsPerPage(itemNumber: number) {
+  async changeItemsPerPage(itemNumber: number) {
     if (!VALID_ITEMS_PER_PAGE.includes(itemNumber)) {
       throw new Error("Invalid items per page number");
     }
-    this.getElement().itemsPerPageDropdown().click();
-    this.getElement().itemsPerPageDropdownItem(itemNumber).click();
+    await this.getElement().itemsPerPageDropdown().click();
+    await this.getElement().itemsPerPageDropdownItem(itemNumber).click();
   }
 
-  clickCustomizeTableViewButton() {
-    this.getElement().customizeTableViewButton().click();
+  clickCustomizeTableViewButton(): Promise<void> {
+    return this.getElement().customizeTableViewButton().click();
   }
 
-  clickClearAllFiltersButton() {
-    this.getElement().clearAllFiltersButton().click();
+  clickClearAllFiltersButton(): Promise<void> {
+    return this.getElement().clearAllFiltersButton().click();
   }
 
-  getDataOfColumn(
+  private async getRowByAnchor(anchorColumnName: string, anchorValue: string) {
+    const anchorIndex = await this.getColumnIndex(anchorColumnName);
+    const row = await findRowByCellValue(this.getElement().rows(), anchorIndex, anchorValue, true);
+    if (!row) {
+      throw new Error(`Row not found for ${anchorColumnName}: ${anchorValue}`);
+    }
+    return row;
+  }
+
+  async getDataOfColumn(
     targetColumnName: string,
     anchorColumnName: string,
     anchorValue: string,
-    targetColumnDataAlias: string
+    _targetColumnDataAlias?: string
   ) {
-    this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[targetColumnName];
-        const anchorColumnIndex = columnIndexes[anchorColumnName];
-        this.getElement()
-          .rows()
-          .each(($row) => {
-            const $columns = $row.find("td");
-            if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              pw.wrap($columns.eq(columnIndex).text()).as(
-                targetColumnDataAlias
-              );
-            }
-          });
-      });
+    await this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
+    const row = await this.getRowByAnchor(anchorColumnName, anchorValue);
+    const columnIndex = await this.getColumnIndex(targetColumnName);
+    return row.locator("td").nth(columnIndex).textContent();
   }
 
-  getElementOfColumn(
+  async getElementOfColumn(
     targetColumnName: string,
     anchorColumnName: string,
     anchorValue: string,
-    targetColumnElementAlias: string
-  ) {
-    this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[targetColumnName];
-        const anchorColumnIndex = columnIndexes[anchorColumnName];
-        this.getElement()
-          .rows()
-          .each(($row) => {
-            const $columns = $row.find("td");
-            if (
-              String($columns.eq(anchorColumnIndex).text())
-                .replace(/\s+/g, " ")
-                .trim() === anchorValue
-            ) {
-              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
-            }
-          });
-      });
+    _targetColumnElementAlias?: string
+  ): Promise<Locator> {
+    await this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
+    const row = await this.getRowByAnchor(anchorColumnName, anchorValue);
+    const columnIndex = await this.getColumnIndex(targetColumnName);
+    return row.locator("td").nth(columnIndex);
   }
 
-  clickExportButton() {
-    this.getElement().exportButton().click();
+  clickExportButton(): Promise<void> {
+    return this.getElement().exportButton().click();
   }
 
-  private recursiveDateInput(props: {
-    date: { month: number; day: number; year: number };
-    selector: any;
-    intendedDateValue: string;
-  }) {
-    pw.get(props.selector).type(`${props.date.month}`);
-    this.getElement().pageTitle().click();
-    pw.get(props.selector).type(`{rightArrow}${props.date.day}`);
-    this.getElement().pageTitle().click();
-    pw.get(props.selector).type(`{rightArrow}{rightArrow}${props.date.year}`);
-    this.getElement().pageTitle().click();
-    pw.get(props.selector)
-      .invoke("attr", "value")
-      .then(($dateValue) => {
-        if ($dateValue !== props.intendedDateValue) {
-          console.log("Date value: ", $dateValue);
-          console.log("Intended date value: ", props.intendedDateValue);
-          pw.get(props.selector).type(`{backspace}`);
-          this.getElement().pageTitle().click();
-          pw.get(props.selector).type(`{leftArrow}{backspace}`);
-          this.getElement().pageTitle().click();
-          pw.get(props.selector).type(`{leftArrow}{leftArrow}{backspace}`);
-          this.getElement().pageTitle().click();
-          this.recursiveDateInput(props);
-        }
-      });
-  }
-
-  setStartDate({
+  async setStartDate({
     month,
     day,
     year,
   }: {
-    month: string;
-    day: string;
-    year: string;
+    month: string | number;
+    day: string | number;
+    year: string | number;
   }) {
-    pw.get(".fa-calendar-days").click();
-    pw.get(".k-animation-container input")
-      .first()
-      .type(`${month}{rightArrow}${day}{rightArrow}${year}`);
-    pw.get(".k-animation-container").find("button").contains("Filter").click();
-    pw.waitForLoading();
+    await this.page.locator(".fa-calendar-days").first().click();
+    await setMaskedDateInput(this.page.locator(".k-animation-container input").first(), {
+      month,
+      day,
+      year,
+    });
+    await this.page.locator(".k-animation-container button").filter({ hasText: "Filter" }).first().click();
+    await waitForLoading(this.page);
   }
 
-  clickSearchButton() {
-    this.getElement().searchButton().click();
-    pw.waitForLoading(10);
+  async clickSearchButton() {
+    await this.getElement().searchButton().click();
+    await waitForLoading(this.page, 10);
   }
 
-  getTotalItems(variableAlias: string) {
-    this.getElement()
-      .itemsData()
-      .invoke("text")
-      .then((text: string) => {
-        const totalItems = parseInt(text.split("of")[1].replace(/\D/g, ""));
-        pw.wrap(totalItems).as(variableAlias);
-      });
+  getTotalItems(_variableAlias?: string) {
+    return getPagerTotal(this.getElement().itemsData());
   }
 
-  showColumn(columnName: string) {
-    const gridSetting = new GridSetting({
+  async showColumn(columnName: string) {
+    const gridSetting = new GridSetting(this.page, {
       columnOrderAlias: `${this.userType}_${this.defaultGridColumnsAlias}`,
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
-    gridSetting.showColumn(columnName);
-    pw.waitForLoading();
+    await gridSetting.showColumn(columnName);
+    await waitForLoading(this.page);
   }
 
-  hideColumn(columnName: string) {
-    const gridSetting = new GridSetting({
+  async hideColumn(columnName: string) {
+    const gridSetting = new GridSetting(this.page, {
       columnOrderAlias: `${this.userType}_${this.defaultGridColumnsAlias}`,
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
-    gridSetting.hideColumn(columnName);
-    pw.waitForLoading();
+    await gridSetting.hideColumn(columnName);
+    await waitForLoading(this.page);
   }
 
-  feezeColumn(columnName: string) {
-    const gridSetting = new GridSetting({
+  async feezeColumn(columnName: string) {
+    const gridSetting = new GridSetting(this.page, {
       columnOrderAlias: `${this.userType}_${this.defaultGridColumnsAlias}`,
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
-    gridSetting.freezeColumn(columnName);
-    pw.waitForLoading();
+    await gridSetting.freezeColumn(columnName);
+    await waitForLoading(this.page);
   }
 
-  unfreezeColumn(columnName: string) {
-    const gridSetting = new GridSetting({
+  async unfreezeColumn(columnName: string) {
+    const gridSetting = new GridSetting(this.page, {
       columnOrderAlias: `${this.userType}_${this.defaultGridColumnsAlias}`,
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
-    gridSetting.unfreezeColumn(columnName);
-    pw.waitForLoading();
+    await gridSetting.unfreezeColumn(columnName);
+    await waitForLoading(this.page);
   }
 
-  verifyColumnVisibility(columnName: string, isVisibleAlias: string) {
-    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}_visibility`)
-      .should("exist")
-      .then((visibilityStatus: any) => {
-        pw.wrap(visibilityStatus[columnName]).as(isVisibleAlias);
-      });
+  async verifyColumnVisibility(columnName: string, _isVisibleAlias?: string) {
+    await this.refreshGridState();
+    return this.visibilityStatus[columnName];
   }
 
-  verifyColumnOrder(columnName: string, orderAlias: string) {
-    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        pw.wrap(columnIndexes[columnName]).as(orderAlias);
-      });
+  async verifyColumnOrder(columnName: string, _orderAlias?: string) {
+    await this.refreshGridState();
+    return this.columnOrder[columnName];
   }
 
-  restoreDefaultGridSettings() {
-    const gridSetting = new GridSetting({
+  async restoreDefaultGridSettings() {
+    const gridSetting = new GridSetting(this.page, {
       columnOrderAlias: `${this.userType}_${this.defaultGridColumnsAlias}`,
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
-    gridSetting.restoreDefaultSettings();
-    pw.waitForLoading();
+    await gridSetting.restoreDefaultSettings();
+    await waitForLoading(this.page);
   }
 
-  moveColumnToLocationOf(columnName: string, targetColumnName: string) {
-    const gridSetting = new GridSetting({
+  async moveColumnToLocationOf(columnName: string, targetColumnName: string) {
+    const gridSetting = new GridSetting(this.page, {
       columnOrderAlias: `${this.userType}_${this.defaultGridColumnsAlias}`,
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
-    gridSetting.moveColumnToLocationOf(columnName, targetColumnName);
-    pw.waitForLoading();
+    await gridSetting.moveColumnToLocationOf(columnName, targetColumnName);
+    await waitForLoading(this.page);
   }
 }
 

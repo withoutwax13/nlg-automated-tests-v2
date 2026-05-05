@@ -1,41 +1,48 @@
+import { currentPage, waitForLoading, withText } from "../../support/runtime";
+
 class Payment {
-    private elements () {
-        return {
-            savedPaymentMethods: () => pw.get('label[for="savedPayment"]'),
-            savedPaymentMethodItems: () => pw.get('.form-section').eq(0).find('.radio').find('.form-check'),
-            termsAndConditionsCheckbox: () => pw.get('input[data-cy="I have read and agree to the Terms and Conditions of this online payment system.-checkbox"]'),
-            finishAndPayButton: () => pw.get('button').contains('Finish and Pay')
-        }
-    }
+  private elements() {
+    const page = currentPage();
 
-    getElements() {
-        return this.elements();
-    }
+    return {
+      savedPaymentMethods: () => page.locator('label[for="savedPayment"]'),
+      savedPaymentMethodItems: () => page.locator(".form-section").first().locator(".radio .form-check"),
+      termsAndConditionsCheckbox: () =>
+        page.locator(
+          'input[data-cy="I have read and agree to the Terms and Conditions of this online payment system.-checkbox"]'
+        ),
+      finishAndPayButton: () => withText(page.locator("button"), "Finish and Pay"),
+    };
+  }
 
-    clickSavedPaymentMethods() {
-        this.getElements().savedPaymentMethods().click( {force: true} );
-    }
+  getElements() {
+    return this.elements();
+  }
 
-    selectSavedPaymentMethod(order: number) {
-        this.getElements().savedPaymentMethodItems().eq(order).click( {force: true} );
-        pw.waitForLoading();
-    }
+  async clickSavedPaymentMethods() {
+    await this.getElements().savedPaymentMethods().click({ force: true });
+  }
 
-    clickTermsAndConditionsCheckbox() {
-        this.getElements().termsAndConditionsCheckbox().click( {force: true} );
-        pw.waitForLoading();
-    }
+  async selectSavedPaymentMethod(order: number) {
+    await this.getElements().savedPaymentMethodItems().nth(order).click({ force: true });
+    await waitForLoading();
+  }
 
-    clickFinishAndPayButton() {
-        this.getElements().finishAndPayButton().click( {force: true} );
-    }
+  async clickTermsAndConditionsCheckbox() {
+    await this.getElements().termsAndConditionsCheckbox().check({ force: true });
+    await waitForLoading();
+  }
 
-    payViaAnySavedPaymentMethod() {
-        this.clickSavedPaymentMethods();
-        this.selectSavedPaymentMethod(0);
-        this.clickTermsAndConditionsCheckbox();
-        this.clickFinishAndPayButton();
-    }
+  async clickFinishAndPayButton() {
+    await this.getElements().finishAndPayButton().click({ force: true });
+  }
+
+  async payViaAnySavedPaymentMethod() {
+    await this.clickSavedPaymentMethods();
+    await this.selectSavedPaymentMethod(0);
+    await this.clickTermsAndConditionsCheckbox();
+    await this.clickFinishAndPayButton();
+  }
 }
 
 export default Payment;

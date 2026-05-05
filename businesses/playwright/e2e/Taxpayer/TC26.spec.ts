@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 
@@ -35,53 +35,53 @@ const newBusinessData = {
 };
 
 test.describe("As a taxpayer user, I should be able to delete a business.", () => {
-  test.beforeEach(() => {
-    pw.deleteBusinessData({
+  test.beforeEach(async () => {
+    await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
       notFirstLogin: false,
       accountIndex: 5,
     });
-    pw.deleteBusinessData({
+    await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
       notFirstLogin: true,
       accountIndex: 3,
     });
   });
-  test("Initiating test", () => {
-    pw.login({
+  test("Initiating test", async () => {
+    await login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 3,
     });
-    municipalBusinessGrid.init();
-    municipalBusinessGrid.clickAddBusinessButton();
-    addBusinessPage.fillFields(newBusinessData);
-    addBusinessPage.clickSaveButton();
-    municipalBusinessGrid.init();
-    municipalBusinessGrid.clickClearAllFiltersButton();
-    municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
+    await municipalBusinessGrid.init();
+    await municipalBusinessGrid.clickAddBusinessButton();
+    await addBusinessPage.fillFields(newBusinessData);
+    await addBusinessPage.clickSaveButton();
+    await municipalBusinessGrid.init();
+    await municipalBusinessGrid.clickClearAllFiltersButton();
+    await municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
+    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
-    pw.logout();
-    pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 5 });
-    taxpayerBusinessGrid.init();
-    taxpayerBusinessGrid.clickAddBusinessButton();
-    taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
-    taxpayerBusinessGrid.clickAddBusinessButton();
-    taxpayerBusinessGrid.init();
-    taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
+    await logout();
+    await login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 5 });
+    await taxpayerBusinessGrid.init();
+    await taxpayerBusinessGrid.clickAddBusinessButton();
+    await taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
+    await taxpayerBusinessGrid.clickAddBusinessButton();
+    await taxpayerBusinessGrid.init();
+    await taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
+    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
-    taxpayerBusinessGrid.init();
-    taxpayerBusinessGrid.deleteBusiness(newBusinessData.locationDba);
-    taxpayerBusinessGrid.getElement().toastComponent().should("exist");
-    pw.logout();
+    await taxpayerBusinessGrid.init();
+    await taxpayerBusinessGrid.deleteBusiness(newBusinessData.locationDba);
+    await expect(taxpayerBusinessGrid.getElement().toastComponent()).toBeVisible();
+    await logout();
   });
-  test.afterEach(() => {
+  test.afterEach(async () => {
     // delete business data
-    pw.deleteBusinessData({
+    await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
       notFirstLogin: true,

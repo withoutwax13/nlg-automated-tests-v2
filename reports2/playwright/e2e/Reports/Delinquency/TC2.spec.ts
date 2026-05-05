@@ -1,20 +1,22 @@
-import { test, expect } from '../../../support/pwtest';
+import { expect, test } from "@playwright/test";
 import DelinquencyGrid from "../../../objects/DelinquencyGrid";
+import Login from "../../../utils/Login";
 
 test.describe(
   "As a Municipal user, I should be able to export the delinquency list",
   { tags: ["sanity", "regression"] },
   () => {
-    test("Initiating test", () => {
-      const delinquencyGrid = new DelinquencyGrid({
+    test("Initiating test", async ({ page }) => {
+      const delinquencyGrid = new DelinquencyGrid(page, {
         userType: "municipal",
       });
-      pw.login({ accountType: "municipal" });
-      delinquencyGrid.init();
-      delinquencyGrid.getElement().exportButton().should("be.visible");
-      delinquencyGrid.getElement().exportButton().should("not.be.disabled");
-      delinquencyGrid.clickExportButton();
-      delinquencyGrid.getElement().pageTitle().should("be.visible");
+
+      await Login.login(page, { accountType: "municipal" });
+      await delinquencyGrid.init();
+      await expect(delinquencyGrid.getElement().exportButton()).toBeVisible();
+      await expect(delinquencyGrid.getElement().exportButton()).toBeEnabled();
+      await delinquencyGrid.clickExportButton();
+      await expect(delinquencyGrid.getElement().pageTitle()).toBeVisible();
     });
   }
 );

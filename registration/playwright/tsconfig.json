@@ -1,12 +1,11 @@
 {
-    "compilerOptions": {
-      "target": "es5",
-      "lib": ["es2017", "dom"],
-      "types": ["cypress", "cypress-file-upload"],
-      "resolveJsonModule": true,
-      "esModuleInterop": true
-    },
-    "include": [
-      "**/*.ts"
-    ]
+  "compilerOptions": {
+    "target": "es2019",
+    "lib": ["es2019", "dom"],
+    "types": ["node", "@playwright/test"],
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "ignoreDeprecations": "6.0"
+  },
+  "include": ["**/*.ts"]
 }

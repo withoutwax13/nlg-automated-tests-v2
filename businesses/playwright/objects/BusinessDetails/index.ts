@@ -1,3 +1,5 @@
+import { expect } from "@playwright/test";
+import { buttonByText, currentPage, fillDateInput, fixturePath, listItem, waitForLoading } from "../../support/runtime";
 import SetBusinessStatusModal from "../SetBusinessStatusModal";
 
 class BusinessDetails {
@@ -9,75 +11,48 @@ class BusinessDetails {
     this.setBusinessStatusModal = new SetBusinessStatusModal();
   }
 
+  private page() {
+    return currentPage();
+  }
+
+  private normalize(value: string) {
+    return value.replace(/\s+/g, " ").trim();
+  }
+
   private elements() {
     return {
-      anyList: () => pw.get("li"),
-      pageTitle: () => pw.get("h1"),
-      toastComponent: () => pw.get(".Toastify"),
-      backToBusinessesButton: () => pw.get(".NLG-Hyperlink").contains("Back"),
-      saveButton: () => pw.get(".NLGButtonPrimary").contains("Save"),
-      discardChangesButton: () =>
-        pw.get(".NLGButtonSecondary").contains("Discard Changes"),
-      businessStatusIndicator: () => this.getElement().pageTitle().next(),
-      aboutBusinessSection: () => pw.get("section").eq(0),
-      editBusinessInfoButton: () =>
-        this.getElement()
-          .aboutBusinessSection()
-          .find(".NLGButtonSecondary")
-          .contains("Edit Business Info"),
-      businessInfoList: () => this.getElement().editBusinessInfoButton().next(),
-      sectionTabs: () => this.getElement().aboutBusinessSection().next(),
-      sectionTabsItems: (tabName: string) =>
-        this.getElement().sectionTabs().find("ul").find("li").contains(tabName),
-      formsSection: () => pw.get("section").eq(1).find("h3").parent().parent(),
-      formsSectionTitle: () => this.getElement().formsSection().find("h3"),
-      formsSectionHelpText: () => this.getElement().formsSection().find("p"),
-      formsSectionFormList: () =>
-        this.getElement()
-          .formsSection()
-          .children("div")
-          .eq(1)
-          .find(".k-switch")
-          .parent(),
-      taxpayerFormsSectionFormList: () =>
-        this.getElement().formsSection().find("div").eq(1),
-      formSectionFormListItem: (formName: string) =>
-        this.getElement().formsSectionFormList().contains(formName).parent(),
-
-      businessStatusSection: () =>
-        pw.get("section").eq(1).find("h3").parent("section"),
+      anyList: () => this.page().locator("li"),
+      pageTitle: () => this.page().locator("h1").first(),
+      toastComponent: () => this.page().locator(".Toastify").first(),
+      backToBusinessesButton: () => this.page().locator(".NLG-Hyperlink").filter({ hasText: "Back" }).first(),
+      saveButton: () => this.page().locator(".NLGButtonPrimary").filter({ hasText: "Save" }).first(),
+      discardChangesButton: () => this.page().locator(".NLGButtonSecondary").filter({ hasText: "Discard Changes" }).first(),
+      businessStatusIndicator: () => this.getElement().pageTitle().locator("xpath=following-sibling::*[1]").first(),
+      aboutBusinessSection: () => this.page().locator("section").nth(0),
+      editBusinessInfoButton: () => this.getElement().aboutBusinessSection().locator(".NLGButtonSecondary").filter({ hasText: "Edit Business Info" }).first(),
+      businessInfoList: () => this.getElement().editBusinessInfoButton().locator("xpath=following-sibling::*[1]").first(),
+      sectionTabs: () => this.getElement().aboutBusinessSection().locator("xpath=following-sibling::*[1]").first(),
+      sectionTabsItems: (tabName: string) => this.getElement().sectionTabs().locator("ul li").filter({ hasText: tabName }).first(),
+      formsSection: () => this.page().locator("section").nth(1).locator("h3").first().locator("xpath=../.."),
+      formsSectionTitle: () => this.getElement().formsSection().locator("h3").first(),
+      formsSectionHelpText: () => this.getElement().formsSection().locator("p").first(),
+      formsSectionFormList: () => this.getElement().formsSection().locator(".k-switch").locator("xpath=.."),
+      taxpayerFormsSectionFormList: () => this.getElement().formsSection().locator("div").nth(1),
+      formSectionFormListItem: (formName: string) => this.getElement().formsSectionFormList().filter({ hasText: formName }).first(),
+      businessStatusSection: () => this.page().locator("section").nth(1).locator("h3").filter({ hasText: "Business Status" }).first().locator("xpath=ancestor::section[1]"),
       startDateDelinquencyTrackingInput: () =>
-        cy
-          .get("label")
-          .contains("Start Date for Delinquency Tracking")
-          .parent()
-          .next()
-          .find("input"),
+        this.page().locator("label").filter({ hasText: "Start Date for Delinquency Tracking" }).first().locator("xpath=following-sibling::*[1]").locator("input").first(),
       businessCloseDateInput: () =>
-        cy
-          .get("label")
-          .contains("Business Close Date")
-          .parent()
-          .next()
-          .find("input"),
+        this.page().locator("label").filter({ hasText: "Business Close Date" }).first().locator("xpath=following-sibling::*[1]").locator("input").first(),
       operatingStatusDropdown: () =>
-        pw.get("label").contains("Operating Status").parent().next().find("i"),
-
-      notesSection: () => this.getElement().sectionTabs().find("div[class*='businessDetailsSectionContent']"),
-      addNoteButton: () =>
-        this.getElement().notesSection().find("button").contains("Add a Note"),
-      noteItems: () => this.getElement().notesSection().find(".k-expander"),
-      noteItem: (pos: number) => this.getElement().noteItems().eq(pos),
-      deleteNoteButton: (pos: number) =>
-        this.getElement().noteItem(pos).find(".fa-trash"),
-
-      uploadDocumentSection: () =>
-        this.getElement().sectionTabs().find("div[class*='businessDetailsSectionContent']"),
-      uploadDocumentButton: () =>
-        this.getElement()
-          .uploadDocumentSection()
-          .find("button")
-          .contains("Upload Document"),
+        this.page().locator("label").filter({ hasText: "Operating Status" }).first().locator("xpath=following-sibling::*[1]").locator("i").first(),
+      notesSection: () => this.getElement().sectionTabs().locator("div[class*='businessDetailsSectionContent']").first(),
+      addNoteButton: () => this.getElement().notesSection().locator("button").filter({ hasText: "Add a Note" }).first(),
+      noteItems: () => this.getElement().notesSection().locator(".k-expander"),
+      noteItem: (pos: number) => this.getElement().noteItems().nth(pos),
+      deleteNoteButton: (pos: number) => this.getElement().noteItem(pos).locator(".fa-trash").first(),
+      uploadDocumentSection: () => this.getElement().sectionTabs().locator("div[class*='businessDetailsSectionContent']").first(),
+      uploadDocumentButton: () => this.getElement().uploadDocumentSection().locator("button").filter({ hasText: "Upload Document" }).first(),
     };
   }
 
@@ -85,221 +60,176 @@ class BusinessDetails {
     return this.elements();
   }
 
-  clickBackToBusinessesButton() {
-    this.getElement().backToBusinessesButton().click();
+  async clickBackToBusinessesButton() {
+    await this.getElement().backToBusinessesButton().click();
   }
 
-  clickSaveButton() {
-    pw.intercept("PUT", "https://**.azavargovapps.com/businesses/**/update").as("updateBusiness");
-    this.getElement().saveButton().click();
-    pw.wait("@updateBusiness");
-    pw.get("@updateBusiness").its("response.statusCode").should("eq", 200);
+  async clickSaveButton() {
+    const updateBusiness = this.page().waitForResponse(
+      (response) => response.request().method() === "PUT" && response.url().includes("/businesses/") && response.url().includes("/update"),
+    );
+    await this.getElement().saveButton().click();
+    expect((await updateBusiness).status()).toBe(200);
   }
 
-  clickDiscardChangesButton() {
-    this.getElement().discardChangesButton().click();
+  async clickDiscardChangesButton() {
+    await this.getElement().discardChangesButton().click();
   }
 
-  clickEditBusinessInfoButton() {
-    this.getElement().editBusinessInfoButton().click();
+  async clickEditBusinessInfoButton() {
+    await this.getElement().editBusinessInfoButton().click();
   }
 
-  clickFormsTab() {
-    this.getElement().sectionTabsItems("Forms").click();
+  async clickFormsTab() {
+    await this.getElement().sectionTabsItems("Forms").click();
   }
 
-  clickBusinessStatusTab() {
-    this.getElement().sectionTabsItems("Business Status").click();
+  async clickBusinessStatusTab() {
+    await this.getElement().sectionTabsItems("Business Status").click();
   }
 
-  clickNotesTab() {
-    this.getElement().sectionTabsItems("Notes").click();
+  async clickNotesTab() {
+    await this.getElement().sectionTabsItems("Notes").click();
   }
 
-  clickDocumentsTab() {
-    this.getElement().sectionTabsItems("Documents").click();
+  async clickDocumentsTab() {
+    await this.getElement().sectionTabsItems("Documents").click();
   }
 
-  getFormRequirements(aliasVariable) {
+  async getFormRequirements() {
     if (this.userType !== "taxpayer") {
-      pw.wrap([]).as(aliasVariable);
-      return this.getElement()
-        .formsSectionFormList()
-        .each(($form, $index) => {
-          this.getElement()
-            .formsSectionFormList()
-            .eq($index)
-            .find("span")
-            .invoke("text")
-            .then((text) => pw.wrap(text).as("formName"));
-          pw.get(`@${aliasVariable}`).then((formRequirements: any) => {
-            pw.get("@formName").then((formName) => {
-              pw.wrap([...formRequirements, formName]).as(aliasVariable);
-            });
-          });
-        });
-    } else {
-      pw.wrap([]).as(aliasVariable);
-      return this.getElement()
-        .taxpayerFormsSectionFormList()
-        .find("li")
-        .each(($form) => {
-          pw.wrap($form)
-            .invoke("text")
-            .then((text) => {
-              pw.get(`@${aliasVariable}`).then((formRequirements: any) => {
-                pw.wrap([...formRequirements, text]).as(aliasVariable);
-              });
-            });
-        });
+      const forms = this.getElement().formsSectionFormList();
+      const count = await forms.count();
+      const requirements: string[] = [];
+
+      for (let index = 0; index < count; index += 1) {
+        requirements.push(this.normalize(await forms.nth(index).locator("span").first().innerText()));
+      }
+
+      return requirements;
     }
+
+    const forms = this.getElement().taxpayerFormsSectionFormList().locator("li");
+    const count = await forms.count();
+    const requirements: string[] = [];
+
+    for (let index = 0; index < count; index += 1) {
+      requirements.push(this.normalize(await forms.nth(index).innerText()));
+    }
+
+    return requirements;
   }
 
-  getEnabledFormRequirements(aliasVariable: string) {
-    pw.wrap([]).as(aliasVariable);
-    return this.getElement()
-      .formsSectionFormList()
-      .each(($form, $index) => {
-        this.getElement()
-          .formsSectionFormList()
-          .eq($index)
-          .find("input")
-          .invoke("attr", "checked")
-          .then((isChecked) => {
-            if (isChecked) {
-              this.getElement()
-                .formsSectionFormList()
-                .eq($index)
-                .find("span")
-                .invoke("text")
-                .then((text) => pw.wrap(text).as("formName"));
-              pw.get(aliasVariable).then((enabledFormRequirements: any) => {
-                pw.get("@formName").then((formName) => {
-                  pw.wrap([...enabledFormRequirements, formName]).as(
-                    aliasVariable
-                  );
-                });
-              });
-            }
-          });
-      });
+  async getEnabledFormRequirements() {
+    const forms = this.getElement().formsSectionFormList();
+    const count = await forms.count();
+    const requirements: string[] = [];
+
+    for (let index = 0; index < count; index += 1) {
+      const form = forms.nth(index);
+      if ((await form.locator("input").first().getAttribute("checked")) !== null) {
+        requirements.push(this.normalize(await form.locator("span").first().innerText()));
+      }
+    }
+
+    return requirements;
   }
 
-  setStartDateDelinquencyTracking(date: {
-    month: number;
-    date: number;
-    year: number;
-  }) {
-    this.getElement().startDateDelinquencyTrackingInput().click();
-    this.getElement().startDateDelinquencyTrackingInput().type(`${date.month}`);
-    this.getElement()
-      .startDateDelinquencyTrackingInput()
-      .type(`{rightArrow}${date.date}`);
-    this.getElement()
-      .startDateDelinquencyTrackingInput()
-      .type(`{rightArrow}{rightArrow}{backspace}${date.year}`);
+  async setStartDateDelinquencyTracking(date: { month: number; date: number; year: number }) {
+    await fillDateInput(this.getElement().startDateDelinquencyTrackingInput(), date);
   }
 
-  triggerSetBusinessStatusModal() {
-    this.getElement().businessCloseDateInput().click();
-    this.getElement().businessCloseDateInput().type(`1`);
+  async triggerSetBusinessStatusModal() {
+    await this.getElement().businessCloseDateInput().click();
+    await this.getElement().businessCloseDateInput().fill("1");
   }
 
-  setBusinessCloseDate(date: { month: number; date: number; year: number }, changeLastAcceptFilingDate: boolean = true) {
-    this.triggerSetBusinessStatusModal();
-    this.setBusinessStatusModal.setBusinessCloseDate(date);
+  async setBusinessCloseDate(
+    date: { month: number; date: number; year: number },
+    changeLastAcceptFilingDate = true,
+  ) {
+    await this.triggerSetBusinessStatusModal();
+    await this.setBusinessStatusModal.setBusinessCloseDate(date);
     if (changeLastAcceptFilingDate) {
-      this.setBusinessStatusModal.setLastAcceptFilingDate({ month: date.month, date: date.date > 28 ? 28 : date.date + 1, year: date.year });
+      await this.setBusinessStatusModal.setLastAcceptFilingDate({
+        month: date.month,
+        date: date.date > 28 ? 28 : date.date + 1,
+        year: date.year,
+      });
     }
-    this.setBusinessStatusModal.setBusinessStatus("Closed");
-    this.setBusinessStatusModal.clickSaveButton();
+    await this.setBusinessStatusModal.setBusinessStatus("Closed");
+    await this.setBusinessStatusModal.clickSaveButton();
   }
 
-  setOperatingStatus(status: string) {
-    if (
-      !["Active", "Active/Seasonal", "Inactive", "Closed", "Sold"].includes(
-        status
-      )
-    ) {
+  async setOperatingStatus(status: string) {
+    if (!["Active", "Active/Seasonal", "Inactive", "Closed", "Sold"].includes(status)) {
       throw new Error("Invalid operating status");
     }
-    this.getElement().operatingStatusDropdown().click();
-    this.getElement().anyList().contains(status).click();
+    await this.getElement().operatingStatusDropdown().click();
+    await listItem(status).click();
   }
 
-  clickAddNoteButton() {
-    this.getElement().addNoteButton().scrollIntoView();
-    this.getElement().addNoteButton().click();
+  async clickAddNoteButton() {
+    await this.getElement().addNoteButton().scrollIntoViewIfNeeded();
+    await this.getElement().addNoteButton().click();
   }
 
-  clickCancelNoteButton() {
-    pw.get("button").contains("Cancel").scrollIntoView();
-    pw.get("button").contains("Cancel").click();
+  async clickCancelNoteButton() {
+    const cancelButton = buttonByText("Cancel");
+    await cancelButton.scrollIntoViewIfNeeded();
+    await cancelButton.click();
   }
 
-  addNote(note: string) {
-    this.clickAddNoteButton();
-    // TODO: Implement Add Note POM
-    pw.get("textarea").type(note);
-    pw.intercept("PATCH", "https://**.azavargovapps.com/businesses/MunicipalBusiness/Note?businessHandle=**").as("addNote");
-    this.getElement().saveButton().click();
-    pw.wait("@addNote");
-    pw.get("@addNote").its("response.statusCode").should("eq", 200);
+  async addNote(note: string) {
+    const addNote = this.page().waitForResponse(
+      (response) =>
+        response.request().method() === "PATCH" &&
+        response.url().includes("/businesses/MunicipalBusiness/Note?businessHandle="),
+    );
+    await this.clickAddNoteButton();
+    await this.page().locator("textarea").fill(note);
+    await this.getElement().saveButton().click();
+    expect((await addNote).status()).toBe(200);
   }
 
-  clickNoteItem(pos: number) {
-    this.getElement().noteItem(pos).click();
+  async clickNoteItem(pos: number) {
+    await this.getElement().noteItem(pos).click();
   }
 
-  deleteNoteItem(pos: number) {
-    pw.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("deleteNote");
-    this.getElement().deleteNoteButton(pos).click();
-    pw.wait("@deleteNote");
-    pw.get("@deleteNote").its("response.statusCode").should("eq", 200);
+  async deleteNoteItem(pos: number) {
+    const deleteNote = this.page().waitForResponse(
+      (response) =>
+        response.request().method() === "PUT" &&
+        response.url().includes("/businesses/municipalityBusiness/update"),
+    );
+    await this.getElement().deleteNoteButton(pos).click();
+    expect((await deleteNote).status()).toBe(200);
   }
 
-  uploadDocument(fileName: string) {
-    pw.intercept("PATCH", "https://**.azavargovapps.com/businesses/MunicipalBusiness/Document/upload?businessHandle=**").as("uploadDocumentPatch");
-    pw.intercept("PUT", "https://nlg-businessesdata-**-businessuploadeddocumentsbu-**.s3-fips.**.amazonaws.com/**").as("uploadDocumentPut");
-    const fileToUpload = "example.json";
-    this.getElement().uploadDocumentButton().click();
-    // TODO: Implement Upload Document POM
-    pw.get('input[placeholder="Enter file name"]').type(fileName);
-    pw.get("#files").attachFile(fileToUpload);
-    pw.get(".NLGButtonPrimary").contains("Upload").click();
-    pw.wait("@uploadDocumentPatch");
-    pw.get("@uploadDocumentPatch").its("response.statusCode").should("eq", 200);
-    pw.wait("@uploadDocumentPut");
-    pw.get("@uploadDocumentPut").its("response.statusCode").should("eq", 200);
+  async uploadDocument(fileName: string) {
+    const uploadDocumentPatch = this.page().waitForResponse(
+      (response) =>
+        response.request().method() === "PATCH" &&
+        response.url().includes("/businesses/MunicipalBusiness/Document/upload?businessHandle="),
+    );
+    const uploadDocumentPut = this.page().waitForResponse(
+      (response) => response.request().method() === "PUT" && response.url().includes("businessuploadeddocumentsbu"),
+    );
+    await this.getElement().uploadDocumentButton().click();
+    await this.page().locator('input[placeholder="Enter file name"]').fill(fileName);
+    await this.page().locator("#files").setInputFiles(fixturePath("example.json"));
+    await this.page().locator(".NLGButtonPrimary").filter({ hasText: "Upload" }).first().click();
+    expect((await uploadDocumentPatch).status()).toBe(200);
+    expect((await uploadDocumentPut).status()).toBe(200);
   }
 
-  getBusinessData(businessField: string, valueAlias: string) {
-    if (this.userType === "taxpayer") {
-      this.getElement()
-        .aboutBusinessSection()
-        .find("h3")
-        .contains("About this business")
-        .next()
-        .find("div")
-        .find("span")
-        .contains(businessField)
-        .next()
-        .invoke("text")
-        .then((text) => pw.wrap(text).as(valueAlias));
-    } else {
-      this.getElement()
-        .aboutBusinessSection()
-        .find("h3")
-        .contains("About this business")
-        .next()
-        .next()
-        .find("div")
-        .find("span")
-        .contains(businessField)
-        .next()
-        .invoke("text")
-        .then((text) => pw.wrap(text).as(valueAlias));
-    }
+  async getBusinessData(businessField: string) {
+    const aboutSection = this.getElement().aboutBusinessSection().getByText("About this business", { exact: false }).first();
+    const container = this.userType === "taxpayer"
+      ? aboutSection.locator("xpath=following-sibling::*[1]")
+      : aboutSection.locator("xpath=following-sibling::*[2]");
+    const value = container.locator("span").filter({ hasText: businessField }).first().locator("xpath=following-sibling::*[1]").first();
+    return this.normalize(await value.innerText());
   }
 }
 

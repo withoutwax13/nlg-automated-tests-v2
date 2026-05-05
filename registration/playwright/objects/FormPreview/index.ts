@@ -1,3 +1,5 @@
+import { expect } from "@playwright/test";
+import { currentPage, withText } from "../../support/runtime";
 import Form from "../Form";
 
 class FormPreview extends Form {
@@ -6,13 +8,15 @@ class FormPreview extends Form {
   }
 
   private formPreviewElements() {
+    const page = currentPage();
+
     return {
       ...super.getElement(),
-      submitButton: () => pw.get(".NLGButtonPrimary").contains(/Go to Payment|Submit/),
-      accordion: () => pw.get(".k-expander").eq(0).parent(),
-      accordionSteps: () => this.getElement().accordion().find(".k-expander"),
-      paymentDetails: () => pw.get("h2").contains("Payment Details").next(),
-      duplicateRegistrationWarning: () => pw.get("*").contains("Duplicate Registration Detected")
+      submitButton: () => page.locator(".NLGButtonPrimary").filter({ hasText: /Go to Payment|Submit/ }).first(),
+      accordion: () => page.locator(".k-expander").first().locator("xpath=.."),
+      accordionSteps: () => page.locator(".k-expander"),
+      paymentDetails: () => withText(page.locator("h2"), "Payment Details").locator("xpath=following-sibling::*[1]"),
+      duplicateRegistrationWarning: () => page.getByText("Duplicate Registration Detected", { exact: false }).first(),
     };
   }
 
@@ -20,41 +24,22 @@ class FormPreview extends Form {
     return this.formPreviewElements();
   }
 
-  clickSubmitButton() {
-    this.getElement().submitButton().should("be.enabled").click( {force: true} );
+  async clickSubmitButton() {
+    await expect(this.getElement().submitButton()).toBeEnabled();
+    await this.getElement().submitButton().click({ force: true });
   }
 
-  toggleStepAccordion(stepName: string, toExpand: boolean) {
-    const stepIndex = [
-      "Instructions",
-      "Basic Info",
-      "Location Info",
-      "Applicant Info",
-    ].indexOf(stepName);
-    if (toExpand) {
-      this.getElement()
-        .accordionSteps()
-        .eq(stepIndex)
-        .find("div")
-        .eq(0)
-        .invoke("attr", "aria-expanded")
-        .then((expanded) => {
-          if (expanded === "false") {
-            this.getElement().accordionSteps().eq(stepIndex).click( {force: true} );
-          }
-        });
-    } else {
-      this.getElement()
-        .accordionSteps()
-        .eq(stepIndex)
-        .find("div")
-        .eq(0)
-        .invoke("attr", "aria-expanded")
-        .then((expanded) => {
-          if (expanded === "true") {
-            this.getElement().accordionSteps().eq(stepIndex).click( {force: true} );
-          }
-        });
+  async toggleStepAccordion(stepName: string, toExpand: boolean) {
+    const stepIndex = ["Instructions", "Basic Info", "Location Info", "Applicant Info"].indexOf(stepName);
+    const trigger = this.getElement().accordionSteps().nth(stepIndex).locator("div").first();
+    const expanded = await trigger.getAttribute("aria-expanded");
+
+    if (toExpand && expanded === "false") {
+      await this.getElement().accordionSteps().nth(stepIndex).click({ force: true });
+    }
+
+    if (!toExpand && expanded === "true") {
+      await this.getElement().accordionSteps().nth(stepIndex).click({ force: true });
     }
   }
 }

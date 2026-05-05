@@ -1,64 +1,59 @@
-import { test, expect } from '../../../support/pwtest';
-import FormGrid from "../../../objects/FormGrid";
-import { MUNICIPAL_FORM_GRID_COLUMNS as defaultColumns } from "../../../objects/FormGrid";
+import { expect, test } from "@playwright/test";
+import FormGrid, { MUNICIPAL_FORM_GRID_COLUMNS as defaultColumns } from "../../../objects/FormGrid";
+import { getAlias, initTestRuntime, login } from "../../../support/runtime";
 
 test.describe("As a municipal user, I should be able to reorganize the order of the columns", () => {
-  test("Initiating test", () => {
-    const munincipalFormGrid = new FormGrid({
+  test("Initiating test", async ({ page }, testInfo) => {
+    const municipalFormGrid = new FormGrid({
       userType: "municipal",
     });
-    pw.login({ accountType: "municipal", accountIndex: 4 });
 
-    const columnPairs = [];
-    const columnsToTest = defaultColumns.slice(1, 5); // Limiting to 4 columns to save resource usage
-    for (let i = 0; i < columnsToTest.length; i++) {
-      for (let j = i + 1; j < columnsToTest.length; j++) {
+    await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
+    await login({ accountType: "municipal", accountIndex: 4 });
+
+    const columnPairs: Array<[string, string]> = [];
+    const columnsToTest = defaultColumns.slice(1, 5);
+    for (let i = 0; i < columnsToTest.length; i += 1) {
+      for (let j = i + 1; j < columnsToTest.length; j += 1) {
         columnPairs.push([columnsToTest[i], columnsToTest[j]]);
       }
     }
 
-    columnPairs.forEach(([column, targetColumn]) => {
-      munincipalFormGrid.init();
-      munincipalFormGrid.verifyColumnOrder(
-        column,
-        `${column.replace(/\s+/g, "")}IndexBeforeMove`
-      );
-      munincipalFormGrid.verifyColumnOrder(
-        targetColumn,
-        `${targetColumn.replace(/\s+/g, "")}IndexBeforeMove`
-      );
-      munincipalFormGrid.clickCustomizeTableViewButton();
-      munincipalFormGrid.moveColumnToLocationOf(column, targetColumn);
+    for (const [column, targetColumn] of columnPairs) {
+      const columnAliasBase = column.replace(/\s+/g, "");
+      const targetAliasBase = targetColumn.replace(/\s+/g, "");
 
-      munincipalFormGrid.init(true);
-      munincipalFormGrid.verifyColumnOrder(
-        targetColumn,
-        `${targetColumn.replace(/\s+/g, "")}IndexAfterMove`
-      );
-      munincipalFormGrid.verifyColumnOrder(
+      await municipalFormGrid.init();
+      await municipalFormGrid.verifyColumnOrder(
         column,
-        `${column.replace(/\s+/g, "")}IndexAfterMove`
+        `${columnAliasBase}IndexBeforeMove`
       );
-      pw.get(`@${column.replace(/\s+/g, "")}IndexBeforeMove`).then(
-        (beforeMove) => {
-          pw.get(`@${column.replace(/\s+/g, "")}IndexAfterMove`).then(
-            (afterMove) => {
-              expect(beforeMove).to.not.equal(afterMove);
-            }
-          );
-        }
+      await municipalFormGrid.verifyColumnOrder(
+        targetColumn,
+        `${targetAliasBase}IndexBeforeMove`
       );
-      pw.get(`@${targetColumn.replace(/\s+/g, "")}IndexBeforeMove`).then(
-        (beforeMove) => {
-          pw.get(`@${targetColumn.replace(/\s+/g, "")}IndexAfterMove`).then(
-            (afterMove) => {
-              expect(beforeMove).to.not.equal(afterMove);
-            }
-          );
-        }
+      await municipalFormGrid.clickCustomizeTableViewButton();
+      await municipalFormGrid.moveColumnToLocationOf(column, targetColumn);
+
+      await municipalFormGrid.init(true);
+      await municipalFormGrid.verifyColumnOrder(
+        targetColumn,
+        `${targetAliasBase}IndexAfterMove`
       );
-      munincipalFormGrid.clickCustomizeTableViewButton();
-      munincipalFormGrid.restoreDefaultGridSettings();
-    });
+      await municipalFormGrid.verifyColumnOrder(
+        column,
+        `${columnAliasBase}IndexAfterMove`
+      );
+
+      expect(getAlias<number>(`${columnAliasBase}IndexBeforeMove`)).not.toBe(
+        getAlias<number>(`${columnAliasBase}IndexAfterMove`)
+      );
+      expect(getAlias<number>(`${targetAliasBase}IndexBeforeMove`)).not.toBe(
+        getAlias<number>(`${targetAliasBase}IndexAfterMove`)
+      );
+
+      await municipalFormGrid.clickCustomizeTableViewButton();
+      await municipalFormGrid.restoreDefaultGridSettings();
+    }
   });
 });

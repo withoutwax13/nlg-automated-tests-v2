@@ -1,149 +1,61 @@
-import { test, expect } from '../../support/pwtest';
+import { expect, test } from "@playwright/test";
 import Filing from "../../objects/Filing";
 import Form from "../../objects/Form";
 import FormPreview from "../../objects/FormPreview";
-import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
-import ApplicationGrid from "../../objects/ApplicationGrid";
-import ApplicationReview from "../../objects/ApplicationReview";
-import Payment from "../../objects/Payment";
-
-const randomSeed = () => Math.floor(Math.random() * 100000);
+import {
+  approveApplication,
+  createSubmittedApplication,
+  getTaxpayerRegistrationRecordId,
+  markApprovalPaymentStatus,
+  payApplicationAsTaxpayer,
+} from "../helpers";
+import { initTestRuntime, login } from "../../support/runtime";
 
 test.describe("As a taxpayer, I want the system to prohibit me from sending duplicate registrations", () => {
-  test("Initiating test", () => {
+  test("Initiating test", async ({ page, request }, testInfo) => {
+    await initTestRuntime({ page, request, baseURL: testInfo.project.use.baseURL as string });
+    const filing = new Filing();
     const form = new Form({ isRenewal: false });
     const formPreviewPage = new FormPreview();
-    const filing = new Filing();
-    const applicationConfirmation = new ApplicationConfirmation();
-    const taxpayerApplicationGrid = new ApplicationGrid({
-      userType: "taxpayer",
+
+    const { customData, referenceId } = await createSubmittedApplication({
+      accountIndex: 9,
+      formName: "Business License (Annual) - E2E #1",
     });
-    const agsApplicationGrid = new ApplicationGrid({
-      userType: "ags",
-      municipalitySelection: "City of Arrakis",
+    const registrationRecordId = await getTaxpayerRegistrationRecordId(referenceId);
+
+    await approveApplication({
+      reviewerType: "ags",
+      reviewerIndex: 9,
+      registrationRecordId: String(registrationRecordId),
+      locationAddress1: String(customData.locationInfo.locations[0].locationAddress1),
     });
-    const applicationReview = new ApplicationReview({ userType: "ags" });
-    const paymentPage = new Payment();
+    await payApplicationAsTaxpayer({
+      registrationRecordId: String(registrationRecordId),
+      taxpayerIndex: 9,
+    });
+    await markApprovalPaymentStatus({
+      reviewerIndex: 9,
+      registrationRecordId: String(registrationRecordId),
+      toStatus: "Fully Paid",
+    });
 
-    pw.login({ accountType: "taxpayer", accountIndex: 9 });
-
-    filing.goToSubmitFormsTab();
-    filing.selectGovernment("City of Arrakis");
-    filing.selectForm("Business License (Annual) - E2E #1");
-    filing.clickSubmitNewRegistrationButton();
-    form.clickNextbutton();
-    form.selectIsRegisteringMultipleLocations(false);
-
-    pw.getUniqueRegistrationData(randomSeed(), false).then(
-      (customData: {
-        basicInfo: any;
-        locationInfo: { locations: any[] };
-        applicantInfo: any;
-      }) => {
-        form.enterBusinessOwnerInformation(customData.basicInfo);
-        form.enterLegalBusinessInformation(customData.basicInfo);
-        form.checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation();
-        form.enterEmergencyPhoneNumbers(customData.basicInfo);
-        form.clickNextbutton();
-        form.enterLocationDetails(customData.locationInfo.locations);
-        form.clickNextbutton();
-        form.enterApplicantDetails(customData.applicantInfo, true);
-        form.clickNextbutton();
-        formPreviewPage.clickSubmitButton();
-        applicationConfirmation
-          .getElement()
-          .referenceIdData()
-          .invoke("text")
-          .then((referenceId) => {
-            pw.wrap(referenceId).as("referenceId");
-          });
-        applicationConfirmation.clickCloseButton();
-        taxpayerApplicationGrid.init();
-        pw.get("@referenceId").then((referenceId) => {
-          taxpayerApplicationGrid.getDataOfColumn(
-            "Registration Record ID",
-            "Reference ID",
-            String(referenceId),
-            "registrationRecordId"
-          );
-        });
-
-        pw.logout();
-        pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 9 });
-        agsApplicationGrid.init();
-        pw.get("@registrationRecordId").then((registrationRecordId) => {
-          agsApplicationGrid.selectRowToReview({
-            anchorColumnName: "Registration Record ID",
-            anchorValue: String(registrationRecordId),
-          });
-          agsApplicationGrid.clickStartApplicationWorkflowForSelectedApplicationsButton();
-          applicationReview.clickReviewStepTab("Manual Steps");
-          applicationReview.manualStepsTab.clickApproveButton();
-          applicationReview.clickReviewStepTab("Business Details");
-          applicationReview.updateBusinessDetailsTab.clickEditBusinessDetailsButton();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.clickReviewBusinessButton(
-            customData.locationInfo.locations[0].locationAddress1
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.disregardSimilarBusinessRecords();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.clicUpdateAddBusinessDetailsButton();
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.clickUpdateFormRequirements(
-            customData.locationInfo.locations[0].locationAddress1
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.enableForm(
-            "Food and Beverage"
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.selectDateDelinquencyTrackingStartDate(
-            1,
-            1,
-            2024
-          );
-          applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.clickSaveButton();
-          applicationReview.toggleActions("Approve");
-          applicationReview.clickGoBackApplicationsButton();
-          pw.logout();
-
-          pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 9 });
-          taxpayerApplicationGrid.init();
-          taxpayerApplicationGrid.payApplication(
-            "Registration Record ID",
-            String(registrationRecordId)
-          );
-          paymentPage.payViaAnySavedPaymentMethod();
-          applicationConfirmation.clickCloseButton();
-          pw.logout();
-
-          pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 9 });
-          agsApplicationGrid.init();
-          agsApplicationGrid.manuallyChangeApplicationPaymentStatus(
-            "Fully Paid",
-            "Registration Record ID",
-            String(registrationRecordId)
-          );
-        });
-        pw.logout();
-
-        // Submit another registration with the same data
-        pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 9 });
-        filing.goToSubmitFormsTab();
-        filing.selectGovernment("City of Arrakis");
-        filing.selectForm("Business License (Annual) - E2E #1");
-        filing.clickSubmitNewRegistrationButton();
-        form.clickNextbutton();
-        form.selectIsRegisteringMultipleLocations(false);
-        form.enterBusinessOwnerInformation(customData.basicInfo);
-        form.enterLegalBusinessInformation(customData.basicInfo);
-        form.checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation();
-        form.enterEmergencyPhoneNumbers(customData.basicInfo);
-        form.clickNextbutton();
-        form.enterLocationDetails(customData.locationInfo.locations);
-        form.clickNextbutton();
-        form.enterApplicantDetails(customData.applicantInfo, true);
-        form.clickNextbutton();
-        formPreviewPage
-          .getElement()
-          .duplicateRegistrationWarning()
-          .should("exist");
-      }
-    );
+    await login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 9 });
+    await filing.goToSubmitFormsTab();
+    await filing.selectGovernment("City of Arrakis");
+    await filing.selectForm("Business License (Annual) - E2E #1");
+    await filing.clickSubmitNewRegistrationButton();
+    await form.clickNextbutton();
+    await form.selectIsRegisteringMultipleLocations(false);
+    await form.enterBusinessOwnerInformation(customData.basicInfo as any);
+    await form.enterLegalBusinessInformation(customData.basicInfo as any);
+    await form.checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation();
+    await form.enterEmergencyPhoneNumbers(customData.basicInfo as any);
+    await form.clickNextbutton();
+    await form.enterLocationDetails((customData.locationInfo as any).locations);
+    await form.clickNextbutton();
+    await form.enterApplicantDetails(customData.applicantInfo as any, true);
+    await form.clickNextbutton();
+    await expect(formPreviewPage.getElement().duplicateRegistrationWarning()).toBeVisible();
   });
 });

@@ -1,4 +1,6 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect } from '../../test';
+import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
+import { legacy } from '../../utils/legacy';
 import Form from "../../objects/Form";
 import FormPreview from "../../objects/FormPreview";
 import Payment from "../../objects/Payment";
@@ -19,36 +21,36 @@ const municipalFilingGrid = new FilingGrid({
   userType: "municipal",
 });
 
-const deleteMultipleFiling = (
+const deleteMultipleFiling = async (
   count: number,
   filterParams: [string, string, string?, string?],
   filingParams: [string, string]
 ) => {
-  agsFilingGrid.clickClearAllFiltersButton();
-  agsFilingGrid.filterColumn(...filterParams);
-  agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
+  await agsFilingGrid.clickClearAllFiltersButton();
+  await agsFilingGrid.filterColumn(...filterParams);
+  await agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
   if (count > 1) {
-    deleteMultipleFiling(count - 1, filterParams, filingParams);
+    await deleteMultipleFiling(count - 1, filterParams, filingParams);
   }
 };
 
 test.describe("As a municipal, I should be able to download the PDF of specific filing by selecting the PDF image icon", () => {
-  test("Initiate test", () => {
-    pw.login({ accountType: "ags" });
+  test("Initiate test", async ({ page }) => {
+    await login({ accountType: "ags" });
     agsFilingGrid.init();
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Location DBA",
       "Arrakis Spice Company 62803",
       "text",
       "Contains"
     );
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Form Name",
       "Food and Beverage",
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    pw.get("@rowsLength").then((rowsLength) => {
+    legacy.get("").then(async (rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -57,9 +59,9 @@ test.describe("As a municipal, I should be able to download the PDF of specific 
         );
       }
     });
-    pw.logout();
+    await logout();
 
-    pw.login({ accountType: "taxpayer", accountIndex: 5, notFirstLogin: true });
+    await login({ accountType: "taxpayer", accountIndex: 5, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -81,13 +83,13 @@ test.describe("As a municipal, I should be able to download the PDF of specific 
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        pw.wrap(referenceId).as("referenceId");
+        legacy.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
-    pw.logout();
+    await logout();
 
-    pw.get("@referenceId").then((referenceId) => {
-      pw.login({ accountType: "municipal", accountIndex: 1, notFirstLogin: true });
+    legacy.get("").then(async (referenceId) => {
+      await login({ accountType: "municipal", accountIndex: 1, notFirstLogin: true });
       municipalFilingGrid.init();
       municipalFilingGrid.toggleActionButton(
         "Download",

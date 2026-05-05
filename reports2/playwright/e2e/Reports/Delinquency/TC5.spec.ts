@@ -1,25 +1,23 @@
-import { test, expect } from '../../../support/pwtest';
+import { expect, test } from "@playwright/test";
 import DelinquencyGrid from "../../../objects/DelinquencyGrid";
+import Login from "../../../utils/Login";
 
 test.describe.skip(
   "As an AGS user, I should be able to view delinquency report of a government.",
   { tags: ["sanity", "regression"] },
   () => {
-    test("Initiating test", () => {
-      const agsDelinquencyGrid = new DelinquencyGrid({
+    test("Initiating test", async ({ page }) => {
+      const agsDelinquencyGrid = new DelinquencyGrid(page, {
         userType: "ags",
         municipalitySelection: "City of Arrakis",
       });
-      pw.login({ accountType: "ags", accountIndex: 2 });
-      agsDelinquencyGrid.init();
-      agsDelinquencyGrid
-        .getElement()
-        .searchMunicipalityDropdown()
-        .should("have.value", "City of Arrakis");
-      agsDelinquencyGrid
-        .getElement()
-        .noRecordFoundComponent()
-        .should("not.exist");
+
+      await Login.login(page, { accountType: "ags", accountIndex: 2 });
+      await agsDelinquencyGrid.init();
+      await expect(agsDelinquencyGrid.getElement().searchMunicipalityDropdown()).toHaveValue(
+        "City of Arrakis"
+      );
+      await expect(agsDelinquencyGrid.getElement().noRecordFoundComponent()).toHaveCount(0);
     });
   }
 );

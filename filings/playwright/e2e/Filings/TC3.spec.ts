@@ -1,4 +1,5 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect } from '../../test';
+import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
 import MunicipalityGrid from "../../objects/MunicipalityGrid";
 
 const randomSeed = Math.floor(Math.random() * 100000);
@@ -7,16 +8,16 @@ const municipalityGrid = new MunicipalityGrid({
 });
 
 test.describe.skip("As an AGS user, I should be able to remove the custom field on the filing list", () => {
-  test("Initiate test", () => {
-    pw.login({ accountType: "ags", accountIndex: 2 });
+  test("Initiate test", async ({ page }) => {
+    await login({ accountType: "ags", accountIndex: 2 });
     municipalityGrid.init();
     municipalityGrid.selectMunicipality("City of Arrakis");
     municipalityGrid.addCustomField(
       `Custom Field Title ${randomSeed}`,
       `Custom Field Name ${randomSeed}`
     );
-    pw.logout();
-    pw.login({ accountType: "ags", accountIndex: 2, notFirstLogin: true });
+    await logout();
+    await login({ accountType: "ags", accountIndex: 2, notFirstLogin: true });
     municipalityGrid.init();
     municipalityGrid.selectMunicipality("City of Arrakis");
     municipalityGrid.removeCustomField(`Custom Field Name ${randomSeed}`);

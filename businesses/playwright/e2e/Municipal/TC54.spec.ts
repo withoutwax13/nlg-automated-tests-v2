@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 
@@ -6,8 +6,8 @@ const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
 const municipalBusinessDetails = new BusinessDetails({ userType: "municipal" });
 
 test.describe("As a municipal user, I should be able to add notes to a business via the business details page", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "municipal", accountIndex: 3 });
+  test("Initiating test", async () => {
+    await login({ accountType: "municipal", accountIndex: 3 });
     municipalBusinessGrid.init();
     municipalBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     municipalBusinessDetails.clickNotesTab(); 

@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessUpdate from "../../objects/BusinessUpdate";
@@ -11,16 +11,16 @@ const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 const agsBusinessUpdatePage = new BusinessUpdate({ userType: "ags" });
 
 test.describe("As a user, if there are no changes made in the update business page, the save button should not exist", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags", accountIndex: 1 });
-    agsBusinessGrid.init();
-    agsBusinessGrid.clickClearAllFiltersButton();
-    agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13857");
-    agsBusinessDetails.clickEditBusinessInfoButton();
-    agsBusinessUpdatePage.getElement().saveButton().should("not.exist");
-    agsBusinessUpdatePage.getElement().locationDbaField().clear();
-    agsBusinessUpdatePage.getElement().stateTaxIdField().clear();
-    agsBusinessUpdatePage.getElement().locationAddress1Field().clear();
-    agsBusinessUpdatePage.getElement().saveButton().should("be.disabled"); // TC62 assertion
+  test("Initiating test", async () => {
+    await login({ accountType: "ags", accountIndex: 1 });
+    await agsBusinessGrid.init();
+    await agsBusinessGrid.clickClearAllFiltersButton();
+    await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13857");
+    await agsBusinessDetails.clickEditBusinessInfoButton();
+    await expect(agsBusinessUpdatePage.getElement().saveButton()).toHaveCount(0);
+    await agsBusinessUpdatePage.getElement().locationDbaField().clear();
+    await agsBusinessUpdatePage.getElement().stateTaxIdField().clear();
+    await agsBusinessUpdatePage.getElement().locationAddress1Field().clear();
+    await expect(agsBusinessUpdatePage.getElement().saveButton()).toBeDisabled();
   });
 });

@@ -1,4 +1,6 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect } from '../../test';
+import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
+import { legacy } from '../../utils/legacy';
 import ApprovalGrid from "../../objects/ApprovalGrid";
 import Form from "../../objects/Form";
 import FormPreview from "../../objects/FormPreview";
@@ -19,36 +21,36 @@ const agsFilingGrid = new FilingGrid({
   municipalitySelection: "City of Arrakis",
 });
 
-const deleteMultipleFiling = (
+const deleteMultipleFiling = async (
   count: number,
   filterParams: [string, string, string?, string?],
   filingParams: [string, string]
 ) => {
-  agsFilingGrid.clickClearAllFiltersButton();
-  agsFilingGrid.filterColumn(...filterParams);
-  agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
+  await agsFilingGrid.clickClearAllFiltersButton();
+  await agsFilingGrid.filterColumn(...filterParams);
+  await agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
   if (count > 1) {
-    deleteMultipleFiling(count - 1, filterParams, filingParams);
+    await deleteMultipleFiling(count - 1, filterParams, filingParams);
   }
 };
 
 test.describe("As a government user, I want to be able to see message of an rejected filing in approval list", () => {
-  test("Initiate test", () => {
-    pw.login({ accountType: "ags", accountIndex: 4 });
+  test("Initiate test", async ({ page }) => {
+    await login({ accountType: "ags", accountIndex: 4 });
     agsFilingGrid.init();
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Location DBA",
       "Arrakis Spice Company 13685",
       "text",
       "Contains"
     );
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Form Name",
       "Food and Beverage",
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    pw.get("@rowsLength").then((rowsLength) => {
+    legacy.get("").then(async (rowsLength) => {
       if(Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -57,9 +59,9 @@ test.describe("As a government user, I want to be able to see message of an reje
         );
       }
     });
-    pw.logout();
+    await logout();
 
-    pw.login({ accountType: "taxpayer", accountIndex: 6, notFirstLogin: true });
+    await login({ accountType: "taxpayer", accountIndex: 6, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -81,17 +83,17 @@ test.describe("As a government user, I want to be able to see message of an reje
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        pw.wrap(referenceId).as("referenceId");
+        legacy.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
     taxpayerFilingGrid.init();
-    pw.get("@referenceId").then((referenceId) => {
-      pw.logout();
-      pw.login({ accountType: "ags", accountIndex: 4, notFirstLogin: true });
+    legacy.get("").then(async (referenceId) => {
+      await logout();
+      await login({ accountType: "ags", accountIndex: 4, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus("Funded", "Reference ID", String(referenceId));
-      pw.logout();
-      pw.login({ accountType: "municipal", accountIndex: 4, notFirstLogin: true });
+      await logout();
+      await login({ accountType: "municipal", accountIndex: 4, notFirstLogin: true });
       govApprovalGrid.init();
       govApprovalGrid.selectRowToReject("Reference ID", String(referenceId));
       govApprovalGrid.init();
@@ -101,13 +103,13 @@ test.describe("As a government user, I want to be able to see message of an reje
         String(referenceId),
         "message"
       );
-      pw.get("@message").then((message) => {
-        pw.wrap(message).click();
-        govApprovalGrid.getElement().anyModal().should("be.visible");
+      legacy.get("").then(async (message) => {
+        legacy.wrap(message).click();
+        govApprovalGrid.getElement().anyModal().assert("be.visible");
         govApprovalGrid
           .getElement()
           .anyModal()
-          .should("contain.text", "Rejected");
+          .assert("contain.text", "Rejected");
       });
     });
   });

@@ -1,8 +1,9 @@
-import { test, expect } from '../../../support/pwtest';
-import DelinquencyGrid from "../../../objects/DelinquencyGrid";
-import ManageDelinquencyModal from "../../../objects/ManageDelinquencyModal";
+import { expect, test } from "@playwright/test";
 import BusinessAdd from "../../../objects/BusinessAdd";
 import BusinessGrid from "../../../objects/BusinessGrid";
+import DelinquencyGrid from "../../../objects/DelinquencyGrid";
+import ManageDelinquencyModal from "../../../objects/ManageDelinquencyModal";
+import Login from "../../../utils/Login";
 
 const randomSeed = Math.floor(Math.random() * 10000);
 const newBusinessData = {
@@ -44,37 +45,31 @@ test.describe.skip(
   "As a municipal user, if I added a form for a business as its remittance requirement and added a start date for delinquency tracking 1 year before the current date, it must produce a delinquency record",
   { tags: ["regression"] },
   () => {
-    test("Initiating test", () => {
-      const municipalDelinquencyGrid = new DelinquencyGrid({
+    test("Initiating test", async ({ page }) => {
+      const municipalDelinquencyGrid = new DelinquencyGrid(page, {
         userType: "municipal",
         municipalitySelection: "City of Arrakis",
       });
-      const businessAddPage = new BusinessAdd({ userType: "municipal" });
-      const businessGrid = new BusinessGrid({ userType: "municipal" });
-      const manageDelinquencyModal = new ManageDelinquencyModal();
-      pw.login({ accountType: "municipal", accountIndex: 3 });
-      businessGrid.init();
-      businessGrid.clickAddBusinessButton();
-      businessAddPage.fillFields(newBusinessData);
-      businessAddPage.clickSaveButton();
-      businessGrid.init();
-      businessGrid.addRequiredForms(newBusinessData.locationDba, [
+      const businessAddPage = new BusinessAdd(page, { userType: "municipal" });
+      const businessGrid = new BusinessGrid(page, { userType: "municipal" });
+      const manageDelinquencyModal = new ManageDelinquencyModal(page);
+
+      await Login.login(page, { accountType: "municipal", accountIndex: 3 });
+      await businessGrid.init();
+      await businessGrid.clickAddBusinessButton();
+      await businessAddPage.fillFields(newBusinessData);
+      await businessAddPage.clickSaveButton();
+      await businessGrid.init();
+      await businessGrid.addRequiredForms(newBusinessData.locationDba, [
         "Food and Beverage Tax Return (Monthly)",
       ]);
 
-      businessGrid.clickClearAllFiltersButton();
-      businessGrid.setDelinquencyStartDate(newBusinessData.locationDba, {
-        month: oneYearBeforeCurrentDate().month,
-        date: oneYearBeforeCurrentDate().date,
-        year: oneYearBeforeCurrentDate().year,
-      });
+      await businessGrid.clickClearAllFiltersButton();
+      await businessGrid.setDelinquencyStartDate(newBusinessData.locationDba, oneYearBeforeCurrentDate());
 
-      municipalDelinquencyGrid.init();
-      municipalDelinquencyGrid
-        .getElement()
-        .noRecordFoundComponent()
-        .should("not.exist");
-      municipalDelinquencyGrid.clickManageDelinquencyItem([
+      await municipalDelinquencyGrid.init();
+      await expect(municipalDelinquencyGrid.getElement().noRecordFoundComponent()).toHaveCount(0);
+      await municipalDelinquencyGrid.clickManageDelinquencyItem([
         {
           anchorColumnName: "Business Name (DBA)",
           anchorValue: newBusinessData.locationDba,
@@ -88,16 +83,11 @@ test.describe.skip(
           anchorValue: "January 2024",
         },
       ]);
-      manageDelinquencyModal.getElement().modal().should("exist");
-      manageDelinquencyModal.saveBusinessDetails("testBusinessData");
-      pw.get("@testBusinessData").then((testBusinessData: any) => {
-        expect(testBusinessData.businessName).to.equal(
-          newBusinessData.locationDba
-        );
-        expect(testBusinessData.formTitle).to.equal(
-          "Food and Beverage Tax Return (Monthly)"
-        );
-      });
+      await expect(manageDelinquencyModal.getElement().modal()).toBeVisible();
+
+      const testBusinessData = await manageDelinquencyModal.saveBusinessDetails();
+      expect(testBusinessData.businessName).toBe(newBusinessData.locationDba);
+      expect(testBusinessData.formTitle).toBe("Food and Beverage Tax Return (Monthly)");
     });
   }
 );

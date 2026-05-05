@@ -1,60 +1,36 @@
-import { test, expect } from '../../../support/pwtest';
-import DelinquencyGrid from "../../../objects/DelinquencyGrid";
-import { AGS_DELINQUENCY_GRID_COLUMNS as defaultColumns } from "../../../objects/DelinquencyGrid";
+import { expect, test } from "@playwright/test";
+import DelinquencyGrid, {
+  AGS_DELINQUENCY_GRID_COLUMNS as defaultColumns,
+} from "../../../objects/DelinquencyGrid";
+import Login from "../../../utils/Login";
+
 test.describe.skip(
   "As a user, I should be able to hide/show columns on the delinquency list",
   { tags: ["sanity", "regression"] },
   () => {
-    test("Initiating test", () => {
-      const delinquencyGrid = new DelinquencyGrid({
+    test("Initiating test", async ({ page }) => {
+      const delinquencyGrid = new DelinquencyGrid(page, {
         userType: "ags",
         municipalitySelection: "City of Arrakis",
       });
-      pw.login({ accountType: "ags", accountIndex: 9 });
-      defaultColumns.slice(1, 4).forEach((column) => {
-        // Limiting to 4 columns to save resource usage
-        delinquencyGrid.init();
-        delinquencyGrid.clickCustomizeTableViewButton();
-        delinquencyGrid.verifyColumnVisibility(
-          column,
-          `${column.replace(/\s+/g, "")}VisibilityBeforeHide`
-        );
-        delinquencyGrid.hideColumn(column);
-        delinquencyGrid.init();
-        delinquencyGrid.verifyColumnVisibility(
-          column,
-          `${column.replace(/\s+/g, "")}VisibilityAfterHide`
-        );
-        pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeHide`).then(
-          (beforeToggle) => {
-            pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterHide`).then(
-              (afterToggle) => {
-                expect(beforeToggle).to.not.equal(afterToggle);
-              }
-            );
-          }
-        );
-        delinquencyGrid.clickCustomizeTableViewButton();
-        delinquencyGrid.verifyColumnVisibility(
-          column,
-          `${column.replace(/\s+/g, "")}VisibilityBeforeShow`
-        );
-        delinquencyGrid.showColumn(column);
-        delinquencyGrid.init();
-        delinquencyGrid.verifyColumnVisibility(
-          column,
-          `${column.replace(/\s+/g, "")}VisibilityAfterShow`
-        );
-        pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeShow`).then(
-          (beforeToggle) => {
-            pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterShow`).then(
-              (afterToggle) => {
-                expect(beforeToggle).to.not.equal(afterToggle);
-              }
-            );
-          }
-        );
-      });
+
+      await Login.login(page, { accountType: "ags", accountIndex: 9 });
+      for (const column of defaultColumns.slice(1, 4)) {
+        await delinquencyGrid.init();
+        await delinquencyGrid.clickCustomizeTableViewButton();
+        const beforeHide = await delinquencyGrid.verifyColumnVisibility(column);
+        await delinquencyGrid.hideColumn(column);
+        await delinquencyGrid.init();
+        const afterHide = await delinquencyGrid.verifyColumnVisibility(column);
+        expect(beforeHide).not.toBe(afterHide);
+
+        await delinquencyGrid.clickCustomizeTableViewButton();
+        const beforeShow = await delinquencyGrid.verifyColumnVisibility(column);
+        await delinquencyGrid.showColumn(column);
+        await delinquencyGrid.init();
+        const afterShow = await delinquencyGrid.verifyColumnVisibility(column);
+        expect(beforeShow).not.toBe(afterShow);
+      }
     });
   }
 );

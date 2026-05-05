@@ -1,8 +1,9 @@
-import { test, expect } from '../../support/pwtest';
-import RegistrationGrid from "../../objects/RegistrationGrid";
+import { expect, test } from "@playwright/test";
 import BusinessAdd from "../../objects/BusinessAdd";
-import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessDetails from "../../objects/BusinessDetails";
+import BusinessGrid from "../../objects/BusinessGrid";
+import RegistrationGrid from "../../objects/RegistrationGrid";
+import { currentPage, initTestRuntime, login, waitForLoading } from "../../support/runtime";
 
 const randomSeed = Math.floor(Math.random() * 100000);
 const customData = {
@@ -32,7 +33,8 @@ const customData = {
 };
 
 test.describe("As an AGS User, when I select a form submission requirement in a business' details page and it is a RegistrationForm type and is Active, a Registration Record will automatically be generated for that business and form and appear in the Registration List. If no applications has been submitted for the Registration Record, the Registration Status will be “Not Registered” by default.", () => {
-  test("Initiating test", () => {
+  test("Initiating test", async ({ page, request }, testInfo) => {
+    await initTestRuntime({ page, request, baseURL: testInfo.project.use.baseURL as string });
     const registrationGrid = new RegistrationGrid({
       userType: "ags",
       municipalitySelection: "Arrakis",
@@ -44,25 +46,25 @@ test.describe("As an AGS User, when I select a form submission requirement in a 
     });
     const businessDetailsPage = new BusinessDetails({ userType: "ags" });
 
-    pw.login({ accountType: "ags", accountIndex: 9 });
-    businessGrid.init();
-    businessGrid.clickAddBusinessButton();
-    businessAddPage.fillFields(customData);
-    businessAddPage.clickSaveButton();
-    businessGrid.init();
-    businessGrid.viewBusinessDetails(customData.locationDba);
-    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
-    businessDetailsPage.clickFormsTab();
-    businessDetailsPage.enableForm("Business License (Annual) - E2E #1");
+    await login({ accountType: "ags", accountIndex: 9 });
+    await businessGrid.init();
+    await businessGrid.clickAddBusinessButton();
+    await businessAddPage.fillFields(customData);
+    await businessAddPage.clickSaveButton();
+    await businessGrid.init();
+    await businessGrid.viewBusinessDetails(customData.locationDba);
+    await expect(currentPage()).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
+    await businessDetailsPage.clickFormsTab();
+    await businessDetailsPage.enableForm("Business License (Annual) - E2E #1");
 
-    pw.waitForLoading(); // wait for the backend to finish processing the form enablement
-    registrationGrid.init();
-    registrationGrid.getDataOfColumn(
+    await waitForLoading();
+    await registrationGrid.init();
+    const registrationStatus = await registrationGrid.getDataOfColumn(
       "Registration Status",
       "Location DBA",
       customData.locationDba,
       "registrationStatus"
     );
-    pw.get("@registrationStatus").should("eq", "Not Registered");
+    expect(registrationStatus).toBe("Not Registered");
   });
 });

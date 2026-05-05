@@ -1,4 +1,7 @@
-import { getOrderOfColumns, validateFilterOperation } from "../../utils/Grid";
+import { Page } from "@playwright/test";
+import { resolvePage } from "../../pageContext";
+import { applyGridFilter, getColumnOrder, getRowByCellText } from "../../utils/Grid";
+import { waitForLoading } from "../../utils/runtime";
 
 const VALID_ITEMS_PER_PAGE = [5, 10, 20, 50];
 const COLUMNS = [
@@ -11,378 +14,156 @@ const COLUMNS = [
   "HubSpot Link",
 ];
 
-const removeSpaces = (text: string) => text.replace(/\s/g, "");
-
 class MunicipalityGrid {
   userType: string;
   sortType: string;
   defaultGridColumnsAlias: string;
+  private columnMap: Record<string, number> = {};
 
   constructor(props: { userType: string; sortType?: string }) {
-    if (props.userType !== "ags") {
-      throw new Error("User type is not ags");
-    }
     this.userType = props.userType;
     this.sortType = props.sortType || "default";
     this.defaultGridColumnsAlias = `${this.userType}_defaultGovernmentColumns`;
   }
 
-  private elements() {
+  private elements(page: Page = resolvePage()) {
     return {
-      columns: () => pw.get("thead").find("tr").find("th"),
-      rows: () => pw.get("tr"),
-      rowsOfMunicipality: (municipality: string) =>
-        this.getElement().rows().contains(municipality),
-      section: (header: string) =>
-        pw.get("h2").contains(header).scrollIntoView(),
-      customizeTableViewButton: () =>
-        pw.get("*").contains("Customize Table View"),
-      clearAllFiltersButton: () =>
-        pw.get("*").contains("Clear All"),
-      columnFilter: () => this.getElement().columns().find("span").find("a"),
-      columnSort: () => this.getElement().columns().find("a").find("i"),
+      columns: () => page.locator("thead tr th"),
+      rows: () => page.locator("tbody tr"),
+      section: (header: string) => page.locator("h2").filter({ hasText: header }),
+      customizeTableViewButton: () => page.getByText("Customize Table View"),
+      clearAllFiltersButton: () => page.getByText("Clear All"),
       specificColumnFilter: (columnOrder: number) =>
-        this.getElement().columns().eq(columnOrder).find("span").find("a"),
-      specificColumnSort: (columnOrder: number) =>
-        this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
+        page.locator("thead tr th").nth(columnOrder).locator("span a").first(),
+      itemsPerPageDropdown: () => page.locator(".k-dropdownlist").first(),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        pw.get("li").contains(itemNumber),
-      pagination: () => pw.get(".k-pager-numbers-wrap"),
-      goToFirstPageButton: () =>
-        this.getElement().pagination().find("button").eq(0),
-      goToPreviousPageButton: () =>
-        this.getElement().pagination().find("button[").eq(1),
-      goToNextPageButton: () =>
-        this.getElement()
-          .pagination()
-          .find('button[title="Go to the next page"]'),
-      goToLastPageButton: () =>
-        this.getElement()
-          .pagination()
-          .find('button[title="Go to the last page"]'),
-      filterOperationsDropdown: () =>
-        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
-      filterOperationsDropdownItem: (item: string) =>
-        cy
-          .get(".k-list-ul")
-          .find("li")
-          .find(".k-list-item-text")
-          .contains(item),
-      filterValueInput: () =>
-        pw.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => pw.get(".k-dateinput"),
-      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
-      filterFilterButton: () =>
-        cy
-          .get(".k-filter-menu-container")
-          .find(".k-actions")
-          .find(".k-button")
-          .contains("Filter"),
-      anyButton: () => pw.get("button"),
-      anyList: () => pw.get("li"),
-      customFieldTitleField: (isLast: boolean, order?: number) => {
-        if (isLast) {
-          return cy
-            .get('input[name^="ColumnsToAddToFilingList"][name$=".Title"]')
-            .last();
-        } else {
-          return cy
-            .get('input[name^="ColumnsToAddToFilingList"][name$=".Title"]')
-            .eq(order);
-        }
-      },
-      customFieldValueField: (isLast: boolean, order?: number) => {
-        if (isLast) {
-          return cy
-            .get('input[name^="ColumnsToAddToFilingList"][name$=".Name"]')
-            .last();
-        } else {
-          return cy
-            .get('input[name^="ColumnsToAddToFilingList"][name$=".Name"]')
-            .eq(order);
-        }
-      },
-      anyInput: () => pw.get("input"),
+        page.locator("li").filter({ hasText: String(itemNumber) }).first(),
+      anyButton: () => page.locator("button"),
+      anyList: () => page.locator("li"),
+      customFieldTitleField: (isLast: boolean, order?: number) =>
+        isLast
+          ? page.locator('input[name^="ColumnsToAddToFilingList"][name$=".Title"]').last()
+          : page.locator('input[name^="ColumnsToAddToFilingList"][name$=".Title"]').nth(order ?? 0),
+      customFieldValueField: (isLast: boolean, order?: number) =>
+        isLast
+          ? page.locator('input[name^="ColumnsToAddToFilingList"][name$=".Name"]').last()
+          : page.locator('input[name^="ColumnsToAddToFilingList"][name$=".Name"]').nth(order ?? 0),
+      anyInput: () => page.locator("input"),
     };
   }
 
-  getElement() {
-    return this.elements();
-  }
-  init() {
-    pw.intercept("GET", "https://**.azavargovapps.com/users/**").as("getUserDetails");
-    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/projected").as("getMunicipalities");
-    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/subscriptions").as("getMunicipalitySubscriptions");
-    pw.intercept("GET", "https://**.azavargovapps.com/users/usersGridSettings/**").as("getGridSettings");
-    pw.visit("/municipalityApp/list/:tab");
-    pw.wait("@getUserDetails").its("response.statusCode").should("eq", 200);
-    pw.wait("@getMunicipalities").its("response.statusCode").should("eq", 200);
-    pw.wait("@getMunicipalitySubscriptions").its("response.statusCode").should("eq", 200);
-    pw.wait("@getGridSettings").its("response.statusCode").should("eq", 200);
-    pw.url().should("include", "/municipalityApp/list");
-    getOrderOfColumns(COLUMNS, this.defaultGridColumnsAlias);
+  getElement(page: Page = resolvePage()) {
+    return this.elements(page);
   }
 
-  private clickColumn(index: number) {
-    this.getElement().columns().eq(index).click();
+  private async loadColumnMap(page: Page = resolvePage()) {
+    this.columnMap = await getColumnOrder(COLUMNS, this.getElement(page).columns());
   }
 
-  private handleDBASorting(index: number, isAscending: boolean) {
-    if (!isAscending && this.sortType === "default") {
-      this.clickColumn(index);
-      this.sortType = "descending";
-    } else if (isAscending && this.sortType === "descending") {
-      this.clickColumn(index);
-      this.sortType = "ascending";
+  async init(page: Page = resolvePage()) {
+    await page.goto("/municipalityApp/list/:tab");
+    await waitForLoading(page, 3);
+    await this.loadColumnMap(page);
+  }
+
+  private async getColumnIndex(page: Page = resolvePage(), columnName: string) {
+    if (!this.columnMap[columnName]) {
+      await this.loadColumnMap(page);
+    }
+    return this.columnMap[columnName];
+  }
+
+  async sortColumn(page: Page = resolvePage(), isAscending: boolean, columnName: string) {
+    const index = await this.getColumnIndex(page, columnName);
+    await this.getElement(page).columns().nth(index).click();
+    if (!isAscending) {
+      await this.getElement(page).columns().nth(index).click();
     }
   }
 
-  private handleGeneralSorting(index: number, isAscending: boolean) {
-    if (
-      isAscending &&
-      (this.sortType === "default" || this.sortType === "descending")
-    ) {
-      this.clickColumn(index);
-      this.sortType = "ascending";
-    } else if (!isAscending && this.sortType === "ascending") {
-      this.clickColumn(index);
-      this.sortType = "descending";
-    }
-  }
-
-  sortColumn(isAscending: boolean, columnName: string) {
-    pw.get(`@${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[columnName];
-        this.clickColumn(columnIndex);
-        if (columnName === "DBA") {
-          this.handleDBASorting(columnIndex, isAscending);
-        } else {
-          this.handleGeneralSorting(columnIndex, isAscending);
-        }
-      });
-  }
-
-  private handleTextFilter(
-    columnIndex: number,
-    filterValue: string,
-    filterOperation: string
-  ) {
-    validateFilterOperation("text", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click();
-    this.getElement().filterOperationsDropdown().click();
-    this.getElement().filterOperationsDropdownItem(filterOperation).click();
-    if (filterOperation !== "Is not null" && filterOperation !== "Is null") {
-      this.getElement().filterValueInput().type(filterValue);
-    }
-    this.getElement().filterFilterButton().click();
-  }
-
-  private handleDateFilter(
-    columnIndex: number,
-    filterValue: string,
-    filterOperation: string
-  ) {
-    validateFilterOperation("date", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click();
-    this.getElement().filterOperationsDropdown().click();
-    this.getElement().filterOperationsDropdownItem(filterOperation).click();
-    this.getElement()
-      .filterValueDateInput()
-      .type(filterValue.split("/").join("{rightarrow}"));
-    this.getElement().filterFilterButton().click();
-  }
-
-  private handleNumberFilter(
-    columnIndex: number,
-    filterValue: string,
-    filterOperation: string
-  ) {
-    validateFilterOperation("number", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click();
-    this.getElement().filterOperationsDropdown().click();
-    this.getElement().filterOperationsDropdownItem(filterOperation).click();
-    this.getElement().filterValueInput().type(filterValue);
-    this.getElement().filterFilterButton().click();
-  }
-
-  private handleMultiSelectFilter(columnIndex: number, filterValue: string) {
-    this.getElement().specificColumnFilter(columnIndex).click();
-    this.getElement()
-      .filterMultiSelectItem()
-      .contains(filterValue)
-      .parent()
-      .find("input")
-      .click();
-    this.getElement().filterFilterButton().click();
-  }
-
-  filterColumn(
+  async filterColumn(
+    page: Page,
     columnName: string,
     filterValue: string,
-    filterType: string = "text",
-    filterOperation: string = "Contains"
+    filterType = "text",
+    filterOperation = "Contains"
   ) {
-    pw.get(`@${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[columnName];
-        switch (filterType) {
-          case "text":
-            this.handleTextFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "date":
-            this.handleDateFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "number":
-            this.handleNumberFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "multi-select":
-            this.handleMultiSelectFilter(columnIndex, filterValue);
-            break;
-          default:
-            break;
-        }
-      });
-    pw.waitForLoading();
+    const index = await this.getColumnIndex(page, columnName);
+    await applyGridFilter({
+      page,
+      filterButton: this.getElement(page).specificColumnFilter(index),
+      filterType,
+      filterValue,
+      filterOperation,
+    });
+    await waitForLoading(page);
   }
 
-  changeItemsPerPage(itemNumber: number) {
+  async changeItemsPerPage(page: Page = resolvePage(), itemNumber: number) {
     if (!VALID_ITEMS_PER_PAGE.includes(itemNumber)) {
       throw new Error("Invalid items per page number");
     }
-    this.getElement().itemsPerPageDropdown().click();
-    this.getElement().itemsPerPageDropdownItem(itemNumber).click();
+    await this.getElement(page).itemsPerPageDropdown().click();
+    await this.getElement(page).itemsPerPageDropdownItem(itemNumber).click();
   }
 
-  clickCustomizeTableViewButton() {
-    this.getElement().customizeTableViewButton().click();
+  async clickCustomizeTableViewButton(page: Page = resolvePage()) {
+    await this.getElement(page).customizeTableViewButton().click();
   }
 
-  clickClearAllFiltersButton() {
-    this.getElement().clearAllFiltersButton().click();
+  async clickClearAllFiltersButton(page: Page = resolvePage()) {
+    await this.getElement(page).clearAllFiltersButton().click();
   }
 
-  getDataOfColumn(
+  async getElementOfColumn(
+    page: Page,
     targetColumnName: string,
-    anchorColumnName: string,
-    anchorValue: string,
-    targetColumnDataAlias: string
-  ) {
-    this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    pw.get(`@${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[targetColumnName];
-        const anchorColumnIndex = columnIndexes[anchorColumnName];
-        this.getElement()
-          .rows()
-          .each(($row) => {
-            const $columns = $row.find("td");
-            if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              pw.wrap($columns.eq(columnIndex).text()).as(
-                targetColumnDataAlias
-              );
-            }
-          });
-      });
-  }
-
-  getElementOfColumn(
-    targetColumnName: string,
-    anchorColumnName: string,
-    anchorValue: string,
-    targetColumnElementAlias: string
-  ) {
-    this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    pw.get(`@${this.defaultGridColumnsAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[targetColumnName];
-        const anchorColumnIndex = columnIndexes[anchorColumnName];
-        this.getElement()
-          .rows()
-          .each(($row) => {
-            const $columns = $row.find("td");
-            if (
-              String($columns.eq(anchorColumnIndex).text())
-                .replace(/\s+/g, " ")
-                .trim() === anchorValue
-            ) {
-              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
-            }
-          });
-      });
-  }
-
-  toggleActionButton(
-    action: string,
     anchorColumnName: string,
     anchorValue: string
   ) {
-    if (this.userType !== "ags") {
-      throw new Error("Action button is not available for this user type");
+    await this.filterColumn(page, anchorColumnName, anchorValue);
+    const targetColumnIndex = await this.getColumnIndex(page, targetColumnName);
+    const anchorColumnIndex = await this.getColumnIndex(page, anchorColumnName);
+    const row = await getRowByCellText(this.getElement(page).rows(), anchorColumnIndex, anchorValue);
+    return row.locator("td").nth(targetColumnIndex);
+  }
+
+  async toggleActionButton(page: Page = resolvePage(), action: string, anchorColumnName: string, anchorValue: string) {
+    const actionCell = await this.getElementOfColumn(page, "Actions", anchorColumnName, anchorValue);
+    await actionCell.click();
+    await this.getElement(page).anyList().filter({ hasText: action }).first().click();
+  }
+
+  async selectMunicipality(page: Page = resolvePage(), municipality: string) {
+    await this.toggleActionButton(page, "View Details", "Municipality Name", municipality);
+    await waitForLoading(page);
+  }
+
+  async addCustomField(page: Page = resolvePage(), customFieldTitle: string, customFieldName: string) {
+    await this.getElement(page).section("Filing List Configuration").scrollIntoViewIfNeeded();
+    await this.getElement(page).anyButton().filter({ hasText: "Add New Column" }).click();
+    await this.getElement(page).customFieldTitleField(true).fill(customFieldTitle);
+    await this.getElement(page).customFieldValueField(true).fill(customFieldName);
+    await this.getElement(page).anyButton().filter({ hasText: "Save" }).click();
+    await waitForLoading(page);
+  }
+
+  async removeCustomField(page: Page = resolvePage(), customFieldName: string) {
+    await this.getElement(page).section("Filing List Configuration").scrollIntoViewIfNeeded();
+    const inputs = this.getElement(page).anyInput();
+    const count = await inputs.count();
+    for (let index = 0; index < count; index += 1) {
+      if ((await inputs.nth(index).inputValue().catch(() => "")) === customFieldName) {
+        await inputs
+          .nth(index)
+          .locator("xpath=../../div[last()]//button")
+          .filter({ hasText: "Remove" })
+          .click();
+        break;
+      }
     }
-    pw.waitForLoading();
-    this.getElementOfColumn(
-      "Actions",
-      anchorColumnName,
-      anchorValue,
-      `${removeSpaces(action)}${removeSpaces(anchorColumnName)}${removeSpaces(
-        anchorValue
-      )}`
-    );
-    pw.get(
-      `@${removeSpaces(action)}${removeSpaces(anchorColumnName)}${removeSpaces(
-        anchorValue
-      )}`
-    ).click();
-    this.getElement().anyList().contains(action).click();
-  }
-
-  selectMunicipality(municipality: string) {
-    this.toggleActionButton("View Details", "Municipality Name", municipality);
-    pw.waitForLoading();
-  }
-
-  addCustomField(customFieldTitle: string, customFieldName: string) {
-    pw.intercept("PATCH", "https://**.azavargovapps.com/municipalities/**").as("updateMunicipality");
-    this.getElement().section("Filing List Configuration");
-    this.getElement().anyButton().contains("Add New Column").click();
-    this.getElement().customFieldTitleField(true).type(customFieldTitle);
-    this.getElement().customFieldValueField(true).type(customFieldName);
-    this.getElement().anyButton().contains("Save").click();
-    pw.wait("@updateMunicipality").its("response.statusCode").should("eq", 200);
-    pw.url().should("include", "/municipalityApp/list");
-  }
-
-  removeCustomField(customFieldName: string) {
-    pw.intercept("PATCH", "https://**.azavargovapps.com/municipalities/**").as("updateMunicipality");
-    this.getElement().section("Filing List Configuration");
-    this.getElement()
-      .anyInput()
-      .each(($input, $index) => {
-        if ($input.val() === customFieldName) {
-          pw.wrap($index).as("customFieldIndex");
-        }
-      });
-    pw.get("@customFieldIndex").then((customFieldIndex) => {
-      this.getElement()
-        .anyInput()
-        .eq(Number(customFieldIndex))
-        .parent()
-        .parent()
-        .find("div")
-        .last()
-        .find("button")
-        .contains("Remove")
-        .click();
-    });
-    this.getElement().anyButton().contains("Save").click();
-    pw.wait("@updateMunicipality").its("response.statusCode").should("eq", 200);
-    pw.url().should("include", "/municipalityApp/list");
+    await this.getElement(page).anyButton().filter({ hasText: "Save" }).click();
+    await waitForLoading(page);
   }
 }
 

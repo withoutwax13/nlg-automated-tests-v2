@@ -1,21 +1,18 @@
+import { currentPage, withText } from "../../support/runtime";
+
 class ExportFiling {
   private elements() {
+    const modal = currentPage().locator(".k-dialog");
     return {
-      modal: () => pw.get(".k-dialog"),
-      modalTitle: () => this.getElement().modal().find(".k-dialog-title"),
-      closeButton: () =>
-        this.getElement().modal().find('button[aria-label="Close"]'),
-      modalContent: () => this.getElement().modal().find(".k-dialog-content"),
+      modal: () => modal,
+      modalTitle: () => modal.locator(".k-dialog-title"),
+      closeButton: () => modal.locator('button[aria-label="Close"]'),
+      modalContent: () => modal.locator(".k-dialog-content"),
       fileTypeRadioButton: (type: "CSV" | "Excel") =>
-        this.getElement()
-          .modal()
-          .find(".k-radio-list")
-          .find("label")
-          .contains(type),
+        withText(modal.locator(".k-radio-list label"), type),
       exportFullDataButton: () =>
-        this.getElement().modal().find("button").contains("Export Full Data"),
-      exportViewButton: () =>
-        this.getElement().modal().find("button").contains("Export View"),
+        withText(modal.locator("button"), "Export Full Data"),
+      exportViewButton: () => withText(modal.locator("button"), "Export View"),
     };
   }
 
@@ -23,24 +20,24 @@ class ExportFiling {
     return this.elements();
   }
 
-  clickExportFullDataButton() {
-    this.getElement().exportFullDataButton().click();
+  async clickExportFullDataButton() {
+    await this.getElement().exportFullDataButton().click();
   }
 
-  clickExportViewButton() {
-    this.getElement().exportViewButton().click();
+  async clickExportViewButton() {
+    await this.getElement().exportViewButton().click();
   }
 
-  clickCloseButton() {
-    this.getElement().closeButton().click();
+  async clickCloseButton() {
+    await this.getElement().closeButton().click();
   }
 
-  selectCSVFileType() {
-    this.getElement().fileTypeRadioButton("CSV").click();
+  async selectCSVFileType() {
+    await this.getElement().fileTypeRadioButton("CSV").click();
   }
 
-  selectExcelFileType() {
-    this.getElement().fileTypeRadioButton("Excel").click();
+  async selectExcelFileType() {
+    await this.getElement().fileTypeRadioButton("Excel").click();
   }
 }
 

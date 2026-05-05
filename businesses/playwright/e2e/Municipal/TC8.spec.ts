@@ -1,56 +1,35 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
 
 const municipalBusinessGrid = new BusinessGrid({
   userType: "municipal"
 });
 
-const cleanTestData = (businessName: string, requiredForm: string) => {
-  municipalBusinessGrid.init();
-  municipalBusinessGrid.clickClearAllFiltersButton();
-  municipalBusinessGrid.checkEnabledRequiredForms(
-    businessName,
-    "requiredFormsBeforeCleaning"
-  );
-  pw.get("@requiredFormsBeforeCleaning").then((requiredFormsBeforeCleaning) => {
-    if(!requiredFormsBeforeCleaning.includes(requiredForm)) {
-      municipalBusinessGrid.clickClearAllFiltersButton();
-      municipalBusinessGrid.addRequiredForms(businessName, [requiredForm]);
-    }
-  });
+const cleanTestData = async (businessName: string, requiredForm: string) => {
+  await municipalBusinessGrid.init();
+  await municipalBusinessGrid.clickClearAllFiltersButton();
+  const requiredFormsBeforeCleaning = await municipalBusinessGrid.checkEnabledRequiredForms(businessName);
+  if (!requiredFormsBeforeCleaning.includes(requiredForm)) {
+    await municipalBusinessGrid.clickClearAllFiltersButton();
+    await municipalBusinessGrid.addRequiredForms(businessName, [requiredForm]);
+  }
 };
 
 test.describe("As a municipal user, I should be able to remove required forms from the grid", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "municipal", accountIndex: 3 });
-    cleanTestData("Arrakis Spice Company 17829", "Food and Beverage Tax Return (Monthly)");
-    municipalBusinessGrid.init();
-    municipalBusinessGrid.clickClearAllFiltersButton();
-    // check the enabled required forms of a business
-    municipalBusinessGrid.checkEnabledRequiredForms(
-      "Arrakis Spice Company 17829",
-      "beforeRemovingRequiredForms"
-    );
-    pw.get("@beforeRemovingRequiredForms").then((beforeRemovingRequiredForms) => {
-      expect(beforeRemovingRequiredForms).to.be.include(
-        "Food and Beverage Tax Return (Monthly)"
-      );
-    });
-    municipalBusinessGrid.clickClearAllFiltersButton();
-    municipalBusinessGrid.removeRequiredForms("Arrakis Spice Company 17829", [
+  test("Initiating test", async () => {
+    await login({ accountType: "municipal", accountIndex: 3 });
+    await cleanTestData("Arrakis Spice Company 17829", "Food and Beverage Tax Return (Monthly)");
+    await municipalBusinessGrid.init();
+    await municipalBusinessGrid.clickClearAllFiltersButton();
+    const beforeRemovingRequiredForms = await municipalBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");
+    expect(beforeRemovingRequiredForms).toContain("Food and Beverage Tax Return (Monthly)");
+    await municipalBusinessGrid.clickClearAllFiltersButton();
+    await municipalBusinessGrid.removeRequiredForms("Arrakis Spice Company 17829", [
       "Food and Beverage Tax Return (Monthly)",
     ]);
-    municipalBusinessGrid.getElement().toastComponent().should("exist");
-    municipalBusinessGrid.clickClearAllFiltersButton();
-    // re-check the enabled required forms of a business
-    municipalBusinessGrid.checkEnabledRequiredForms(
-      "Arrakis Spice Company 17829",
-      "afterRemovingRequiredForms"
-    );
-    pw.get("@afterRemovingRequiredForms").then((afterRemovingRequiredForms) => {
-      expect(afterRemovingRequiredForms).to.not.be.include(
-        "Food and Beverage Tax Return (Monthly)"
-      );
-    });
+    await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
+    await municipalBusinessGrid.clickClearAllFiltersButton();
+    const afterRemovingRequiredForms = await municipalBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");
+    expect(afterRemovingRequiredForms).not.toContain("Food and Beverage Tax Return (Monthly)");
   });
 });

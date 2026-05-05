@@ -1,4 +1,6 @@
+import type { Locator, Page } from "@playwright/test";
 import { getOrderOfColumns, validateFilterOperation } from "../../utils/Grid";
+import { clickLocatorByText, waitForLoading } from "../../support/native-helpers";
 
 const VALID_ITEMS_PER_PAGE = [5, 10, 20, 50];
 
@@ -34,109 +36,75 @@ class FormGrid {
   userType: string;
   defaultColumnAlias: string;
   sortType: string;
+  page: Page;
+  private columnIndexes?: Record<string, number>;
 
-  constructor(props: { userType: string; sortType?: string }) {
+  constructor(page: Page, props: { userType: string; sortType?: string }) {
     if (!["ags", "municipal"].includes(props.userType)) {
       throw new Error("Invalid user type");
     }
 
+    this.page = page;
     this.userType = props.userType;
     this.defaultColumnAlias = `${this.userType}FormGridDefaultColumns`;
-    this.userType = props.userType;
+    this.sortType = props.sortType || "default";
   }
-  init() {
-    pw.visit("/formsApp");
-    pw.waitForLoading();
-    switch (this.userType) {
-      case "ags":
-        getOrderOfColumns(AGS_FORM_GRID_COLUMNS, this.defaultColumnAlias);
-        break;
-      case "municipal":
-        getOrderOfColumns(MUNICIPAL_FORM_GRID_COLUMNS, this.defaultColumnAlias);
-      default:
-        break;
-    }
+
+  async init() {
+    await this.page.goto("/formsApp");
+    await waitForLoading(this.page);
+    this.columnIndexes = await getOrderOfColumns(
+      this.page,
+      this.userType === "ags"
+        ? AGS_FORM_GRID_COLUMNS
+        : MUNICIPAL_FORM_GRID_COLUMNS
+    );
   }
 
   private elements() {
     return {
-      pageTitle: () => pw.get("h1"),
-      formActionsButton: () => pw.get("button").contains("Form Actions"),
-      createNewFormButton: () =>
-        this.getElement().anyList().contains("Create New Form"),
-      uploadFileInput: () => pw.get("#files"),
-      exportButton: () => {
-        if (this.userType === "ags") {
-          return this.getElement().anyList().contains("Export");
-        } else {
-          return this.getElement().anyButton().contains("Export");
-        }
-      },
-      settingsButton: () => {
-        if (this.userType === "ags") {
-          return this.getElement().anyList().contains("Form Settings");
-        } else {
-          return this.getElement().anyButton().contains("Settings");
-        }
-      },
+      pageTitle: () => this.page.locator("h1"),
+      formActionsButton: () => this.page.getByRole("button", { name: "Form Actions" }),
+      createNewFormButton: () => this.page.locator("li").filter({ hasText: "Create New Form" }).first(),
+      uploadFileInput: () => this.page.locator("#files"),
+      exportButton: () =>
+        this.userType === "ags"
+          ? this.page.locator("li").filter({ hasText: "Export" }).first()
+          : this.page.getByRole("button", { name: "Export" }).first(),
+      settingsButton: () =>
+        this.userType === "ags"
+          ? this.page.locator("li").filter({ hasText: "Form Settings" }).first()
+          : this.page.getByRole("button", { name: "Settings" }).first(),
       createFormFromLibraryButton: () =>
-        this.getElement().anyList().contains("Create Form From Library"),
+        this.page.locator("li").filter({ hasText: "Create Form From Library" }).first(),
       formLibrarySettingsButton: () =>
-        this.getElement().anyList().contains("Form Library Settings"),
+        this.page.locator("li").filter({ hasText: "Form Library Settings" }).first(),
       customizeTableViewButton: () =>
-        pw.get(".NLG-HyperlinkNoPadding").contains("Customize Table View"),
-      columns: () => pw.get("thead").find("tr").find("th"),
-      rows: () =>
-        pw.get("tbody").then(($tbody) => {
-          if ($tbody.find("tr").length !== 0) {
-            return $tbody.find("tr");
-          }
-        }),
-      columnFilter: () => this.getElement().columns().find("span").find("a"),
-      columnSort: () => this.getElement().columns().find("a").find("i"),
+        this.page.locator(".NLG-HyperlinkNoPadding").filter({ hasText: "Customize Table View" }).first(),
+      columns: () => this.page.locator("thead tr th"),
+      rows: () => this.page.locator("tbody tr"),
       specificColumnFilter: (columnOrder: number) =>
-        this.getElement().columns().eq(columnOrder).find("span").find("a"),
-      specificColumnSort: (columnOrder: number) =>
-        this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
+        this.page.locator("thead tr th").nth(columnOrder).locator("span a").first(),
+      itemsPerPageDropdown: () => this.page.locator(".k-dropdownlist").first(),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        pw.get("li").contains(itemNumber),
-      pagination: () => pw.get(".k-pager-numbers-wrap"),
-      goToFirstPageButton: () =>
-        this.getElement().pagination().find("button").eq(0),
-      goToPreviousPageButton: () =>
-        this.getElement().pagination().find("button[").eq(1),
+        this.page.locator("li").filter({ hasText: String(itemNumber) }).first(),
+      pagination: () => this.page.locator(".k-pager-numbers-wrap"),
       goToNextPageButton: () =>
-        this.getElement()
-          .pagination()
-          .find('button[title="Go to the next page"]'),
-      goToLastPageButton: () =>
-        this.getElement()
-          .pagination()
-          .find('button[title="Go to the last page"]'),
+        this.page.locator('button[title="Go to the next page"]').first(),
       filterOperationsDropdown: () =>
-        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        this.page.locator(".k-filter-menu-container .k-dropdownlist").first(),
       filterOperationsDropdownItem: (item: string) =>
-        cy
-          .get(".k-list-ul")
-          .find("li")
-          .find(".k-list-item-text")
-          .contains(item),
+        this.page.locator(".k-list-ul li .k-list-item-text").filter({ hasText: item }).first(),
       filterValueInput: () =>
-        pw.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => pw.get(".k-dateinput"),
-      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
+        this.page.locator(".k-filter-menu-container .k-input").first(),
+      filterValueDateInput: () => this.page.locator(".k-dateinput").first(),
+      filterMultiSelectItem: () => this.page.locator(".k-multicheck-wrap li"),
       filterFilterButton: () =>
-        cy
-          .get(".k-filter-menu-container")
-          .find(".k-actions")
-          .find(".k-button")
-          .contains("Filter"),
-      anyList: () => pw.get("li"),
-      anyButton: () => pw.get("button"),
-      clearAllFiltersButton: () =>
-        pw.get("*").contains("Clear All"),
-      itemsData: () => pw.get(".k-pager-info"),
+        this.page.locator(".k-filter-menu-container .k-actions .k-button").filter({ hasText: "Filter" }).first(),
+      anyList: () => this.page.locator("li"),
+      anyButton: () => this.page.locator("button"),
+      clearAllFiltersButton: () => this.page.getByText("Clear All", { exact: false }).first(),
+      itemsData: () => this.page.locator(".k-pager-info").first(),
     };
   }
 
@@ -144,355 +112,299 @@ class FormGrid {
     return this.elements();
   }
 
-  private clickColumn(index: number) {
-    this.getElement().columns().eq(index).click();
+  private async getColumnIndexes() {
+    if (!this.columnIndexes) {
+      this.columnIndexes = await getOrderOfColumns(
+        this.page,
+        this.userType === "ags"
+          ? AGS_FORM_GRID_COLUMNS
+          : MUNICIPAL_FORM_GRID_COLUMNS
+      );
+    }
+
+    return this.columnIndexes;
   }
 
-  private handleDBASorting(index: number, isAscending: boolean) {
+  private async clickColumn(index: number) {
+    await this.getElement().columns().nth(index).click();
+  }
+
+  private async handleDBASorting(index: number, isAscending: boolean) {
     if (!isAscending && this.sortType === "default") {
-      this.clickColumn(index);
+      await this.clickColumn(index);
       this.sortType = "descending";
     } else if (isAscending && this.sortType === "descending") {
-      this.clickColumn(index);
+      await this.clickColumn(index);
       this.sortType = "ascending";
     }
   }
 
-  private handleGeneralSorting(index: number, isAscending: boolean) {
+  private async handleGeneralSorting(index: number, isAscending: boolean) {
     if (
       isAscending &&
       (this.sortType === "default" || this.sortType === "descending")
     ) {
-      this.clickColumn(index);
+      await this.clickColumn(index);
       this.sortType = "ascending";
     } else if (!isAscending && this.sortType === "ascending") {
-      this.clickColumn(index);
+      await this.clickColumn(index);
       this.sortType = "descending";
     }
   }
 
-  sortColumn(isAscending: boolean, columnName: string) {
-    pw.get(`@${this.defaultColumnAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[columnName];
-        this.clickColumn(columnIndex);
-        if (columnName === "DBA") {
-          this.handleDBASorting(columnIndex, isAscending);
-        } else {
-          this.handleGeneralSorting(columnIndex, isAscending);
-        }
-      });
+  async sortColumn(isAscending: boolean, columnName: string) {
+    const columnIndexes = await this.getColumnIndexes();
+    const columnIndex = columnIndexes[columnName];
+    await this.clickColumn(columnIndex);
+    if (columnName === "DBA") {
+      await this.handleDBASorting(columnIndex, isAscending);
+      return;
+    }
+
+    await this.handleGeneralSorting(columnIndex, isAscending);
   }
 
-  private handleTextFilter(
+  private async handleTextFilter(
     columnIndex: number,
     filterValue: string,
     filterOperation: string
   ) {
     validateFilterOperation("text", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click();
-    this.getElement().filterOperationsDropdown().click();
-    this.getElement().filterOperationsDropdownItem(filterOperation).click();
+    await this.getElement().specificColumnFilter(columnIndex).click();
+    await this.getElement().filterOperationsDropdown().click();
+    await this.getElement().filterOperationsDropdownItem(filterOperation).click();
     if (filterOperation !== "Is not null" && filterOperation !== "Is null") {
-      this.getElement().filterValueInput().type(filterValue);
+      await this.getElement().filterValueInput().fill(filterValue);
     }
-    this.getElement().filterFilterButton().click();
+    await this.getElement().filterFilterButton().click();
   }
 
-  private handleDateFilter(
+  private async handleDateFilter(
     columnIndex: number,
     filterValue: string,
     filterOperation: string
   ) {
     validateFilterOperation("date", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click();
-    this.getElement().filterOperationsDropdown().click();
-    this.getElement().filterOperationsDropdownItem(filterOperation).click();
-    this.getElement()
-      .filterValueDateInput()
-      .type(filterValue.split("/").join("{rightarrow}"));
-    this.getElement().filterFilterButton().click();
+    await this.getElement().specificColumnFilter(columnIndex).click();
+    await this.getElement().filterOperationsDropdown().click();
+    await this.getElement().filterOperationsDropdownItem(filterOperation).click();
+    await this.getElement().filterValueDateInput().fill(filterValue);
+    await this.getElement().filterFilterButton().click();
   }
 
-  private handleNumberFilter(
+  private async handleNumberFilter(
     columnIndex: number,
     filterValue: string,
     filterOperation: string
   ) {
     validateFilterOperation("number", filterOperation);
-    this.getElement().specificColumnFilter(columnIndex).click();
-    this.getElement().filterOperationsDropdown().click();
-    this.getElement().filterOperationsDropdownItem(filterOperation).click();
-    this.getElement().filterValueInput().type(filterValue);
-    this.getElement().filterFilterButton().click();
+    await this.getElement().specificColumnFilter(columnIndex).click();
+    await this.getElement().filterOperationsDropdown().click();
+    await this.getElement().filterOperationsDropdownItem(filterOperation).click();
+    await this.getElement().filterValueInput().fill(filterValue);
+    await this.getElement().filterFilterButton().click();
   }
 
-  private handleMultiSelectFilter(columnIndex: number, filterValue: string) {
-    this.getElement().specificColumnFilter(columnIndex).click();
-    this.getElement()
-      .filterMultiSelectItem()
-      .contains(filterValue)
-      .parent()
-      .find("input")
-      .click();
-    this.getElement().filterFilterButton().click();
+  private async handleMultiSelectFilter(columnIndex: number, filterValue: string) {
+    await this.getElement().specificColumnFilter(columnIndex).click();
+    const item = this.getElement().filterMultiSelectItem().filter({ hasText: filterValue }).first();
+    await item.locator("input").click();
+    await this.getElement().filterFilterButton().click();
   }
 
-  filterColumn(
+  async filterColumn(
     columnName: string,
     filterValue: string,
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    pw.get(`@${this.defaultColumnAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        console.log(columnIndexes);
-        const columnIndex = columnIndexes[columnName];
-        switch (filterType) {
-          case "text":
-            this.handleTextFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "date":
-            this.handleDateFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "number":
-            this.handleNumberFilter(columnIndex, filterValue, filterOperation);
-            break;
-          case "multi-select":
-            this.handleMultiSelectFilter(columnIndex, filterValue);
-            break;
-          default:
-            break;
-        }
-      });
+    const columnIndexes = await this.getColumnIndexes();
+    const columnIndex = columnIndexes[columnName];
+
+    switch (filterType) {
+      case "text":
+        await this.handleTextFilter(columnIndex, filterValue, filterOperation);
+        break;
+      case "date":
+        await this.handleDateFilter(columnIndex, filterValue, filterOperation);
+        break;
+      case "number":
+        await this.handleNumberFilter(columnIndex, filterValue, filterOperation);
+        break;
+      case "multi-select":
+        await this.handleMultiSelectFilter(columnIndex, filterValue);
+        break;
+      default:
+        break;
+    }
   }
 
-  changeItemsPerPage(itemNumber: number) {
+  async changeItemsPerPage(itemNumber: number) {
     if (!VALID_ITEMS_PER_PAGE.includes(itemNumber)) {
       throw new Error("Invalid items per page number");
     }
-    this.getElement().itemsPerPageDropdown().click();
-    this.getElement().itemsPerPageDropdownItem(itemNumber).click();
+    await this.getElement().itemsPerPageDropdown().click();
+    await this.getElement().itemsPerPageDropdownItem(itemNumber).click();
   }
 
-  clickCustomizeTableViewButton() {
-    this.getElement().customizeTableViewButton().click();
+  async clickCustomizeTableViewButton() {
+    await this.getElement().customizeTableViewButton().click();
   }
 
-  clickClearAllFiltersButton() {
-    this.getElement().clearAllFiltersButton().click();
+  async clickClearAllFiltersButton() {
+    await this.getElement().clearAllFiltersButton().click();
   }
 
-  getDataOfColumn(
+  private async getRows() {
+    return this.getElement().rows();
+  }
+
+  async getDataOfColumn(
     targetColumnName: string,
     anchorColumnName: string,
-    anchorValue: string,
-    targetColumnDataAlias: string
+    anchorValue: string
   ) {
-    this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    pw.get(`@${this.defaultColumnAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[targetColumnName];
-        const anchorColumnIndex = columnIndexes[anchorColumnName];
-        this.getElement()
-          .rows()
-          .each(($row) => {
-            const $columns = $row.find("td");
-            if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              pw.wrap($columns.eq(columnIndex).text()).as(
-                targetColumnDataAlias
-              );
-            }
-          });
-      });
+    await this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
+    const columnIndexes = await this.getColumnIndexes();
+    const columnIndex = columnIndexes[targetColumnName];
+    const anchorColumnIndex = columnIndexes[anchorColumnName];
+    const rows = await this.getRows().all();
+
+    for (const row of rows) {
+      const cells = row.locator("td");
+      if ((await cells.nth(anchorColumnIndex).innerText()).trim() === anchorValue) {
+        return (await cells.nth(columnIndex).innerText()).trim();
+      }
+    }
+
+    return "";
   }
 
-  getDataOfColumnForNRow(
-    rowPosition: number,
-    targetColumnName: string,
-    targetColumnDataAlias: string
-  ) {
-    pw.get(`@${this.defaultColumnAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[targetColumnName];
-        this.getElement()
-          .rows()
-          .eq(rowPosition)
-          .then(($row) => {
-            const $columns = $row.find("td");
-            pw.wrap($columns.eq(columnIndex).text()).as(targetColumnDataAlias);
-          });
-      });
+  async getDataOfColumnForNRow(rowPosition: number, targetColumnName: string) {
+    const columnIndexes = await this.getColumnIndexes();
+    const columnIndex = columnIndexes[targetColumnName];
+    const row = this.getElement().rows().nth(rowPosition);
+    return (await row.locator("td").nth(columnIndex).innerText()).trim();
   }
 
-  getElementOfColumn(
+  async getElementOfColumn(
     targetColumnName: string,
     anchorColumnName: string,
-    anchorValue: string,
-    targetColumnElementAlias: string
+    anchorValue: string
   ) {
-    this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    pw.get(`@${this.defaultColumnAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[targetColumnName];
-        const anchorColumnIndex = columnIndexes[anchorColumnName];
-        this.getElement()
-          .rows()
-          .each(($row) => {
-            const $columns = $row.find("td");
-            if (
-              String($columns.eq(anchorColumnIndex).text())
-                .replace(/\s+/g, " ")
-                .trim() === anchorValue
-            ) {
-              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
-            }
-          });
-      });
+    await this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
+    const columnIndexes = await this.getColumnIndexes();
+    const columnIndex = columnIndexes[targetColumnName];
+    const anchorColumnIndex = columnIndexes[anchorColumnName];
+    const rows = await this.getRows().all();
+
+    for (const row of rows) {
+      const cells = row.locator("td");
+      if (
+        (await cells.nth(anchorColumnIndex).innerText()).replace(/\s+/g, " ").trim() ===
+        anchorValue
+      ) {
+        return cells.nth(columnIndex);
+      }
+    }
+
+    return this.page.locator("__missing__");
   }
 
-  getElementOfColumnForNRow(
-    rowPosition: number,
-    targetColumnName: string,
-    targetColumnElementAlias: string
-  ) {
-    pw.get(`@${this.defaultColumnAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[targetColumnName];
-        this.getElement()
-          .rows()
-          .eq(rowPosition)
-          .then(($row) => {
-            const $columns = $row.find("td");
-            pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
-          });
-      });
+  async getElementOfColumnForNRow(rowPosition: number, targetColumnName: string) {
+    const columnIndexes = await this.getColumnIndexes();
+    const columnIndex = columnIndexes[targetColumnName];
+    return this.getElement().rows().nth(rowPosition).locator("td").nth(columnIndex);
   }
 
-  toggleActionButton(
+  async toggleActionButton(
     type: "order" | "filter",
     action?: string,
     anchorColumnName?: string,
     anchorValue?: string,
     order?: number
   ) {
+    let actionCell: Locator;
+
     if (type === "filter") {
-      this.getElementOfColumn(
+      actionCell = await this.getElementOfColumn(
         "Action Button",
-        anchorColumnName,
-        anchorValue,
-        `${removeSpaces(action)}${removeSpaces(anchorColumnName)}${removeSpaces(
-          anchorValue
-        )}`
+        anchorColumnName || "",
+        anchorValue || ""
       );
-      pw.get(
-        `@${removeSpaces(action)}${removeSpaces(
-          anchorColumnName
-        )}${removeSpaces(anchorValue)}`
-      ).click();
-      this.getElement().anyList().contains(action).click();
-    } else if (type === "order") {
-      this.getElementOfColumnForNRow(
-        order,
-        "Action Button",
-        "firstRowActionButton"
-      );
-      pw.get("@firstRowActionButton").click();
-      this.getElement().anyList().contains(action).click();
-    }
-  }
-
-  clickExportButton() {
-    if (this.userType === "ags") {
-      this.getElement().formActionsButton().click();
-      this.getElement().exportButton().click();
     } else {
-      this.getElement().exportButton().click();
+      actionCell = await this.getElementOfColumnForNRow(order || 0, "Action Button");
+    }
+
+    await actionCell.click();
+    if (action) {
+      await clickLocatorByText(this.getElement().anyList(), action);
     }
   }
 
-  clickAddNeWFormButton() {
-    this.getElement().formActionsButton().click();
-    this.getElement().createNewFormButton().click();
-  }
-
-  clickSettingsButton() {
+  async clickExportButton() {
     if (this.userType === "ags") {
-      this.getElement().formActionsButton().click();
-      this.getElement().settingsButton().click();
-    } else {
-      this.getElement().settingsButton().click();
+      await this.getElement().formActionsButton().click();
+      await this.getElement().exportButton().click();
+      return;
     }
+
+    await this.getElement().exportButton().click();
   }
 
-  clickCreateFormFromLibraryButton() {
-    this.getElement().formActionsButton().click();
-    this.getElement().createFormFromLibraryButton().click();
+  async clickAddNeWFormButton() {
+    await this.getElement().formActionsButton().click();
+    await this.getElement().createNewFormButton().click();
   }
 
-  clickFormLibrarySettingsButton() {
-    this.getElement().formActionsButton().click();
-    this.getElement().formLibrarySettingsButton().click();
+  async clickSettingsButton() {
+    if (this.userType === "ags") {
+      await this.getElement().formActionsButton().click();
+      await this.getElement().settingsButton().click();
+      return;
+    }
+
+    await this.getElement().settingsButton().click();
   }
 
-  getTotalItems(alias: string) {
-    this.getElement()
-      .itemsData()
-      .invoke("text")
-      .then((text: string) => {
-        const totalItems = text.split("of")[1].trim();
-        pw.wrap(parseInt(totalItems)).as(alias);
-      });
+  async clickCreateFormFromLibraryButton() {
+    await this.getElement().formActionsButton().click();
+    await this.getElement().createFormFromLibraryButton().click();
   }
 
-  getArrayDataOfColumn(
-    columnName: string,
-    alias: string,
-    persistAliasData: boolean = false
-  ) {
-    const collectData = (columnIndex: number, columnData: string[]) => {
-      this.getElement()
-        .rows()
-        .each(($row) => {
-          const $columns = $row.find("td");
-          columnData.push($columns.eq(columnIndex).text());
-        });
-      pw.wrap(columnData).as(alias);
-    };
+  async clickFormLibrarySettingsButton() {
+    await this.getElement().formActionsButton().click();
+    await this.getElement().formLibrarySettingsButton().click();
+  }
 
-    const processNextPage = (columnIndex: number, columnData: string[]) => {
-      this.getElement()
-        .goToNextPageButton()
-        .invoke("attr", "aria-disabled")
-        .then((isDisabled) => {
-          if (isDisabled !== "true") {
-            this.getElement().goToNextPageButton().click();
-            pw.wait(1000); // wait for the next page to load
-            collectData(columnIndex, columnData);
-            processNextPage(columnIndex, columnData);
-          }
-        });
-    };
+  async getTotalItems() {
+    const text = await this.getElement().itemsData().innerText();
+    const totalItems = text.split("of")[1]?.trim() || "0";
+    return Number.parseInt(totalItems, 10);
+  }
 
-    pw.get(`@${this.defaultColumnAlias}`)
-      .should("exist")
-      .then((columnIndexes: any) => {
-        const columnIndex = columnIndexes[columnName];
-        let columnData: string[] = [];
-        if (persistAliasData) {
-          pw.get(`@${alias}`).then((data: any) => {
-            columnData = data || [];
-          });
-        }
-        collectData(columnIndex, columnData);
-        processNextPage(columnIndex, columnData);
-      });
+  async getArrayDataOfColumn(columnName: string) {
+    const columnIndexes = await this.getColumnIndexes();
+    const columnIndex = columnIndexes[columnName];
+    const columnData: string[] = [];
+
+    while (true) {
+      const rows = await this.getRows().all();
+      for (const row of rows) {
+        columnData.push((await row.locator("td").nth(columnIndex).innerText()).trim());
+      }
+
+      const nextButton = this.getElement().goToNextPageButton();
+      const isDisabled = await nextButton.getAttribute("aria-disabled");
+      if (isDisabled === "true") {
+        break;
+      }
+
+      await nextButton.click();
+      await this.page.waitForTimeout(1000);
+    }
+
+    return columnData;
   }
 }
 

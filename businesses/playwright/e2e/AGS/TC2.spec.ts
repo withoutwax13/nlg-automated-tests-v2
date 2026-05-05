@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
 
 const agsBusinessGrid = new BusinessGrid({
@@ -11,36 +11,28 @@ const randomDate = {
 };
 
 test.describe("As an AGS user, I should be able to set close date from the grid", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags", accountIndex: 1 });
-    agsBusinessGrid.init();
-    agsBusinessGrid.clickClearAllFiltersButton();
-    agsBusinessGrid.getDataOfColumn(
+  test("Initiating test", async () => {
+    await login({ accountType: "ags", accountIndex: 1 });
+    await agsBusinessGrid.init();
+    await agsBusinessGrid.clickClearAllFiltersButton();
+    const beforeCloseDate = await agsBusinessGrid.getDataOfColumn(
       "Close Date",
       "DBA",
-      "Arrakis Spice Company 13857",
-      "beforeCloseDate"
+      "Arrakis Spice Company 13857"
     );
-    agsBusinessGrid.clickClearAllFiltersButton();
-    agsBusinessGrid.setCloseDate("Arrakis Spice Company 13857", {
+    await agsBusinessGrid.clickClearAllFiltersButton();
+    await agsBusinessGrid.setCloseDate("Arrakis Spice Company 13857", {
       month: 1,
       date: randomDate.date,
       year: 2029,
     });
-    agsBusinessGrid.getElement().toastComponent().should("exist");
-    agsBusinessGrid.clickClearAllFiltersButton();
-    agsBusinessGrid.getDataOfColumn(
+    await expect(agsBusinessGrid.getElement().toastComponent()).toBeVisible();
+    await agsBusinessGrid.clickClearAllFiltersButton();
+    const afterCloseDate = await agsBusinessGrid.getDataOfColumn(
       "Close Date",
       "DBA",
-      "Arrakis Spice Company 13857",
-      "afterCloseDate"
+      "Arrakis Spice Company 13857"
     );
-    pw.get("@beforeCloseDate").then((beforeCloseDate) => {
-      pw.get("@afterCloseDate").then((afterCloseDate) => {
-        expect(beforeCloseDate).to.be.not.equal(
-          afterCloseDate
-        );
-      });
-    });
+    expect(beforeCloseDate).not.toEqual(afterCloseDate);
   });
 });

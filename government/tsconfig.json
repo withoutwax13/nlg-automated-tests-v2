@@ -1,9 +1,10 @@
 {
     "compilerOptions": {
-        "target": "es5",
-        "lib": ["es2015", "dom"],
-        "types": ["node", "playwright"],
+        "target": "es2020",
+        "lib": ["es2020", "dom"],
+        "types": ["node", "@playwright/test"],
         "strict": true,
+        "ignoreDeprecations": "6.0",
         "baseUrl": "../node_modules",
         "outDir": "../dist/out-tsc",
         // "sourceMap": true,

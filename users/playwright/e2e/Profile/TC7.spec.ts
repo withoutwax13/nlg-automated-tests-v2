@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { expect, test } from "@playwright/test";
 import Filing from "../../objects/Filing";
 import Form from "../../objects/Form";
 import FormPreview from "../../objects/FormPreview";
@@ -6,6 +6,7 @@ import Payment from "../../objects/Payment";
 import FilingGrid from "../../objects/FilingGrid";
 import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
 import Profile from "../../objects/Profile";
+import { bindRuntime, login, logout } from "../../support/runtime";
 
 const form = new Form();
 const formPreview = new FormPreview();
@@ -18,60 +19,61 @@ const agsFilingGrid = new FilingGrid({
 const confirmation = new ApplicationConfirmation();
 const profile = new Profile();
 
-const deleteMultipleFiling = (
+const deleteMultipleFiling = async (
   count: number,
   filterParams: [string, string, string?, string?],
   filingParams: [string, string]
 ) => {
-  agsFilingGrid.clickClearAllFiltersButton();
-  agsFilingGrid.filterColumn(...filterParams);
-  agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
+  await agsFilingGrid.clickClearAllFiltersButton();
+  await agsFilingGrid.filterColumn(...filterParams);
+  await agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
   if (count > 1) {
-    deleteMultipleFiling(count - 1, filterParams, filingParams);
+    await deleteMultipleFiling(count - 1, filterParams, filingParams);
   }
 };
 
 test.describe.skip("As a Taxpayer user, I should be able to save and delete credit/debit cards information", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags", accountIndex: 2 });
-    agsFilingGrid.init();
-    agsFilingGrid.filterColumn(
+  test("Initiating test", async ({ page, request }) => {
+    bindRuntime(page, request);
+
+    await login({ accountType: "ags", accountIndex: 2 });
+    await agsFilingGrid.init();
+    await agsFilingGrid.filterColumn(
       "Location DBA",
       "Test Trade Name 98068 1",
       "text",
       "Contains"
     );
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Form Name",
       "Food and Beverage",
       "multi-select"
     );
-    agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    pw.get("@rowsLength").then((rowsLength) => {
-      if (Number(rowsLength) > 0) {
-        deleteMultipleFiling(
-          Number(rowsLength),
-          ["Form Name", "Food and Beverage", "multi-select"],
-          ["Location DBA", "Test Trade Name 98068 1"]
-        );
-      }
-    });
-    pw.logout();
-    pw.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
-    filing.goToSubmitFormsTab();
-    filing.selectGovernment("City of Arrakis");
-    filing.selectForm("Food and Beverage");
-    filing.selectBusinessToFile("Test Trade Name 98068 1");
-    form.clickNextbutton();
-    form.enterBasicInformation();
-    form.clickNextbutton();
-    form.enterTaxInformation();
-    form.clickNextbutton();
-    form.enterPreparerInformation();
-    form.clickNextbutton();
-    formPreview.clickSubmitButton();
-    payment.clickNewPaymentMethod();
-    payment.addDebitCreditCardDetails({
+    const rowsLength = await agsFilingGrid.getElement().rows().count();
+    if (rowsLength > 0) {
+      await deleteMultipleFiling(
+        rowsLength,
+        ["Form Name", "Food and Beverage", "multi-select"],
+        ["Location DBA", "Test Trade Name 98068 1"]
+      );
+    }
+
+    await logout();
+    await login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
+    await filing.goToSubmitFormsTab();
+    await filing.selectGovernment("City of Arrakis");
+    await filing.selectForm("Food and Beverage");
+    await filing.selectBusinessToFile("Test Trade Name 98068 1");
+    await form.clickNextbutton();
+    await form.enterBasicInformation();
+    await form.clickNextbutton();
+    await form.enterTaxInformation();
+    await form.clickNextbutton();
+    await form.enterPreparerInformation();
+    await form.clickNextbutton();
+    await formPreview.clickSubmitButton();
+    await payment.clickNewPaymentMethod();
+    await payment.addDebitCreditCardDetails({
       firstName: "John",
       lastName: "Doe",
       address1: "123 Main St",
@@ -82,32 +84,16 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete cred
       expirationDate: "02/27",
       cvv: "123",
     });
-    payment.clickSaveThisPaymentMethodForFutureUseCheckbox();
-    payment.clickTermsAndConditionsCheckbox();
-    payment.clickFinishAndPayButton();
-    confirmation.clickCloseButton();
-    profile.init();
-    profile.clickSavedCreditDebitCardsAccordion();
-    profile
-      .getElement()
-      .savedCreditDebitCardItems()
-      .its("length")
-      .then((savedCreditDebitCardItems) => {
-        pw.wrap(savedCreditDebitCardItems).as("savedCreditDebitCardItems");
-      });
-    profile.deleteSavedPaymentMethod("card", 0);
-    profile
-      .getElement()
-      .savedCreditDebitCardItems()
-      .its("length")
-      .then((currentLength) => {
-        pw.get("@savedCreditDebitCardItems").then(
-          (savedCreditDebitCardItems) => {
-            expect(Number(currentLength)).to.not.eq(
-              Number(savedCreditDebitCardItems)
-            );
-          }
-        );
-      });
+    await payment.clickSaveThisPaymentMethodForFutureUseCheckbox();
+    await payment.clickTermsAndConditionsCheckbox();
+    await payment.clickFinishAndPayButton();
+    await confirmation.clickCloseButton();
+    await profile.init();
+    await profile.clickSavedCreditDebitCardsAccordion();
+    const savedCreditDebitCardItems = await profile.getElement().savedCreditDebitCardItems().count();
+    await profile.deleteSavedPaymentMethod("card", 0);
+    const currentLength = await profile.getElement().savedCreditDebitCardItems().count();
+
+    expect(currentLength).not.toBe(savedCreditDebitCardItems);
   });
 });

@@ -1,4 +1,5 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect } from '../../test';
+import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
 import FilingGrid from "../../objects/FilingGrid";
 
 const agsFilingGrid = new FilingGrid({
@@ -7,10 +8,10 @@ const agsFilingGrid = new FilingGrid({
 });
 
 test.describe("As an AGS user, I should be able to view requested extract.", () => {
-  test("Initiate test", () => {
-    pw.login({ accountType: "ags", accountIndex: 8 });
-    agsFilingGrid.init();
-    agsFilingGrid.clickViewRequestedExtractButton();
-    pw.url().should("include", "/filingsExtractRequests?");
+  test("Initiate test", async ({ page }) => {
+    await login({ accountType: "ags", accountIndex: 8 });
+    await agsFilingGrid.init();
+    await agsFilingGrid.clickViewRequestedExtractButton();
+    await expect(page).toHaveURL(/\/filingsExtractRequests\?/);
   });
 });

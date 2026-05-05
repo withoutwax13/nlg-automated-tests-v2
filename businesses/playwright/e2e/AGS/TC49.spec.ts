@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessAdd from "../../objects/BusinessAdd";
@@ -38,36 +38,36 @@ const newBusinessData = {
   businessOwnerZipCode: "90210",
 };
 
-const addBusiness = () => {
-  agsBusinessGrid.init();
-  agsBusinessGrid.clickAddBusinessButton();
-  addBusinessPage.fillFields(newBusinessData);
-  addBusinessPage.clickSaveButton();
+const addBusiness = async () => {
+  await agsBusinessGrid.init();
+  await agsBusinessGrid.clickAddBusinessButton();
+  await addBusinessPage.fillFields(newBusinessData);
+  await addBusinessPage.clickSaveButton();
 };
 
 const operatingStatus = ["Inactive", "Active/Seasonal", "Closed", "Sold"];
 
 test.describe("As a ags user, I should be able to update operating status in the business details page", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags" });
-    agsBusinessGrid.init();
-    addBusiness();
-    agsBusinessGrid.init();
-    agsBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    operatingStatus.forEach((status) => {
+  test("Initiating test", async () => {
+    await login({ accountType: "ags" });
+    await agsBusinessGrid.init();
+    await addBusiness();
+    await agsBusinessGrid.init();
+    await agsBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
+    for (const status of operatingStatus) {
       if (status === "Active/Seasonal" || status === "Inactive") {
-        agsBusinessDetails.clickBusinessStatusTab();
-        agsBusinessDetails.getElement().operatingStatusDropdown().click();
-        agsBusinessDetails.getElement().anyList().contains(status).click();
-        setBusinessStatusModal.getElement().modal().should("exist");
-        setBusinessStatusModal.getElement().cancelButton().click();
+        await agsBusinessDetails.clickBusinessStatusTab();
+        await agsBusinessDetails.getElement().operatingStatusDropdown().click();
+        await agsBusinessDetails.getElement().anyList().filter({ hasText: status }).first().click();
+        await expect(setBusinessStatusModal.getElement().modal()).toBeVisible();
+        await setBusinessStatusModal.getElement().cancelButton().click();
       } else {
-        agsBusinessDetails.clickBusinessStatusTab();
-        agsBusinessDetails.getElement().operatingStatusDropdown().click();
-        agsBusinessDetails.getElement().anyList().contains(status).click();
-        setBusinessStatusModal.getElement().modal().should("exist");
-        setBusinessStatusModal.clickCloseButton();
+        await agsBusinessDetails.clickBusinessStatusTab();
+        await agsBusinessDetails.getElement().operatingStatusDropdown().click();
+        await agsBusinessDetails.getElement().anyList().filter({ hasText: status }).first().click();
+        await expect(setBusinessStatusModal.getElement().modal()).toBeVisible();
+        await setBusinessStatusModal.clickCloseButton();
       }
-    });
+    }
   });
 });

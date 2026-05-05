@@ -1,4 +1,6 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect } from '../../test';
+import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
+import { legacy } from '../../utils/legacy';
 import ApprovalGrid from "../../objects/ApprovalGrid";
 import Form from "../../objects/Form";
 import FormPreview from "../../objects/FormPreview";
@@ -19,37 +21,37 @@ const agsFilingGrid = new FilingGrid({
   municipalitySelection: "City of Arrakis",
 });
 
-const deleteMultipleFiling = (
+const deleteMultipleFiling = async (
   count: number,
   filterParams: [string, string, string?, string?],
   filingParams: [string, string]
 ) => {
-  agsFilingGrid.clickClearAllFiltersButton();
-  agsFilingGrid.filterColumn(...filterParams);
-  agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
+  await agsFilingGrid.clickClearAllFiltersButton();
+  await agsFilingGrid.filterColumn(...filterParams);
+  await agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
   if (count > 1) {
-    deleteMultipleFiling(count - 1, filterParams, filingParams);
+    await deleteMultipleFiling(count - 1, filterParams, filingParams);
   }
 };
 
 test.describe.skip("As a government user, I want to be able to start approval workflow a specific item in Approvals", () => {
   // Skipped, assertions covered by TC37 and TC38
-  test("Initiate test", () => {
-    pw.login({ accountType: "ags", accountIndex: 5 });
+  test("Initiate test", async ({ page }) => {
+    await login({ accountType: "ags", accountIndex: 5 });
     agsFilingGrid.init();
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Location DBA",
       "Test Trade Name 47910 1",
       "text",
       "Contains"
     );
-    agsFilingGrid.filterColumn(
+    await agsFilingGrid.filterColumn(
       "Form Name",
       "Food and Beverage",
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    pw.get("@rowsLength").then((rowsLength) => {
+    legacy.get("").then(async (rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -58,9 +60,9 @@ test.describe.skip("As a government user, I want to be able to start approval wo
         );
       }
     });
-    pw.logout();
+    await logout();
 
-    pw.login({ accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
+    await login({ accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -82,17 +84,17 @@ test.describe.skip("As a government user, I want to be able to start approval wo
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        pw.wrap(referenceId).as("referenceId");
+        legacy.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
     taxpayerFilingGrid.init();
-    pw.get("@referenceId").then((referenceId) => {
-      pw.logout();
-      pw.login({ accountType: "ags", accountIndex: 5, notFirstLogin: true });
+    legacy.get("").then(async (referenceId) => {
+      await logout();
+      await login({ accountType: "ags", accountIndex: 5, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus("Funded", "Reference ID", String(referenceId));
-      pw.logout();
-      pw.login({ accountType: "municipal", accountIndex: 3, notFirstLogin: true });
+      await logout();
+      await login({ accountType: "municipal", accountIndex: 3, notFirstLogin: true });
       govApprovalGrid.init();
       govApprovalGrid.selectRowToReject("Reference ID", String(referenceId));
     });

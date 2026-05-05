@@ -1,101 +1,82 @@
-import { test, expect } from '../support/pwtest';
-import Filing from "../../../users/playwright/objects/Filing";
-import Form from "../../../users/playwright/objects/Form";
-import FormPreview from "../../../users/playwright/objects/FormPreview";
-import Payment from "../../../users/playwright/objects/Payment";
-import FilingGrid from "../../../users/playwright/objects/FilingGrid";
-import ApplicationConfirmation from "../../../users/playwright/objects/ApplicationConfirmation";
-import Profile from "../../../users/playwright/objects/Profile";
+import { test } from "@playwright/test";
+import {
+  addDebitCreditCardDetails,
+  closeApplicationConfirmation,
+  countSavedCreditDebitCards,
+  deleteMultipleAgsFilings,
+  enterBasicInformation,
+  enterPreparerInformation,
+  enterTaxInformation,
+  filterGridColumn,
+  getGridRowCount,
+  goToSubmitFormsTab,
+  login,
+  logout,
+  openAgsFilingGrid,
+  openProfile,
+  proceedToPayment,
+  savePaymentMethodAndFinishPayment,
+  selectBusinessToFile,
+  selectForm,
+  selectGovernment,
+} from "../support/native-helpers";
 
-const form = new Form();
-const formPreview = new FormPreview();
-const payment = new Payment();
-const filing = new Filing({ isResumingDraftApplication: false });
-const agsFilingGrid = new FilingGrid({
-  userType: "ags",
-  municipalitySelection: "City of Arrakis",
-});
-const confirmation = new ApplicationConfirmation();
-const profile = new Profile();
+test.describe(
+  "As a Taxpayer user, I should be able to save and delete credit/debit cards information",
+  () => {
+    for (let i = 0; i < 10; i++) {
+      test(`Initiating test for account ${i}`, async ({ page }) => {
+        await login(page, { accountType: "ags" });
+        await openAgsFilingGrid(page, "City of Arrakis");
 
-const deleteMultipleFiling = (
-  count: number,
-  filterParams: [string, string, string?, string?],
-  filingParams: [string, string]
-) => {
-  agsFilingGrid.clickClearAllFiltersButton();
-  agsFilingGrid.filterColumn(...filterParams);
-  agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
-  if (count > 1) {
-    deleteMultipleFiling(count - 1, filterParams, filingParams);
-  }
-};
-
-test.describe("As a Taxpayer user, I should be able to save and delete credit/debit cards information", () => {
-  for (let i = 0; i < 10; i++) {
-    test(`Initiating test for account ${i}`, () => {
-      pw.login({ accountType: "ags" });
-      agsFilingGrid.init();
-      agsFilingGrid.filterColumn(
-        "Location DBA",
-        "Test Trade Name 98068 1",
-        "text",
-        "Contains"
-      );
-      agsFilingGrid.filterColumn(
-        "Form Name",
-        "Food and Beverage",
-        "multi-select"
-      );
-      agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-      pw.get("@rowsLength").then((rowsLength) => {
-        if (Number(rowsLength) > 0) {
-          deleteMultipleFiling(
-            Number(rowsLength),
-            ["Form Name", "Food and Beverage", "multi-select"],
-            ["Location DBA", "Test Trade Name 98068 1"]
-          );
-        }
-      });
-      pw.logout();
-      pw.login({ accountType: "taxpayer", accountIndex: i, notFirstLogin: true });
-      filing.goToSubmitFormsTab();
-      filing.selectGovernment("City of Arrakis");
-      filing.selectForm("Food and Beverage");
-      filing.selectBusinessToFile("Test Trade Name 98068 1");
-      form.clickNextbutton();
-      form.enterBasicInformation();
-      form.clickNextbutton();
-      form.enterTaxInformation();
-      form.clickNextbutton();
-      form.enterPreparerInformation();
-      form.clickNextbutton();
-      formPreview.clickSubmitButton();
-      payment.clickNewPaymentMethod();
-      payment.addDebitCreditCardDetails({
-        firstName: "John",
-        lastName: "Doe",
-        address1: "123 Main St",
-        city: "Chicago",
-        state: "IL",
-        postalCode: "12345",
-        cardNumber: "4111111111111111",
-        expirationDate: "02/27",
-        cvv: "123",
-      });
-      payment.clickSaveThisPaymentMethodForFutureUseCheckbox();
-      payment.clickTermsAndConditionsCheckbox();
-      payment.clickFinishAndPayButton();
-      confirmation.clickCloseButton();
-      profile.init();
-      profile.clickSavedCreditDebitCardsAccordion();
-      profile
-        .getElement()
-        .savedCreditDebitCardItems()
-        .its("length")
-        .then((savedCreditDebitCardItems) => {
-          pw.wrap(savedCreditDebitCardItems).as("savedCreditDebitCardItems");
+        await filterGridColumn(page, {
+          columnName: "Location DBA",
+          filterValue: "Test Trade Name 98068 1",
+          filterType: "text",
+          filterOperation: "Contains",
         });
-    });
+
+        await filterGridColumn(page, {
+          columnName: "Form Name",
+          filterValue: "Food and Beverage",
+          filterType: "multi-select",
+        });
+
+        const rowsLength = await getGridRowCount(page);
+        if (rowsLength > 0) {
+          await deleteMultipleAgsFilings(page, rowsLength);
+        }
+
+        await logout(page);
+
+        await login(page, {
+          accountType: "taxpayer",
+          accountIndex: i,
+          notFirstLogin: true,
+        });
+
+        await goToSubmitFormsTab(page);
+        await selectGovernment(page, "City of Arrakis");
+        await selectForm(page, "Food and Beverage");
+        await selectBusinessToFile(page, "Test Trade Name 98068 1");
+
+        await page.locator(".NLGButtonPrimary").filter({ hasText: "Next" }).first().click();
+        await enterBasicInformation(page);
+        await page.locator(".NLGButtonPrimary").filter({ hasText: "Next" }).first().click();
+        await enterTaxInformation(page);
+        await page.locator(".NLGButtonPrimary").filter({ hasText: "Next" }).first().click();
+        await enterPreparerInformation(page);
+        await page.locator(".NLGButtonPrimary").filter({ hasText: "Next" }).first().click();
+
+        await proceedToPayment(page);
+        await addDebitCreditCardDetails(page);
+        await savePaymentMethodAndFinishPayment(page);
+        await closeApplicationConfirmation(page);
+
+        await openProfile(page);
+        const savedCreditDebitCardItems = await countSavedCreditDebitCards(page);
+        void savedCreditDebitCardItems;
+      });
+    }
   }
-});
+);

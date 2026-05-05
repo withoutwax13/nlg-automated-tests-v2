@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
 
 const agsBusinessGrid = new BusinessGrid({
@@ -11,36 +11,28 @@ const randomDate = {
 };
 
 test.describe("As an AGS user, I should be able to set delinquency start date from the grid", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags" });
-    agsBusinessGrid.init();
-    agsBusinessGrid.clickClearAllFiltersButton();
-    agsBusinessGrid.getDataOfColumn(
+  test("Initiating test", async () => {
+    await login({ accountType: "ags" });
+    await agsBusinessGrid.init();
+    await agsBusinessGrid.clickClearAllFiltersButton();
+    const beforeDelinquencyStartDate = await agsBusinessGrid.getDataOfColumn(
       "Delinquency Start Date",
       "DBA",
-      "Arrakis Spice Company 13685",
-      "beforeDelinquencyStartDate"
+      "Arrakis Spice Company 13685"
     );
-    agsBusinessGrid.clickClearAllFiltersButton();
-    agsBusinessGrid.setDelinquencyStartDate("Arrakis Spice Company 13685", {
+    await agsBusinessGrid.clickClearAllFiltersButton();
+    await agsBusinessGrid.setDelinquencyStartDate("Arrakis Spice Company 13685", {
       month: 1,
       date: randomDate.date,
       year: 2023,
     });
-    agsBusinessGrid.getElement().toastComponent().should("exist");
-    agsBusinessGrid.clickClearAllFiltersButton();
-    agsBusinessGrid.getDataOfColumn(
+    await expect(agsBusinessGrid.getElement().toastComponent()).toBeVisible();
+    await agsBusinessGrid.clickClearAllFiltersButton();
+    const afterDelinquencyStartDate = await agsBusinessGrid.getDataOfColumn(
       "Delinquency Start Date",
       "DBA",
-      "Arrakis Spice Company 13685",
-      "afterDelinquencyStartDate"
+      "Arrakis Spice Company 13685"
     );
-    pw.get("@beforeDelinquencyStartDate").then((beforeDelinquencyStartDate) => {
-      pw.get("@afterDelinquencyStartDate").then((afterDelinquencyStartDate) => {
-        expect(beforeDelinquencyStartDate).to.be.not.equal(
-          afterDelinquencyStartDate
-        );
-      });
-    });
+    expect(beforeDelinquencyStartDate).not.toEqual(afterDelinquencyStartDate);
   });
 });
