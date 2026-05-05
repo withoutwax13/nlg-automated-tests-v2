@@ -1,11 +1,35 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../utils/Login";
+import { test, expect } from '../../support/pwtest';
+import FormGrid from "../../objects/FormGrid";
+import { deleteDownloadsFolder } from "../../utils/Files";
 
 test.describe("As municipal user, exported file's form title data should match the grid", () => {
-  test("Initiate test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "municipal", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
+  test("Initiate test", () => {
+    const columnName = "Form Title";
+    const columnDataAlias = "formTitles";
+    const formGrid = new FormGrid({ userType: "municipal" });
+    pw.login({ accountType: "municipal" });
+    formGrid.init();
+    formGrid.getArrayDataOfColumn(columnName, columnDataAlias);
+    formGrid.clickExportButton();
+
+    const today = new Date();
+    const month = today.toLocaleString("default", { month: "short" });
+    const day = String(today.getDate()).padStart(2, "0");
+    const year = today.getFullYear();
+    const fileName = `Localgov-Forms-Export-${month}-${day}-${year}.xlsx`;
+    const downloadedFilePath = `playwright/downloads/${fileName}`;
+
+    pw.readXlsx(downloadedFilePath).then((excelData) => {
+      pw.get(`@${columnDataAlias}`).then((columnDataAlias) => {
+        columnDataAlias.forEach((aliasStringItem) => {
+          const found = excelData.some(
+            (row) => row[columnName] === aliasStringItem
+          );
+          expect(found).to.be.true;
+        });
+      });
+    });
+
+    deleteDownloadsFolder();
   });
 });

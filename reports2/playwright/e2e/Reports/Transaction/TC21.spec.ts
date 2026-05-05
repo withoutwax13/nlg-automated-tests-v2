@@ -1,11 +1,20 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../../utils/Login";
+import { test, expect } from '../../../support/pwtest';
+import TransactionGrid from "../../../objects/TransactionGrid";
 
-test.describe("As a municipal user, I should be able to export the transaction report", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "municipal", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
-  });
-});
+test.describe(
+  "As a municipal user, I should be able to export the transaction report",
+  { tags: ["sanity", "regression"] },
+  () => {
+    test("Initiating test", () => {
+      const transactionGrid = new TransactionGrid({
+        userType: "municipal",
+      });
+      pw.login({ accountType: "municipal", accountIndex: 6 });
+      transactionGrid.init();
+      transactionGrid.getElement().exportButton().should("be.visible");
+      transactionGrid.getElement().exportButton().should("not.be.disabled");
+      transactionGrid.clickExportButton();
+      transactionGrid.getElement().pageTitle().should("be.visible");
+    });
+  }
+);

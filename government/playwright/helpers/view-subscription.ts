@@ -1,20 +1,15 @@
-import { expect, Page } from "@playwright/test";
 import selector from "../fixtures/selector.json";
-import { loginViaUi, waitForApiResponse } from "../utils/Login";
 
-export default async function viewSubscription(page: Page, projectRoot: string) {
-  const subscriptionsPromise = waitForApiResponse(page, {
-    method: "GET",
-    urlIncludes: "amazonaws.com/subscriptions",
-  });
+export default function viewSubscription() {
+  pw.intercept("GET", "https://**.amazonaws.com/municipalities/ActiveTaxAndFeesSubscriptions").as("loadMunicipalitiesData");
+  pw.intercept("GET", "https://**.amazonaws.com/municipalities").as("municipalList");
+  pw.intercept("GET", "https://**.amazonaws.com/subscriptions").as("subsList");
 
-  await loginViaUi(page, projectRoot, { accountType: "ags" });
-  await page.locator(selector.navigateMunicipality).click();
-  await expect(page).toHaveURL(/\/municipalityApp\/list\//);
+  pw.login({ accountType: "ags" });
+  pw.get(selector.navigateMunicipality).click();
+  pw.url().should('contain', '/municipalityApp/list/');
 
-  const subscriptionsResponse = await subscriptionsPromise;
-  expect(subscriptionsResponse.status()).toBe(200);
-
-  await page.locator(selector.dataLink).filter({ hasText: "Subscriptions" }).click();
-  await expect(page.locator(selector.heading2Title).filter({ hasText: "Subscriptions" })).toBeVisible();
+  pw.wait("@subsList").its("response.statusCode").should("eq", 200);
+  pw.get(selector.dataLink).contains("Subscriptions").click();
+  pw.get(selector.heading2Title).contains("Subscriptions").should('exist');
 }

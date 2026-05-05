@@ -1,11 +1,21 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../../utils/Login";
+import { test, expect } from '../../../support/pwtest';
+import SettlementGrid from "../../../objects/SettlementGrid";
 
-test.describe("As an AGS user, I should be able to export a settlement report of a government.", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "ags", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
-  });
-});
+test.describe(
+  "As an AGS user, I should be able to export a settlement report of a government.",
+  { tags: ["sanity", "regression"] },
+  () => {
+    test("Initiating test", () => {
+      const settlementGrid = new SettlementGrid({
+        userType: "ags",
+        municipalitySelection: "City of Arrakis",
+      });
+      pw.login({ accountType: "ags", accountIndex: 4 });
+      settlementGrid.init();
+      settlementGrid.getElement().exportButton().should("be.visible");
+      settlementGrid.getElement().exportButton().should("not.be.disabled");
+      settlementGrid.clickExportButton();
+      settlementGrid.getElement().pageTitle().should("be.visible");
+    });
+  }
+);

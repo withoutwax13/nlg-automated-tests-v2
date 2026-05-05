@@ -1,11 +1,26 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../utils/Login";
+import { test, expect } from '../../support/pwtest';
+import BusinessDetails from "../../objects/BusinessDetails";
+import BusinessGrid from "../../objects/BusinessGrid";
+import BusinessUpdate from "../../objects/BusinessUpdate";
+
+const agsBusinessGrid = new BusinessGrid({
+  userType: "ags",
+  municipalitySelection: "City of Arrakis",
+});
+const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
+const agsBusinessUpdatePage = new BusinessUpdate({ userType: "ags" });
 
 test.describe("As a user, if there are no changes made in the update business page, the save button should not exist", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "ags", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
+  test("Initiating test", () => {
+    pw.login({ accountType: "ags", accountIndex: 1 });
+    agsBusinessGrid.init();
+    agsBusinessGrid.clickClearAllFiltersButton();
+    agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13857");
+    agsBusinessDetails.clickEditBusinessInfoButton();
+    agsBusinessUpdatePage.getElement().saveButton().should("not.exist");
+    agsBusinessUpdatePage.getElement().locationDbaField().clear();
+    agsBusinessUpdatePage.getElement().stateTaxIdField().clear();
+    agsBusinessUpdatePage.getElement().locationAddress1Field().clear();
+    agsBusinessUpdatePage.getElement().saveButton().should("be.disabled"); // TC62 assertion
   });
 });

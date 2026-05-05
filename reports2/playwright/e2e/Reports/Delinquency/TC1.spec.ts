@@ -1,11 +1,22 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../../utils/Login";
+import { test, expect } from '../../../support/pwtest';
+import DelinquencyGrid from "../../../objects/DelinquencyGrid";
 
-test.describe("As an AGS user, I should be able to export delinquency report of a government.", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "ags", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
-  });
-});
+test.describe(
+  "As an AGS user, I should be able to export delinquency report of a government.",
+  { tags: ["sanity", "regression"] },
+  () => {
+    test("Initiating test", () => {
+      const delinquencyGrid = new DelinquencyGrid({
+        userType: "ags",
+        municipalitySelection: "City of Arrakis",
+      });
+      pw.login({ accountType: "ags" });
+      delinquencyGrid.init();
+      delinquencyGrid.getElement().exportButton().should("be.visible");
+      delinquencyGrid.getElement().exportButton().should("not.be.disabled");
+      delinquencyGrid.clickExportButton();
+      delinquencyGrid.getElement().pageTitle().scrollIntoView();
+      delinquencyGrid.getElement().pageTitle().should("be.visible");
+    });
+  }
+);

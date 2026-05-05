@@ -1,11 +1,45 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../utils/Login";
+import { test, expect } from '../../support/pwtest';
+import BusinessGrid from "../../objects/BusinessGrid";
+
+const municipalBusinessGrid = new BusinessGrid({
+  userType: "municipal"
+});
+
+const randomDate = {
+  date: Math.floor(Math.random() * 28) + 1,
+};
 
 test.describe("As a municipal user, I should be able to set close date from the grid", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "municipal", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
+  test("Initiating test", () => {
+    pw.login({ accountType: "municipal", accountIndex: 1 });
+    municipalBusinessGrid.init();
+    municipalBusinessGrid.clickClearAllFiltersButton();
+    municipalBusinessGrid.getDataOfColumn(
+      "Close Date",
+      "DBA",
+      "Arrakis Spice Company 13857",
+      "beforeCloseDate"
+    );
+    municipalBusinessGrid.clickClearAllFiltersButton();
+    municipalBusinessGrid.setCloseDate("Arrakis Spice Company 13857", {
+      month: 1,
+      date: randomDate.date,
+      year: 2029,
+    });
+    municipalBusinessGrid.getElement().toastComponent().should("exist");
+    municipalBusinessGrid.clickClearAllFiltersButton();
+    municipalBusinessGrid.getDataOfColumn(
+      "Close Date",
+      "DBA",
+      "Arrakis Spice Company 13857",
+      "afterCloseDate"
+    );
+    pw.get("@beforeCloseDate").then((beforeCloseDate) => {
+      pw.get("@afterCloseDate").then((afterCloseDate) => {
+        expect(beforeCloseDate).to.be.not.equal(
+          afterCloseDate
+        );
+      });
+    });
   });
 });

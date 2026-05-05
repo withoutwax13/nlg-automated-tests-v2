@@ -1,11 +1,14 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../utils/Login";
+import { test, expect } from '../../support/pwtest';
+import BusinessGrid from "../../objects/BusinessGrid";
 
-test.describe("TC28.spec", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "taxpayer", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
+const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
+
+// Skipped, assertions in TC38
+test.describe.skip("As a taxpayer user, I should be able to view business details.", () => {
+  test("Initiating test", () => {
+    pw.login({ accountType: "taxpayer", accountIndex: 7 });
+    taxpayerBusinessList.init();
+    taxpayerBusinessList.viewBusinessDetails("Arrakis Spice Company 13685");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
   });
 });

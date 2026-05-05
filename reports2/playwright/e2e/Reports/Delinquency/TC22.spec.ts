@@ -1,11 +1,28 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../../utils/Login";
+import { test, expect } from '../../../support/pwtest';
+import DelinquencyGrid from "../../../objects/DelinquencyGrid";
 
-test.describe("TC22.spec", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "taxpayer", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
-  });
-});
+test.describe.skip(
+  "As a taxpayer, I should be able to submit an application via delinquency list action button",
+  { tags: ["sanity", "regression"] },
+  () => {
+    test("Initiating test", () => {
+      pw.intercept("GET", "https://**.azavargovapps.com/forms/municipality/**").as(
+        "getFilingForm"
+      );
+      const taxpayerDelinquencyGrid = new DelinquencyGrid({
+        userType: "taxpayer",
+      });
+      pw.login({ accountType: "taxpayer" });
+      taxpayerDelinquencyGrid.init();
+      taxpayerDelinquencyGrid
+        .getElement()
+        .noRecordFoundComponent()
+        .should("not.exist");
+      taxpayerDelinquencyGrid.toggleActionButtonForNthDelinquencyItem(
+        "Submit Now",
+        1
+      );
+      pw.get("@getFilingForm").its("response.statusCode").should("eq", 200);
+    });
+  }
+);

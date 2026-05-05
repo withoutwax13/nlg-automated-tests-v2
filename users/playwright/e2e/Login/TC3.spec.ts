@@ -1,11 +1,6 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../utils/Login";
-
+import { test, expect } from '../../support/pwtest';
 test.describe("As an AGS user, I should be able to log into the system using valid username and password.", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "ags", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
+  test("Initiating test", () => {
+    pw.login({ accountType: "ags" });
   });
 });

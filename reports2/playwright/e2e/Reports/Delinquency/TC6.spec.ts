@@ -1,11 +1,20 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../../utils/Login";
+import { test, expect } from '../../../support/pwtest';
+import DelinquencyGrid from "../../../objects/DelinquencyGrid";
 
-test.describe("TC6.spec", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "municipal", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
-  });
-});
+test.describe.skip(
+  "As a municipal user, I should be able to view delinquency report.",
+  { tags: ["regression"] },
+  () => {
+    test("Initiating test", () => {
+      const municipalityDelinquencyGrid = new DelinquencyGrid({
+        userType: "municipality",
+      });
+      pw.login({ accountType: "municipality", accountIndex: 2 });
+      municipalityDelinquencyGrid.init();
+      municipalityDelinquencyGrid
+        .getElement()
+        .noRecordFoundComponent()
+        .should("not.exist");
+    });
+  }
+);

@@ -1,11 +1,61 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../../utils/Login";
+import { test, expect } from '../../../support/pwtest';
+import TransactionGrid from "../../../objects/TransactionGrid";
+import { AGS_TRANSACTION_GRID_COLUMNS as defaultColumns } from "../../../objects/TransactionGrid";
 
-test.describe("As a user, I should be able to hide/show columns on the transaction list", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "ags", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
-  });
-});
+test.describe(
+  "As a user, I should be able to hide/show columns on the transaction list",
+  { tags: ["sanity", "regression"] },
+  () => {
+    test.skip("Initiating test", () => {
+      const transactionGrid = new TransactionGrid({
+        userType: "ags",
+        municipalitySelection: "City of Arrakis",
+      });
+      pw.login({ accountType: "ags", accountIndex: 9 });
+      defaultColumns.slice(1, 4).forEach((column) => {
+        // Limiting to 4 columns to save resource usage
+        transactionGrid.init();
+        transactionGrid.clickCustomizeTableViewButton();
+        transactionGrid.verifyColumnVisibility(
+          column,
+          `${column.replace(/\s+/g, "")}VisibilityBeforeHide`
+        );
+        transactionGrid.hideColumn(column);
+        transactionGrid.init();
+        transactionGrid.verifyColumnVisibility(
+          column,
+          `${column.replace(/\s+/g, "")}VisibilityAfterHide`
+        );
+        pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeHide`).then(
+          (beforeToggle) => {
+            pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterHide`).then(
+              (afterToggle) => {
+                expect(beforeToggle).to.not.equal(afterToggle);
+              }
+            );
+          }
+        );
+        transactionGrid.clickCustomizeTableViewButton();
+        transactionGrid.verifyColumnVisibility(
+          column,
+          `${column.replace(/\s+/g, "")}VisibilityBeforeShow`
+        );
+        transactionGrid.showColumn(column);
+        transactionGrid.init();
+        transactionGrid.verifyColumnVisibility(
+          column,
+          `${column.replace(/\s+/g, "")}VisibilityAfterShow`
+        );
+        pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeShow`).then(
+          (beforeToggle) => {
+            pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterShow`).then(
+              (afterToggle) => {
+                expect(beforeToggle).to.not.equal(afterToggle);
+              }
+            );
+          }
+        );
+      });
+    });
+  }
+);

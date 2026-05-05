@@ -1,11 +1,36 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../../utils/Login";
+import { test, expect } from '../../../support/pwtest';
+import SettlementGrid from "../../../objects/SettlementGrid";
 
-test.describe("As an municipal user, I should be able to generate a distribution details from a date range", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "municipal", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
-  });
-});
+const nineMonthsFromToday = () => {
+  const today = new Date();
+  today.setMonth(today.getMonth() - 9);
+  return {
+    month: today.getMonth() + 1,
+    day: today.getDate(),
+    year: today.getFullYear(),
+  };
+};
+
+test.describe(
+  "As an municipal user, I should be able to generate a distribution details from a date range",
+  { tags: ["regression"] },
+  () => {
+    test("Initiating test", () => {
+      const settlementGrid = new SettlementGrid({
+        userType: "municipal",
+      });
+      pw.login({ accountType: "municipal", accountIndex: 5 });
+      settlementGrid.init();
+      settlementGrid.getElement().noRecordFoundComponent().should("not.exist");
+      settlementGrid.getTotalItems("defaultTotalItems");
+      settlementGrid.setStartDate(nineMonthsFromToday());
+      settlementGrid.getElement().noRecordFoundComponent().should("not.exist");
+      settlementGrid.getTotalItems("newTotalItems");
+      pw.get("@defaultTotalItems").then((defaultTotalItems) => {
+        pw.get("@newTotalItems").then((newTotalItems) => {
+          expect(defaultTotalItems).to.not.equal(newTotalItems);
+        });
+      });
+    });
+  }
+);

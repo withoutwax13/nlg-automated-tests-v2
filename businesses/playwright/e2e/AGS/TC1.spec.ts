@@ -1,11 +1,46 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../utils/Login";
+import { test, expect } from '../../support/pwtest';
+import BusinessGrid from "../../objects/BusinessGrid";
+
+const agsBusinessGrid = new BusinessGrid({
+  userType: "ags",
+  municipalitySelection: "City of Arrakis",
+});
+
+const randomDate = {
+  date: Math.floor(Math.random() * 28) + 1,
+};
 
 test.describe("As an AGS user, I should be able to set delinquency start date from the grid", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "ags", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
+  test("Initiating test", () => {
+    pw.login({ accountType: "ags" });
+    agsBusinessGrid.init();
+    agsBusinessGrid.clickClearAllFiltersButton();
+    agsBusinessGrid.getDataOfColumn(
+      "Delinquency Start Date",
+      "DBA",
+      "Arrakis Spice Company 13685",
+      "beforeDelinquencyStartDate"
+    );
+    agsBusinessGrid.clickClearAllFiltersButton();
+    agsBusinessGrid.setDelinquencyStartDate("Arrakis Spice Company 13685", {
+      month: 1,
+      date: randomDate.date,
+      year: 2023,
+    });
+    agsBusinessGrid.getElement().toastComponent().should("exist");
+    agsBusinessGrid.clickClearAllFiltersButton();
+    agsBusinessGrid.getDataOfColumn(
+      "Delinquency Start Date",
+      "DBA",
+      "Arrakis Spice Company 13685",
+      "afterDelinquencyStartDate"
+    );
+    pw.get("@beforeDelinquencyStartDate").then((beforeDelinquencyStartDate) => {
+      pw.get("@afterDelinquencyStartDate").then((afterDelinquencyStartDate) => {
+        expect(beforeDelinquencyStartDate).to.be.not.equal(
+          afterDelinquencyStartDate
+        );
+      });
+    });
   });
 });

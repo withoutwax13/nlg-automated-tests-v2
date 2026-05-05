@@ -1,11 +1,28 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../utils/Login";
+import { test, expect } from '../../support/pwtest';
+import Profile from "../../objects/Profile";
+import { MUNICIPAL_DEFAULT_HOME_PAGE as pageOptions } from "../../objects/Profile";
 
+
+const profile = new Profile();
 test.describe("As a municipal user, I should be able to set my default home page", () => {
-  test("Initiating test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "municipal", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
-  });
+  test("Initiating test", () => {
+      pw.login({
+        accountType: "municipal",
+        accountIndex: 10,
+        customRedirectionAfterLoginAssertion: () =>
+          pw.url().should("contain", "/"),
+      });
+      Object.keys(pageOptions).forEach((page) => {
+        profile.init();
+        profile.selectDefaultHomePage(page);
+        pw.logout();
+        pw.login({
+          accountType: "municipal",
+          accountIndex: 10,
+          notFirstLogin: true,
+          customRedirectionAfterLoginAssertion: () =>
+            pw.url().should("contain", pageOptions[page]),
+        });
+      });
+    });
 });

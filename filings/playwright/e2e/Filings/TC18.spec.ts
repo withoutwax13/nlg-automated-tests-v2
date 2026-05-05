@@ -1,11 +1,96 @@
-import { test, expect } from "@playwright/test";
-import path from "path";
-import { loginViaUi } from "../../utils/Login";
+import { test, expect } from '../../support/pwtest';
+import Form from "../../objects/Form";
+import FormPreview from "../../objects/FormPreview";
+import Payment from "../../objects/Payment";
+import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
+import Filing from "../../objects/Filing";
+import FilingGrid from "../../objects/FilingGrid";
+
+const form = new Form();
+const formPreview = new FormPreview();
+const payment = new Payment();
+const applicationConfirmation = new ApplicationConfirmation();
+const filing = new Filing({ isResumingDraftApplication: false });
+const agsFilingGrid = new FilingGrid({
+  userType: "ags",
+  municipalitySelection: "City of Arrakis",
+});
+const municipalFilingGrid = new FilingGrid({
+  userType: "municipal",
+});
+
+const deleteMultipleFiling = (
+  count: number,
+  filterParams: [string, string, string?, string?],
+  filingParams: [string, string]
+) => {
+  agsFilingGrid.clickClearAllFiltersButton();
+  agsFilingGrid.filterColumn(...filterParams);
+  agsFilingGrid.deleteFiling(filingParams[0], filingParams[1]);
+  if (count > 1) {
+    deleteMultipleFiling(count - 1, filterParams, filingParams);
+  }
+};
 
 test.describe("As a municipal, I should be able to search filing list with data from its columns", () => {
-  test("Initiate test", async ({ page }, testInfo) => {
-    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
-    await loginViaUi(page, projectRoot, { accountType: "ags", accountIndex: 0 });
-    await expect(page).toHaveURL(/.+/);
+  test("Initiate test", () => {
+    pw.login({ accountType: "ags", accountIndex: 1 });
+    agsFilingGrid.init();
+    agsFilingGrid.filterColumn(
+      "Location DBA",
+      "Arrakis Spice Company 24510",
+      "text",
+      "Contains"
+    );
+    agsFilingGrid.filterColumn(
+      "Form Name",
+      "Food and Beverage",
+      "multi-select"
+    );
+    agsFilingGrid.getElement().rows().its("length").as("rowsLength");
+    pw.get("@rowsLength").then((rowsLength) => {
+      if (Number(rowsLength) > 0) {
+        deleteMultipleFiling(
+          Number(rowsLength),
+          ["Form Name", "Food and Beverage", "multi-select"],
+          ["Location DBA", "Arrakis Spice Company 24510"]
+        );
+      }
+    });
+    pw.logout();
+
+    pw.login({ accountType: "taxpayer", accountIndex: 6, notFirstLogin: true });
+    filing.goToSubmitFormsTab();
+    filing.selectGovernment("City of Arrakis");
+    filing.selectForm("Food and Beverage");
+    filing.selectBusinessToFile("Arrakis Spice Company 24510");
+    form.clickNextbutton(false);
+    form.enterBasicInformation();
+    form.clickNextbutton();
+    form.enterTaxInformation();
+    form.clickNextbutton();
+    form.enterPreparerInformation();
+    form.clickNextbutton();
+    formPreview.clickSubmitButton();
+    payment.clickSavedPaymentMethods();
+    payment.selectSavedPaymentMethod(0);
+    payment.clickTermsAndConditionsCheckbox();
+    payment.clickFinishAndPayButton();
+    applicationConfirmation
+      .getElement()
+      .referenceIdData()
+      .invoke("text")
+      .then((referenceId) => {
+        pw.wrap(referenceId).as("referenceId");
+      });
+    applicationConfirmation.clickCloseButton();
+    pw.logout();
+
+    pw.get("@referenceId").then((referenceId) => {
+      pw.login({ accountType: "municipal", accountIndex: 4, notFirstLogin: true });
+      municipalFilingGrid.init();
+      municipalFilingGrid.searchFiling(String(referenceId));
+      municipalFilingGrid.getElement().rows().its("length").should("be.eq", 1);
+    });
   });
 });
