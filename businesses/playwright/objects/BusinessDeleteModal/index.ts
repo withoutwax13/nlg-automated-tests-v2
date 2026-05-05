@@ -5,9 +5,9 @@ class BusinessDeleteModal {
   }
   private elements() {
     return {
-      modalTitle: () => cy.get(".k-dialog-title"),
-      modalContent: () => cy.get(".k-dialog-content"),
-      buttonGroup: () => cy.get(".k-dialog-actions"),
+      modalTitle: () => pw.get(".k-dialog-title"),
+      modalContent: () => pw.get(".k-dialog-content"),
+      buttonGroup: () => pw.get(".k-dialog-actions"),
       cancelButton: () =>
         this.getElement()
           .buttonGroup()
@@ -18,7 +18,7 @@ class BusinessDeleteModal {
           .buttonGroup()
           .find(".NLGButtonSecondary")
           .contains("Delete Business"),
-      closeModalButton: () => cy.get('button[aria-label="Close"]'),
+      closeModalButton: () => pw.get('button[aria-label="Close"]'),
     };
   }
   getElement() {

@@ -42,24 +42,24 @@ class ApplicationReview {
    */
   private elements() {
     return {
-      pageTitle: () => cy.get("h1").first(),
+      pageTitle: () => pw.get("h1").first(),
       goBackToApplicationGridButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Applications"),
+        pw.get(".NLGButtonSecondary").contains("Applications"),
       nextApplicationButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Next"),
-      applicationFormTitle: () => cy.get("h1").eq(1),
-      registrationTypeAndReferenceIdData: () => cy.get("h3"),
-      addressData: () => cy.get("h3").next(),
-      applicationStatusData: () => cy.get("h3").parent().next(),
-      actionsDropdown: () => cy.get(".NLG-PrimaryDropdown").contains("Actions"),
+        pw.get(".NLGButtonSecondary").contains("Next"),
+      applicationFormTitle: () => pw.get("h1").eq(1),
+      registrationTypeAndReferenceIdData: () => pw.get("h3"),
+      addressData: () => pw.get("h3").next(),
+      applicationStatusData: () => pw.get("h3").parent().next(),
+      actionsDropdown: () => pw.get(".NLG-PrimaryDropdown").contains("Actions"),
       reviewStepperTab: () =>
-        cy.get("main").find("div").first().find("div").first(),
+        pw.get("main").find("div").first().find("div").first(),
       reviewChecklist: () =>
-        cy.get("main").find("div").first().find("div").eq(1),
-      anyList: () => cy.get("li"),
+        pw.get("main").find("div").first().find("div").eq(1),
+      anyList: () => pw.get("li"),
       actionDropdownActionItems: () =>
-        cy.get(".k-animation-container").find("li"),
-      actionConfirmationModal: () => cy.get(".k-dialog"),
+        pw.get(".k-animation-container").find("li"),
+      actionConfirmationModal: () => pw.get(".k-dialog"),
       actionConfirmationModalPrimaryButton: () =>
         this.getElements().actionConfirmationModal().find(".NLGButtonPrimary"),
     };
@@ -98,7 +98,7 @@ class ApplicationReview {
       .actionConfirmationModalPrimaryButton()
       .contains(actionName)
       .click( {force: true} );
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   /**

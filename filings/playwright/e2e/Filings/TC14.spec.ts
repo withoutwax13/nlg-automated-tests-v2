@@ -31,7 +31,7 @@ const deleteMultipleFiling = (
 
 test.describe("As a AGS, I should be able to to view a specific filing by selecting the “View” icon", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 9 });
+    pw.login({ accountType: "ags", accountIndex: 9 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -45,7 +45,7 @@ test.describe("As a AGS, I should be able to to view a specific filing by select
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -54,9 +54,9 @@ test.describe("As a AGS, I should be able to to view a specific filing by select
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 4, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 4, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -78,13 +78,13 @@ test.describe("As a AGS, I should be able to to view a specific filing by select
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
-    cy.logout();
+    pw.logout();
 
-    cy.get("@referenceId").then((referenceId) => {
-      cy.login({ accountType: "ags", accountIndex: 9, notFirstLogin: true });
+    pw.get("@referenceId").then((referenceId) => {
+      pw.login({ accountType: "ags", accountIndex: 9, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.toggleActionButton(
         "View",

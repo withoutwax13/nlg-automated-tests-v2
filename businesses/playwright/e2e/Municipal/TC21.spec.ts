@@ -35,7 +35,7 @@ const newBusinessData = {
 
 test.describe("As a municipal user, I should be able to add a business.", () => {
   test.beforeEach(() => {
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
       notFirstLogin: false,
@@ -43,7 +43,7 @@ test.describe("As a municipal user, I should be able to add a business.", () => 
     });
   });
   test("Initiating test", () => {
-    cy.login({
+    pw.login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 8,
@@ -56,6 +56,6 @@ test.describe("As a municipal user, I should be able to add a business.", () => 
     municipalBusinessGrid.clickClearAllFiltersButton();
     municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
 
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
   });
 });

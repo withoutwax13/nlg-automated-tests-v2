@@ -13,7 +13,7 @@ test.describe("As a municipal user, I should be able to see filings in 1 year ag
     const today = new Date();
     today.toLocaleString("en-US", { timeZone: "America/Chicago" });
 
-    cy.login({ accountType: "municipal", accountIndex: 5 });
+    pw.login({ accountType: "municipal", accountIndex: 5 });
     municipalFilingGrid.init();
     municipalFilingGrid.setStartDate({
       month: `${oneYearAgo.getMonth() + 1}`,
@@ -22,7 +22,7 @@ test.describe("As a municipal user, I should be able to see filings in 1 year ag
     });
     municipalFilingGrid.sortColumn(true, "Filing Date");
     municipalFilingGrid.getColumnCellsData("Filing Date");
-    cy.get("@columnCellsData").then((columnCellsData) => {
+    pw.get("@columnCellsData").then((columnCellsData) => {
       Array.from(columnCellsData).forEach((cellData) => {
         const filingDate = new Date(String(cellData));
         expect(filingDate).to.be.gte(oneYearAgo);

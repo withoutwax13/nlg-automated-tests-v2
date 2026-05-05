@@ -5,14 +5,14 @@ const agsFormGrid = new FormGrid({ userType: "ags" });
 
 test.describe("As an AGS user, I should be able to navigate to the form editor via open in editor button", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 4 });
+    pw.login({ accountType: "ags", accountIndex: 4 });
     agsFormGrid.init();
     agsFormGrid.filterColumn("Draft Change Type", "Major");
     agsFormGrid.filterColumn("Status", "Draft", "multi-select");
     agsFormGrid.getDataOfColumnForNRow(1, "Form Title", "firstRowForm");
     agsFormGrid.getDataOfColumnForNRow(1, "Version", "firstRowVersion");
     agsFormGrid.clickClearAllFiltersButton();
-    cy.get("@firstRowForm").then(($firstRowForm) => {
+    pw.get("@firstRowForm").then(($firstRowForm) => {
       agsFormGrid.init();
       agsFormGrid.filterColumn("Form Title", String($firstRowForm));
       agsFormGrid.filterColumn("Draft Change Type", "Major");
@@ -25,9 +25,9 @@ test.describe("As an AGS user, I should be able to navigate to the form editor v
         0
       );
     });
-    cy.get("@firstRowVersion").then(($firstRowVersion) => {
-      cy.url().should("include", "formsApp");
-      cy.url().should("include", $firstRowVersion);
+    pw.get("@firstRowVersion").then(($firstRowVersion) => {
+      pw.url().should("include", "formsApp");
+      pw.url().should("include", $firstRowVersion);
     });
   });
 });

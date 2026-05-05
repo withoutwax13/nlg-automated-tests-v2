@@ -4,13 +4,13 @@
 class UploadDocument {
   private elements() {
     return {
-      modalTitle: () => cy.get(".k-dialog-title"),
+      modalTitle: () => pw.get(".k-dialog-title"),
       uploadDocumentNameInput: () =>
-        cy.get(".upload-document-dialog").find("input"),
+        pw.get(".upload-document-dialog").find("input"),
       uploadFileInput: () =>
-        cy.get(".upload-document-dialog").find("input[type='files']"),
-      uploadButton: () => cy.get(".NLGButtonPrimary").contains("Upload"),
-      cancelButton: () => cy.get(".NLGButtonSecondary").contains("Cancel"),
+        pw.get(".upload-document-dialog").find("input[type='files']"),
+      uploadButton: () => pw.get(".NLGButtonPrimary").contains("Upload"),
+      cancelButton: () => pw.get(".NLGButtonSecondary").contains("Cancel"),
     };
   }
   getElements() {
@@ -28,7 +28,7 @@ class UploadDocument {
   uploadFile(fileName: string) {
     const fileToUpload = fileName || "data.json";
     this.elements().uploadFileInput().attachFile(fileToUpload);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 }
 

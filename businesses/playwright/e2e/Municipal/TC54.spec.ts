@@ -7,7 +7,7 @@ const municipalBusinessDetails = new BusinessDetails({ userType: "municipal" });
 
 test.describe("As a municipal user, I should be able to add notes to a business via the business details page", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "municipal", accountIndex: 3 });
+    pw.login({ accountType: "municipal", accountIndex: 3 });
     municipalBusinessGrid.init();
     municipalBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     municipalBusinessDetails.clickNotesTab(); 

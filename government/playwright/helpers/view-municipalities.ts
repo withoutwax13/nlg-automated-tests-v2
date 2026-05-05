@@ -1,15 +1,15 @@
 import selector from "../fixtures/selector.json";
 
 export default function viewMunicipalities() {
-  cy.intercept("GET", "https://**.amazonaws.com/municipalities/ActiveTaxAndFeesSubscriptions").as("loadMunicipalitiesData");
-  cy.intercept("GET", "https://**.amazonaws.com/municipalities").as("municipalList");
-  cy.intercept("GET", "https://**.amazonaws.com/subscriptions").as("subsList");
+  pw.intercept("GET", "https://**.amazonaws.com/municipalities/ActiveTaxAndFeesSubscriptions").as("loadMunicipalitiesData");
+  pw.intercept("GET", "https://**.amazonaws.com/municipalities").as("municipalList");
+  pw.intercept("GET", "https://**.amazonaws.com/subscriptions").as("subsList");
 
-  cy.login({ accountType: "ags" });
-  cy.get(selector.navigateMunicipality).click();
-  cy.url().should('contain', '/municipalityApp/list/');
+  pw.login({ accountType: "ags" });
+  pw.get(selector.navigateMunicipality).click();
+  pw.url().should('contain', '/municipalityApp/list/');
 
-  cy.wait("@municipalList").its("response.statusCode").should("eq", 200);
-  cy.get(selector.dataLink).contains("Municipalities").click();
-  cy.get(selector.heading2Title).contains("Municipalities").should('exist');
+  pw.wait("@municipalList").its("response.statusCode").should("eq", 200);
+  pw.get(selector.dataLink).contains("Municipalities").click();
+  pw.get(selector.heading2Title).contains("Municipalities").should('exist');
 }

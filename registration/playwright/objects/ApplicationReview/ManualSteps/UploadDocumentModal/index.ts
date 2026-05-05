@@ -8,13 +8,13 @@ class UploadDocumentModal {
    */
     elements() {
       return {
-        modalTitle: () => cy.get(".k-dialog-title"),
-        fileNameInput: () => cy.get(".k-form-field-wrap").find("input"),
-        fileUploadInput: () => cy.get("#files"),
+        modalTitle: () => pw.get(".k-dialog-title"),
+        fileNameInput: () => pw.get(".k-form-field-wrap").find("input"),
+        fileUploadInput: () => pw.get("#files"),
         uploadButton: () =>
-          cy.get(".k-dialog-actions").find("button").contains("Upload"),
+          pw.get(".k-dialog-actions").find("button").contains("Upload"),
         cancelButton: () =>
-          cy.get(".k-dialog-actions").find("button").contains("Cancel"),
+          pw.get(".k-dialog-actions").find("button").contains("Cancel"),
       };
     }
     
@@ -30,7 +30,7 @@ class UploadDocumentModal {
      */
     clickUploadButton() {
       this.elements().uploadButton().click( {force: true} );
-      cy.waitForLoading();
+      pw.waitForLoading();
     }
   
     /**
@@ -43,12 +43,12 @@ class UploadDocumentModal {
   
     /**
      * Upload a file.
-     * @param fileName - The name of the file to upload. This should be found under the cypress/fixtures directory.
+     * @param fileName - The name of the file to upload. This should be found under the playwright/fixtures directory.
      */
     uploadFile(fileName?: string) {
       const fileToUpload = fileName || "data.json";
       this.elements().fileUploadInput().attachFile(fileToUpload);
-      cy.waitForLoading();
+      pw.waitForLoading();
     }
   }
   

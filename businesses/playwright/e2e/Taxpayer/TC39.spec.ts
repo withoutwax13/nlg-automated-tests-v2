@@ -7,10 +7,10 @@ const taxpayerBusinessDetails = new BusinessDetails({ userType: "taxpayer" });
 
 test.describe("As a taxpayer, I should be able to see my business information in my business details page", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "taxpayer", accountIndex: 1 });
+    pw.login({ accountType: "taxpayer", accountIndex: 1 });
     taxpayerBusinessList.init();
     taxpayerBusinessList.viewBusinessDetails("Arrakis Spice Company 13685");
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
 
     const businessFields = {
       "Business Name": "Arrakis Spice Company 13685",
@@ -24,7 +24,7 @@ test.describe("As a taxpayer, I should be able to see my business information in
 
     Object.entries(businessFields).forEach(([field, value]) => {
       taxpayerBusinessDetails.getBusinessData(field, field.replace(/\s+/g, ""));
-      cy.get(`@${field.replace(/\s+/g, "")}`).then((data) => {
+      pw.get(`@${field.replace(/\s+/g, "")}`).then((data) => {
         expect(data).to.equal(value);
       });
     });

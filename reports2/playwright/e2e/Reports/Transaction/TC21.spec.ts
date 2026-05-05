@@ -9,7 +9,7 @@ test.describe(
       const transactionGrid = new TransactionGrid({
         userType: "municipal",
       });
-      cy.login({ accountType: "municipal", accountIndex: 6 });
+      pw.login({ accountType: "municipal", accountIndex: 6 });
       transactionGrid.init();
       transactionGrid.getElement().exportButton().should("be.visible");
       transactionGrid.getElement().exportButton().should("not.be.disabled");

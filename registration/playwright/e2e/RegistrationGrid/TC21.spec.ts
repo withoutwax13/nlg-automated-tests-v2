@@ -44,18 +44,18 @@ test.describe("As an AGS User, when I select a form submission requirement in a 
     });
     const businessDetailsPage = new BusinessDetails({ userType: "ags" });
 
-    cy.login({ accountType: "ags", accountIndex: 9 });
+    pw.login({ accountType: "ags", accountIndex: 9 });
     businessGrid.init();
     businessGrid.clickAddBusinessButton();
     businessAddPage.fillFields(customData);
     businessAddPage.clickSaveButton();
     businessGrid.init();
     businessGrid.viewBusinessDetails(customData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
     businessDetailsPage.clickFormsTab();
     businessDetailsPage.enableForm("Business License (Annual) - E2E #1");
 
-    cy.waitForLoading(); // wait for the backend to finish processing the form enablement
+    pw.waitForLoading(); // wait for the backend to finish processing the form enablement
     registrationGrid.init();
     registrationGrid.getDataOfColumn(
       "Registration Status",
@@ -63,6 +63,6 @@ test.describe("As an AGS User, when I select a form submission requirement in a 
       customData.locationDba,
       "registrationStatus"
     );
-    cy.get("@registrationStatus").should("eq", "Not Registered");
+    pw.get("@registrationStatus").should("eq", "Not Registered");
   });
 });

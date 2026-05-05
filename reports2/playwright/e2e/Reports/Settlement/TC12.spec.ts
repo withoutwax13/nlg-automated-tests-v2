@@ -11,7 +11,7 @@ test.describe(
         userType: "ags",
         municipalitySelection: "City of Arrakis",
       });
-      cy.login({ accountType: "ags", accountIndex: 9 });
+      pw.login({ accountType: "ags", accountIndex: 9 });
       defaultColumns.slice(1, 4).forEach((column) => {
         // Limiting to 4 columns to save resource usage
         settlementGrid.init();
@@ -26,9 +26,9 @@ test.describe(
           column,
           `${column.replace(/\s+/g, "")}VisibilityAfterHide`
         );
-        cy.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeHide`).then(
+        pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeHide`).then(
           (beforeToggle) => {
-            cy.get(`@${column.replace(/\s+/g, "")}VisibilityAfterHide`).then(
+            pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterHide`).then(
               (afterToggle) => {
                 expect(beforeToggle).to.not.equal(afterToggle);
               }
@@ -46,9 +46,9 @@ test.describe(
           column,
           `${column.replace(/\s+/g, "")}VisibilityAfterShow`
         );
-        cy.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeShow`).then(
+        pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeShow`).then(
           (beforeToggle) => {
-            cy.get(`@${column.replace(/\s+/g, "")}VisibilityAfterShow`).then(
+            pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterShow`).then(
               (afterToggle) => {
                 expect(beforeToggle).to.not.equal(afterToggle);
               }

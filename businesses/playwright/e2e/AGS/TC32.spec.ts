@@ -46,7 +46,7 @@ const addBusiness = () => {
 
 test.describe("I should be able to reset all data of a specific municipality", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags" });
+    pw.login({ accountType: "ags" });
     addBusiness();
     agsBusinessGrid.init();
     agsBusinessGrid.clickResetDataButton();

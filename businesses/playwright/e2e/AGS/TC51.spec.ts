@@ -12,11 +12,11 @@ const randomDate = Math.floor(Math.random() * 28) + 1;
 
 test.describe("When I update the business close date, system should let the save button of the Set Business Status modal to be disabled until I select a business status", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 4 });
+    pw.login({ accountType: "ags", accountIndex: 4 });
     agsBusinessGrid.init();
     agsBusinessGrid.clickClearAllFiltersButton();
     agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13857");
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
     agsBusinessDetails.clickBusinessStatusTab();
     agsBusinessDetails.triggerSetBusinessStatusModal();
     agsBusinessDetails.setBusinessStatusModal.getElement().modal().should("exist");

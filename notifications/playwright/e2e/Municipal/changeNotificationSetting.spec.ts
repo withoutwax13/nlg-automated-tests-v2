@@ -2,39 +2,39 @@ import { test, expect } from '../../support/pwtest';
 import selector from '../../fixtures/selector.json';
 
 const changeNotificationSetting = () => {
-  cy.intercept(
+  pw.intercept(
     "GET",
     "https://**.amazonaws.com/Notifications?notificationStatus=undefined"
   ).as("municipalNotification");
-  cy.intercept(
+  pw.intercept(
     "GET",
     "https://**.amazonaws.com/Notifications?notificationStatus=UNREAD"
   ).as("municipalUnreadNotification");
-  cy.intercept(
+  pw.intercept(
     "GET",
     "https://**.amazonaws.com/NotificationsSetting"
   ).as("changeSetting");
-  cy.intercept(
+  pw.intercept(
     "PUT",
     "https://**.amazonaws.com/NotificationsSetting"
   ).as("updateSetting")
 
-  cy.login({ accountType: "municipal" });
+  pw.login({ accountType: "municipal" });
 
   //Click the notification button
-  cy.get(selector.notificationIcon).should('exist');
-  cy.get(selector.notificationIcon).click();
+  pw.get(selector.notificationIcon).should('exist');
+  pw.get(selector.notificationIcon).click();
 
-  cy.wait("@municipalNotification").its("response.statusCode").should("eq", 200);
-  cy.url().should('contain', "/NotificationsApp/NotificationsList");
+  pw.wait("@municipalNotification").its("response.statusCode").should("eq", 200);
+  pw.url().should('contain', "/NotificationsApp/NotificationsList");
 
   //Click the setting button
-  cy.get(selector.settingButton).should('exist').click();
-  cy.wait("@changeSetting").its("response.statusCode").should("eq", 200);
+  pw.get(selector.settingButton).should('exist').click();
+  pw.wait("@changeSetting").its("response.statusCode").should("eq", 200);
 
   //Click the update button
-  cy.get(selector.updateButton).click()
-  cy.wait("@updateSetting").its("response.statusCode").should("eq", 200);
+  pw.get(selector.updateButton).click()
+  pw.wait("@updateSetting").its("response.statusCode").should("eq", 200);
 };
 
 test.describe("As a municipal, I should be able to change notifications settings.", () => {

@@ -8,7 +8,7 @@ const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 test.describe("As a ags user, I should be able to delete notes to a business via the business details page", () => {
   // Skipped, assertions moved to TC55
   test.skip("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 7 });
+    pw.login({ accountType: "ags", accountIndex: 7 });
     agsBusinessGrid.init();
     agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     agsBusinessDetails.clickNotesTab();
@@ -20,7 +20,7 @@ test.describe("As a ags user, I should be able to delete notes to a business via
       .noteItems()
       .its("length")
       .as("noteItemsLength");
-    cy.get("@noteItemsLength").then((noteItemsLength) => {
+    pw.get("@noteItemsLength").then((noteItemsLength) => {
       agsBusinessDetails.clickNoteItem(Number(noteItemsLength) - 1);
       agsBusinessDetails.deleteNoteItem(Number(noteItemsLength) - 1);
       agsBusinessDetails

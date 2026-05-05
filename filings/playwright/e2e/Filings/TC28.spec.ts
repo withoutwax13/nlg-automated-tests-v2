@@ -28,7 +28,7 @@ const deleteMultipleFiling = (
 
 test.describe("As a taxpayer, I should be able to resume a draft filing.", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 5 });
+    pw.login({ accountType: "ags", accountIndex: 5 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -42,7 +42,7 @@ test.describe("As a taxpayer, I should be able to resume a draft filing.", () =>
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -51,9 +51,9 @@ test.describe("As a taxpayer, I should be able to resume a draft filing.", () =>
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -68,6 +68,6 @@ test.describe("As a taxpayer, I should be able to resume a draft filing.", () =>
       "multi-select"
     );
     taxpayerFilingGrid.toggleActionButton("Resume", "Location DBA", "Arrakis Spice Company 40337");
-    cy.url().should("include", "/filingApp/filings");
+    pw.url().should("include", "/filingApp/filings");
   });
 });

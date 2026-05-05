@@ -34,7 +34,7 @@ const deleteMultipleFiling = (
 test.describe("As a Taxpayer user, I should be able to save and delete bank account information", () => {
   for (let i = 0; i < 10; i++) {
     test(`Initiating test for account ${i}`, () => {
-      cy.login({ accountType: "ags" });
+      pw.login({ accountType: "ags" });
       agsFilingGrid.init();
       agsFilingGrid.filterColumn(
         "Location DBA",
@@ -48,7 +48,7 @@ test.describe("As a Taxpayer user, I should be able to save and delete bank acco
         "multi-select"
       );
       agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-      cy.get("@rowsLength").then((rowsLength) => {
+      pw.get("@rowsLength").then((rowsLength) => {
         if (Number(rowsLength) > 0) {
           deleteMultipleFiling(
             Number(rowsLength),
@@ -57,8 +57,8 @@ test.describe("As a Taxpayer user, I should be able to save and delete bank acco
           );
         }
       });
-      cy.logout();
-      cy.login({
+      pw.logout();
+      pw.login({
         accountType: "taxpayer",
         accountIndex: i,
         notFirstLogin: true,
@@ -97,7 +97,7 @@ test.describe("As a Taxpayer user, I should be able to save and delete bank acco
         .savedBankAccountItems()
         .its("length")
         .then((savedBankAccountsLength) => {
-          cy.wrap(savedBankAccountsLength).as("savedBankAccountsLength");
+          pw.wrap(savedBankAccountsLength).as("savedBankAccountsLength");
         });
     });
   }

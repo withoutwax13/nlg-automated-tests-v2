@@ -11,7 +11,7 @@ test.describe(
         userType: "ags",
         municipalitySelection: "City of Arrakis",
       });
-      cy.login({ accountType: "ags", accountIndex: 6 });
+      pw.login({ accountType: "ags", accountIndex: 6 });
       transactionGrid.init();
       transactionGrid.getElement().exportButton().should("be.visible");
       transactionGrid.getElement().exportButton().should("not.be.disabled");

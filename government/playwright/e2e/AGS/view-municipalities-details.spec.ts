@@ -2,28 +2,28 @@ import { test, expect } from '../../support/pwtest';
 import selector from "../../fixtures/selector.json";
 
 const setupIntercepts = () => {
-  cy.intercept("GET", "https://**.amazonaws.com/municipalities/ActiveTaxAndFeesSubscriptions").as("loadMunicipalitiesData");
-  cy.intercept("GET", "https://**.amazonaws.com/municipalities").as("municipalList");
-  cy.intercept("GET", "https://**.amazonaws.com/subscriptions").as("subsList");
+  pw.intercept("GET", "https://**.amazonaws.com/municipalities/ActiveTaxAndFeesSubscriptions").as("loadMunicipalitiesData");
+  pw.intercept("GET", "https://**.amazonaws.com/municipalities").as("municipalList");
+  pw.intercept("GET", "https://**.amazonaws.com/subscriptions").as("subsList");
 };
 
 const loginAndViewMunicipalities = () => {
-  cy.login({ accountType: "ags" });
-  cy.get('[href="/municipalityApp/list/:tab"] > [data-cy="drawer-item"]').click();
-  cy.url().should('contain', '/municipalityApp/list/');
+  pw.login({ accountType: "ags" });
+  pw.get('[href="/municipalityApp/list/:tab"] > [data-cy="drawer-item"]').click();
+  pw.url().should('contain', '/municipalityApp/list/');
 };
 
 const verifyMunicipalities = () => {
-  cy.wait("@municipalList").its("response.statusCode").should("eq", 200);
-  cy.get(selector.dataLink).contains("Municipalities").click();
-  cy.get(selector.heading2Title).contains("Municipalities").should('exist');
+  pw.wait("@municipalList").its("response.statusCode").should("eq", 200);
+  pw.get(selector.dataLink).contains("Municipalities").click();
+  pw.get(selector.heading2Title).contains("Municipalities").should('exist');
 };
 
 const interactMunicipalitiesDetials = () => {
-  cy.get(selector.detailsIcon).should('exist')
+  pw.get(selector.detailsIcon).should('exist')
     .click();
-  cy.url().should('contain', "/municipalityApp/view/")
-  cy.get(selector.heading2Title).contains("Basic information").should('exist').and('be.visible')
+  pw.url().should('contain', "/municipalityApp/view/")
+  pw.get(selector.heading2Title).contains("Basic information").should('exist').and('be.visible')
 
 };
 const viewmunicipalitiesDetials = () => {

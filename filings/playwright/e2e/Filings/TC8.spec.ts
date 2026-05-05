@@ -33,7 +33,7 @@ const deleteMultipleFiling = (
 
 test.describe("As an AGS user, I should be able to navigate to the Audit Log page", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 6 });
+    pw.login({ accountType: "ags", accountIndex: 6 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -47,7 +47,7 @@ test.describe("As an AGS user, I should be able to navigate to the Audit Log pag
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -56,9 +56,9 @@ test.describe("As an AGS user, I should be able to navigate to the Audit Log pag
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -80,13 +80,13 @@ test.describe("As an AGS user, I should be able to navigate to the Audit Log pag
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
-    cy.logout();
+    pw.logout();
 
-    cy.get("@referenceId").then((referenceId) => {
-      cy.login({ accountType: "ags", accountIndex: 6, notFirstLogin: true });
+    pw.get("@referenceId").then((referenceId) => {
+      pw.login({ accountType: "ags", accountIndex: 6, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.checkAuditLog("Reference ID", String(referenceId));
     });

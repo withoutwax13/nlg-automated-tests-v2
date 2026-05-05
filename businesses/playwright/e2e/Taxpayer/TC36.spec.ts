@@ -5,7 +5,7 @@ const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
 
 test.describe("As a taxpayer, I should only have details and delete as options in my action button column", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "taxpayer", accountIndex: 7 });
+    pw.login({ accountType: "taxpayer", accountIndex: 7 });
     taxpayerBusinessList.init();
     taxpayerBusinessList.getElementOfColumn(
       "Actions",
@@ -13,7 +13,7 @@ test.describe("As a taxpayer, I should only have details and delete as options i
       "Arrakis Spice Company 13685",
       "actionButton"
     );
-    cy.get("@actionButton").click();
+    pw.get("@actionButton").click();
     taxpayerBusinessList
       .getElement()
       .anyList()

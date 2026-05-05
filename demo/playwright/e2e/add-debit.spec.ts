@@ -34,7 +34,7 @@ const deleteMultipleFiling = (
 test.describe("As a Taxpayer user, I should be able to save and delete credit/debit cards information", () => {
   for (let i = 0; i < 10; i++) {
     test(`Initiating test for account ${i}`, () => {
-      cy.login({ accountType: "ags" });
+      pw.login({ accountType: "ags" });
       agsFilingGrid.init();
       agsFilingGrid.filterColumn(
         "Location DBA",
@@ -48,7 +48,7 @@ test.describe("As a Taxpayer user, I should be able to save and delete credit/de
         "multi-select"
       );
       agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-      cy.get("@rowsLength").then((rowsLength) => {
+      pw.get("@rowsLength").then((rowsLength) => {
         if (Number(rowsLength) > 0) {
           deleteMultipleFiling(
             Number(rowsLength),
@@ -57,8 +57,8 @@ test.describe("As a Taxpayer user, I should be able to save and delete credit/de
           );
         }
       });
-      cy.logout();
-      cy.login({ accountType: "taxpayer", accountIndex: i, notFirstLogin: true });
+      pw.logout();
+      pw.login({ accountType: "taxpayer", accountIndex: i, notFirstLogin: true });
       filing.goToSubmitFormsTab();
       filing.selectGovernment("City of Arrakis");
       filing.selectForm("Food and Beverage");
@@ -94,7 +94,7 @@ test.describe("As a Taxpayer user, I should be able to save and delete credit/de
         .savedCreditDebitCardItems()
         .its("length")
         .then((savedCreditDebitCardItems) => {
-          cy.wrap(savedCreditDebitCardItems).as("savedCreditDebitCardItems");
+          pw.wrap(savedCreditDebitCardItems).as("savedCreditDebitCardItems");
         });
     });
   }

@@ -9,7 +9,7 @@ test.describe("If user opted for not an agency registering in behalf of the cust
     const form = new Form({ isRenewal: false });
     const filing = new Filing();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 7 });
+    pw.login({ accountType: "taxpayer", accountIndex: 7 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -17,7 +17,7 @@ test.describe("If user opted for not an agency registering in behalf of the cust
     filing.clickSubmitNewRegistrationButton();
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
-    cy.getUniqueRegistrationData(randomSeed, false).then(
+    pw.getUniqueRegistrationData(randomSeed, false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };

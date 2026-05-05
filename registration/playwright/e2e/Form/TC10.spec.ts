@@ -31,7 +31,7 @@ test.describe("User must see the current date on the Applicant info step", () =>
       day: "2-digit",
     });
 
-    cy.login({ accountType: "taxpayer", accountIndex: 9 });
+    pw.login({ accountType: "taxpayer", accountIndex: 9 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -39,7 +39,7 @@ test.describe("User must see the current date on the Applicant info step", () =>
     filing.clickSubmitNewRegistrationButton();
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
-    cy.getUniqueRegistrationData(randomSeed, false).then(
+    pw.getUniqueRegistrationData(randomSeed, false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };

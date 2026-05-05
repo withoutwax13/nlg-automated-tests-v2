@@ -2,11 +2,11 @@ class ViewLocationDetails {
   constructor() {}
   private elements() {
     return {
-      modalTitle: () => cy.get(".k-dialog-title"),
-      formSubmissionRequirementsList: () => cy.get(".disabledFormRemittances"),
-      businessDetailsData: () => cy.get("section"),
+      modalTitle: () => pw.get(".k-dialog-title"),
+      formSubmissionRequirementsList: () => pw.get(".disabledFormRemittances"),
+      businessDetailsData: () => pw.get("section"),
       cancelButton: () =>
-        cy.get(".k-window-titlebar-actions").find('button[aria-label="Close"]'),
+        pw.get(".k-window-titlebar-actions").find('button[aria-label="Close"]'),
     };
   }
 

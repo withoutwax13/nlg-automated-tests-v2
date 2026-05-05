@@ -5,7 +5,7 @@ export const getOrderOfColumns = (
   resetAlias?: boolean
 ) => {
   // Check if the alias already exists and has valid data
-  if (Cypress._.has(cy.state("aliases"), columnCollectionAlias)) {
+  if (PW._.has(pw.state("aliases"), columnCollectionAlias)) {
     // Alias already exists and has valid data, skip the process
     if (!resetAlias) {
       return;
@@ -13,13 +13,13 @@ export const getOrderOfColumns = (
   }
 
   // Alias does not exist or is empty, proceed with the process
-  cy.wrap({}).as(`${columnCollectionAlias}`);
+  pw.wrap({}).as(`${columnCollectionAlias}`);
 
-  cy.get("thead")
+  pw.get("thead")
     .find("tr")
     .find("th")
     .each(($th, index) => {
-      cy.get(`@${columnCollectionAlias}`).then((columnIndexes) => {
+      pw.get(`@${columnCollectionAlias}`).then((columnIndexes) => {
         columns.forEach((column) => {
           // Clean the text content of the current column header using regex
           const cleanedText = $th
@@ -29,10 +29,10 @@ export const getOrderOfColumns = (
 
           if (cleanedText === column) {
             // LOG FOR DEBUG
-            // cy.log(`Processing column: ${column}`);
-            // cy.log(`Column index in DOM: ${index}`);
+            // pw.log(`Processing column: ${column}`);
+            // pw.log(`Column index in DOM: ${index}`);
 
-            cy.wrap({
+            pw.wrap({
               ...columnIndexes,
               [column]: index,
             }).as(`${columnCollectionAlias}`);
@@ -83,19 +83,19 @@ export const getVisibilityStatusOfColumns = (
   columnCollectionAlias: string
 ) => {
   // Check if the alias already exists and has valid data
-  if (Cypress._.has(cy.state("aliases"), columnCollectionAlias)) {
+  if (PW._.has(pw.state("aliases"), columnCollectionAlias)) {
     // Alias already exists and has valid data, skip the process
     return;
   }
 
   // Alias does not exist or is empty, proceed with the process
-  cy.wrap({}).as(`${columnCollectionAlias}`);
+  pw.wrap({}).as(`${columnCollectionAlias}`);
 
-  cy.get("thead")
+  pw.get("thead")
     .find("tr")
     .find("th")
     .each(($th) => {
-      cy.get(`@${columnCollectionAlias}`).then((columnCollection) => {
+      pw.get(`@${columnCollectionAlias}`).then((columnCollection) => {
         let columnCollectionCopy = columnCollection;
         columns.forEach((column, index, _array) => {
           // Clean the text content of the current column header using regex
@@ -111,7 +111,7 @@ export const getVisibilityStatusOfColumns = (
               ...columnCollectionCopy,
               [column]: true,
             };
-            cy.wrap(columnCollectionCopy).as(`${columnCollectionAlias}`);
+            pw.wrap(columnCollectionCopy).as(`${columnCollectionAlias}`);
           } else {
             if (
               index === _array.length - 1 &&
@@ -123,7 +123,7 @@ export const getVisibilityStatusOfColumns = (
                 ...columnCollectionCopy,
                 [column]: false,
               };
-              cy.wrap(columnCollectionCopy).as(`${columnCollectionAlias}`);
+              pw.wrap(columnCollectionCopy).as(`${columnCollectionAlias}`);
             }
           }
         });

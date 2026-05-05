@@ -19,13 +19,13 @@ export const MUNICIPAL_DEFAULT_HOME_PAGE = {
 class Profile {
   private elements() {
     return {
-      pageTitle: () => cy.get("h1"),
-      sectionTitle: () => cy.get("h2"),
-      firstNameInput: () => cy.get("input").eq(0),
-      lastNameInput: () => cy.get("input").eq(1),
-      emailInput: () => cy.get("input").eq(2),
+      pageTitle: () => pw.get("h1"),
+      sectionTitle: () => pw.get("h2"),
+      firstNameInput: () => pw.get("input").eq(0),
+      lastNameInput: () => pw.get("input").eq(1),
+      emailInput: () => pw.get("input").eq(2),
       currentEmailAddressData: () =>
-        cy.get("label").contains("Current Email Address").next().find("b"),
+        pw.get("label").contains("Current Email Address").next().find("b"),
       mfaSwitch: () =>
         cy
           .get("label")
@@ -33,21 +33,21 @@ class Profile {
           .parent()
           .next()
           .find("span[role='switch']"),
-      resetPasswordButton: () => cy.get("button").contains("Reset Password"),
-      oldPasswordInput: () => cy.get("#OldPassword"),
-      newPasswordInput: () => cy.get("#NewPassword"),
+      resetPasswordButton: () => pw.get("button").contains("Reset Password"),
+      oldPasswordInput: () => pw.get("#OldPassword"),
+      newPasswordInput: () => pw.get("#NewPassword"),
       confirmPasswordInput: () =>
         cy
           .get("label")
           .contains("Confirm The New Password")
           .next()
           .find("input"),
-      updatePasswordButton: () => cy.get("button").contains("Update"),
-      cancelUpdatePasswordButton: () => cy.get("button").contains("Cancel"),
+      updatePasswordButton: () => pw.get("button").contains("Update"),
+      cancelUpdatePasswordButton: () => pw.get("button").contains("Cancel"),
       savedBankAccountsAccordion: () =>
-        cy.get(".k-expander-header").contains("Saved Bank Accounts"),
+        pw.get(".k-expander-header").contains("Saved Bank Accounts"),
       savedCreditDebitCardsAccordion: () =>
-        cy.get(".k-expander-header").contains("Saved Credit/Debit Cards"),
+        pw.get(".k-expander-header").contains("Saved Credit/Debit Cards"),
       savedBankAccountItems: () =>
         this.getElement()
           .savedBankAccountsAccordion()
@@ -87,12 +87,12 @@ class Profile {
           .find("a")
           .contains("Delete"),
       defaultHomePageDropdown: () =>
-        cy.get("label").contains("Default Home Page").next(),
-      anyList: () => cy.get("li"),
-      saveChangesButton: () => cy.get("button").contains("Save Changes"),
-      saveDefaultHomePageButton: () => cy.get("button").contains("Save"),
-      defaultHomePageDropdownItems: () => cy.get(".k-list-item"),
-      toastComponent: () => cy.get(".Toastify"),
+        pw.get("label").contains("Default Home Page").next(),
+      anyList: () => pw.get("li"),
+      saveChangesButton: () => pw.get("button").contains("Save Changes"),
+      saveDefaultHomePageButton: () => pw.get("button").contains("Save"),
+      defaultHomePageDropdownItems: () => pw.get(".k-list-item"),
+      toastComponent: () => pw.get(".Toastify"),
     };
   }
 
@@ -101,8 +101,8 @@ class Profile {
   }
 
   init() {
-    cy.visit("/profile");
-    cy.waitForLoading();
+    pw.visit("/profile");
+    pw.waitForLoading();
   }
 
   deleteSavedPaymentMethod(type: "bank" | "card", order: number) {
@@ -111,7 +111,7 @@ class Profile {
     } else {
       this.getElement().deleteCreditDebitCardItem(order).click();
     }
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   clickResetPassword() {
@@ -171,8 +171,8 @@ class Profile {
   selectDefaultHomePage(value: string) {
     this.getElement().defaultHomePageDropdown().click();
     this.getElement().defaultHomePageDropdownItems().contains(value).click();
-    cy.waitForLoading();
-    cy.get("body").then(($body) => {
+    pw.waitForLoading();
+    pw.get("body").then(($body) => {
       if ($body.find("button").text().includes("Save")) {
         this.getElement().saveDefaultHomePageButton().click();
       }
@@ -181,7 +181,7 @@ class Profile {
 
   clickSaveChanges() {
     this.getElement().saveChangesButton().click();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 }
 

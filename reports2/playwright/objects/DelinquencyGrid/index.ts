@@ -63,26 +63,26 @@ class DelinquencyGrid {
 
   private elements() {
     return {
-      pageTitle: () => cy.get("h2"),
-      noRecordFoundComponent: () => cy.get(".k-grid-norecords-template"),
-      searchBox: () => cy.get("span").find(".fa-magnifying-glass").parent(),
-      columns: () => cy.get("thead").find("tr").find("th"),
+      pageTitle: () => pw.get("h2"),
+      noRecordFoundComponent: () => pw.get(".k-grid-norecords-template"),
+      searchBox: () => pw.get("span").find(".fa-magnifying-glass").parent(),
+      columns: () => pw.get("thead").find("tr").find("th"),
       rows: () =>
-        cy.get("tbody").then(($tbody) => {
+        pw.get("tbody").then(($tbody) => {
           return $tbody.find("tr");
         }),
       customizeTableViewButton: () =>
-        cy.get(".NLGNewLayoutSecondaryButton").contains("Customize"),
+        pw.get(".NLGNewLayoutSecondaryButton").contains("Customize"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -96,7 +96,7 @@ class DelinquencyGrid {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -104,9 +104,9 @@ class DelinquencyGrid {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
@@ -114,16 +114,16 @@ class DelinquencyGrid {
           .find(".k-button")
           .contains("Filter"),
       searchMunicipalityDropdown: () =>
-        cy.get('input[placeholder="Select government..."]'),
-      anyList: () => cy.get("li"),
-      anyButton: () => cy.get("button"),
-      clearAllFiltersButton: () => cy.get("*").contains("Clear All"),
+        pw.get('input[placeholder="Select government..."]'),
+      anyList: () => pw.get("li"),
+      anyButton: () => pw.get("button"),
+      clearAllFiltersButton: () => pw.get("*").contains("Clear All"),
       exportButton: () =>
-        cy.get(".NLGButtonPrimary").contains("Export"),
+        pw.get(".NLGButtonPrimary").contains("Export"),
       refreshReportDataButton: () =>
-        cy.get(".NLGNewLayoutSecondaryButton").contains("Refresh Report Data"),
+        pw.get(".NLGNewLayoutSecondaryButton").contains("Refresh Report Data"),
       createNewFilingButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Create a New Filing"),
+        pw.get(".NLGButtonSecondary").contains("Create a New Filing"),
     };
   }
 
@@ -132,31 +132,31 @@ class DelinquencyGrid {
   }
 
   init(resetSavedGridSettingsInMemory?: boolean) {
-    cy.intercept("GET", "https://**.azavargovapps.com/users/**").as("getUserDetails");
-    cy.intercept("GET", "https://**.azavargovapps.com/municipalities/**").as("getMunicipalityDetails");
-    cy.intercept("GET", "https://**.azavargovapps.com/reports/LastUpdatedDelinquencyReport/**").as("getLastUpdatedDelinquencyReport");
-    cy.intercept("GET", "https://**.azavargovapps.com/forms/municipality/**?status=Active").as("getFormsForMunicipality");
-    cy.intercept("GET", "https://**.azavargovapps.com/reports/DelinquencyReports/**").as("getDelinquencyReportData");
-    cy.intercept("GET", "**/users/usersGridSettings*").as("getUserGridSettings");
-    cy.intercept("GET", "https://**.azavargovapps.com/reports/DelinquencyReport/Taxpayer").as("getTaxpayerDelinquencyReportData");
+    pw.intercept("GET", "https://**.azavargovapps.com/users/**").as("getUserDetails");
+    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/**").as("getMunicipalityDetails");
+    pw.intercept("GET", "https://**.azavargovapps.com/reports/LastUpdatedDelinquencyReport/**").as("getLastUpdatedDelinquencyReport");
+    pw.intercept("GET", "https://**.azavargovapps.com/forms/municipality/**?status=Active").as("getFormsForMunicipality");
+    pw.intercept("GET", "https://**.azavargovapps.com/reports/DelinquencyReports/**").as("getDelinquencyReportData");
+    pw.intercept("GET", "**/users/usersGridSettings*").as("getUserGridSettings");
+    pw.intercept("GET", "https://**.azavargovapps.com/reports/DelinquencyReport/Taxpayer").as("getTaxpayerDelinquencyReportData");
 
     const delinquencyGridUrl =
       this.userType === "taxpayer"
         ? "/reports/taxpayerDelinquencyReport"
         : "/reports/delinquency";
-    cy.visit(delinquencyGridUrl);
-    cy.wait("@getUserDetails").its("response.statusCode").should("eq", 200);
+    pw.visit(delinquencyGridUrl);
+    pw.wait("@getUserDetails").its("response.statusCode").should("eq", 200);
     if (this.userType === "ags") {
       if (!this.municipalitySelection) {
         throw new Error("Municipality selection is required for AGS user type");
       }
       this.selectMunicipality(this.municipalitySelection);
-      cy.wait("@getFormsForMunicipality").its("response.statusCode").should("eq", 200);
-      cy.wait("@getDelinquencyReportData").its("response.statusCode").should("eq", 200);
-      cy.wait("@getLastUpdatedDelinquencyReport").its("response.statusCode").should("eq", 200);
+      pw.wait("@getFormsForMunicipality").its("response.statusCode").should("eq", 200);
+      pw.wait("@getDelinquencyReportData").its("response.statusCode").should("eq", 200);
+      pw.wait("@getLastUpdatedDelinquencyReport").its("response.statusCode").should("eq", 200);
       // TEMP EXCEPTION (intercept instability for AGS flow): use bounded time wait instead of @getUserGridSettings
-      // cy.wait("@getUserGridSettings").its("response.statusCode").should("eq", 200);
-      cy.wait(5000);
+      // pw.wait("@getUserGridSettings").its("response.statusCode").should("eq", 200);
+      pw.wait(5000);
       this.getElement().columns().should("exist");
       getOrderOfColumns(
         AGS_DELINQUENCY_GRID_COLUMNS,
@@ -168,13 +168,13 @@ class DelinquencyGrid {
         `${this.userType}_${this.defaultGridColumnsAlias}_visibility`
       );
     } else if (this.userType === "municipal") {
-      cy.wait("@getMunicipalityDetails").its("response.statusCode").should("eq", 200);
-      cy.wait("@getLastUpdatedDelinquencyReport").its("response.statusCode").should("eq", 200);
-      cy.wait("@getFormsForMunicipality").its("response.statusCode").should("eq", 200);
-      cy.wait("@getDelinquencyReportData").its("response.statusCode").should("eq", 200);
+      pw.wait("@getMunicipalityDetails").its("response.statusCode").should("eq", 200);
+      pw.wait("@getLastUpdatedDelinquencyReport").its("response.statusCode").should("eq", 200);
+      pw.wait("@getFormsForMunicipality").its("response.statusCode").should("eq", 200);
+      pw.wait("@getDelinquencyReportData").its("response.statusCode").should("eq", 200);
       // TEMP EXCEPTION (intercept instability for municipal flow): use bounded time wait instead of @getUserGridSettings
-      // cy.wait("@getUserGridSettings").its("response.statusCode").should("eq", 200);
-      cy.wait(5000);
+      // pw.wait("@getUserGridSettings").its("response.statusCode").should("eq", 200);
+      pw.wait(5000);
       getOrderOfColumns(
         MUNICIPAL_DELINQUENCY_GRID_COLUMNS,
         `${this.userType}_${this.defaultGridColumnsAlias}`,
@@ -185,10 +185,10 @@ class DelinquencyGrid {
         `${this.userType}_${this.defaultGridColumnsAlias}_visibility`
       );
     } else if (this.userType === "taxpayer") {
-      cy.wait("@getTaxpayerDelinquencyReportData").its("response.statusCode").should("eq", 200);
+      pw.wait("@getTaxpayerDelinquencyReportData").its("response.statusCode").should("eq", 200);
       // TEMP EXCEPTION (intercept instability for taxpayer flow): use bounded time wait instead of @getUserGridSettings
-      // cy.wait("@getUserGridSettings").its("response.statusCode").should("eq", 200);
-      cy.wait(5000);
+      // pw.wait("@getUserGridSettings").its("response.statusCode").should("eq", 200);
+      pw.wait(5000);
       getOrderOfColumns(
         TAXPAYER_DELINQUENCY_GRID_COLUMNS,
         `${this.userType}_${this.defaultGridColumnsAlias}`,
@@ -202,11 +202,11 @@ class DelinquencyGrid {
   }
 
   selectMunicipality(municipality: string) {
-    cy.intercept("GET", "**/municipalities/ActiveTaxAndFeesSubscriptions*").as("getSubscribedMunicipalities");
+    pw.intercept("GET", "**/municipalities/ActiveTaxAndFeesSubscriptions*").as("getSubscribedMunicipalities");
     this.getElement().searchMunicipalityDropdown().clear();
     this.getElement().searchMunicipalityDropdown().type(municipality);
     this.getElement().anyList().contains(municipality).click();
-    cy.wait("@getSubscribedMunicipalities").its("response.statusCode").should("eq", 200);
+    pw.wait("@getSubscribedMunicipalities").its("response.statusCode").should("eq", 200);
   }
 
   private clickColumn(index: number) {
@@ -237,7 +237,7 @@ class DelinquencyGrid {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -305,7 +305,7 @@ class DelinquencyGrid {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -351,7 +351,7 @@ class DelinquencyGrid {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -361,7 +361,7 @@ class DelinquencyGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -376,7 +376,7 @@ class DelinquencyGrid {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -390,7 +390,7 @@ class DelinquencyGrid {
                 .replace(/\s+/g, " ")
                 .trim() === anchorValue
             ) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -420,7 +420,7 @@ class DelinquencyGrid {
         );
       }
     });
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = this.userType === "taxpayer" ? columnIndexes["Actions"] : columnIndexes["Actions"];
@@ -429,8 +429,8 @@ class DelinquencyGrid {
           .each(($row) => {
             // this assumes that the filterParams filters the rows to only one row
             const $columns = $row.find("td");
-            cy.wrap($columns.eq(columnIndex)).as("actionButton");
-            cy.get("@actionButton").click();
+            pw.wrap($columns.eq(columnIndex)).as("actionButton");
+            pw.get("@actionButton").click();
             this.getElement().anyList().contains(action).click();
           });
       });
@@ -450,7 +450,7 @@ class DelinquencyGrid {
 
   clickRefreshReportDataButton() {
     this.getElement().refreshReportDataButton().click();
-    cy.waitForLoading(10);
+    pw.waitForLoading(10);
   }
 
   clickExportButton(
@@ -485,23 +485,23 @@ class DelinquencyGrid {
   }
 
   private startFiling() {
-    cy.get("body").then(($body) => {
+    pw.get("body").then(($body) => {
       const modal = $body.find(".k-dialog-titlebar");
       if (modal.length > 0) {
         if (modal.text().includes("Resume Draft Filing")) {
-          cy.intercept("DELETE", "https://**.azavargovapps.com/filings/**/delete").as("deleteDraftFiling");
+          pw.intercept("DELETE", "https://**.azavargovapps.com/filings/**/delete").as("deleteDraftFiling");
           this.getElement().createNewFilingButton().click();
-          cy.wait("@deleteDraftFiling").its("response.statusCode").should("eq", 201);
+          pw.wait("@deleteDraftFiling").its("response.statusCode").should("eq", 201);
         }
       }
     });
-    cy.wait("@getFilingFullForm").its("response.statusCode").should("eq", 200);
-    cy.url().should("include", "/filingApp/filings/");
+    pw.wait("@getFilingFullForm").its("response.statusCode").should("eq", 200);
+    pw.url().should("include", "/filingApp/filings/");
   }
 
   toggleActionButtonForNthDelinquencyItem(action: string, order?: number) {
-    cy.intercept("GET", "https://**.azavargovapps.com/forms/full/**").as("getFilingFullForm");
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.intercept("GET", "https://**.azavargovapps.com/forms/full/**").as("getFilingFullForm");
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = this.userType === "taxpayer" ? columnIndexes["Actions"] : columnIndexes["Actions"];
@@ -510,13 +510,13 @@ class DelinquencyGrid {
           .eq(order ? order : 0)
           .then(($row) => {
             const $columns = $row.find("td");
-            cy.wrap($columns.eq(columnIndex)).as("actionButton");
-            cy.get("@actionButton").click();
+            pw.wrap($columns.eq(columnIndex)).as("actionButton");
+            pw.get("@actionButton").click();
             this.getElement().anyList().contains(action).click();
           });
       });
     if (action === "Submit Now") {
-      cy.wait("@getFormsForMunicipality").its("response.statusCode").should("eq", 200);
+      pw.wait("@getFormsForMunicipality").its("response.statusCode").should("eq", 200);
       this.startFiling();
     }
   }
@@ -527,7 +527,7 @@ class DelinquencyGrid {
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
     gridSetting.showColumn(columnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   hideColumn(columnName: string) {
@@ -536,7 +536,7 @@ class DelinquencyGrid {
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
     gridSetting.hideColumn(columnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   feezeColumn(columnName: string) {
@@ -545,7 +545,7 @@ class DelinquencyGrid {
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
     gridSetting.freezeColumn(columnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   unfreezeColumn(columnName: string) {
@@ -554,25 +554,25 @@ class DelinquencyGrid {
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
     gridSetting.unfreezeColumn(columnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   verifyColumnVisibility(columnName: string, isVisibleAlias: string) {
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}_visibility`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}_visibility`)
       .should("exist")
       .should((visibilityStatus: any) => {
         expect(visibilityStatus[columnName]).to.not.equal(undefined);
       })
       .then((visibilityStatus: any) => {
-        cy.wrap(visibilityStatus[columnName]).as(isVisibleAlias);
+        pw.wrap(visibilityStatus[columnName]).as(isVisibleAlias);
       });
   }
 
   verifyColumnOrder(columnName: string, orderAlias: string) {
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
-        cy.wrap(columnIndexes[columnName]).as(orderAlias);
+        pw.wrap(columnIndexes[columnName]).as(orderAlias);
       });
   }
 
@@ -582,7 +582,7 @@ class DelinquencyGrid {
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
     gridSetting.restoreDefaultSettings();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   moveColumnToLocationOf(columnName: string, targetColumnName: string) {
@@ -591,7 +591,7 @@ class DelinquencyGrid {
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
     gridSetting.moveColumnToLocationOf(columnName, targetColumnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 }
 

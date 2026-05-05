@@ -22,27 +22,27 @@ class UserGrid {
   }
   private elements() {
     return {
-      pageTitle: () => cy.get("h1"),
-      noRecordFoundComponent: () => cy.get(".k-grid-norecords-template"),
-      columns: () => cy.get("thead").find("tr").find("th"),
+      pageTitle: () => pw.get("h1"),
+      noRecordFoundComponent: () => pw.get(".k-grid-norecords-template"),
+      columns: () => pw.get("thead").find("tr").find("th"),
       rows: () =>
-        cy.get("tbody").then(($tbody) => {
+        pw.get("tbody").then(($tbody) => {
           if ($tbody.find("tr").length !== 0) {
             return $tbody.find("tr");
           }
         }),
       customizeTableViewButton: () =>
-        cy.get("*").contains("Customize Table View"),
+        pw.get("*").contains("Customize Table View"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -56,7 +56,7 @@ class UserGrid {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -64,25 +64,25 @@ class UserGrid {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
           .find(".k-actions")
           .find(".k-button")
           .contains("Filter"),
-      anyList: () => cy.get("li"),
-      anyButton: () => cy.get("button"),
+      anyList: () => pw.get("li"),
+      anyButton: () => pw.get("button"),
       clearAllFiltersButton: () =>
-        cy.get("*").contains("Clear All"),
-      exportButton: () => cy.get(".NLGButtonSecondary").contains("Export"),
+        pw.get("*").contains("Clear All"),
+      exportButton: () => pw.get(".NLGButtonSecondary").contains("Export"),
       migrateUserDataButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Migrate User Data"),
+        pw.get(".NLGButtonSecondary").contains("Migrate User Data"),
       inviteUserButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Invite User"),
-      itemsData: () => cy.get(".k-pager-info"),
+        pw.get(".NLGButtonSecondary").contains("Invite User"),
+      itemsData: () => pw.get(".k-pager-info"),
     };
   }
 
@@ -91,8 +91,8 @@ class UserGrid {
   }
 
   init() {
-    cy.visit("/appUsers");
-    cy.waitForLoading(10);
+    pw.visit("/appUsers");
+    pw.waitForLoading(10);
     getOrderOfColumns(COLUMNS, this.defaultGridColumnsAlias);
   }
 
@@ -124,7 +124,7 @@ class UserGrid {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -192,7 +192,7 @@ class UserGrid {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -238,7 +238,7 @@ class UserGrid {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -248,7 +248,7 @@ class UserGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -263,7 +263,7 @@ class UserGrid {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -277,7 +277,7 @@ class UserGrid {
                 .replace(/\s+/g, " ")
                 .trim() === anchorValue
             ) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -301,7 +301,7 @@ class UserGrid {
       .invoke("text")
       .then((text: string) => {
         const totalItems = parseInt(text.split("of")[1].replace(/\D/g, ""));
-        cy.wrap(totalItems).as(variableAlias);
+        pw.wrap(totalItems).as(variableAlias);
       });
   }
 
@@ -317,7 +317,7 @@ class UserGrid {
 
   editUser(anchorColumnName, anchorValue) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes["Is Enabled?"];
@@ -325,7 +325,7 @@ class UserGrid {
           .rows()
           .each(($row) => {
             const $columns = $row.find("td");
-            cy.wrap($columns)
+            pw.wrap($columns)
               .eq(anchorColumnIndex + 1)
               .find("button")
               .contains("Edit")
@@ -336,7 +336,7 @@ class UserGrid {
 
   removeUser(anchorColumnName, anchorValue) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes["Is Enabled?"];
@@ -344,7 +344,7 @@ class UserGrid {
           .rows()
           .each(($row) => {
             const $columns = $row.find("td");
-            cy.wrap($columns)
+            pw.wrap($columns)
               .eq(anchorColumnIndex + 1)
               .find("button")
               .contains("Remove")

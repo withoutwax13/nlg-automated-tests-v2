@@ -53,7 +53,7 @@ const operatingStatus = [
 
 test.describe("As a municipal user, I should be able to update operating status in the business details page", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "municipal" });
+    pw.login({ accountType: "municipal" });
     municipalBusinessGrid.init();
     addBusiness();
     municipalBusinessGrid.init();

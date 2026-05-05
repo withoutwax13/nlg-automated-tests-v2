@@ -7,7 +7,7 @@ const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 
 test.describe("As a ags user, I should be able to add notes to a business via the business details page", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 5 });
+    pw.login({ accountType: "ags", accountIndex: 5 });
     agsBusinessGrid.init();
     agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     agsBusinessDetails.clickNotesTab();
@@ -22,7 +22,7 @@ test.describe("As a ags user, I should be able to add notes to a business via th
       .noteItems()
       .its("length")
       .as("noteItemsLength");
-    cy.get("@noteItemsLength").then((noteItemsLength) => {
+    pw.get("@noteItemsLength").then((noteItemsLength) => {
       agsBusinessDetails.clickNoteItem(Number(noteItemsLength) - 1);
       agsBusinessDetails.deleteNoteItem(Number(noteItemsLength) - 1);
       agsBusinessDetails

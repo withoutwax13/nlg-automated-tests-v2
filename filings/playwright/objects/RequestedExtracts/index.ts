@@ -18,20 +18,20 @@ class RequestedExtracts {
   }
   private elements() {
     return {
-      pageTitle: () => cy.get("h1"),
-      table: () => cy.get("table"),
-      columns: () => cy.get("thead").find("tr").find("th"),
-      rows: () => cy.get("tbody").find("tr"),
+      pageTitle: () => pw.get("h1"),
+      table: () => pw.get("table"),
+      columns: () => pw.get("thead").find("tr").find("th"),
+      rows: () => pw.get("tbody").find("tr"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -45,7 +45,7 @@ class RequestedExtracts {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -53,16 +53,16 @@ class RequestedExtracts {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
           .find(".k-actions")
           .find(".k-button")
           .contains("Filter"),
-      itemsData: () => cy.get(".k-pager-info"),
+      itemsData: () => pw.get(".k-pager-info"),
     };
   }
   getElement() {
@@ -82,7 +82,7 @@ class RequestedExtracts {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -146,7 +146,7 @@ class RequestedExtracts {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -180,7 +180,7 @@ class RequestedExtracts {
   getTotalItems(alias: string) {
     this.getElement().itemsData().invoke("text").then((text: string) => {
       const totalItems = text.split("of")[1].trim();
-      cy.wrap(parseInt(totalItems)).as(alias);
+      pw.wrap(parseInt(totalItems)).as(alias);
     });
   }
 }

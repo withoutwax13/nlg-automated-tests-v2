@@ -5,7 +5,7 @@ import { deleteDownloadsFolder } from "../../utils/Files";
 test.describe("As municipal user, exported file should match the filtered grid's row items", () => {
   test("Initiate test", () => {
     const formGrid = new FormGrid({ userType: "municipal" });
-    cy.login({ accountType: "municipal" });
+    pw.login({ accountType: "municipal" });
     formGrid.init();
     formGrid.filterColumn("Form Title", "Annual");
     formGrid.getTotalItems("rowLength");
@@ -16,11 +16,11 @@ test.describe("As municipal user, exported file should match the filtered grid's
     const day = String(today.getDate()).padStart(2, "0");
     const year = today.getFullYear();
     const fileName = `Localgov-Forms-Export-${month}-${day}-${year}.xlsx`;
-    const downloadedFilePath = `cypress/downloads/${fileName}`;
+    const downloadedFilePath = `playwright/downloads/${fileName}`;
 
-    cy.readXlsx(downloadedFilePath).then((excelData) => {
+    pw.readXlsx(downloadedFilePath).then((excelData) => {
       // Perform assertions on excelData
-      cy.get("@rowLength").then((rowLength) => {
+      pw.get("@rowLength").then((rowLength) => {
         expect(excelData.length).to.equal(rowLength);
       });
     });

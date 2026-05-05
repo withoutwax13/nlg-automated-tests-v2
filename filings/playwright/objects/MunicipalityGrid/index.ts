@@ -29,26 +29,26 @@ class MunicipalityGrid {
 
   private elements() {
     return {
-      columns: () => cy.get("thead").find("tr").find("th"),
-      rows: () => cy.get("tr"),
+      columns: () => pw.get("thead").find("tr").find("th"),
+      rows: () => pw.get("tr"),
       rowsOfMunicipality: (municipality: string) =>
         this.getElement().rows().contains(municipality),
       section: (header: string) =>
-        cy.get("h2").contains(header).scrollIntoView(),
+        pw.get("h2").contains(header).scrollIntoView(),
       customizeTableViewButton: () =>
-        cy.get("*").contains("Customize Table View"),
+        pw.get("*").contains("Customize Table View"),
       clearAllFiltersButton: () =>
-        cy.get("*").contains("Clear All"),
+        pw.get("*").contains("Clear All"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -62,7 +62,7 @@ class MunicipalityGrid {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -70,17 +70,17 @@ class MunicipalityGrid {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
           .find(".k-actions")
           .find(".k-button")
           .contains("Filter"),
-      anyButton: () => cy.get("button"),
-      anyList: () => cy.get("li"),
+      anyButton: () => pw.get("button"),
+      anyList: () => pw.get("li"),
       customFieldTitleField: (isLast: boolean, order?: number) => {
         if (isLast) {
           return cy
@@ -103,7 +103,7 @@ class MunicipalityGrid {
             .eq(order);
         }
       },
-      anyInput: () => cy.get("input"),
+      anyInput: () => pw.get("input"),
     };
   }
 
@@ -111,16 +111,16 @@ class MunicipalityGrid {
     return this.elements();
   }
   init() {
-    cy.intercept("GET", "https://**.azavargovapps.com/users/**").as("getUserDetails");
-    cy.intercept("GET", "https://**.azavargovapps.com/municipalities/projected").as("getMunicipalities");
-    cy.intercept("GET", "https://**.azavargovapps.com/municipalities/subscriptions").as("getMunicipalitySubscriptions");
-    cy.intercept("GET", "https://**.azavargovapps.com/users/usersGridSettings/**").as("getGridSettings");
-    cy.visit("/municipalityApp/list/:tab");
-    cy.wait("@getUserDetails").its("response.statusCode").should("eq", 200);
-    cy.wait("@getMunicipalities").its("response.statusCode").should("eq", 200);
-    cy.wait("@getMunicipalitySubscriptions").its("response.statusCode").should("eq", 200);
-    cy.wait("@getGridSettings").its("response.statusCode").should("eq", 200);
-    cy.url().should("include", "/municipalityApp/list");
+    pw.intercept("GET", "https://**.azavargovapps.com/users/**").as("getUserDetails");
+    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/projected").as("getMunicipalities");
+    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/subscriptions").as("getMunicipalitySubscriptions");
+    pw.intercept("GET", "https://**.azavargovapps.com/users/usersGridSettings/**").as("getGridSettings");
+    pw.visit("/municipalityApp/list/:tab");
+    pw.wait("@getUserDetails").its("response.statusCode").should("eq", 200);
+    pw.wait("@getMunicipalities").its("response.statusCode").should("eq", 200);
+    pw.wait("@getMunicipalitySubscriptions").its("response.statusCode").should("eq", 200);
+    pw.wait("@getGridSettings").its("response.statusCode").should("eq", 200);
+    pw.url().should("include", "/municipalityApp/list");
     getOrderOfColumns(COLUMNS, this.defaultGridColumnsAlias);
   }
 
@@ -152,7 +152,7 @@ class MunicipalityGrid {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -225,7 +225,7 @@ class MunicipalityGrid {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -246,7 +246,7 @@ class MunicipalityGrid {
             break;
         }
       });
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   changeItemsPerPage(itemNumber: number) {
@@ -272,7 +272,7 @@ class MunicipalityGrid {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -282,7 +282,7 @@ class MunicipalityGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -297,7 +297,7 @@ class MunicipalityGrid {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -311,7 +311,7 @@ class MunicipalityGrid {
                 .replace(/\s+/g, " ")
                 .trim() === anchorValue
             ) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -325,7 +325,7 @@ class MunicipalityGrid {
     if (this.userType !== "ags") {
       throw new Error("Action button is not available for this user type");
     }
-    cy.waitForLoading();
+    pw.waitForLoading();
     this.getElementOfColumn(
       "Actions",
       anchorColumnName,
@@ -334,7 +334,7 @@ class MunicipalityGrid {
         anchorValue
       )}`
     );
-    cy.get(
+    pw.get(
       `@${removeSpaces(action)}${removeSpaces(anchorColumnName)}${removeSpaces(
         anchorValue
       )}`
@@ -344,31 +344,31 @@ class MunicipalityGrid {
 
   selectMunicipality(municipality: string) {
     this.toggleActionButton("View Details", "Municipality Name", municipality);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   addCustomField(customFieldTitle: string, customFieldName: string) {
-    cy.intercept("PATCH", "https://**.azavargovapps.com/municipalities/**").as("updateMunicipality");
+    pw.intercept("PATCH", "https://**.azavargovapps.com/municipalities/**").as("updateMunicipality");
     this.getElement().section("Filing List Configuration");
     this.getElement().anyButton().contains("Add New Column").click();
     this.getElement().customFieldTitleField(true).type(customFieldTitle);
     this.getElement().customFieldValueField(true).type(customFieldName);
     this.getElement().anyButton().contains("Save").click();
-    cy.wait("@updateMunicipality").its("response.statusCode").should("eq", 200);
-    cy.url().should("include", "/municipalityApp/list");
+    pw.wait("@updateMunicipality").its("response.statusCode").should("eq", 200);
+    pw.url().should("include", "/municipalityApp/list");
   }
 
   removeCustomField(customFieldName: string) {
-    cy.intercept("PATCH", "https://**.azavargovapps.com/municipalities/**").as("updateMunicipality");
+    pw.intercept("PATCH", "https://**.azavargovapps.com/municipalities/**").as("updateMunicipality");
     this.getElement().section("Filing List Configuration");
     this.getElement()
       .anyInput()
       .each(($input, $index) => {
         if ($input.val() === customFieldName) {
-          cy.wrap($index).as("customFieldIndex");
+          pw.wrap($index).as("customFieldIndex");
         }
       });
-    cy.get("@customFieldIndex").then((customFieldIndex) => {
+    pw.get("@customFieldIndex").then((customFieldIndex) => {
       this.getElement()
         .anyInput()
         .eq(Number(customFieldIndex))
@@ -381,8 +381,8 @@ class MunicipalityGrid {
         .click();
     });
     this.getElement().anyButton().contains("Save").click();
-    cy.wait("@updateMunicipality").its("response.statusCode").should("eq", 200);
-    cy.url().should("include", "/municipalityApp/list");
+    pw.wait("@updateMunicipality").its("response.statusCode").should("eq", 200);
+    pw.url().should("include", "/municipalityApp/list");
   }
 }
 

@@ -39,13 +39,13 @@ const newBusinessData = {
 
 test.describe("As a taxpayer, when my business has been deleted by an AGS user, I should be able to verify that the business does not exist in my grid.", () => {
   test.beforeEach(() => {
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
       notFirstLogin: false,
     });
 
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "ags",
       notFirstLogin: true,
@@ -54,7 +54,7 @@ test.describe("As a taxpayer, when my business has been deleted by an AGS user, 
   });
   test("Initiating test", () => {
     // add business data
-    cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 6 });
+    pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 6 });
     agsBusinessGrid.init();
     agsBusinessGrid.clickAddBusinessButton();
     agsAddBusinessPage.fillFields(newBusinessData);
@@ -62,27 +62,27 @@ test.describe("As a taxpayer, when my business has been deleted by an AGS user, 
     agsBusinessGrid.init();
     agsBusinessGrid.clickClearAllFiltersButton();
     agsBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
-    cy.logout();
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.logout();
 
     // add business data to the taxpayer account
-    cy.login({ accountType: "taxpayer", notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", notFirstLogin: true });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.logout();
+    pw.logout();
 
     // delete business data
-    cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 6 });
+    pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 6 });
     agsBusinessGrid.init();
     agsBusinessGrid.deleteBusiness(newBusinessData.locationDba);
     agsBusinessGrid.getElement().toastComponent().should("exist");
-    cy.logout();
+    pw.logout();
 
     // verify that the business does not exist in the taxpayer grid
-    cy.login({ accountType: "taxpayer", notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", notFirstLogin: true });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.filterColumn("DBA", newBusinessData.locationDba);
     taxpayerBusinessGrid.getElement().noRecordFoundComponent().should("exist");

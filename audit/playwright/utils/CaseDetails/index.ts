@@ -5,7 +5,7 @@ const interceptAuditXhr = () => {
 };
 
 const waitForAuditXhr = () => {
-  return cy.wait("@getAudits");
+  return pw.wait("@getAudits");
 };
 
 const interceptCaseFields = () => {
@@ -18,7 +18,7 @@ const interceptCaseFields = () => {
 };
 
 const waitForCaseFields = () => {
-  return cy.wait("@getCaseFields");
+  return pw.wait("@getCaseFields");
 };
 
 const interceptUsers = () => {
@@ -28,7 +28,7 @@ const interceptUsers = () => {
 };
 
 const waitForUsers = () => {
-  return cy.wait("@getUsers");
+  return pw.wait("@getUsers");
 };
 
 export default {

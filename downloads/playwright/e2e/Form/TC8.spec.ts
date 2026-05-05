@@ -7,7 +7,7 @@ test.describe("As municipal user, exported file's status data should match the g
     const columnName = "Status";
     const columnDataAlias = "statusList";
     const formGrid = new FormGrid({ userType: "municipal" });
-    cy.login({ accountType: "municipal" });
+    pw.login({ accountType: "municipal" });
     formGrid.init();
     formGrid.getArrayDataOfColumn(columnName, columnDataAlias);
     formGrid.clickExportButton();
@@ -17,10 +17,10 @@ test.describe("As municipal user, exported file's status data should match the g
     const day = String(today.getDate()).padStart(2, "0");
     const year = today.getFullYear();
     const fileName = `Localgov-Forms-Export-${month}-${day}-${year}.xlsx`;
-    const downloadedFilePath = `cypress/downloads/${fileName}`;
+    const downloadedFilePath = `playwright/downloads/${fileName}`;
 
-    cy.readXlsx(downloadedFilePath).then((excelData) => {
-      cy.get(`@${columnDataAlias}`).then((columnDataAlias) => {
+    pw.readXlsx(downloadedFilePath).then((excelData) => {
+      pw.get(`@${columnDataAlias}`).then((columnDataAlias) => {
         columnDataAlias.forEach((aliasStringItem) => {
           const found = excelData.some(
             (row) => row[columnName] === aliasStringItem

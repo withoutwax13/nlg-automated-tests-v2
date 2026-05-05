@@ -29,15 +29,15 @@ test.describe("Add Business", () => {
     test(`should add business to taxpayer account index ${i}`, () => {
       const businessGridTaxpayer = new BusinessGrid({ userType: "taxpayer" });
       const businessAdd = new BusinessAdd({ userType: "taxpayer" });
-      cy.login({ accountType: "taxpayer", accountIndex: i });
+      pw.login({ accountType: "taxpayer", accountIndex: i });
       businessGridTaxpayer.init();
       accounts.forEach((account, index) => {
         businessGridTaxpayer.filterColumn("DBA", account);
-        cy.get("body").then(($body) => {
+        pw.get("body").then(($body) => {
           if ($body.find(".k-grid-norecords-template").length !== 0) {
             businessGridTaxpayer.clickAddBusinessButton();
             businessAdd.addBusinessOnAccount(account);
-            cy.waitForLoading(5);
+            pw.waitForLoading(5);
           } else {
             businessGridTaxpayer.clickClearAllFiltersButton();
           }

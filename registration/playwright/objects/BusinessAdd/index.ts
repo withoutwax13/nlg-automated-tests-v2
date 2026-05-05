@@ -6,34 +6,34 @@ class BusinessAdd {
 
   private elements() {
     return {
-      anyList: () => cy.get("li"),
-      pageTitle: () => cy.get("h1"),
+      anyList: () => pw.get("li"),
+      pageTitle: () => pw.get("h1"),
       pageHelpContent: () => this.getElement().pageTitle().next(),
-      businessDetailsDropdown: () => cy.get(".BusinessDetailsComboBox"),
+      businessDetailsDropdown: () => pw.get(".BusinessDetailsComboBox"),
       addBusinessButton: () =>
-        cy.get(".NLGButtonPrimary").contains("Add Business"),
-      governmentSearchBox: () => cy.get(".k-combobox").find("input"),
-      warningMessage: () => cy.get(".text-danger"),
-      backButton: () => cy.get(".NLGButtonSecondaryFlat").contains("Back"),
-      saveButton: () => cy.get("button").contains("Save"),
-      cancelButton: () => cy.get("button").contains("Cancel"),
-      addCustomFieldButton: () => cy.get("button").contains("Add Custom Field"),
-      legalBusinessNameField: () => cy.get('input[name="BusinessName"]'),
-      feinField: () => cy.get('input[name="FEIN"]'),
+        pw.get(".NLGButtonPrimary").contains("Add Business"),
+      governmentSearchBox: () => pw.get(".k-combobox").find("input"),
+      warningMessage: () => pw.get(".text-danger"),
+      backButton: () => pw.get(".NLGButtonSecondaryFlat").contains("Back"),
+      saveButton: () => pw.get("button").contains("Save"),
+      cancelButton: () => pw.get("button").contains("Cancel"),
+      addCustomFieldButton: () => pw.get("button").contains("Add Custom Field"),
+      legalBusinessNameField: () => pw.get('input[name="BusinessName"]'),
+      feinField: () => pw.get('input[name="FEIN"]'),
       legalBusinessAddress1Field: () =>
-        cy.get('input[name="LegalBusiness.LegalBusinessAddress1"]'),
+        pw.get('input[name="LegalBusiness.LegalBusinessAddress1"]'),
       legalBusinessAddress2Field: () =>
-        cy.get('input[name="LegalBusiness.LegalBusinessAddress2"]'),
+        pw.get('input[name="LegalBusiness.LegalBusinessAddress2"]'),
       legalBusinessCityField: () =>
-        cy.get('input[name="LegalBusiness.LegalBusinessCity"]'),
+        pw.get('input[name="LegalBusiness.LegalBusinessCity"]'),
       legalBusinessStateDropdown: () =>
         this.getElement().legalBusinessCityField().parent().next().find(".k-dropdownlist"),
       legalBusinessZipCodeField: () =>
-        cy.get('input[name="LegalBusiness.LegalBusinessZipCode"]'),
-      locationDbaField: () => cy.get('input[name="DBA"]'),
-      stateTaxIdField: () => cy.get('input[name="StateTaxId"]'),
+        pw.get('input[name="LegalBusiness.LegalBusinessZipCode"]'),
+      locationDbaField: () => pw.get('input[name="DBA"]'),
+      stateTaxIdField: () => pw.get('input[name="StateTaxId"]'),
       locationOpenDateField: () =>
-        cy.get("label").contains("Location Open Date").next().find("input"),
+        pw.get("label").contains("Location Open Date").next().find("input"),
       sameBusinessLocationAddressForLegalBusinessAddressCheckbox: () =>
         cy
           .get("label")
@@ -41,21 +41,21 @@ class BusinessAdd {
             "Check this box if the business location address is the same as the legal business address."
           ),
       businessOwnerFullNameField: () =>
-        cy.get('input[name="Owner.OwnerFullName"]'),
+        pw.get('input[name="Owner.OwnerFullName"]'),
       businessOwnerEmailAddressField: () =>
-        cy.get('input[name="Owner.OwnerEmailAddress"]'),
+        pw.get('input[name="Owner.OwnerEmailAddress"]'),
       businessOwnerPhoneNumberField: () =>
-        cy.get('input[name="Owner.OwnerPhoneNumber"]'),
-      businessOwnerSSNField: () => cy.get('input[name="Owner.OwnerSSN"]'),
+        pw.get('input[name="Owner.OwnerPhoneNumber"]'),
+      businessOwnerSSNField: () => pw.get('input[name="Owner.OwnerSSN"]'),
       businessOwnerAddress1Field: () =>
-        cy.get('input[name="Owner.OwnerAddress1"]'),
+        pw.get('input[name="Owner.OwnerAddress1"]'),
       businessOwnerAddress2Field: () =>
-        cy.get('input[name="Owner.OwnerAddress2"]'),
-      businessOwnerCityField: () => cy.get('input[name="Owner.OwnerCity"]'),
+        pw.get('input[name="Owner.OwnerAddress2"]'),
+      businessOwnerCityField: () => pw.get('input[name="Owner.OwnerCity"]'),
       businessOwnerStateDropdown: () =>
         this.getElement().businessOwnerCityField().parent().next().find(".k-dropdownlist"),
       businessOwnerZipCodeField: () =>
-        cy.get('input[name="Owner.OwnerZipCode"]'),
+        pw.get('input[name="Owner.OwnerZipCode"]'),
       sameBusinessMailingAddressAsLegalBusinessAddressCheckbox: () =>
         cy
           .get("label")
@@ -69,7 +69,7 @@ class BusinessAdd {
             "Check this box if the business management contact information is the same as the owner information."
           ),
       customFieldSection: () =>
-        cy.get("h5").contains("Other Information").parent().next(),
+        pw.get("h5").contains("Other Information").parent().next(),
       customFieldBlocks: () =>
         this.getElement().customFieldSection().find("div"),
     };
@@ -83,7 +83,7 @@ class BusinessAdd {
     if (this.userType === "taxpayer") {
       throw new Error("Taxpayer cannot proceed with this user flow.");
     }
-    cy.wait(["@govBusinessConfig", "@lambdaRequestMunicipalityId", "@govBusinessConfig"]).then(
+    pw.wait(["@govBusinessConfig", "@lambdaRequestMunicipalityId", "@govBusinessConfig"]).then(
       (interceptions) => {
         interceptions.forEach((interception) => {
           expect(interception.response.statusCode).to.eq(200);
@@ -100,7 +100,7 @@ class BusinessAdd {
       .type(data.legalBusinessAddress2);
     this.getElement().legalBusinessCityField().type(data.legalBusinessCity);
     this.getElement().legalBusinessStateDropdown().click( {force: true} );
-    cy.get("li").contains(data.legalBusinessState).click( {force: true} );
+    pw.get("li").contains(data.legalBusinessState).click( {force: true} );
     this.getElement()
       .legalBusinessZipCodeField()
       .type(data.legalBusinessZipCode);
@@ -138,7 +138,7 @@ class BusinessAdd {
       .type(data.businessOwnerAddress2);
     this.getElement().businessOwnerCityField().type(data.businessOwnerCity);
     this.getElement().businessOwnerStateDropdown().click( {force: true} );
-    cy.get("li").contains(data.businessOwnerState).click( {force: true} );
+    pw.get("li").contains(data.businessOwnerState).click( {force: true} );
     this.getElement()
       .businessOwnerZipCodeField()
       .type(data.businessOwnerZipCode);
@@ -172,7 +172,7 @@ class BusinessAdd {
 
   clickSaveButton() {
     this.getElement().saveButton().click( {force: true} );
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   clickCancelButton() {
@@ -189,11 +189,11 @@ class BusinessAdd {
     }
     this.getElement().governmentSearchBox().type("Arrakis");
     this.getElement().anyList().contains("Arrakis").click( {force: true} );
-    cy.waitForLoading();
+    pw.waitForLoading();
     this.getElement().businessDetailsDropdown().type(businessDba);
     this.getElement().anyList().contains(businessDba).click( {force: true} );
     this.getElement().addBusinessButton().click( {force: true} );
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 }
 

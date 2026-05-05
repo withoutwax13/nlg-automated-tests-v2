@@ -8,12 +8,12 @@ class AddNewNoteModal {
    */
   elements() {
     return {
-      modalTitle: () => cy.get(".k-dialog-title"),
-      noteTextArea: () => cy.get(".k-textarea").find("textarea"),
+      modalTitle: () => pw.get(".k-dialog-title"),
+      noteTextArea: () => pw.get(".k-textarea").find("textarea"),
       saveButton: () =>
-        cy.get(".k-dialog-actions").find("button").contains("Save"),
+        pw.get(".k-dialog-actions").find("button").contains("Save"),
       cancelButton: () =>
-        cy.get(".k-dialog-actions").find("button").contains("Cancel"),
+        pw.get(".k-dialog-actions").find("button").contains("Cancel"),
     };
   }
 

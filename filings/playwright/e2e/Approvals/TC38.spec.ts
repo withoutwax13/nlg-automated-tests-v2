@@ -34,7 +34,7 @@ const deleteMultipleFiling = (
 
 test.describe("As a government user, I want to be able to see message of an rejected filing in approval list", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 4 });
+    pw.login({ accountType: "ags", accountIndex: 4 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -48,7 +48,7 @@ test.describe("As a government user, I want to be able to see message of an reje
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if(Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -57,9 +57,9 @@ test.describe("As a government user, I want to be able to see message of an reje
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 6, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 6, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -81,17 +81,17 @@ test.describe("As a government user, I want to be able to see message of an reje
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
     taxpayerFilingGrid.init();
-    cy.get("@referenceId").then((referenceId) => {
-      cy.logout();
-      cy.login({ accountType: "ags", accountIndex: 4, notFirstLogin: true });
+    pw.get("@referenceId").then((referenceId) => {
+      pw.logout();
+      pw.login({ accountType: "ags", accountIndex: 4, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus("Funded", "Reference ID", String(referenceId));
-      cy.logout();
-      cy.login({ accountType: "municipal", accountIndex: 4, notFirstLogin: true });
+      pw.logout();
+      pw.login({ accountType: "municipal", accountIndex: 4, notFirstLogin: true });
       govApprovalGrid.init();
       govApprovalGrid.selectRowToReject("Reference ID", String(referenceId));
       govApprovalGrid.init();
@@ -101,8 +101,8 @@ test.describe("As a government user, I want to be able to see message of an reje
         String(referenceId),
         "message"
       );
-      cy.get("@message").then((message) => {
-        cy.wrap(message).click();
+      pw.get("@message").then((message) => {
+        pw.wrap(message).click();
         govApprovalGrid.getElement().anyModal().should("be.visible");
         govApprovalGrid
           .getElement()

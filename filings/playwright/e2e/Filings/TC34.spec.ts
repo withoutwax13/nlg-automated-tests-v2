@@ -32,7 +32,7 @@ const deleteMultipleFiling = (
 
 test.describe("As a taxpayer, I should be able to submit a zero payment filing.", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 1 });
+    pw.login({ accountType: "ags", accountIndex: 1 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -46,7 +46,7 @@ test.describe("As a taxpayer, I should be able to submit a zero payment filing."
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -55,9 +55,9 @@ test.describe("As a taxpayer, I should be able to submit a zero payment filing."
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
+    pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("ZERO PAYMENT");
@@ -75,11 +75,11 @@ test.describe("As a taxpayer, I should be able to submit a zero payment filing."
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton(false);
 
-    cy.get("@referenceId").then((referenceId) => {
+    pw.get("@referenceId").then((referenceId) => {
       taxpayerFilingGrid.init();
       taxpayerFilingGrid.toggleActionButton(
         "View",

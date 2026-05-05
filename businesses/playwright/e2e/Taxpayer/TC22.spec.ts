@@ -37,14 +37,14 @@ const newBusinessData = {
 // Skipped, assertions alrady covered in TC24
 test.describe.skip("As a taxpayer, when a business has been added by a municipal user, I should be able to add the business in my account", () => {
   test.beforeEach(() => {
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
       notFirstLogin: false,
       accountIndex: 2,
     });
 
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "ags",
       notFirstLogin: true,
@@ -52,7 +52,7 @@ test.describe.skip("As a taxpayer, when a business has been added by a municipal
     });
   });
   test("Initiating test", () => {
-    cy.login({ accountType: "municipal", notFirstLogin: true });
+    pw.login({ accountType: "municipal", notFirstLogin: true });
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickAddBusinessButton();
     addBusinessPage.fillFields(newBusinessData);
@@ -60,16 +60,16 @@ test.describe.skip("As a taxpayer, when a business has been added by a municipal
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickClearAllFiltersButton();
     municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
 
-    cy.logout();
-    cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 2 });
+    pw.logout();
+    pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 2 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
   });
 });

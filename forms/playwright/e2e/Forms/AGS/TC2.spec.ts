@@ -5,7 +5,7 @@ const agsFormGrid = new FormGrid({ userType: "ags" });
 
 test.describe("As an AGS user, I should be able to export a specific form.", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 1 });
+    pw.login({ accountType: "ags", accountIndex: 1 });
     agsFormGrid.init();
     agsFormGrid.toggleActionButton(
       "filter",

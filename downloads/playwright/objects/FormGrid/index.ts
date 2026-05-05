@@ -45,8 +45,8 @@ class FormGrid {
     this.userType = props.userType;
   }
   init() {
-    cy.visit("/formsApp");
-    cy.waitForLoading();
+    pw.visit("/formsApp");
+    pw.waitForLoading();
     switch (this.userType) {
       case "ags":
         getOrderOfColumns(AGS_FORM_GRID_COLUMNS, this.defaultColumnAlias);
@@ -60,11 +60,11 @@ class FormGrid {
 
   private elements() {
     return {
-      pageTitle: () => cy.get("h1"),
-      formActionsButton: () => cy.get("button").contains("Form Actions"),
+      pageTitle: () => pw.get("h1"),
+      formActionsButton: () => pw.get("button").contains("Form Actions"),
       createNewFormButton: () =>
         this.getElement().anyList().contains("Create New Form"),
-      uploadFileInput: () => cy.get("#files"),
+      uploadFileInput: () => pw.get("#files"),
       exportButton: () => {
         if (this.userType === "ags") {
           return this.getElement().anyList().contains("Export");
@@ -84,10 +84,10 @@ class FormGrid {
       formLibrarySettingsButton: () =>
         this.getElement().anyList().contains("Form Library Settings"),
       customizeTableViewButton: () =>
-        cy.get(".NLG-HyperlinkNoPadding").contains("Customize Table View"),
-      columns: () => cy.get("thead").find("tr").find("th"),
+        pw.get(".NLG-HyperlinkNoPadding").contains("Customize Table View"),
+      columns: () => pw.get("thead").find("tr").find("th"),
       rows: () =>
-        cy.get("tbody").then(($tbody) => {
+        pw.get("tbody").then(($tbody) => {
           if ($tbody.find("tr").length !== 0) {
             return $tbody.find("tr");
           }
@@ -98,10 +98,10 @@ class FormGrid {
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -115,7 +115,7 @@ class FormGrid {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -123,20 +123,20 @@ class FormGrid {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
           .find(".k-actions")
           .find(".k-button")
           .contains("Filter"),
-      anyList: () => cy.get("li"),
-      anyButton: () => cy.get("button"),
+      anyList: () => pw.get("li"),
+      anyButton: () => pw.get("button"),
       clearAllFiltersButton: () =>
-        cy.get("*").contains("Clear All"),
-      itemsData: () => cy.get(".k-pager-info"),
+        pw.get("*").contains("Clear All"),
+      itemsData: () => pw.get(".k-pager-info"),
     };
   }
 
@@ -172,7 +172,7 @@ class FormGrid {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.defaultColumnAlias}`)
+    pw.get(`@${this.defaultColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -245,7 +245,7 @@ class FormGrid {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.defaultColumnAlias}`)
+    pw.get(`@${this.defaultColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         console.log(columnIndexes);
@@ -292,7 +292,7 @@ class FormGrid {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultColumnAlias}`)
+    pw.get(`@${this.defaultColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -302,7 +302,7 @@ class FormGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -315,7 +315,7 @@ class FormGrid {
     targetColumnName: string,
     targetColumnDataAlias: string
   ) {
-    cy.get(`@${this.defaultColumnAlias}`)
+    pw.get(`@${this.defaultColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -324,7 +324,7 @@ class FormGrid {
           .eq(rowPosition)
           .then(($row) => {
             const $columns = $row.find("td");
-            cy.wrap($columns.eq(columnIndex).text()).as(targetColumnDataAlias);
+            pw.wrap($columns.eq(columnIndex).text()).as(targetColumnDataAlias);
           });
       });
   }
@@ -336,7 +336,7 @@ class FormGrid {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultColumnAlias}`)
+    pw.get(`@${this.defaultColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -350,7 +350,7 @@ class FormGrid {
                 .replace(/\s+/g, " ")
                 .trim() === anchorValue
             ) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -361,7 +361,7 @@ class FormGrid {
     targetColumnName: string,
     targetColumnElementAlias: string
   ) {
-    cy.get(`@${this.defaultColumnAlias}`)
+    pw.get(`@${this.defaultColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -370,7 +370,7 @@ class FormGrid {
           .eq(rowPosition)
           .then(($row) => {
             const $columns = $row.find("td");
-            cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+            pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
           });
       });
   }
@@ -391,7 +391,7 @@ class FormGrid {
           anchorValue
         )}`
       );
-      cy.get(
+      pw.get(
         `@${removeSpaces(action)}${removeSpaces(
           anchorColumnName
         )}${removeSpaces(anchorValue)}`
@@ -403,7 +403,7 @@ class FormGrid {
         "Action Button",
         "firstRowActionButton"
       );
-      cy.get("@firstRowActionButton").click();
+      pw.get("@firstRowActionButton").click();
       this.getElement().anyList().contains(action).click();
     }
   }
@@ -447,7 +447,7 @@ class FormGrid {
       .invoke("text")
       .then((text: string) => {
         const totalItems = text.split("of")[1].trim();
-        cy.wrap(parseInt(totalItems)).as(alias);
+        pw.wrap(parseInt(totalItems)).as(alias);
       });
   }
 
@@ -463,7 +463,7 @@ class FormGrid {
           const $columns = $row.find("td");
           columnData.push($columns.eq(columnIndex).text());
         });
-      cy.wrap(columnData).as(alias);
+      pw.wrap(columnData).as(alias);
     };
 
     const processNextPage = (columnIndex: number, columnData: string[]) => {
@@ -473,20 +473,20 @@ class FormGrid {
         .then((isDisabled) => {
           if (isDisabled !== "true") {
             this.getElement().goToNextPageButton().click();
-            cy.wait(1000); // wait for the next page to load
+            pw.wait(1000); // wait for the next page to load
             collectData(columnIndex, columnData);
             processNextPage(columnIndex, columnData);
           }
         });
     };
 
-    cy.get(`@${this.defaultColumnAlias}`)
+    pw.get(`@${this.defaultColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
         let columnData: string[] = [];
         if (persistAliasData) {
-          cy.get(`@${alias}`).then((data: any) => {
+          pw.get(`@${alias}`).then((data: any) => {
             columnData = data || [];
           });
         }

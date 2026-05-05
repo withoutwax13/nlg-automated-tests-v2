@@ -151,39 +151,39 @@ class BusinessGrid {
   }
   private elements() {
     return {
-      pageTitle: () => cy.get("h2"),
+      pageTitle: () => pw.get("h2"),
       pageHelpContent: () => this.getElement().pageTitle().next(),
-      anyList: () => cy.get("li"),
-      noRecordFoundComponent: () => cy.get(".k-grid-norecords-template"),
+      anyList: () => pw.get("li"),
+      noRecordFoundComponent: () => pw.get(".k-grid-norecords-template"),
       addBusinessButton: () =>
-        cy.get(".NLGNewLayoutSecondaryButton").contains("Add a Business"),
+        pw.get(".NLGNewLayoutSecondaryButton").contains("Add a Business"),
       uploadBusinessButton: () =>
-        cy.get(".NLGNewLayoutSecondaryButton").contains("Upload Businesses"),
-      exportButton: () => cy.get(".NLGNewLayoutSecondaryButton").contains("Export"),
+        pw.get(".NLGNewLayoutSecondaryButton").contains("Upload Businesses"),
+      exportButton: () => pw.get(".NLGNewLayoutSecondaryButton").contains("Export"),
       resetDataButton: () =>
-        cy.get(".NLGNewLayoutSecondaryButton").contains("Reset All Data"),
+        pw.get(".NLGNewLayoutSecondaryButton").contains("Reset All Data"),
       businessConfigurationButton: () =>
-        cy.get(".NLGNewLayoutSecondaryButton").find(".a-magnifying-glass-plus"),
-      searchBox: () => cy.get("span").find(".fa-magnifying-glass").parent(),
-      columns: () => cy.get("thead").find("tr").find("th"),
+        pw.get(".NLGNewLayoutSecondaryButton").find(".a-magnifying-glass-plus"),
+      searchBox: () => pw.get("span").find(".fa-magnifying-glass").parent(),
+      columns: () => pw.get("thead").find("tr").find("th"),
       rows: () =>
-        cy.get("tbody").then(($tbody) => {
+        pw.get("tbody").then(($tbody) => {
           if ($tbody.find("tr").length !== 0) {
             return $tbody.find("tr");
           }
         }),
       customizeTableViewButton: () =>
-        cy.get("*").contains("Customize"),
+        pw.get("*").contains("Customize"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -197,7 +197,7 @@ class BusinessGrid {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -205,9 +205,9 @@ class BusinessGrid {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
@@ -215,11 +215,11 @@ class BusinessGrid {
           .find(".k-button")
           .contains("Filter"),
       searchMunicipalityDropdown: () =>
-        cy.get('input[placeholder="Search government ..."]'),
-      anyButton: () => cy.get("button"),
-      clearAllFiltersButton: () => cy.get("*").contains("Clear All"),
-      toastComponent: () => cy.get(".Toastify"),
-      gridPopup: () => cy.get(".k-popup"),
+        pw.get('input[placeholder="Search government ..."]'),
+      anyButton: () => pw.get("button"),
+      clearAllFiltersButton: () => pw.get("*").contains("Clear All"),
+      toastComponent: () => pw.get(".Toastify"),
+      gridPopup: () => pw.get(".k-popup"),
       gridPopupTitle: () =>
         this.getElement().gridPopup().find("div").find("div").find("div"),
       gridPopupContent: () => this.getElement().gridPopupTitle().next(),
@@ -241,8 +241,8 @@ class BusinessGrid {
       gridPopupCancelButton: () =>
         this.getElement().gridPopup().find("button").contains("Cancel"),
       activeFilterChipsContainer: () =>
-        cy.get("label").contains("Filtered By:").parent(),
-      activeFilterChipsLabel: () => cy.get("label").contains("Filtered By:"),
+        pw.get("label").contains("Filtered By:").parent(),
+      activeFilterChipsLabel: () => pw.get("label").contains("Filtered By:"),
       activeFilterChip: (columnName: string) =>
         this.getElement()
           .activeFilterChipsLabel()
@@ -254,31 +254,31 @@ class BusinessGrid {
   }
 
   init(resetSavedGridSettingsInMemory?: boolean, isFirstTimeGridSettingsLoading: boolean = true) {
-    cy.intercept(
+    pw.intercept(
       "GET",
       "https://**.azavargovapps.com/businesses/municipalityBusinessConfig/**"
     ).as("govBusinessConfig");
-    cy.intercept("GET", "https://**.lambda-url.us-east-1.on.aws/?municipalityId=**").as("lambdaRequestMunicipalityId");
-    cy.intercept("GET", "https://**.azavargovapps.com/municipalities/ActiveTaxAndFeesSubscriptions").as("activeTaxAndFeesSubscriptions");
-    cy.intercept(
+    pw.intercept("GET", "https://**.lambda-url.us-east-1.on.aws/?municipalityId=**").as("lambdaRequestMunicipalityId");
+    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/ActiveTaxAndFeesSubscriptions").as("activeTaxAndFeesSubscriptions");
+    pw.intercept(
       "GET",
       "https://**.azavargovapps.com/users/usersGridSettings/**"
     ).as("userGridSettings");
-    cy.intercept("GET", "https://**.azavargovapps.com/users/**").as("userDetailsRequest");
-    cy.visit("/BusinessesApp/BusinessesList");
+    pw.intercept("GET", "https://**.azavargovapps.com/users/**").as("userDetailsRequest");
+    pw.visit("/BusinessesApp/BusinessesList");
     if (this.userType === "ags") {
-      cy.wait("@activeTaxAndFeesSubscriptions");
-      cy.get("@activeTaxAndFeesSubscriptions").its("response.statusCode").should("eq", 200);
+      pw.wait("@activeTaxAndFeesSubscriptions");
+      pw.get("@activeTaxAndFeesSubscriptions").its("response.statusCode").should("eq", 200);
     }
     const isArrakisMunicipality = String(this.municipalitySelection).includes(
       "Arrakis"
     );
     switch (this.userType) {
       case "taxpayer":
-        cy.wait("@userDetailsRequest");
-        cy.get("@userDetailsRequest").its("response.statusCode").should("eq", 200);
+        pw.wait("@userDetailsRequest");
+        pw.get("@userDetailsRequest").its("response.statusCode").should("eq", 200);
         if (isFirstTimeGridSettingsLoading) {
-          cy.get("@userGridSettings").its("response.statusCode").should("eq", 200);
+          pw.get("@userGridSettings").its("response.statusCode").should("eq", 200);
         }
         this.getElement().noRecordFoundComponent().should("not.exist");
         getOrderOfColumns(
@@ -292,15 +292,15 @@ class BusinessGrid {
         );
         break;
       case "municipal":
-        cy.wait("@govBusinessConfig");
-        cy.wait("@lambdaRequestMunicipalityId");
+        pw.wait("@govBusinessConfig");
+        pw.wait("@lambdaRequestMunicipalityId");
         if (isFirstTimeGridSettingsLoading) {
-          cy.wait("@userGridSettings");
+          pw.wait("@userGridSettings");
         }
-        cy.get("@govBusinessConfig").its("response.statusCode").should("eq", 200);
-        cy.get("@lambdaRequestMunicipalityId").its("response.statusCode").should("eq", 200);
+        pw.get("@govBusinessConfig").its("response.statusCode").should("eq", 200);
+        pw.get("@lambdaRequestMunicipalityId").its("response.statusCode").should("eq", 200);
         if (isFirstTimeGridSettingsLoading) {
-          cy.get("@userGridSettings").its("response.statusCode").should("eq", 200);
+          pw.get("@userGridSettings").its("response.statusCode").should("eq", 200);
         }
         this.getElement().noRecordFoundComponent().should("not.exist");
         getOrderOfColumns(
@@ -315,15 +315,15 @@ class BusinessGrid {
         break;
       case "ags":
         this.searchMunicipality(this.municipalitySelection);
-        cy.wait("@govBusinessConfig");
-        cy.wait("@lambdaRequestMunicipalityId");
+        pw.wait("@govBusinessConfig");
+        pw.wait("@lambdaRequestMunicipalityId");
         if (isFirstTimeGridSettingsLoading) {
-          cy.wait("@userGridSettings");
+          pw.wait("@userGridSettings");
         }
-        cy.get("@govBusinessConfig").its("response.statusCode").should("eq", 200);
-        cy.get("@lambdaRequestMunicipalityId").its("response.statusCode").should("eq", 200);
+        pw.get("@govBusinessConfig").its("response.statusCode").should("eq", 200);
+        pw.get("@lambdaRequestMunicipalityId").its("response.statusCode").should("eq", 200);
         if (isFirstTimeGridSettingsLoading) {
-          cy.get("@userGridSettings").its("response.statusCode").should("eq", 200);
+          pw.get("@userGridSettings").its("response.statusCode").should("eq", 200);
         }
 
         if (isArrakisMunicipality) {
@@ -381,7 +381,7 @@ class BusinessGrid {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -444,11 +444,11 @@ class BusinessGrid {
   }
 
   isGridFiltered() {
-    return cy.get("body").then($body => {
+    return pw.get("body").then($body => {
       if ($body.find("label:contains('Filtered By:')").length > 0) {
-        return cy.wrap(true);
+        return pw.wrap(true);
       } else {
-        return cy.wrap(false);
+        return pw.wrap(false);
       }
     });
   }
@@ -459,25 +459,25 @@ class BusinessGrid {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
         switch (filterType) {
           case "text":
-            cy.wait(1500); // wait to avoid jquery delay issue causing flakiness
+            pw.wait(1500); // wait to avoid jquery delay issue causing flakiness
             this.handleTextFilter(columnIndex, filterValue, filterOperation);
             break;
           case "date":
-            cy.wait(1500); // wait to avoid jquery delay issue causing flakiness
+            pw.wait(1500); // wait to avoid jquery delay issue causing flakiness
             this.handleDateFilter(columnIndex, filterValue, filterOperation);
             break;
           case "number":
-            cy.wait(1500); // wait to avoid jquery delay issue causing flakiness
+            pw.wait(1500); // wait to avoid jquery delay issue causing flakiness
             this.handleNumberFilter(columnIndex, filterValue, filterOperation);
             break;
           case "multi-select":
-            cy.wait(1500); // wait to avoid jquery delay issue causing flakiness
+            pw.wait(1500); // wait to avoid jquery delay issue causing flakiness
             this.handleMultiSelectFilter(columnIndex, filterValue);
             break;
           default:
@@ -509,7 +509,7 @@ class BusinessGrid {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -519,7 +519,7 @@ class BusinessGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -534,7 +534,7 @@ class BusinessGrid {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -550,7 +550,7 @@ class BusinessGrid {
                 .replace(/\s+/g, " ")
                 .trim() === anchorValue
             ) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -577,14 +577,14 @@ class BusinessGrid {
   }
 
   deleteBusiness(businessDba: string) {
-    cy.intercept("DELETE", this.userType !== "taxpayer" ? "https://**.azavargovapps.com/businesses/municipalityBusiness/**" : "https://**.azavargovapps.com/businesses/taxpayerBusiness/**").as("deleteBusiness");
+    pw.intercept("DELETE", this.userType !== "taxpayer" ? "https://**.azavargovapps.com/businesses/municipalityBusiness/**" : "https://**.azavargovapps.com/businesses/taxpayerBusiness/**").as("deleteBusiness");
     this.getElementOfColumn("Actions", "DBA", businessDba, "actionButton");
-    cy.get("@actionButton").click();
+    pw.get("@actionButton").click();
     this.getElement().anyList().contains("Delete").click();
     this.businessDeleteModal.clickDeleteButton();
     this.getElement().toastComponent().should("exist");
-    cy.wait("@deleteBusiness");
-    cy.get("@deleteBusiness").its("response.statusCode").should("eq", 200);
+    pw.wait("@deleteBusiness");
+    pw.get("@deleteBusiness").its("response.statusCode").should("eq", 200);
   }
 
   viewBusinessDetails(businessDba: string) {
@@ -594,7 +594,7 @@ class BusinessGrid {
       businessDba,
       "actionButton"
     );
-    cy.get("@actionButton").click();
+    pw.get("@actionButton").click();
     this.getElement().anyList().contains("View Details").click();
   }
 
@@ -602,14 +602,14 @@ class BusinessGrid {
     businessDba: string,
     date: { month: number; date: number; year: number }
   ) {
-    cy.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("updateBusiness");
+    pw.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("updateBusiness");
     this.getElementOfColumn(
       "Delinquency Start Date",
       "DBA",
       businessDba,
       "delinquencyStartDateInput"
     );
-    cy.get("@delinquencyStartDateInput").click();
+    pw.get("@delinquencyStartDateInput").click();
     this.getElement().gridPopupDateInput().click();
     this.getElement().gridPopupDateInput().type(`${date.month}`);
 
@@ -621,8 +621,8 @@ class BusinessGrid {
       .gridPopupDateInput()
       .type(`{rightarrow}{rightarrow}0000${date.year}`);
     this.getElement().gridPopupSaveButton().should("not.be.disabled").click();
-    cy.wait("@updateBusiness");
-    cy.get("@updateBusiness").its("response.statusCode").should("eq", 200);
+    pw.wait("@updateBusiness");
+    pw.get("@updateBusiness").its("response.statusCode").should("eq", 200);
   }
 
   setCloseDate(
@@ -631,20 +631,20 @@ class BusinessGrid {
   ) {
     const setCloseDateModal = new SetBusinessStatusModal();
 
-    cy.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("updateBusiness");
+    pw.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("updateBusiness");
     this.getElementOfColumn("Close Date", "DBA", businessDba, "closeDateInput");
-    cy.get("@closeDateInput").click();
+    pw.get("@closeDateInput").click();
     setCloseDateModal.setBusinessCloseDate({
       month: date.month,
       date: date.date,
       year: date.year,
     });
-    cy.waitForLoading();
+    pw.waitForLoading();
     setCloseDateModal.setBusinessStatus("Closed");
-    cy.waitForLoading();
+    pw.waitForLoading();
     setCloseDateModal.clickSaveButton();
-    cy.wait("@updateBusiness");
-    cy.get("@updateBusiness").its("response.statusCode").should("eq", 200);
+    pw.wait("@updateBusiness");
+    pw.get("@updateBusiness").its("response.statusCode").should("eq", 200);
   }
 
   addRequiredForms(businessDba: string, forms: string[]) {
@@ -654,8 +654,8 @@ class BusinessGrid {
       businessDba,
       "requiredFormsCellAdd"
     );
-    cy.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("updateBusiness");
-    cy.get("@requiredFormsCellAdd").click();
+    pw.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("updateBusiness");
+    pw.get("@requiredFormsCellAdd").click();
     forms.forEach((form) => {
       this.getElement()
         .gridPopupSelectionItem(form)
@@ -672,8 +672,8 @@ class BusinessGrid {
         });
     });
     this.getElement().pageTitle().click();
-    cy.wait("@updateBusiness");
-    cy.get("@updateBusiness").its("response.statusCode").should("eq", 200);
+    pw.wait("@updateBusiness");
+    pw.get("@updateBusiness").its("response.statusCode").should("eq", 200);
   }
 
   removeRequiredForms(businessDba: string, forms: string[]) {
@@ -683,8 +683,8 @@ class BusinessGrid {
       businessDba,
       "requiredFormsCellRemove"
     );
-    cy.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("updateBusiness");
-    cy.get("@requiredFormsCellRemove").click();
+    pw.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("updateBusiness");
+    pw.get("@requiredFormsCellRemove").click();
     forms.forEach((form) => {
       this.getElement()
         .gridPopupSelectionItem(form)
@@ -701,19 +701,19 @@ class BusinessGrid {
         });
     });
     this.getElement().pageTitle().click();
-    cy.wait("@updateBusiness");
-    cy.get("@updateBusiness").its("response.statusCode").should("eq", 200);
+    pw.wait("@updateBusiness");
+    pw.get("@updateBusiness").its("response.statusCode").should("eq", 200);
   }
 
   checkEnabledRequiredForms(businessDba: string, aliasVariable: string) {
-    cy.wrap([]).as(aliasVariable);
+    pw.wrap([]).as(aliasVariable);
     this.getElementOfColumn(
       "Required Forms",
       "DBA",
       businessDba,
       "requiredFormsCellCheck"
     );
-    cy.get("@requiredFormsCellCheck").click();
+    pw.get("@requiredFormsCellCheck").click();
     this.getElement()
       .gridPopupContent()
       .find(".k-switch")
@@ -727,8 +727,8 @@ class BusinessGrid {
           .invoke("attr", "aria-checked")
           .then((isChecked) => {
             if (isChecked === "true") {
-              cy.get(`@${aliasVariable}`).then((forms) => {
-                cy.wrap([...forms, label]).as(aliasVariable);
+              pw.get(`@${aliasVariable}`).then((forms) => {
+                pw.wrap([...forms, label]).as(aliasVariable);
               });
             }
           });
@@ -741,7 +741,7 @@ class BusinessGrid {
       visibilityStatusAlias: `${this.defaultGridColumnAlias}_visibility`,
     });
     gridSetting.showColumn(columnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   hideColumn(columnName: string) {
@@ -750,7 +750,7 @@ class BusinessGrid {
       visibilityStatusAlias: `${this.defaultGridColumnAlias}_visibility`,
     });
     gridSetting.hideColumn(columnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   feezeColumn(columnName: string) {
@@ -759,7 +759,7 @@ class BusinessGrid {
       visibilityStatusAlias: `${this.defaultGridColumnAlias}_visibility`,
     });
     gridSetting.freezeColumn(columnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   unfreezeColumn(columnName: string) {
@@ -768,22 +768,22 @@ class BusinessGrid {
       visibilityStatusAlias: `${this.defaultGridColumnAlias}_visibility`,
     });
     gridSetting.unfreezeColumn(columnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   verifyColumnVisibility(columnName: string, isVisibleAlias: string) {
-    cy.get(`@${this.defaultGridColumnAlias}_visibility`)
+    pw.get(`@${this.defaultGridColumnAlias}_visibility`)
       .should("exist")
       .then((visibilityStatus: any) => {
-        cy.wrap(visibilityStatus[columnName]).as(isVisibleAlias);
+        pw.wrap(visibilityStatus[columnName]).as(isVisibleAlias);
       });
   }
 
   verifyColumnOrder(columnName: string, orderAlias: string) {
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
-        cy.wrap(columnIndexes[columnName]).as(orderAlias);
+        pw.wrap(columnIndexes[columnName]).as(orderAlias);
       });
   }
 
@@ -793,7 +793,7 @@ class BusinessGrid {
       visibilityStatusAlias: `${this.defaultGridColumnAlias}_visibility`,
     });
     gridSetting.restoreDefaultSettings();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   moveColumnToLocationOf(columnName: string, targetColumnName: string) {
@@ -802,7 +802,7 @@ class BusinessGrid {
       visibilityStatusAlias: `${this.defaultGridColumnAlias}_visibility`,
     });
     gridSetting.moveColumnToLocationOf(columnName, targetColumnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 }
 

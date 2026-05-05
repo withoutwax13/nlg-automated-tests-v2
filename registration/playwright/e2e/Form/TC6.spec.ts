@@ -9,7 +9,7 @@ test.describe("If user clicks the 'Add Location' button on the location info ste
     const form = new Form({ isRenewal: false });
     const filing = new Filing();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 5 });
+    pw.login({ accountType: "taxpayer", accountIndex: 5 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -17,7 +17,7 @@ test.describe("If user clicks the 'Add Location' button on the location info ste
     filing.clickSubmitNewRegistrationButton();
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(true);
-    cy.getUniqueRegistrationData(randomSeed, true).then(
+    pw.getUniqueRegistrationData(randomSeed, true).then(
       (customData: { basicInfo: any; locationInfo: { locations: any[] } }) => {
         form.enterBusinessOwnerInformation(customData.basicInfo);
         form.enterLegalBusinessInformation(customData.basicInfo);

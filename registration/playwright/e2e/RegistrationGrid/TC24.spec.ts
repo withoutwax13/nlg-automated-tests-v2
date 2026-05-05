@@ -44,18 +44,18 @@ test.describe.skip("As an AGS User, If I delete a business record associated to 
     });
     const businessDetailsPage = new BusinessDetails({ userType: "ags" });
 
-    cy.login({ accountType: "ags", accountIndex: 2 });
+    pw.login({ accountType: "ags", accountIndex: 2 });
     businessGrid.init();
     businessGrid.clickAddBusinessButton();
     businessAddPage.fillFields(customData);
     businessAddPage.clickSaveButton();
     businessGrid.init();
     businessGrid.viewBusinessDetails(customData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
     businessDetailsPage.clickFormsTab();
     businessDetailsPage.enableForm("Business License (Annual) - E2E #1");
 
-    cy.waitForLoading(); // wait for the backend to finish processing the form enablement
+    pw.waitForLoading(); // wait for the backend to finish processing the form enablement
     registrationGrid.init();
     registrationGrid.getDataOfColumn(
       "Registration Record ID",
@@ -70,7 +70,7 @@ test.describe.skip("As an AGS User, If I delete a business record associated to 
       customData.locationDba
     );
     registrationGrid.clickClearAllFiltersButton();
-    cy.get("@regRecordId").then(($regRecordId) => {
+    pw.get("@regRecordId").then(($regRecordId) => {
       registrationGrid.getDataOfColumn(
         "Registration Status",
         "Registration Record ID",
@@ -78,15 +78,15 @@ test.describe.skip("As an AGS User, If I delete a business record associated to 
         "registrationStatus"
       );
     });
-    cy.get("@registrationStatus").then(($registrationStatus) => {
+    pw.get("@registrationStatus").then(($registrationStatus) => {
       expect($registrationStatus).to.equal("Active");
     });
 
     businessGrid.init();
     businessGrid.deleteBusiness(customData.locationDba);
 
-    cy.logout();
-    cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 2 });
+    pw.logout();
+    pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 2 });
     registrationGrid.init();
     registrationGrid.filterColumn("Location DBA", customData.locationDba);
     registrationGrid.getElement().noRecordFoundComponent().should("exist");

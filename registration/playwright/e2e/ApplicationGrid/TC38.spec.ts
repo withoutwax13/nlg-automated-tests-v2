@@ -28,7 +28,7 @@ test.describe("As a gov/AGS user, application records with not funded Payment St
     });
     const payment = new Payment();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 2 });
+    pw.login({ accountType: "taxpayer", accountIndex: 2 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -37,7 +37,7 @@ test.describe("As a gov/AGS user, application records with not funded Payment St
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
 
-    cy.getUniqueRegistrationData(randomSeed(), false).then(
+    pw.getUniqueRegistrationData(randomSeed(), false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };
@@ -59,11 +59,11 @@ test.describe("As a gov/AGS user, application records with not funded Payment St
           .referenceIdData()
           .invoke("text")
           .then((referenceId) => {
-            cy.wrap(referenceId).as("referenceId");
+            pw.wrap(referenceId).as("referenceId");
           });
         applicationConfirmation.clickCloseButton();
         taxpayerApplicationGrid.init();
-        cy.get("@referenceId").then((referenceId) => {
+        pw.get("@referenceId").then((referenceId) => {
           taxpayerApplicationGrid.getDataOfColumn(
             "Registration Record ID",
             "Reference ID",
@@ -71,9 +71,9 @@ test.describe("As a gov/AGS user, application records with not funded Payment St
             "registrationRecordId"
           );
         });
-        cy.logout();
-        cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 2 });
-        cy.get("@referenceId").then((referenceId) => {
+        pw.logout();
+        pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 2 });
+        pw.get("@referenceId").then((referenceId) => {
           filingGrid.init();
           filingGrid.getDataOfColumn(
             "Payment Status",
@@ -81,11 +81,11 @@ test.describe("As a gov/AGS user, application records with not funded Payment St
             String(referenceId),
             "paymentStatus"
           );
-          cy.get("@paymentStatus").then((paymentStatus) => {
+          pw.get("@paymentStatus").then((paymentStatus) => {
             expect(paymentStatus).to.not.equal("Funded");
           });
         });
-        cy.get("@registrationRecordId").then((registrationRecordId) => {
+        pw.get("@registrationRecordId").then((registrationRecordId) => {
           agsApplicationGrid.init();
           agsApplicationGrid.filterColumn(
             "Registration Record ID",

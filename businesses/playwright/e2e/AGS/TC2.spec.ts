@@ -12,7 +12,7 @@ const randomDate = {
 
 test.describe("As an AGS user, I should be able to set close date from the grid", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 1 });
+    pw.login({ accountType: "ags", accountIndex: 1 });
     agsBusinessGrid.init();
     agsBusinessGrid.clickClearAllFiltersButton();
     agsBusinessGrid.getDataOfColumn(
@@ -35,8 +35,8 @@ test.describe("As an AGS user, I should be able to set close date from the grid"
       "Arrakis Spice Company 13857",
       "afterCloseDate"
     );
-    cy.get("@beforeCloseDate").then((beforeCloseDate) => {
-      cy.get("@afterCloseDate").then((afterCloseDate) => {
+    pw.get("@beforeCloseDate").then((beforeCloseDate) => {
+      pw.get("@afterCloseDate").then((afterCloseDate) => {
         expect(beforeCloseDate).to.be.not.equal(
           afterCloseDate
         );

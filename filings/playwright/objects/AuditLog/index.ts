@@ -9,10 +9,10 @@ const AUDITLOG_COLUMNS = [
 class AuditLog {
   private elements() {
     return {
-      columns: () => cy.get("thead").find("tr").eq(0).find("th"),
-      filterRow: () => cy.get("thead").find("tr").eq(1),
+      columns: () => pw.get("thead").find("tr").eq(0).find("th"),
+      filterRow: () => pw.get("thead").find("tr").eq(1),
       rows: () =>
-        cy.get("tbody").then(($tbody) => {
+        pw.get("tbody").then(($tbody) => {
           if ($tbody.find("tr").length !== 0) {
             return $tbody.find("tr");
           }
@@ -33,7 +33,7 @@ class AuditLog {
       .rows()
       .then((rows) => {
         const $columns = rows.find("td");
-        cy.wrap($columns.filter(`:contains(${action})`).eq(0), {
+        pw.wrap($columns.filter(`:contains(${action})`).eq(0), {
           timeout: 60000,
         }).as(alias);
       });
@@ -44,7 +44,7 @@ class AuditLog {
       .rows()
       .then((rows) => {
         const $columns = rows.find("td");
-        cy.wrap($columns.filter(`:contains(${role})`).eq(0), {
+        pw.wrap($columns.filter(`:contains(${role})`).eq(0), {
           timeout: 60000,
         }).as(alias);
       });
@@ -55,7 +55,7 @@ class AuditLog {
       .rows()
       .then((rows) => {
         const $columns = rows.find("td");
-        cy.wrap($columns.filter(`:contains(${actionTakenBy})`).eq(0), {
+        pw.wrap($columns.filter(`:contains(${actionTakenBy})`).eq(0), {
           timeout: 60000,
         }).as(alias);
       });
@@ -70,7 +70,7 @@ class AuditLog {
       .rows()
       .then((rows) => {
         const $columns = rows.find("td");
-        cy.wrap($columns.filter(`:contains(${wantedDate})`).eq(0), {
+        pw.wrap($columns.filter(`:contains(${wantedDate})`).eq(0), {
           timeout: 60000,
         }).as(alias);
       });
@@ -84,7 +84,7 @@ class AuditLog {
       case "Action":
         if (typeof anchorValue === "string") {
           this.findRowByAction(anchorValue, "actionRow");
-          cy.get("@actionRow").parent("tr").find("td").eq(0).find("a").click();
+          pw.get("@actionRow").parent("tr").find("td").eq(0).find("a").click();
         } else {
           throw new Error("Invalid anchor value for Action column");
         }
@@ -92,7 +92,7 @@ class AuditLog {
       case "Role":
         if (typeof anchorValue === "string") {
           this.findRowByRole(anchorValue, "roleRow");
-          cy.get("@roleRow").parent("tr").find("td").eq(0).find("a").click();
+          pw.get("@roleRow").parent("tr").find("td").eq(0).find("a").click();
         } else {
           throw new Error("Invalid anchor value for Role column");
         }
@@ -100,7 +100,7 @@ class AuditLog {
       case "Action Taken By":
         if (typeof anchorValue === "string") {
           this.findRowByActionTakenBy(anchorValue, "actionTakenByRow");
-          cy.get("@actionTakenByRow")
+          pw.get("@actionTakenByRow")
             .parent("tr")
             .find("td")
             .eq(0)
@@ -113,7 +113,7 @@ class AuditLog {
       case "Created Date":
         if (typeof anchorValue === "object") {
           this.findRowByCreatedDate(anchorValue, "createdDateRow");
-          cy.get("@createdDateRow")
+          pw.get("@createdDateRow")
             .parent("tr")
             .find("td")
             .eq(0)

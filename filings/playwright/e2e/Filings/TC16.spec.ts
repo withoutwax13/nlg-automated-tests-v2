@@ -9,7 +9,7 @@ const requestedExtractPage = new RequestedExtracts();
 
 test.describe("As a municipal user, I should be able to export full filing data.", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "municipal", accountIndex: 2 });
+    pw.login({ accountType: "municipal", accountIndex: 2 });
     municipalFilingGrid.init();
     municipalFilingGrid.clickViewRequestedExtractButton();
     requestedExtractPage.getTotalItems("preClickItemTotal");
@@ -18,8 +18,8 @@ test.describe("As a municipal user, I should be able to export full filing data.
     municipalFilingGrid.clickExportButton(true, "Excel");
     municipalFilingGrid.clickViewRequestedExtractButton();
     requestedExtractPage.getTotalItems("postClickItemTotal");
-    cy.get("@preClickItemTotal").then((preClickItemTotal) => {
-      cy.get("@postClickItemTotal").then((postClickItemTotal) => {
+    pw.get("@preClickItemTotal").then((preClickItemTotal) => {
+      pw.get("@postClickItemTotal").then((postClickItemTotal) => {
         expect(Number(postClickItemTotal)).to.be.greaterThan(
           Number(preClickItemTotal)
         );

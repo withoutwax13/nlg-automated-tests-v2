@@ -39,7 +39,7 @@ const saveRowData = ($row) => {
   const data = {};
   const columns = ["caseName", "government", "caseType", "assignee", "status", "updatedDate"];
   columns.forEach((col, index) => {
-    cy.wrap($row)
+    pw.wrap($row)
       .find("td")
       .eq(index + 1)
       .invoke("text")
@@ -52,39 +52,39 @@ const saveRowData = ($row) => {
 
 const assertCaseDetails = (data) => {
   Object.keys(caseDetailsXpathSelectors.caseInfo).forEach((key) => {
-    cy.xpath(caseDetailsXpathSelectors.caseInfo[key])
+    pw.xpath(caseDetailsXpathSelectors.caseInfo[key])
       .invoke("text")
       .then((text) => {
         expect(text.trim()).to.eq(data[key].trim());
       });
   });
-  cy.xpath(`//span[contains(text(),"Activity History")]`)
+  pw.xpath(`//span[contains(text(),"Activity History")]`)
     .should("be.visible")
     .click();
-  cy.xpath(`//td[contains(text(),"${data.updatedDate}")]`).should("be.visible");
+  pw.xpath(`//td[contains(text(),"${data.updatedDate}")]`).should("be.visible");
 };
 
 test.describe("Case Detail Scenarios", () => {
   test("As a user, I should be able to see that the column data in /cases grid are similar to the data in the /cases/{id}/info page", () => {
-    cy.login();
+    pw.login();
     interceptXhrForCaseDetail();
-    cy.location("pathname").should("include", "/cases");
+    pw.location("pathname").should("include", "/cases");
 
     // Save the data of the first row in the table
-    cy.get("tbody > tr")
+    pw.get("tbody > tr")
       .first()
       .then(($row) => {
         const rowData = saveRowData($row);
-        cy.wrap(rowData).as("rowData");
+        pw.wrap(rowData).as("rowData");
       });
 
-    cy.get("tbody > tr").first().click();
+    pw.get("tbody > tr").first().click();
     waitForXhrForCaseDetail();
-    cy.location("pathname").should("include", "/cases/");
-    cy.url().should("include", "/info");
+    pw.location("pathname").should("include", "/cases/");
+    pw.url().should("include", "/info");
 
     // Assert the data saved to the data in the case details page
-    cy.get("@rowData").then((data) => {
+    pw.get("@rowData").then((data) => {
       assertCaseDetails(data);
     });
   });

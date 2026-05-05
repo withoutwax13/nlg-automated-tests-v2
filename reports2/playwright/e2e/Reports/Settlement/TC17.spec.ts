@@ -19,15 +19,15 @@ test.describe(
       const settlementGrid = new SettlementGrid({
         userType: "municipal",
       });
-      cy.login({ accountType: "municipal", accountIndex: 5 });
+      pw.login({ accountType: "municipal", accountIndex: 5 });
       settlementGrid.init();
       settlementGrid.getElement().noRecordFoundComponent().should("not.exist");
       settlementGrid.getTotalItems("defaultTotalItems");
       settlementGrid.setStartDate(nineMonthsFromToday());
       settlementGrid.getElement().noRecordFoundComponent().should("not.exist");
       settlementGrid.getTotalItems("newTotalItems");
-      cy.get("@defaultTotalItems").then((defaultTotalItems) => {
-        cy.get("@newTotalItems").then((newTotalItems) => {
+      pw.get("@defaultTotalItems").then((defaultTotalItems) => {
+        pw.get("@newTotalItems").then((newTotalItems) => {
           expect(defaultTotalItems).to.not.equal(newTotalItems);
         });
       });

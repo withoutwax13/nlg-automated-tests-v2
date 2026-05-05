@@ -1,14 +1,14 @@
 class RemoveUserModal {
   private elements() {
     return {
-      modal: () => cy.get(".k-dialog"),
-      title: () => cy.get(".k-dialog-title"),
-      closeModalButton: () => cy.get('button[aria-label="Close"]'),
-      modalContent: () => cy.get(".k-dialog-content"),
-      confirmationRadioButton: () => cy.get("k-checkbox-wrap"),
-      confirmationLabel: () => cy.get(".k-checkbox-label"),
-      cancelButton: () => cy.get("button").contains("Cancel"),
-      deleteButton: () => cy.get("button").contains("Delete"),
+      modal: () => pw.get(".k-dialog"),
+      title: () => pw.get(".k-dialog-title"),
+      closeModalButton: () => pw.get('button[aria-label="Close"]'),
+      modalContent: () => pw.get(".k-dialog-content"),
+      confirmationRadioButton: () => pw.get("k-checkbox-wrap"),
+      confirmationLabel: () => pw.get(".k-checkbox-label"),
+      cancelButton: () => pw.get("button").contains("Cancel"),
+      deleteButton: () => pw.get("button").contains("Delete"),
     };
   }
 

@@ -13,7 +13,7 @@ const cleanTestData = (businessName: string, requiredForm: string) => {
     businessName,
     "requiredFormsBeforeCleaning"
   );
-  cy.get("@requiredFormsBeforeCleaning").then((requiredFormsBeforeCleaning) => {
+  pw.get("@requiredFormsBeforeCleaning").then((requiredFormsBeforeCleaning) => {
     if (requiredFormsBeforeCleaning.includes(requiredForm)) {
       agsBusinessGrid.clickClearAllFiltersButton();
       agsBusinessGrid.removeRequiredForms(businessName, [requiredForm]);
@@ -23,7 +23,7 @@ const cleanTestData = (businessName: string, requiredForm: string) => {
 
 test.describe("As an AGS user, I should be able to add required forms from the grid", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 2 });
+    pw.login({ accountType: "ags", accountIndex: 2 });
     cleanTestData("Arrakis Spice Company 17829", "Food and Beverage Tax Return (Monthly)");
     agsBusinessGrid.clickClearAllFiltersButton();
     // check the enabled required forms of a business
@@ -31,7 +31,7 @@ test.describe("As an AGS user, I should be able to add required forms from the g
       "Arrakis Spice Company 17829",
       "beforeAddingRequiredForms"
     );
-    cy.get("@beforeAddingRequiredForms").then((beforeAddingRequiredForms) => {
+    pw.get("@beforeAddingRequiredForms").then((beforeAddingRequiredForms) => {
       expect(beforeAddingRequiredForms).to.be.not.include(
         "Food and Beverage Tax Return (Monthly)"
       );
@@ -47,7 +47,7 @@ test.describe("As an AGS user, I should be able to add required forms from the g
       "Arrakis Spice Company 17829",
       "afterAddingRequiredForms"
     );
-    cy.get("@afterAddingRequiredForms").then((afterAddingRequiredForms) => {
+    pw.get("@afterAddingRequiredForms").then((afterAddingRequiredForms) => {
       expect(afterAddingRequiredForms).to.be.include(
         "Food and Beverage Tax Return (Monthly)"
       );

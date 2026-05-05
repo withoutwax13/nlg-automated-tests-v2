@@ -5,8 +5,8 @@ const profile = new Profile();
 test.describe("As a municipal user, I should be able to reset my password.", () => {
   test("Initiating test", () => {
     const acountPassword =
-      Cypress.env("validCredentials").municipal[3].password;
-    cy.login({ accountType: "municipal", accountIndex: 3 });
+      PW.env("validCredentials").municipal[3].password;
+    pw.login({ accountType: "municipal", accountIndex: 3 });
     profile.init();
     profile.clickResetPassword();
     profile.typeOldPassword(acountPassword);
@@ -15,8 +15,8 @@ test.describe("As a municipal user, I should be able to reset my password.", () 
     profile.clickUpdatePasswordButton();
     profile.getElement().toastComponent().should("exist");
 
-    cy.logout();
-    cy.login({
+    pw.logout();
+    pw.login({
       accountType: "municipal",
       accountIndex: 3,
       notFirstLogin: true,

@@ -32,7 +32,7 @@ test.describe("As a Government User, if the business user's application does not
     const applicationReview = new ApplicationReview({ userType: "ags" });
     const paymentPage = new Payment();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 5 });
+    pw.login({ accountType: "taxpayer", accountIndex: 5 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -41,7 +41,7 @@ test.describe("As a Government User, if the business user's application does not
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
     
-    cy.getUniqueRegistrationData(randomSeed(), false).then(
+    pw.getUniqueRegistrationData(randomSeed(), false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };
@@ -62,11 +62,11 @@ test.describe("As a Government User, if the business user's application does not
           .referenceIdData()
           .invoke("text")
           .then((referenceId) => {
-            cy.wrap(referenceId).as("referenceId");
+            pw.wrap(referenceId).as("referenceId");
           });
         applicationConfirmation.clickCloseButton();
         taxpayerApplicationGrid.init();
-        cy.get("@referenceId").then((referenceId) => {
+        pw.get("@referenceId").then((referenceId) => {
           taxpayerApplicationGrid.getDataOfColumn(
             "Registration Record ID",
             "Reference ID",
@@ -74,10 +74,10 @@ test.describe("As a Government User, if the business user's application does not
             "registrationRecordId"
           );
         });
-        cy.logout();
-        cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 5 });
+        pw.logout();
+        pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 5 });
         agsApplicationGrid.init();
-        cy.get("@registrationRecordId").then((registrationRecordId) => {
+        pw.get("@registrationRecordId").then((registrationRecordId) => {
           agsApplicationGrid.selectRowToReview({
             anchorColumnName: "Registration Record ID",
             anchorValue: String(registrationRecordId),
@@ -96,16 +96,16 @@ test.describe("As a Government User, if the business user's application does not
           applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.clickSaveButton();
           applicationReview.toggleActions("Approve");
           applicationReview.clickGoBackApplicationsButton();
-          cy.logout();
+          pw.logout();
           
-          cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 5 });
+          pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 5 });
           taxpayerApplicationGrid.init();
           taxpayerApplicationGrid.payApplication("Registration Record ID", String(registrationRecordId));
           paymentPage.payViaAnySavedPaymentMethod();
           applicationConfirmation.clickCloseButton();
-          cy.logout();
+          pw.logout();
 
-          cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 5 });
+          pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 5 });
           agsApplicationGrid.init();
           agsApplicationGrid.manuallyChangeApplicationPaymentStatus("Fully Paid", "Registration Record ID", String(registrationRecordId));
 

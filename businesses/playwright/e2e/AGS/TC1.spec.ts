@@ -12,7 +12,7 @@ const randomDate = {
 
 test.describe("As an AGS user, I should be able to set delinquency start date from the grid", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags" });
+    pw.login({ accountType: "ags" });
     agsBusinessGrid.init();
     agsBusinessGrid.clickClearAllFiltersButton();
     agsBusinessGrid.getDataOfColumn(
@@ -35,8 +35,8 @@ test.describe("As an AGS user, I should be able to set delinquency start date fr
       "Arrakis Spice Company 13685",
       "afterDelinquencyStartDate"
     );
-    cy.get("@beforeDelinquencyStartDate").then((beforeDelinquencyStartDate) => {
-      cy.get("@afterDelinquencyStartDate").then((afterDelinquencyStartDate) => {
+    pw.get("@beforeDelinquencyStartDate").then((beforeDelinquencyStartDate) => {
+      pw.get("@afterDelinquencyStartDate").then((afterDelinquencyStartDate) => {
         expect(beforeDelinquencyStartDate).to.be.not.equal(
           afterDelinquencyStartDate
         );

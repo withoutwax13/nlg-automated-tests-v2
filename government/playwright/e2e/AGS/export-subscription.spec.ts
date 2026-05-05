@@ -9,7 +9,7 @@ const exportSubscription = () => {
   viewSubscription();
 
   // Find and click the "Export" button
-  cy.get(selector.button)
+  pw.get(selector.button)
     .contains("Export")
     .should("exist")
     .and("be.enabled")

@@ -37,14 +37,14 @@ const newBusinessData = {
 // Skipped, assertions alrady covered in TC26
 test.describe.skip("As a taxpayer user, I should be able to add a business.", () => {
   test.beforeEach(() => {
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
       notFirstLogin: false,
       accountIndex: 4,
     });
 
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
       notFirstLogin: true,
@@ -52,7 +52,7 @@ test.describe.skip("As a taxpayer user, I should be able to add a business.", ()
     });
   });
   test("Initiating test", () => {
-    cy.login({
+    pw.login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 2,
@@ -64,16 +64,16 @@ test.describe.skip("As a taxpayer user, I should be able to add a business.", ()
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickClearAllFiltersButton();
     municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
 
-    cy.logout();
-    cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
+    pw.logout();
+    pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
   });
 });

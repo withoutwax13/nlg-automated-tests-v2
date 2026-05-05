@@ -8,20 +8,20 @@ class ApplicationConfirmation {
    */
   private elements() {
     return {
-      pageTitle: () => cy.get("h1"),
+      pageTitle: () => pw.get("h1"),
       systemMessage: () => this.getElement().systemMessage().next(),
       printPageButton: () =>
-        cy.get(".NLG-HyperlinkNoPadding").contains("Print this page"),
-      closeButton: () => cy.get(".NLGButtonPrimary").contains("Close"),
-      referenceIdData: () => cy.get("label").contains("Reference ID").next(),
+        pw.get(".NLG-HyperlinkNoPadding").contains("Print this page"),
+      closeButton: () => pw.get(".NLGButtonPrimary").contains("Close"),
+      referenceIdData: () => pw.get("label").contains("Reference ID").next(),
       paymentDateData: () =>
-        cy.get("label").contains("Payment Date").next(),
-      totalAmountData: () => cy.get("label").contains("Total Amount").next(),
+        pw.get("label").contains("Payment Date").next(),
+      totalAmountData: () => pw.get("label").contains("Total Amount").next(),
       localGovernmentData: () =>
-        cy.get("label").contains("Local Government").next(),
-      formTitleData: () => cy.get("label").contains("Form Title").next(),
+        pw.get("label").contains("Local Government").next(),
+      formTitleData: () => pw.get("label").contains("Form Title").next(),
       applicationStatusData: () =>
-        cy.get("label").contains("Application Status").next(),
+        pw.get("label").contains("Application Status").next(),
     };
   }
 
@@ -39,9 +39,9 @@ class ApplicationConfirmation {
    */
   clickCloseButton(hasPayment = true) {
     if (hasPayment) {
-      cy.wait("@checkout").its("response.statusCode").should("eq", 201);
-      cy.wait("@getFiling").its("response.statusCode").should("eq", 200);
-      cy.wait("@getPayment").its("response.statusCode").should("eq", 200);
+      pw.wait("@checkout").its("response.statusCode").should("eq", 201);
+      pw.wait("@getFiling").its("response.statusCode").should("eq", 200);
+      pw.wait("@getPayment").its("response.statusCode").should("eq", 200);
     }
     this.getElement().closeButton().click();
   }

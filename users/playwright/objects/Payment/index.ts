@@ -1,21 +1,21 @@
 class Payment {
   private elements() {
     return {
-      savedPaymentMethods: () => cy.get('label[for="savedPayment"]'),
+      savedPaymentMethods: () => pw.get('label[for="savedPayment"]'),
       savedPaymentMethodItems: () =>
-        cy.get(".form-section").eq(0).find(".radio").find(".form-check"),
-      newPaymentMethod: () => cy.get('label[for="newPaymentRadio"]'),
+        pw.get(".form-section").eq(0).find(".radio").find(".form-check"),
+      newPaymentMethod: () => pw.get('label[for="newPaymentRadio"]'),
       saveThisPaymentMethodForFutureUseCheckbox: () =>
-        cy.get(
+        pw.get(
           "input[data-cy='Save this payment method for future use-checkbox']"
         ),
       termsAndConditionsCheckbox: () =>
-        cy.get(
+        pw.get(
           'input[data-cy="I have read and agree to the Terms and Conditions of this online payment system.-checkbox"]'
         ),
-      finishAndPayButton: () => cy.get("button").contains("Finish and Pay"),
-      payNowButton: () => cy.get("button").contains("Pay Now"),
-      payLaterButton: () => cy.get("button").contains("Pay Later"),
+      finishAndPayButton: () => pw.get("button").contains("Finish and Pay"),
+      payNowButton: () => pw.get("button").contains("Pay Now"),
+      payLaterButton: () => pw.get("button").contains("Pay Later"),
     };
   }
 
@@ -39,14 +39,14 @@ class Payment {
     // this intercept is important to determine that the iframe is loaded
     // before proceeding to interact with the iframe after
     // the new payment method button is clicked
-    cy.intercept("POST", "https://**.amazonaws.com//burton/payment-method").as(
+    pw.intercept("POST", "https://**.amazonaws.com//burton/payment-method").as(
       "burtonPaymentMethod"
     );
-    cy.intercept(
+    pw.intercept(
       "GET",
       "https://**.i3verticals.com/v2/plugins/payment/payment**"
     ).as("paymentMethodPlugin");
-    cy.intercept(
+    pw.intercept(
       "POST",
       "https://**.i3verticals.com/v2/plugins/payment/**/token"
     ).as("continuePaymentIframe");
@@ -59,12 +59,12 @@ class Payment {
 
   selectSavedPaymentMethod(order: number) {
     this.getElements().savedPaymentMethodItems().eq(order).click();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   clickTermsAndConditionsCheckbox() {
     this.getElements().termsAndConditionsCheckbox().click();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   clickFinishAndPayButton() {
@@ -98,15 +98,15 @@ class Payment {
       bankRoutingNumber,
       bankAccountNumber,
     } = data;
-    cy.wait("@burtonPaymentMethod")
+    pw.wait("@burtonPaymentMethod")
       .its("response.statusCode")
       .should("eq", 201);
-    cy.waitForLoading();
-    cy.wait("@paymentMethodPlugin")
+    pw.waitForLoading();
+    pw.wait("@paymentMethodPlugin")
       .its("response.statusCode")
       .should("eq", 200);
-    cy.waitForLoading();
-    cy.enter(
+    pw.waitForLoading();
+    pw.enter(
       "iframe[src*='https://content-dev.i3verticals.com/uapi/plugins']"
     ).then((getBody) => {
       getBody().find("div[name='tab_bank_account']").click();
@@ -127,7 +127,7 @@ class Payment {
         .type(bankAccountNumber);
       getBody().find("button").contains("Continue").click();
     });
-    cy.wait("@continuePaymentIframe");
+    pw.wait("@continuePaymentIframe");
   }
 
   addDebitCreditCardDetails(data: {
@@ -152,16 +152,16 @@ class Payment {
       expirationDate,
       cvv,
     } = data;
-    cy.wait("@burtonPaymentMethod")
+    pw.wait("@burtonPaymentMethod")
       .its("response.statusCode")
       .should("eq", 201);
-    cy.waitForLoading();
-    cy.wait("@paymentMethodPlugin")
+    pw.waitForLoading();
+    pw.wait("@paymentMethodPlugin")
       .its("response.statusCode")
       .should("eq", 200);
-    cy.waitForLoading();
+    pw.waitForLoading();
 
-    cy.enter(
+    pw.enter(
       "iframe[src*='https://content-dev.i3verticals.com/uapi/plugins']"
     ).then((getBody) => {
       getBody().find("input[name='first_name']").type(firstName);
@@ -175,7 +175,7 @@ class Payment {
       getBody().find("input[name='cc_cvv']").type(cvv);
       getBody().find("button").contains("Continue").click();
     });
-    cy.wait("@continuePaymentIframe");
+    pw.wait("@continuePaymentIframe");
   }
 }
 

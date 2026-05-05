@@ -5,14 +5,14 @@ const agsFormGrid = new FormGrid({ userType: "ags" });
 
 test.describe("As an AGS user, I should be able to open a form draft in form editor.", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 2 });
+    pw.login({ accountType: "ags", accountIndex: 2 });
     agsFormGrid.init();
     agsFormGrid.filterColumn("Draft Change Type", "None");
     agsFormGrid.getDataOfColumnForNRow(0, "Form Title", "firstRowForm");
     agsFormGrid.getDataOfColumnForNRow(0, "Clients", "firstRowClient");
     agsFormGrid.clickClearAllFiltersButton();
-    cy.get("@firstRowForm").then(($firstRowForm) => {
-      cy.get("@firstRowClient").then(($firstRowClient) => {
+    pw.get("@firstRowForm").then(($firstRowForm) => {
+      pw.get("@firstRowClient").then(($firstRowClient) => {
         agsFormGrid.init();
         agsFormGrid.filterColumn(
           "Form Title",

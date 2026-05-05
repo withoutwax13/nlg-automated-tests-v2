@@ -10,12 +10,12 @@ class UpdateBusinessList {
   }
   private elements() {
     return {
-      reviewBusinessButton: () => cy.get("button").contains("Review Business"),
+      reviewBusinessButton: () => pw.get("button").contains("Review Business"),
       updateFormRequirementsButton: () =>
-        cy.get("button").contains(/Update Form Requirements|Set Form Requirements/),
+        pw.get("button").contains(/Update Form Requirements|Set Form Requirements/),
       locationList: () =>
         this.getElements().reviewBusinessButton().parent().parent().parent(), // returns more than one element
-      locationsUpdatedCounter: () => cy.get("b").contains("Locations Updated"),
+      locationsUpdatedCounter: () => pw.get("b").contains("Locations Updated"),
     };
   }
 

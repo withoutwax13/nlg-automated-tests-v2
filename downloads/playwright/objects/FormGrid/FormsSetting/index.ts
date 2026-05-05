@@ -1,13 +1,13 @@
 class FormsSetting {
   private elements() {
     return {
-      saveButton: () => cy.get(".k-actions").find("button").contains("Save"),
+      saveButton: () => pw.get(".k-actions").find("button").contains("Save"),
       cancelButton: () =>
-        cy.get(".k-actions").find("button").contains("Cancel"),
+        pw.get(".k-actions").find("button").contains("Cancel"),
       municipalityDropdown: () =>
-        cy.get('input[placeholder="Search government and press enter …"]'),
-      anyList: () => cy.get("li"),
-      forrms: () => cy.get(".k-list-item"),
+        pw.get('input[placeholder="Search government and press enter …"]'),
+      anyList: () => pw.get("li"),
+      forrms: () => pw.get(".k-list-item"),
     };
   }
   getElement() {
@@ -28,12 +28,12 @@ class FormsSetting {
   }
 
   saveFormOrders(aliasName: string) {
-    cy.wrap([]).as(aliasName);
+    pw.wrap([]).as(aliasName);
     this.getElement()
       .forrms()
       .each(($el) => {
-        cy.get(`@${aliasName}`).then((formsOrder) => {
-          cy.wrap([...formsOrder, $el.text()]).as(aliasName);
+        pw.get(`@${aliasName}`).then((formsOrder) => {
+          pw.wrap([...formsOrder, $el.text()]).as(aliasName);
         });
       });
   }

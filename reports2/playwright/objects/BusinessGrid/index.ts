@@ -147,39 +147,39 @@ class BusinessGrid {
   }
   private elements() {
     return {
-      pageTitle: () => cy.get("h1"),
+      pageTitle: () => pw.get("h1"),
       pageHelpContent: () => this.getElement().pageTitle().next(),
-      anyList: () => cy.get("li"),
-      noRecordFoundComponent: () => cy.get(".k-grid-norecords-template"),
+      anyList: () => pw.get("li"),
+      noRecordFoundComponent: () => pw.get(".k-grid-norecords-template"),
       addBusinessButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Add a Business"),
+        pw.get(".NLGButtonSecondary").contains("Add a Business"),
       uploadBusinessButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Upload Businesses"),
-      exportButton: () => cy.get(".NLGButtonSecondary").contains("Export"),
+        pw.get(".NLGButtonSecondary").contains("Upload Businesses"),
+      exportButton: () => pw.get(".NLGButtonSecondary").contains("Export"),
       resetDataButton: () =>
-        cy.get(".NLGButtonSecondaryDanger").contains("Reset All Data"),
+        pw.get(".NLGButtonSecondaryDanger").contains("Reset All Data"),
       businessConfigurationButton: () =>
-        cy.get(".NLGButtonSecondary").find(".a-magnifying-glass-plus"),
-      searchBox: () => cy.get("span").find(".fa-magnifying-glass").parent(),
-      columns: () => cy.get("thead").find("tr").find("th"),
+        pw.get(".NLGButtonSecondary").find(".a-magnifying-glass-plus"),
+      searchBox: () => pw.get("span").find(".fa-magnifying-glass").parent(),
+      columns: () => pw.get("thead").find("tr").find("th"),
       rows: () =>
-        cy.get("tbody").then(($tbody) => {
+        pw.get("tbody").then(($tbody) => {
           if ($tbody.find("tr").length !== 0) {
             return $tbody.find("tr");
           }
         }),
       customizeTableViewButton: () =>
-        cy.get("*").contains("Customize Table View"),
+        pw.get("*").contains("Customize Table View"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -193,7 +193,7 @@ class BusinessGrid {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -201,9 +201,9 @@ class BusinessGrid {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
@@ -211,12 +211,12 @@ class BusinessGrid {
           .find(".k-button")
           .contains("Filter"),
       searchMunicipalityDropdown: () =>
-        cy.get('input[placeholder="Search government ..."]'),
-      anyButton: () => cy.get("button"),
+        pw.get('input[placeholder="Search government ..."]'),
+      anyButton: () => pw.get("button"),
       clearAllFiltersButton: () =>
-        cy.get("*").contains("Clear All"),
-      toastComponent: () => cy.get(".Toastify"),
-      gridPopup: () => cy.get(".k-popup"),
+        pw.get("*").contains("Clear All"),
+      toastComponent: () => pw.get(".Toastify"),
+      gridPopup: () => pw.get(".k-popup"),
       gridPopupTitle: () =>
         this.getElement().gridPopup().find("div").find("div").find("div"),
       gridPopupContent: () => this.getElement().gridPopupTitle().next(),
@@ -241,26 +241,26 @@ class BusinessGrid {
   }
 
   init() {
-    cy.intercept(
+    pw.intercept(
       "GET",
       "https://**.amazonaws.com/municipalityBusinessConfig/**"
     ).as("govBusinessConfig");
-cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGridSettings");
-    cy.visit("/BusinessesApp/BusinessesList");
-    cy.waitForLoading(10);
+pw.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGridSettings");
+    pw.visit("/BusinessesApp/BusinessesList");
+    pw.waitForLoading(10);
     switch (this.userType) {
       case "taxpayer":
-        cy.wait("@userGridSettings").its("response.statusCode").should("eq", 200);
+        pw.wait("@userGridSettings").its("response.statusCode").should("eq", 200);
         getOrderOfColumns(TAXPAYER_COLUMNS, this.defaultGridColumnAlias);
         break;
       case "municipal":
-        cy.wait("@userGridSettings").its("response.statusCode").should("eq", 200);
+        pw.wait("@userGridSettings").its("response.statusCode").should("eq", 200);
         getOrderOfColumns(MUNICIPAL_COLUMNS, this.defaultGridColumnAlias);
         break;
       case "ags":
         this.searchMunicipality(this.municipalitySelection);
-        cy.waitForLoading(10);
-        cy.wait("@userGridSettings").its("response.statusCode").should("eq", 200);
+        pw.waitForLoading(10);
+        pw.wait("@userGridSettings").its("response.statusCode").should("eq", 200);
         getOrderOfColumns(AGS_COLUMNS, this.defaultGridColumnAlias);
         break;
       default:
@@ -305,7 +305,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -373,7 +373,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -419,7 +419,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -429,7 +429,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -444,7 +444,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -460,7 +460,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
                 .replace(/\s+/g, " ")
                 .trim() === anchorValue
             ) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -488,15 +488,15 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
 
   deleteBusiness(businessDba: string) {
     this.getElementOfColumn("Delete", "DBA", businessDba, "deleteButton");
-    cy.get("@deleteButton").click();
+    pw.get("@deleteButton").click();
     this.businessDeleteModal.clickDeleteButton();
     this.getElement().toastComponent().should("exist");
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   viewBusinessDetails(businessDba: string) {
     this.getElementOfColumn("Details", "DBA", businessDba, "detailsButton");
-    cy.get("@detailsButton").click();
+    pw.get("@detailsButton").click();
   }
 
   setDelinquencyStartDate(
@@ -509,7 +509,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
       businessDba,
       "delinquencyStartDateInput"
     );
-    cy.get("@delinquencyStartDateInput").click();
+    pw.get("@delinquencyStartDateInput").click();
     this.getElement().gridPopupDateInput().click();
     this.getElement().gridPopupDateInput().type(`${date.month}`);
 
@@ -521,7 +521,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
       .gridPopupDateInput()
       .type(`{rightarrow}{rightarrow}0000${date.year}`);
     this.getElement().gridPopupSaveButton().should("not.be.disabled").click();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   setCloseDate(
@@ -529,7 +529,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
     date: { month: number; date: number; year: number }
   ) {
     this.getElementOfColumn("Close Date", "DBA", businessDba, "closeDateInput");
-    cy.get("@closeDateInput").click();
+    pw.get("@closeDateInput").click();
     this.getElement().gridPopupDateInput().click();
     this.getElement().gridPopupDateInput().type(`${date.month}`);
 
@@ -541,7 +541,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
       .gridPopupDateInput()
       .type(`{rightarrow}{rightarrow}0000${date.year}`);
     this.getElement().gridPopupSaveButton().should("not.be.disabled").click();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   addRequiredForms(businessDba: string, forms: string[]) {
@@ -551,7 +551,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
       businessDba,
       "requiredFormsCellAdd"
     );
-    cy.get("@requiredFormsCellAdd").click();
+    pw.get("@requiredFormsCellAdd").click();
     forms.forEach((form) => {
       this.getElement()
         .gridPopupSelectionItem(form)
@@ -567,7 +567,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
         });
     });
     this.getElement().gridPopupSaveButton().should("not.be.disabled").click();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   removeRequiredForms(businessDba: string, forms: string[]) {
@@ -577,7 +577,7 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
       businessDba,
       "requiredFormsCellRemove"
     );
-    cy.get("@requiredFormsCellRemove").click();
+    pw.get("@requiredFormsCellRemove").click();
     forms.forEach((form) => {
       this.getElement()
         .gridPopupSelectionItem(form)
@@ -593,18 +593,18 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
         });
     });
     this.getElement().gridPopupSaveButton().should("not.be.disabled").click();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   checkEnabledRequiredForms(businessDba: string, aliasVariable: string) {
-    cy.wrap([]).as(aliasVariable);
+    pw.wrap([]).as(aliasVariable);
     this.getElementOfColumn(
       "Required Forms",
       "DBA",
       businessDba,
       "requiredFormsCellCheck"
     );
-    cy.get("@requiredFormsCellCheck").click();
+    pw.get("@requiredFormsCellCheck").click();
     this.getElement()
       .gridPopupContent()
       .find(".k-checkbox-wrap")
@@ -618,8 +618,8 @@ cy.intercept("GET", "https://**.amazonaws.com/usersGridSettings/**").as("userGri
           .invoke("attr", "aria-checked")
           .then((isChecked) => {
             if (isChecked === "true") {
-              cy.get(`@${aliasVariable}`).then((forms) => {
-                cy.wrap([...forms, label]).as(aliasVariable);
+              pw.get(`@${aliasVariable}`).then((forms) => {
+                pw.wrap([...forms, label]).as(aliasVariable);
               });
             }
           });

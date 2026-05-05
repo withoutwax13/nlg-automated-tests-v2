@@ -4,19 +4,19 @@ export const getOrderOfColumns = (
   columnCollectionAlias: string
 ) => {
   // Check if the alias already exists and has valid data
-  if (Cypress._.has(cy.state("aliases"), columnCollectionAlias)) {
+  if (PW._.has(pw.state("aliases"), columnCollectionAlias)) {
     // Alias already exists and has valid data, skip the process
     return;
   }
 
   // Alias does not exist or is empty, proceed with the process
-  cy.wrap({}).as(`${columnCollectionAlias}`);
+  pw.wrap({}).as(`${columnCollectionAlias}`);
 
-  cy.get("thead")
+  pw.get("thead")
     .find("tr")
     .find("th")
     .each(($th, index) => {
-      cy.get(`@${columnCollectionAlias}`).then((columnIndexes) => {
+      pw.get(`@${columnCollectionAlias}`).then((columnIndexes) => {
         columns.forEach((column) => {
           // Clean the text content of the current column header using regex
           const cleanedText = $th
@@ -26,10 +26,10 @@ export const getOrderOfColumns = (
 
           if (cleanedText === column) {
             // LOG FOR DEBUG
-            // cy.log(`Processing column: ${column}`);
-            // cy.log(`Column index in DOM: ${index}`);
+            // pw.log(`Processing column: ${column}`);
+            // pw.log(`Column index in DOM: ${index}`);
 
-            cy.wrap({
+            pw.wrap({
               ...columnIndexes,
               [column]: index,
             }).as(`${columnCollectionAlias}`);

@@ -15,21 +15,21 @@ const stepperNameShouldBeCurrent = (stepperName) => {
 
 test.describe("As an muinicipal user, I want to be able to navigate the form pages without validation", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "municipal", accountIndex: 2 });
+    pw.login({ accountType: "municipal", accountIndex: 2 });
     municipalFormsGrid.init();
-    cy.stubNewWindow("previewFormWindow");
+    pw.stubNewWindow("previewFormWindow");
     municipalFormsGrid.toggleActionButton(
       "filter",
       "Preview",
       "Form Title",
       "Food and Beverage Tax Return (Monthly)"
     );
-    cy.get("@previewFormWindow").should("be.called");
-    cy.url().should("include", "?preview=yes");
+    pw.get("@previewFormWindow").should("be.called");
+    pw.url().should("include", "?preview=yes");
     stepperNameShouldBeCurrent("Instructions");
     previewForm.getElement().nextButton().should("be.enabled");
     previewForm.clickNextbutton();
-    cy.waitForLoading();
+    pw.waitForLoading();
     previewForm.getElement().nextButton().should("be.disabled");
     previewForm.clickSkipRequiredFieldsCheckbox();
     previewForm.getElement().nextButton().should("be.enabled");
@@ -44,15 +44,15 @@ test.describe("As an muinicipal user, I want to be able to navigate the form pag
     stepperNameShouldBeCurrent("Basic Info");
     previewForm.getElement().nextButton().should("be.enabled");
     previewForm.clickNextbutton();
-    cy.waitForLoading();
+    pw.waitForLoading();
     stepperNameShouldBeCurrent("Tax Info");
     previewForm.getElement().nextButton().should("be.enabled");
     previewForm.clickNextbutton();
-    cy.waitForLoading();
+    pw.waitForLoading();
     stepperNameShouldBeCurrent("Preparer Info");
     previewForm.getElement().nextButton().should("be.enabled");
     previewForm.clickNextbutton();
-    cy.waitForLoading();
+    pw.waitForLoading();
     stepperNameShouldBeCurrent("Preview");
   });
 });

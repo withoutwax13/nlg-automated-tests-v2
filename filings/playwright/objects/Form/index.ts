@@ -8,32 +8,32 @@ class Form {
    */
   private elements() {
     return {
-      nextButton: () => cy.get(".NLGButtonPrimary").contains("Next"),
-      formTitle: () => cy.get("h1"),
-      stepper: () => cy.get(".k-stepper").find("ol"),
-      backButton: () => cy.get(".NLGButtonSecondary").contains("Back"),
+      nextButton: () => pw.get(".NLGButtonPrimary").contains("Next"),
+      formTitle: () => pw.get("h1"),
+      stepper: () => pw.get(".k-stepper").find("ol"),
+      backButton: () => pw.get(".NLGButtonSecondary").contains("Back"),
       saveAndCloseButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Save And Close"),
+        pw.get(".NLGButtonSecondary").contains("Save And Close"),
       managerOperatorFullName: () =>
-        cy.get('span[data-cy="Manager/Operator Full Name-masked-input"]'),
-      managerOperatorTitle: () => cy.get('input[name="OperatorTitleRB"]'),
-      managerOperatorPhoneNumber: () => cy.get('input[name="OperatorPhoneRB"]'),
+        pw.get('span[data-cy="Manager/Operator Full Name-masked-input"]'),
+      managerOperatorTitle: () => pw.get('input[name="OperatorTitleRB"]'),
+      managerOperatorPhoneNumber: () => pw.get('input[name="OperatorPhoneRB"]'),
       managerOperatorEmail: () =>
-        cy.get('input[name="OperatorEmailAddressRB"]'),
+        pw.get('input[name="OperatorEmailAddressRB"]'),
       managerEmergencyPhoneNumber: () =>
-        cy.get('input[name="EmergencyPhoneNumberRB"]'),
-      agencyName: () => cy.get("#AgencyName"),
-      agencyTypeDropdown: () => cy.get('div[data-cy="Agency Type-dropdown"]'),
-      preparerFullName: () => cy.get("#TaxPreparerFullName"),
-      preparerTitle: () => cy.get("#Title"),
-      preparerPhone: () => cy.get("#TaxPreparerPhoneNumber"),
-      preparerEmailAddress: () => cy.get("#PreparerEmail"),
-      signature: () => cy.get("#Signature"),
+        pw.get('input[name="EmergencyPhoneNumberRB"]'),
+      agencyName: () => pw.get("#AgencyName"),
+      agencyTypeDropdown: () => pw.get('div[data-cy="Agency Type-dropdown"]'),
+      preparerFullName: () => pw.get("#TaxPreparerFullName"),
+      preparerTitle: () => pw.get("#Title"),
+      preparerPhone: () => pw.get("#TaxPreparerPhoneNumber"),
+      preparerEmailAddress: () => pw.get("#PreparerEmail"),
+      signature: () => pw.get("#Signature"),
       agencyCheckbox: () =>
-        cy.get(
+        pw.get(
           '*[data-cy="Check box if you are a representative of an Agency registering on behalf of a business owner.-checkbox"]'
         ),
-      applicantInfoDateData: () => cy.get("#Date"),
+      applicantInfoDateData: () => pw.get("#Date"),
     };
   }
 
@@ -49,10 +49,10 @@ class Form {
    * Click the next button.
    */
   clickNextbutton(isFromFormSteps = true) {
-    cy.intercept("PATCH", "https://**.azavargovapps.com/filings/**/input?form-id=**").as("saveFormInput");
+    pw.intercept("PATCH", "https://**.azavargovapps.com/filings/**/input?form-id=**").as("saveFormInput");
     this.elements().nextButton().click();
     if (isFromFormSteps) {
-      cy.wait("@saveFormInput").its("response.statusCode").should("eq", 200);
+      pw.wait("@saveFormInput").its("response.statusCode").should("eq", 200);
     }
   }
 
@@ -97,8 +97,8 @@ class Form {
 
     const element =
       selectorCountOnMultiple === undefined
-        ? cy.get(selector)
-        : cy.get(selector).eq(selectorCountOnMultiple);
+        ? pw.get(selector)
+        : pw.get(selector).eq(selectorCountOnMultiple);
 
     switch (method) {
       case "type":
@@ -108,7 +108,7 @@ class Form {
         break;
       case "select":
         element.click();
-        cy.get("li").contains(data).click();
+        pw.get("li").contains(data).click();
         break;
       case "click":
         element.click();
@@ -133,8 +133,8 @@ class Form {
       "select",
       getValidDate()
     );
-    cy.waitForLoading();
-    cy.get("div").then(($el) => {
+    pw.waitForLoading();
+    pw.get("div").then(($el) => {
       if ($el.text().includes("You have already filed for this period")) {
         this.handleSelectingUnavailableFilingPeriod(++counter);
       }
@@ -142,8 +142,8 @@ class Form {
   }
 
   enterBasicInformation(data?: any) {
-    cy.wait("@createFiling").its("response.statusCode").should("eq", 201);
-    cy.wait("@visitFormPage").its("response.statusCode").should("eq", 200);
+    pw.wait("@createFiling").its("response.statusCode").should("eq", 201);
+    pw.wait("@visitFormPage").its("response.statusCode").should("eq", 200);
     this.handleSelectingUnavailableFilingPeriod(1); // 4 months ago
     // this.enterData(
     //   '*[data-cy="Business Location State-dropdown"]',
@@ -181,15 +181,15 @@ class Form {
   saveAndCloseFiling() {
     this.getElement().saveAndCloseButton().click();
     // TODO: Add save and close modal POM
-    cy.get('.k-actions').find('button').contains('Save and Close').click();
-    cy.waitForLoading();
+    pw.get('.k-actions').find('button').contains('Save and Close').click();
+    pw.waitForLoading();
   }
 
   deleteAndCloseFiling() {
     this.getElement().saveAndCloseButton().click();
     // TODO: Add save and close modal POM
-    cy.get('.k-actions').find('button').contains('Delete And Close').click();
-    cy.waitForLoading();
+    pw.get('.k-actions').find('button').contains('Delete And Close').click();
+    pw.waitForLoading();
   }
 }
 

@@ -15,27 +15,27 @@ class UserDetails {
   }
   private elements() {
     return {
-      pageTitle: () => cy.get("h1"),
-      noRecordFoundComponent: () => cy.get(".k-grid-norecords-template"),
-      columns: () => cy.get("thead").find("tr").find("th"),
+      pageTitle: () => pw.get("h1"),
+      noRecordFoundComponent: () => pw.get(".k-grid-norecords-template"),
+      columns: () => pw.get("thead").find("tr").find("th"),
       rows: () =>
-        cy.get("tbody").then(($tbody) => {
+        pw.get("tbody").then(($tbody) => {
           if ($tbody.find("tr").length !== 0) {
             return $tbody.find("tr");
           }
         }),
       customizeTableViewButton: () =>
-        cy.get("*").contains("Customize Table View"),
+        pw.get("*").contains("Customize Table View"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -49,7 +49,7 @@ class UserDetails {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -57,22 +57,22 @@ class UserDetails {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
           .find(".k-actions")
           .find(".k-button")
           .contains("Filter"),
-      anyList: () => cy.get("li"),
-      anyButton: () => cy.get("button"),
+      anyList: () => pw.get("li"),
+      anyButton: () => pw.get("button"),
       clearAllFiltersButton: () =>
-        cy.get("*").contains("Clear All"),
-      itemsData: () => cy.get(".k-pager-info"),
+        pw.get("*").contains("Clear All"),
+      itemsData: () => pw.get(".k-pager-info"),
       getUserDetailsData: (labelName: string) =>
-        cy.get("label").contains(labelName).parent().next(),
+        pw.get("label").contains(labelName).parent().next(),
       firstNameData: () => this.getElement().getUserDetailsData("First Name:"),
       lastNameData: () => this.getElement().getUserDetailsData("Last Name:"),
       emailData: () => this.getElement().getUserDetailsData("Email:"),
@@ -84,8 +84,8 @@ class UserDetails {
       userLastModifiedDateData: () =>
         this.getElement().getUserDetailsData("User Last Modified Date:"),
       loginActivityTab: () =>
-        cy.get(".k-tabstrip-items").contains("Login Activity"),
-      userGroupsTab: () => cy.get(".k-tabstrip-items").contains("User Groups"),
+        pw.get(".k-tabstrip-items").contains("Login Activity"),
+      userGroupsTab: () => pw.get(".k-tabstrip-items").contains("User Groups"),
     };
   }
 
@@ -121,7 +121,7 @@ class UserDetails {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -189,7 +189,7 @@ class UserDetails {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -235,7 +235,7 @@ class UserDetails {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -245,7 +245,7 @@ class UserDetails {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -260,7 +260,7 @@ class UserDetails {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -274,7 +274,7 @@ class UserDetails {
                 .replace(/\s+/g, " ")
                 .trim() === anchorValue
             ) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -286,7 +286,7 @@ class UserDetails {
       .invoke("text")
       .then((text: string) => {
         const totalItems = parseInt(text.split("of")[1].replace(/\D/g, ""));
-        cy.wrap(totalItems).as(variableAlias);
+        pw.wrap(totalItems).as(variableAlias);
       });
   }
 
@@ -297,20 +297,20 @@ class UserDetails {
       LOGIN_ACTIVITY_COLUMNS,
       `${this.defaultGridColumnsAlias}`
     );
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   clickUserGroupsTab() {
     this.getElement().userGroupsTab().click();
     this.defaultGridColumnsAlias = `${this.defaultGridColumnsAlias}UserGroups`;
     getOrderOfColumns(USER_GROUP_COLUMNS, `${this.defaultGridColumnsAlias}`);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   enableUserGroup(groupName: string) {
     this.clickUserGroupsTab();
     this.filterColumn("Group Name", groupName, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes["Is Member?"];
@@ -318,12 +318,12 @@ class UserDetails {
           .rows()
           .each(($row) => {
             const $columns = $row.find("td");
-            cy.wrap($columns.eq(columnIndex))
+            pw.wrap($columns.eq(columnIndex))
               .invoke("text")
               .then((text) => {
                 if (text.includes("No")) {
-                  cy.wrap($columns.eq(columnIndex)).find('span[role="switch"]').click();
-                  cy.waitForLoading();
+                  pw.wrap($columns.eq(columnIndex)).find('span[role="switch"]').click();
+                  pw.waitForLoading();
                 }
               });
           });
@@ -333,7 +333,7 @@ class UserDetails {
   disableUserGroup(groupName: string) {
     this.clickUserGroupsTab();
     this.filterColumn("Group Name", groupName, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes["Is Member?"];
@@ -341,12 +341,12 @@ class UserDetails {
           .rows()
           .each(($row) => {
             const $columns = $row.find("td");
-            cy.wrap($columns.eq(columnIndex))
+            pw.wrap($columns.eq(columnIndex))
               .invoke("text")
               .then((text) => {
                 if (text.includes("Yes")) {
-                  cy.wrap($columns.eq(columnIndex)).find('span[role="switch"]').click();
-                  cy.waitForLoading();
+                  pw.wrap($columns.eq(columnIndex)).find('span[role="switch"]').click();
+                  pw.waitForLoading();
                 }
               });
           });

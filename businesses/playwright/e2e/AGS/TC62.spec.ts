@@ -13,7 +13,7 @@ const agsBusinessUpdatePage = new BusinessUpdate({ userType: "ags" });
 test.describe("As a user, if I clear the required fields in the update business page, the save button should remain disabled", () => {
   // Skipped, assertion moved to TC61
   test.skip("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 2 });
+    pw.login({ accountType: "ags", accountIndex: 2 });
     agsBusinessGrid.init();
     agsBusinessGrid.clickClearAllFiltersButton();
     agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");

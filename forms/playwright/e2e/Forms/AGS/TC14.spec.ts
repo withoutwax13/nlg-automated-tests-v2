@@ -9,18 +9,18 @@ const filing = new Filing({ isResumingDraftApplication: false });
 
 test.describe("As an AGS user, the current taxpayer form display arrangement in the settings should be the same as the taxpayer filing experience", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 7 });
+    pw.login({ accountType: "ags", accountIndex: 7 });
     agsFormsGrid.init();
     agsFormsGrid.clickSettingsButton();
     formsSettingModal.selectMunicipality("City of Arrakis");
     formsSettingModal.saveFormOrders("arrakisTaxpayerForms");
     formsSettingModal.clickSaveButton();
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
-    cy.get("@arrakisTaxpayerForms").then((arrakisTaxpayerForms) => {
+    pw.get("@arrakisTaxpayerForms").then((arrakisTaxpayerForms) => {
       arrakisTaxpayerForms.forEach((formName: string, index: number) => {
         filing.getElements().formLinkItem(formName).should("exist");
         filing

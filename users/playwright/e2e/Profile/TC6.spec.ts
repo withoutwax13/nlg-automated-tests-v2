@@ -33,7 +33,7 @@ const deleteMultipleFiling = (
 
 test.describe.skip("As a Taxpayer user, I should be able to save and delete bank account information", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 1 });
+    pw.login({ accountType: "ags", accountIndex: 1 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -47,7 +47,7 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete bank
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -56,8 +56,8 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete bank
         );
       }
     });
-    cy.logout();
-    cy.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
+    pw.logout();
+    pw.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -92,7 +92,7 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete bank
       .savedBankAccountItems()
       .its("length")
       .then((savedBankAccountsLength) => {
-        cy.wrap(savedBankAccountsLength).as("savedBankAccountsLength");
+        pw.wrap(savedBankAccountsLength).as("savedBankAccountsLength");
       });
     profile.deleteSavedPaymentMethod("bank", 0);
     profile
@@ -100,7 +100,7 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete bank
       .savedBankAccountItems()
       .its("length")
       .then((currentLength) => {
-        cy.get("@savedBankAccountsLength").then((savedBankAccountsLength) => {
+        pw.get("@savedBankAccountsLength").then((savedBankAccountsLength) => {
           expect(Number(currentLength)).to.not.eq(
             Number(savedBankAccountsLength)
           );

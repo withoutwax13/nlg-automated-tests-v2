@@ -5,7 +5,7 @@ const municipalFormGrid = new FormGrid({ userType: "municipal" });
 
 test.describe("As a municipal user, I should be able to export forms.", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "municipal" });
+    pw.login({ accountType: "municipal" });
     municipalFormGrid.init();
     municipalFormGrid.clickExportButton();
   });

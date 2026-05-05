@@ -78,26 +78,26 @@ class FilingGrid {
   }
 
   init() {
-    cy.intercept("GET", "https://**.azavargovapps.com/users/**").as("getUserDetails");
-    cy.intercept("GET", "https://**.azavargovapps.com/municipalities/ActiveTaxAndFeesSubscriptions").as("getMunicipalitiesWithActiveSubscriptions");
-    cy.intercept("GET", "https://**.azavargovapps.com/forms/municipality-forms-names/**").as("getFormNames");
-    cy.intercept("GET", "https://**.azavargovapps.com/forms/municipality/**").as("getActiveForms");
-    cy.intercept("GET", "https://**.azavargovapps.com/municipalities/**").as("getMunicipalityDetails");
-    cy.intercept("GET", "https://**.azavargovapps.com/users/usersGridSettings/**").as("getGridSettings");
-    cy.intercept("GET", "https://**.azavargovapps.com/filings/?municipalityId=**").as("getFilings");
-    cy.visit("/filingApp/filingList");
+    pw.intercept("GET", "https://**.azavargovapps.com/users/**").as("getUserDetails");
+    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/ActiveTaxAndFeesSubscriptions").as("getMunicipalitiesWithActiveSubscriptions");
+    pw.intercept("GET", "https://**.azavargovapps.com/forms/municipality-forms-names/**").as("getFormNames");
+    pw.intercept("GET", "https://**.azavargovapps.com/forms/municipality/**").as("getActiveForms");
+    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/**").as("getMunicipalityDetails");
+    pw.intercept("GET", "https://**.azavargovapps.com/users/usersGridSettings/**").as("getGridSettings");
+    pw.intercept("GET", "https://**.azavargovapps.com/filings/?municipalityId=**").as("getFilings");
+    pw.visit("/filingApp/filingList");
     if (this.userType === "ags") {
       if (this.municipalitySelection === undefined) {
         throw new Error("Municipality selection is required for AGS user type");
       }
-      cy.wait("@getUserDetails").its("response.statusCode").should("eq", 200);
-      cy.wait("@getMunicipalitiesWithActiveSubscriptions").its("response.statusCode").should("eq", 200);
+      pw.wait("@getUserDetails").its("response.statusCode").should("eq", 200);
+      pw.wait("@getMunicipalitiesWithActiveSubscriptions").its("response.statusCode").should("eq", 200);
       this.selectMunicipality(this.municipalitySelection);
-      cy.wait("@getFormNames").its("response.statusCode").should("eq", 200);
-      cy.wait("@getActiveForms").its("response.statusCode").should("eq", 200);
-      cy.wait("@getMunicipalityDetails").its("response.statusCode").should("eq", 200);
-      cy.wait("@getGridSettings").its("response.statusCode").should("eq", 200);
-      cy.wait("@getFilings").its("response.statusCode").should("eq", 200);
+      pw.wait("@getFormNames").its("response.statusCode").should("eq", 200);
+      pw.wait("@getActiveForms").its("response.statusCode").should("eq", 200);
+      pw.wait("@getMunicipalityDetails").its("response.statusCode").should("eq", 200);
+      pw.wait("@getGridSettings").its("response.statusCode").should("eq", 200);
+      pw.wait("@getFilings").its("response.statusCode").should("eq", 200);
       getOrderOfColumns(
         AGS_FILING_COLUMNS,
         `${this.userType}_${this.defaultGridColumnsAlias}`
@@ -113,32 +113,32 @@ class FilingGrid {
         `${this.userType}_${this.defaultGridColumnsAlias}`
       );
     }
-    cy.url().should("include", "/filingApp/filingList");
-    cy.waitForLoading(3);
+    pw.url().should("include", "/filingApp/filingList");
+    pw.waitForLoading(3);
   }
 
   private elements() {
     return {
-      searchBox: () => cy.get("div").find(".fa-magnifying-glass").parent(),
-      columns: () => cy.get("thead").find("tr").find("th"),
+      searchBox: () => pw.get("div").find(".fa-magnifying-glass").parent(),
+      columns: () => pw.get("thead").find("tr").find("th"),
       rows: () =>
-        cy.get("tbody").then(($tbody) => {
+        pw.get("tbody").then(($tbody) => {
           if ($tbody.find("tr").length !== 0) {
             return $tbody.find("tr");
           }
         }),
       customizeTableViewButton: () =>
-        cy.get("*").contains("Customize"),
+        pw.get("*").contains("Customize"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -152,7 +152,7 @@ class FilingGrid {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -160,9 +160,9 @@ class FilingGrid {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
@@ -170,14 +170,14 @@ class FilingGrid {
           .find(".k-button")
           .contains("Filter"),
       searchMunicipalityDropdown: () =>
-        cy.get('input[placeholder="Select government..."]'),
-      anyList: () => cy.get("li"),
-      anyButton: () => cy.get("button"),
+        pw.get('input[placeholder="Select government..."]'),
+      anyList: () => pw.get("li"),
+      anyButton: () => pw.get("button"),
       clearAllFiltersButton: () =>
-        cy.get("*").contains("Clear All"),
-      exportButton: () => cy.get(".NLGButtonPrimary").contains("Export"),
+        pw.get("*").contains("Clear All"),
+      exportButton: () => pw.get(".NLGButtonPrimary").contains("Export"),
       viewRequestedExtractButton: () =>
-        cy.get("*").contains("View requested extracts"),
+        pw.get("*").contains("View requested extracts"),
     };
   }
 
@@ -218,7 +218,7 @@ class FilingGrid {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -291,8 +291,8 @@ class FilingGrid {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.waitForLoading(1);
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.waitForLoading(1);
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -313,7 +313,7 @@ class FilingGrid {
             break;
         }
       });
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   changeItemsPerPage(itemNumber: number) {
@@ -339,7 +339,7 @@ class FilingGrid {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -349,7 +349,7 @@ class FilingGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -364,7 +364,7 @@ class FilingGrid {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -378,7 +378,7 @@ class FilingGrid {
                 .replace(/\s+/g, " ")
                 .trim() === anchorValue
             ) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -397,7 +397,7 @@ class FilingGrid {
         anchorValue
       )}`
     );
-    cy.get(
+    pw.get(
       `@${removeSpaces(action)}${removeSpaces(anchorColumnName)}${removeSpaces(
         anchorValue
       )}`
@@ -406,13 +406,13 @@ class FilingGrid {
   }
 
   deleteFiling(anchorColumnName: string, anchorValue: string) {
-    cy.intercept("DELETE", "https://**.azavargovapps.com/filings/delete/ReferenceId/**/MunicipalityId/**").as("deleteFiling");
+    pw.intercept("DELETE", "https://**.azavargovapps.com/filings/delete/ReferenceId/**/MunicipalityId/**").as("deleteFiling");
     if (this.userType === "taxpayer") {
       this.toggleActionButton("Delete", anchorColumnName, anchorValue);
       // TODO: Add delete confirmation POM
-      cy.get(".k-dialog-actions").find("button").contains("Delete").click();
+      pw.get(".k-dialog-actions").find("button").contains("Delete").click();
     } else if (this.userType === "ags") {
-      cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+      pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
         .should("exist")
         .then((columnIndexes: any) => {
           this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
@@ -428,14 +428,14 @@ class FilingGrid {
                   .replace(/\s+/g, " ")
                   .trim() === anchorValue
               ) {
-                cy.wrap($columns.eq(columnIndex)).find("button[aria-haspopup='menu']").click();
+                pw.wrap($columns.eq(columnIndex)).find("button[aria-haspopup='menu']").click();
                 this.getElement().anyList().contains("Delete Filing").click();
                 // TODO: Add delete confirmation POM
-                cy.get(".k-dialog-actions")
+                pw.get(".k-dialog-actions")
                   .find("button")
                   .contains("Delete")
                   .click();
-                cy.wait("@deleteFiling").its("response.statusCode").should("eq", 200);
+                pw.wait("@deleteFiling").its("response.statusCode").should("eq", 200);
                 return false;
               }
             });
@@ -450,7 +450,7 @@ class FilingGrid {
     anchorColumnName: string,
     anchorValue: string
   ) {
-    cy.intercept("PATCH", "https://**.azavargovapps.com/filings/filing-status/**/status/**").as("updateFilingStatus");
+    pw.intercept("PATCH", "https://**.azavargovapps.com/filings/filing-status/**/status/**").as("updateFilingStatus");
     if (this.userType !== "ags") {
       throw new Error(
         "Update status action is not available for this user type"
@@ -464,7 +464,7 @@ class FilingGrid {
         anchorValue
       )}`
     );
-    cy.get(
+    pw.get(
       `@paymentStatus_${removeSpaces(anchorColumnName)}${removeSpaces(
         anchorValue
       )}`
@@ -473,17 +473,17 @@ class FilingGrid {
       .click();
     this.getElement().anyList().contains("Update Status").click();
     // TODO: Add update status modal POM
-    cy.get(".k-window-content")
+    pw.get(".k-window-content")
       .find(".k-radio-list")
       .find(`input[value="${newStatus}"]`)
       .click();
-    cy.get(".k-dialog-actions").find("button").contains("Save").click();
-    cy.wait("@updateFilingStatus").its("response.statusCode").should("eq", 200);
+    pw.get(".k-dialog-actions").find("button").contains("Save").click();
+    pw.wait("@updateFilingStatus").its("response.statusCode").should("eq", 200);
   }
 
   checkAuditLog(anchorColumnName: string, anchorValue: string) {
-    cy.window().then((win) => {
-      cy.stub(win, 'open').as('windowOpen');
+    pw.window().then((win) => {
+      pw.stub(win, 'open').as('windowOpen');
     });
     this.getElementOfColumn(
       "Payment Status",
@@ -493,7 +493,7 @@ class FilingGrid {
         anchorValue
       )}`
     );
-    cy.get(
+    pw.get(
       `@paymentStatus_${removeSpaces(anchorColumnName)}${removeSpaces(
         anchorValue
       )}`
@@ -502,11 +502,11 @@ class FilingGrid {
       .first()
       .click();
     this.getElement().anyList().contains("Audit Log").click();
-    cy.get('@windowOpen').then((stub) => {
+    pw.get('@windowOpen').then((stub) => {
       const newTabUrl = stub.args[0][0]; // Get the first argument (URL) of the first call
-      cy.visit(newTabUrl);
+      pw.visit(newTabUrl);
     });
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   clickExportButton(
@@ -538,12 +538,12 @@ class FilingGrid {
 
   clickViewRequestedExtractButton() {
     this.getElement().viewRequestedExtractButton().click();
-    cy.waitForLoading(5);
+    pw.waitForLoading(5);
   }
 
   searchFiling(searchValue: string) {
     this.getElement().searchBox().type(searchValue);
-    cy.waitForLoading(5);
+    pw.waitForLoading(5);
   }
 
   setStartDate({
@@ -555,15 +555,15 @@ class FilingGrid {
     day: string;
     year: string;
   }) {
-    cy.get(".fa-calendar-days").click();
-    cy.get(".k-animation-container input").first().type(`${month}{rightArrow}${day}{rightArrow}${year}`);
-    cy.get(".k-animation-container").find("button").contains("Filter").click();
-    cy.waitForLoading();
+    pw.get(".fa-calendar-days").click();
+    pw.get(".k-animation-container input").first().type(`${month}{rightArrow}${day}{rightArrow}${year}`);
+    pw.get(".k-animation-container").find("button").contains("Filter").click();
+    pw.waitForLoading();
   }
 
   getColumnCellsData(columnName: string) {
-    cy.wrap([]).as("columnCellsData");
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.wrap([]).as("columnCellsData");
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -571,8 +571,8 @@ class FilingGrid {
           .rows()
           .each(($row) => {
             const $columns = $row.find("td");
-            cy.get("@columnCellsData").then((columnCellsData: any) => {
-              cy.wrap([...columnCellsData, $columns.eq(columnIndex).text()]).as(
+            pw.get("@columnCellsData").then((columnCellsData: any) => {
+              pw.wrap([...columnCellsData, $columns.eq(columnIndex).text()]).as(
                 "columnCellsData"
               );
             });
@@ -587,15 +587,15 @@ class FilingGrid {
         : [...AGS_FILING_COLUMNS, columnName],
       `${this.userType}_${this.defaultGridColumnsAlias}AfterAdditionalColumn`
     );
-    cy.get(
+    pw.get(
       `@${this.userType}_${this.defaultGridColumnsAlias}AfterAdditionalColumn`
     )
       .should("exist")
       .then((columnIndexes: any) => {
         if (columnIndexes[columnName] !== undefined) {
-          cy.wrap(true).as(variableAlias);
+          pw.wrap(true).as(variableAlias);
         } else {
-          cy.wrap(false).as(variableAlias);
+          pw.wrap(false).as(variableAlias);
         }
       });
   }

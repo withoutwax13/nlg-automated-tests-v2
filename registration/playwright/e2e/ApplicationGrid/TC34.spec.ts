@@ -22,7 +22,7 @@ test.describe("As a Business User, when a Registration Record is added into my R
       userType: "taxpayer",
     });
 
-    cy.login({ accountType: "taxpayer" });
+    pw.login({ accountType: "taxpayer" });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -31,7 +31,7 @@ test.describe("As a Business User, when a Registration Record is added into my R
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
 
-    cy.getUniqueRegistrationData(randomSeed(), false).then(
+    pw.getUniqueRegistrationData(randomSeed(), false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };
@@ -52,11 +52,11 @@ test.describe("As a Business User, when a Registration Record is added into my R
           .referenceIdData()
           .invoke("text")
           .then((referenceId) => {
-            cy.wrap(referenceId).as("referenceId");
+            pw.wrap(referenceId).as("referenceId");
           });
         applicationConfirmation.clickCloseButton();
         taxpayerApplicationGrid.init();
-        cy.get("@referenceId").then((referenceId) => {
+        pw.get("@referenceId").then((referenceId) => {
           taxpayerApplicationGrid.getDataOfColumn(
             "Registration Record ID",
             "Reference ID",
@@ -64,7 +64,7 @@ test.describe("As a Business User, when a Registration Record is added into my R
             "registrationRecordId"
           );
         });
-        cy.get("@registrationRecordId").then((registrationRecordId) => {
+        pw.get("@registrationRecordId").then((registrationRecordId) => {
           taxpayerApplicationGrid.filterColumn(
             "Registration Record ID",
             String(registrationRecordId)

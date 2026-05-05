@@ -11,7 +11,7 @@ const randomDate = {
 
 test.describe("As a municipal user, I should be able to set delinquency start date from the grid", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "municipal" });
+    pw.login({ accountType: "municipal" });
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickClearAllFiltersButton();
     municipalBusinessGrid.getDataOfColumn(
@@ -34,8 +34,8 @@ test.describe("As a municipal user, I should be able to set delinquency start da
       "Arrakis Spice Company 13685",
       "afterDelinquencyStartDate"
     );
-    cy.get("@beforeDelinquencyStartDate").then((beforeDelinquencyStartDate) => {
-      cy.get("@afterDelinquencyStartDate").then((afterDelinquencyStartDate) => {
+    pw.get("@beforeDelinquencyStartDate").then((beforeDelinquencyStartDate) => {
+      pw.get("@afterDelinquencyStartDate").then((afterDelinquencyStartDate) => {
         expect(beforeDelinquencyStartDate).to.be.not.equal(
           afterDelinquencyStartDate
         );

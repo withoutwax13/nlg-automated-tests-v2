@@ -19,90 +19,90 @@ class Form {
    */
   private elements() {
     return {
-      nextButton: () => cy.get(".NLGButtonPrimary").contains("Next"),
-      formTitle: () => cy.get("h1"),
-      stepper: () => cy.get(".k-stepper").find("ol"),
-      backButton: () => cy.get(".NLGButtonSecondary").contains("Back"),
+      nextButton: () => pw.get(".NLGButtonPrimary").contains("Next"),
+      formTitle: () => pw.get("h1"),
+      stepper: () => pw.get(".k-stepper").find("ol"),
+      backButton: () => pw.get(".NLGButtonSecondary").contains("Back"),
       saveAndCloseButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Save And Close"),
+        pw.get(".NLGButtonSecondary").contains("Save And Close"),
       addLocationButton: () =>
-        cy.get(".NLGButtonPrimary").contains("Add Location"),
+        pw.get(".NLGButtonPrimary").contains("Add Location"),
       removeLocationButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Remove"),
-      ownerFullName: () => cy.get("#OwnerFullName"),
-      ownerPhoneNumber: () => cy.get("#OwnerPhoneNumber"),
-      ownerEmailAddress: () => cy.get("#OwnerEmailAddress"),
-      businessName: () => cy.get("#BusinessName"),
-      fein: () => cy.get("#FEIN"),
-      businessAddress1: () => cy.get("#BusinessAddress1"),
-      businessAddress2: () => cy.get("#BusinessAddress2"),
-      businessCity: () => cy.get("#BusinessCity"),
+        pw.get(".NLGButtonSecondary").contains("Remove"),
+      ownerFullName: () => pw.get("#OwnerFullName"),
+      ownerPhoneNumber: () => pw.get("#OwnerPhoneNumber"),
+      ownerEmailAddress: () => pw.get("#OwnerEmailAddress"),
+      businessName: () => pw.get("#BusinessName"),
+      fein: () => pw.get("#FEIN"),
+      businessAddress1: () => pw.get("#BusinessAddress1"),
+      businessAddress2: () => pw.get("#BusinessAddress2"),
+      businessCity: () => pw.get("#BusinessCity"),
       businessStateDropdown: () =>
-        cy.get('span[data-cy="Legal Business State-dropdown"]'),
-      businessZipCode: () => cy.get("#BusinessZipCode"),
-      noRadioButton: () => cy.get('input[data-cy="No-radio-button"]'),
+        pw.get('span[data-cy="Legal Business State-dropdown"]'),
+      businessZipCode: () => pw.get("#BusinessZipCode"),
+      noRadioButton: () => pw.get('input[data-cy="No-radio-button"]'),
       legalBusinessAddressCheckbox: () =>
-        cy.get(
+        pw.get(
           'input[data-cy="Check this box if the Legal Business Address is the same as the Business Mailing Address-checkbox"]'
         ),
       businessOwnerInfoCheckbox: () =>
-        cy.get(
+        pw.get(
           'input[data-cy="Check this box if the Business Owner Information is the same as the Business Management Contact Information-checkbox"]'
         ),
-      emergencyPhoneNumber: () => cy.get("#EmergencyPhoneNumber"),
+      emergencyPhoneNumber: () => pw.get("#EmergencyPhoneNumber"),
       locationOpenDate: () =>
         cy
           .get('span[data-cy="Location Open Date-datePicker-input"]')
           .find("input"),
       locationDBA: () =>
-        cy.get('span[data-cy="Location Trade Name DBA-masked-input"]'),
+        pw.get('span[data-cy="Location Trade Name DBA-masked-input"]'),
       locationAddress1: () =>
-        cy.get('span[data-cy="Location Address 1-masked-input"]'),
+        pw.get('span[data-cy="Location Address 1-masked-input"]'),
       locationAddress2: () =>
-        cy.get('span[data-cy="Location Address 2-masked-input"]'),
-      locationCity: () => cy.get('span[data-cy="Location City-masked-input"]'),
+        pw.get('span[data-cy="Location Address 2-masked-input"]'),
+      locationCity: () => pw.get('span[data-cy="Location City-masked-input"]'),
       locationStateDropdown: () =>
-        cy.get('span[data-cy="Location State-dropdown"]'),
+        pw.get('span[data-cy="Location State-dropdown"]'),
       locationZipCode: () =>
-        cy.get('span[data-cy="Location Zip Code-masked-input"]'),
+        pw.get('span[data-cy="Location Zip Code-masked-input"]'),
       locationMailingAddress1: () =>
-        cy.get('span[data-cy="Business Mailing Address 1-masked-input"]'),
+        pw.get('span[data-cy="Business Mailing Address 1-masked-input"]'),
       locationMailingAddress2: () =>
-        cy.get('span[data-cy="Business Mailing Address 2-masked-input"]'),
+        pw.get('span[data-cy="Business Mailing Address 2-masked-input"]'),
       locationMailingCity: () =>
-        cy.get('span[data-cy="Business Mailing City-masked-input"]'),
+        pw.get('span[data-cy="Business Mailing City-masked-input"]'),
       locationMailingStateDropdown: () =>
-        cy.get('span[data-cy="Business Mailing State-dropdown"]'),
+        pw.get('span[data-cy="Business Mailing State-dropdown"]'),
       locationMailingZipCode: () =>
-        cy.get('span[data-cy="Business Mailing Zip Code-masked-input"]'),
+        pw.get('span[data-cy="Business Mailing Zip Code-masked-input"]'),
       managerOperatorFullName: () =>
-        cy.get('span[data-cy="Manager/Operator Full Name-masked-input"]'),
-      managerOperatorTitle: () => cy.get('input[name="OperatorTitleRB"]'),
-      managerOperatorPhoneNumber: () => cy.get('input[name="OperatorPhoneRB"]'),
+        pw.get('span[data-cy="Manager/Operator Full Name-masked-input"]'),
+      managerOperatorTitle: () => pw.get('input[name="OperatorTitleRB"]'),
+      managerOperatorPhoneNumber: () => pw.get('input[name="OperatorPhoneRB"]'),
       managerOperatorEmail: () =>
-        cy.get('input[name="OperatorEmailAddressRB"]'),
+        pw.get('input[name="OperatorEmailAddressRB"]'),
       managerEmergencyPhoneNumber: () =>
-        cy.get('input[name="EmergencyPhoneNumberRB"]'),
-      agencyName: () => cy.get("#AgencyName"),
-      agencyTypeDropdown: () => cy.get('span[data-cy="Agency Type-dropdown"]'),
-      preparerFullName: () => cy.get("#PreparerFullName"),
-      preparerTitle: () => cy.get("#PreparerTitle"),
-      preparerPhone: () => cy.get("#PreparerPhone"),
-      preparerEmailAddress: () => cy.get("#PreparerEmailAddress"),
-      signature: () => cy.get("#Signature"),
+        pw.get('input[name="EmergencyPhoneNumberRB"]'),
+      agencyName: () => pw.get("#AgencyName"),
+      agencyTypeDropdown: () => pw.get('span[data-cy="Agency Type-dropdown"]'),
+      preparerFullName: () => pw.get("#PreparerFullName"),
+      preparerTitle: () => pw.get("#PreparerTitle"),
+      preparerPhone: () => pw.get("#PreparerPhone"),
+      preparerEmailAddress: () => pw.get("#PreparerEmailAddress"),
+      signature: () => pw.get("#Signature"),
       agencyCheckbox: () =>
-        cy.get(
+        pw.get(
           '*[data-cy="Check box if you are a representative of an Agency registering on behalf of a business owner.-checkbox"]'
         ),
       yesMultipleLocationsRadioButton: () =>
-        cy.get(
+        pw.get(
           'input[data-cy="Yes, I will be registering multiple business locations.-radio-button"]'
         ),
       noSingleLocationRadioButton: () =>
-        cy.get(
+        pw.get(
           'input[data-cy="No, I will only be registering a single business.-radio-button"]'
         ),
-      applicantInfoDateData: () => cy.get("#Date"),
+      applicantInfoDateData: () => pw.get("#Date"),
     };
   }
 
@@ -183,8 +183,8 @@ class Form {
 
     const element =
       selectorCountOnMultiple === undefined
-        ? cy.get(selector)
-        : cy.get(selector).eq(selectorCountOnMultiple);
+        ? pw.get(selector)
+        : pw.get(selector).eq(selectorCountOnMultiple);
 
     switch (method) {
       case "type":
@@ -194,7 +194,7 @@ class Form {
         break;
       case "select":
         element.click( {force: true} );
-        cy.get("li").contains(data).click( {force: true} );
+        pw.get("li").contains(data).click( {force: true} );
         break;
       case "click":
         element.click( {force: true} );
@@ -277,7 +277,7 @@ class Form {
    */
   checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation() {
     this.enterData('input[data-cy="No-radio-button"]', "click");
-    cy.waitForLoading();
+    pw.waitForLoading();
     this.enterData(
       'input[data-cy="Check this box if the Legal Business Address is the same as the Business Mailing Address-checkbox"]',
       "click"
@@ -318,7 +318,7 @@ class Form {
     this.getElement().formTitle().click( {force: true} );
     enter(props.selector, "type", `{rightarrow}{rightarrow}${props.date.year}`);
     this.getElement().formTitle().click( {force: true} );
-    cy.get(`${props.selector} input`)
+    pw.get(`${props.selector} input`)
       .eq(props.index ? props.index : 0)
       .invoke("attr", "value")
       .then((dateValue) => {
@@ -482,7 +482,7 @@ class Form {
         );
       }
       index < data.length - 1 && this.addLocation();
-      cy.waitForLoading();
+      pw.waitForLoading();
     });
   }
 

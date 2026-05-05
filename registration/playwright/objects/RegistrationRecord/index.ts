@@ -2,7 +2,7 @@ class RegistrationRecord {
   constructor() {}
   private elements() {
     return {
-      pageTitle: () => cy.get("h1"),
+      pageTitle: () => pw.get("h1"),
       addressData: () => this.getElements().pageTitle().next(),
       registrationStatusCard: () =>
         cy
@@ -166,9 +166,9 @@ class RegistrationRecord {
           .eq(1)
           .find("a"),
       viewAllApplicationsButton: () =>
-        cy.get("NLGButtonSecondaryFlat").contains("View All"),
+        pw.get("NLGButtonSecondaryFlat").contains("View All"),
       backToRegistrationGridButton: () =>
-        cy.get("NLGButtonSecondaryFlat").contains("Registrations"),
+        pw.get("NLGButtonSecondaryFlat").contains("Registrations"),
     };
   }
   getElements() {

@@ -6,10 +6,10 @@ class BusinessUpload {
 
   private elements() {
     return {
-      governmentDropdown: () => cy.get(".k-combobox").find("input"),
-      anyList: () => cy.get("li"),
-      fileUploadInput: () => cy.get("#files"),
-      nextButton: () => cy.get("button").contains("Next"),
+      governmentDropdown: () => pw.get(".k-combobox").find("input"),
+      anyList: () => pw.get("li"),
+      fileUploadInput: () => pw.get("#files"),
+      nextButton: () => pw.get("button").contains("Next"),
     };
   }
 

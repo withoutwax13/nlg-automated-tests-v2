@@ -9,7 +9,7 @@ test.describe(
       const delinquencyGrid = new DelinquencyGrid({
         userType: "municipal",
       });
-      cy.login({ accountType: "municipal" });
+      pw.login({ accountType: "municipal" });
       delinquencyGrid.init();
       delinquencyGrid.getElement().exportButton().should("be.visible");
       delinquencyGrid.getElement().exportButton().should("not.be.disabled");

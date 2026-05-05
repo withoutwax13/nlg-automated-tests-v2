@@ -8,16 +8,16 @@ class ApplicationDetail {
    */
   private elements() {
     return {
-      exportButton: () => cy.get(".NLGButtonSecondary").contains("Export PDF"),
-      applicationDataAccordion: () => cy.get(".k-expander-title"),
+      exportButton: () => pw.get(".NLGButtonSecondary").contains("Export PDF"),
+      applicationDataAccordion: () => pw.get(".k-expander-title"),
       finalReviewerSystemInformation: () =>
-        cy.get("h4").contains("Application Details").next().find("span").eq(1),
+        pw.get("h4").contains("Application Details").next().find("span").eq(1),
       askForResubmissionButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Ask for Resubmission"),
+        pw.get(".NLGButtonSecondary").contains("Ask for Resubmission"),
       rejectApplicationButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Reject"),
+        pw.get(".NLGButtonSecondary").contains("Reject"),
       approveApplicationButton: () =>
-        cy.get(".NLGButtonPrimary").contains("Approve"),
+        pw.get(".NLGButtonPrimary").contains("Approve"),
     };
   }
 

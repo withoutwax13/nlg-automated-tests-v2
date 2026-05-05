@@ -30,7 +30,7 @@ test.describe.skip("As an AGS user, an active registration that cannot renew yet
     const applicationReview = new ApplicationReview({ userType: "ags" });
     const paymentPage = new Payment();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 3 });
+    pw.login({ accountType: "taxpayer", accountIndex: 3 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -39,7 +39,7 @@ test.describe.skip("As an AGS user, an active registration that cannot renew yet
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
 
-    cy.getUniqueRegistrationData(randomSeed(), false).then(
+    pw.getUniqueRegistrationData(randomSeed(), false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };
@@ -60,11 +60,11 @@ test.describe.skip("As an AGS user, an active registration that cannot renew yet
           .referenceIdData()
           .invoke("text")
           .then((referenceId) => {
-            cy.wrap(referenceId).as("referenceId");
+            pw.wrap(referenceId).as("referenceId");
           });
         applicationConfirmation.clickCloseButton();
         taxpayerApplicationGrid.init();
-        cy.get("@referenceId").then((referenceId) => {
+        pw.get("@referenceId").then((referenceId) => {
           taxpayerApplicationGrid.getDataOfColumn(
             "Registration Record ID",
             "Reference ID",
@@ -72,10 +72,10 @@ test.describe.skip("As an AGS user, an active registration that cannot renew yet
             "registrationRecordId"
           );
         });
-        cy.logout();
-        cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 3 });
+        pw.logout();
+        pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 3 });
         agsApplicationGrid.init();
-        cy.get("@registrationRecordId").then((registrationRecordId) => {
+        pw.get("@registrationRecordId").then((registrationRecordId) => {
           agsApplicationGrid.selectRowToReview({
             anchorColumnName: "Registration Record ID",
             anchorValue: String(registrationRecordId),
@@ -104,9 +104,9 @@ test.describe.skip("As an AGS user, an active registration that cannot renew yet
           applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.clickSaveButton();
           applicationReview.toggleActions("Approve");
           applicationReview.clickGoBackApplicationsButton();
-          cy.logout();
+          pw.logout();
 
-          cy.login({
+          pw.login({
             accountType: "taxpayer",
             notFirstLogin: true,
             accountIndex: 3,
@@ -118,9 +118,9 @@ test.describe.skip("As an AGS user, an active registration that cannot renew yet
           );
           paymentPage.payViaAnySavedPaymentMethod();
           applicationConfirmation.clickCloseButton();
-          cy.logout();
+          pw.logout();
 
-          cy.login({
+          pw.login({
             accountType: "ags",
             notFirstLogin: true,
             accountIndex: 3,
@@ -139,7 +139,7 @@ test.describe.skip("As an AGS user, an active registration that cannot renew yet
             String(registrationRecordId),
             "canRenewStatusInitial"
           );
-          cy.get("@canRenewStatusInitial").should("eq", "Not Available");
+          pw.get("@canRenewStatusInitial").should("eq", "Not Available");
 
           const today = new Date();
           const tenDaysBefore = new Date(today.setDate(today.getDate() - 10));
@@ -162,7 +162,7 @@ test.describe.skip("As an AGS user, an active registration that cannot renew yet
             String(registrationRecordId),
             "canRenewStatusFinal"
           );
-          cy.get("@canRenewStatusFinal").should("eq", "Available");
+          pw.get("@canRenewStatusFinal").should("eq", "Available");
         });
       }
     );

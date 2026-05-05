@@ -1,14 +1,14 @@
 class MigrateUserDataModal {
   private elements() {
     return {
-      modal: () => cy.get(".k-dialog"),
-      title: () => cy.get(".k-dialog-title"),
-      closeModalButton: () => cy.get('button[aria-label="Close"]'),
-      modalContent: () => cy.get(".k-dialog-content"),
-      cancelButton: () => cy.get("button").contains("Cancel"),
-      migrateButton: () => cy.get("button").contains("Migrate"),
-      fromEmailInput: () => cy.get("input[name='Email']").first(),
-      toEmailInput: () => cy.get("input[name='Email']").last(),
+      modal: () => pw.get(".k-dialog"),
+      title: () => pw.get(".k-dialog-title"),
+      closeModalButton: () => pw.get('button[aria-label="Close"]'),
+      modalContent: () => pw.get(".k-dialog-content"),
+      cancelButton: () => pw.get("button").contains("Cancel"),
+      migrateButton: () => pw.get("button").contains("Migrate"),
+      fromEmailInput: () => pw.get("input[name='Email']").first(),
+      toEmailInput: () => pw.get("input[name='Email']").last(),
     };
   }
 

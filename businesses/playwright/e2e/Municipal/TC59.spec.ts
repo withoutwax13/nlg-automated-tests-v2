@@ -10,7 +10,7 @@ const randomSeed = Math.floor(Math.random() * 100000);
 
 test.describe("As a municipal user, I should be able to upload documents to a business via the business details page", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "municipal", accountIndex: 9 });
+    pw.login({ accountType: "municipal", accountIndex: 9 });
     municipalBusinessGrid.init();
     municipalBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     municipalBusinessDetails.clickDocumentsTab();

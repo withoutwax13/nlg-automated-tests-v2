@@ -1,12 +1,12 @@
 class Payment {
     private elements() {
         return {
-            savedPaymentMethods: () => cy.get('label[for="savedPayment"]'),
-            savedPaymentMethodItems: () => cy.get('.form-section').eq(0).find('.radio').find('.form-check'),
-            termsAndConditionsCheckbox: () => cy.get('input[data-cy="I have read and agree to the Terms and Conditions of this online payment system.-checkbox"]'),
-            finishAndPayButton: () => cy.get('button').contains('Finish and Pay'),
-            payNowButton: () => cy.get('button').contains('Pay Now'),
-            payLaterButton: () => cy.get('button').contains('Pay Later'),
+            savedPaymentMethods: () => pw.get('label[for="savedPayment"]'),
+            savedPaymentMethodItems: () => pw.get('.form-section').eq(0).find('.radio').find('.form-check'),
+            termsAndConditionsCheckbox: () => pw.get('input[data-cy="I have read and agree to the Terms and Conditions of this online payment system.-checkbox"]'),
+            finishAndPayButton: () => pw.get('button').contains('Finish and Pay'),
+            payNowButton: () => pw.get('button').contains('Pay Now'),
+            payLaterButton: () => pw.get('button').contains('Pay Later'),
         }
     }
 
@@ -23,19 +23,19 @@ class Payment {
     }
 
     clickSavedPaymentMethods() {
-        cy.intercept("GET", "https://**.azavargovapps.com/forms/payment-options/**").as("getPaymentOptions");
-        cy.intercept("POST", "https://**.azavargovapps.com/payments/burton/payment-method").as("addBurtonPaymentMethod");
-        cy.intercept("GET", "https://**.azavargovapps.com/payments/paymentMethods").as("getPaymentMethods");
+        pw.intercept("GET", "https://**.azavargovapps.com/forms/payment-options/**").as("getPaymentOptions");
+        pw.intercept("POST", "https://**.azavargovapps.com/payments/burton/payment-method").as("addBurtonPaymentMethod");
+        pw.intercept("GET", "https://**.azavargovapps.com/payments/paymentMethods").as("getPaymentMethods");
         this.getElements().savedPaymentMethods().click();
-        cy.wait("@getPaymentOptions").its("response.statusCode").should("eq", 200);
-        cy.wait("@getPaymentMethods").its("response.statusCode").should("eq", 200);
-        cy.wait("@addBurtonPaymentMethod").its("response.statusCode").should("eq", 201);
+        pw.wait("@getPaymentOptions").its("response.statusCode").should("eq", 200);
+        pw.wait("@getPaymentMethods").its("response.statusCode").should("eq", 200);
+        pw.wait("@addBurtonPaymentMethod").its("response.statusCode").should("eq", 201);
     }
 
     selectSavedPaymentMethod(order: number) {
-        cy.intercept("PATCH", "https://**.azavargovapps.com/filings/**/reeval-for-payment").as("reevalForPayment");
+        pw.intercept("PATCH", "https://**.azavargovapps.com/filings/**/reeval-for-payment").as("reevalForPayment");
         this.getElements().savedPaymentMethodItems().eq(order).click();
-        cy.wait("@reevalForPayment").its("response.statusCode").should("be.oneOf", [200, 201]);
+        pw.wait("@reevalForPayment").its("response.statusCode").should("be.oneOf", [200, 201]);
     }
 
     clickTermsAndConditionsCheckbox() {
@@ -43,9 +43,9 @@ class Payment {
     }
 
     clickFinishAndPayButton() {
-        cy.intercept("POST", "https://**.azavargovapps.com/payments/checkout").as("checkout");
-        cy.intercept("GET", "https://**.azavargovapps.com/filings/**").as("getFiling");
-        cy.intercept("GET", "https://**.azavargovapps.com/payments/payment/**").as("getPayment");
+        pw.intercept("POST", "https://**.azavargovapps.com/payments/checkout").as("checkout");
+        pw.intercept("GET", "https://**.azavargovapps.com/filings/**").as("getFiling");
+        pw.intercept("GET", "https://**.azavargovapps.com/payments/payment/**").as("getPayment");
         this.getElements().finishAndPayButton().click();
     }
 

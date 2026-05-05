@@ -48,22 +48,22 @@ class ApprovalGrid {
   }
   private elements() {
     return {
-      pageTitle: () => cy.get("h1"),
+      pageTitle: () => pw.get("h1"),
       helpText: () => this.getElement().pageTitle().next(),
-      columns: () => cy.get("thead").find("tr").find("th"),
-      rows: () => cy.get("tbody").find("tr"),
+      columns: () => pw.get("thead").find("tr").find("th"),
+      rows: () => pw.get("tbody").find("tr"),
       customizeTableViewButton: () =>
-        cy.get("*").contains("Customize Table View"),
+        pw.get("*").contains("Customize Table View"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -77,7 +77,7 @@ class ApprovalGrid {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -85,9 +85,9 @@ class ApprovalGrid {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
@@ -95,17 +95,17 @@ class ApprovalGrid {
           .find(".k-button")
           .contains("Filter"),
       searchMunicipalityDropdown: () =>
-        cy.get('input[placeholder="Search government ..."]'),
-      anyList: () => cy.get("li"),
-      anyButton: () => cy.get("button"),
+        pw.get('input[placeholder="Search government ..."]'),
+      anyList: () => pw.get("li"),
+      anyButton: () => pw.get("button"),
       pendingApplicationsInfo: () =>
         this.getElement().helpText().next().next().find("div").eq(0),
       startAllApprovalsButton: () =>
-        cy.get(".NLGButtonPrimary"),
-      exportButton: () => cy.get(".NLGNewLayoutSecondaryButton").contains("Export"),
+        pw.get(".NLGButtonPrimary"),
+      exportButton: () => pw.get(".NLGNewLayoutSecondaryButton").contains("Export"),
       startApprovalForSelectedButton: () =>
-        cy.get("*").contains("Enroll in workflow"),
-      anyModal: () => cy.get(".k-window"),
+        pw.get("*").contains("Enroll in workflow"),
+      anyModal: () => pw.get(".k-window"),
     };
   }
 
@@ -114,14 +114,14 @@ class ApprovalGrid {
   }
 
   init() {
-    cy.intercept("GET", "https://**.azavargovapps.com/users/**").as("getUserDetails");
-    cy.intercept("GET", "https://**.azavargovapps.com/municipalities/**").as("getMunicipalityDetails");
-    cy.intercept("GET", "https://**.azavargovapps.com/users/usersGridSettings/**").as("getGridSettings");
-    cy.intercept("GET", "https://**.azavargovapps.com/filings/approval?municipalityId=**").as("getApprovals");
-    cy.visit("/filingApp/approvalList");
+    pw.intercept("GET", "https://**.azavargovapps.com/users/**").as("getUserDetails");
+    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/**").as("getMunicipalityDetails");
+    pw.intercept("GET", "https://**.azavargovapps.com/users/usersGridSettings/**").as("getGridSettings");
+    pw.intercept("GET", "https://**.azavargovapps.com/filings/approval?municipalityId=**").as("getApprovals");
+    pw.visit("/filingApp/approvalList");
     if (this.userType === "ags") {
       this.selectMunicipality(this.municipalitySelection);
-      cy.waitForLoading(10);
+      pw.waitForLoading(10);
       getOrderOfColumns(
         AGS_DEFAULT_GRID_COLUMNS,
         `${this.userType}_${this.defaultGridColumnsAlias}`
@@ -129,11 +129,11 @@ class ApprovalGrid {
     } else if (this.userType === "taxpayer") {
       throw new Error("Taxpayer user type is not allowed to access this page");
     } else if (this.userType === "municipal") {
-      cy.wait("@getUserDetails").its("response.statusCode").should("eq", 200);
-      cy.wait("@getMunicipalityDetails").its("response.statusCode").should("eq", 200);
-      cy.wait("@getGridSettings").its("response.statusCode").should("eq", 200);
-      cy.wait("@getApprovals").its("response.statusCode").should("eq", 200);
-      cy.url().should("include", "/filingApp/approvalList?municipalityId=");
+      pw.wait("@getUserDetails").its("response.statusCode").should("eq", 200);
+      pw.wait("@getMunicipalityDetails").its("response.statusCode").should("eq", 200);
+      pw.wait("@getGridSettings").its("response.statusCode").should("eq", 200);
+      pw.wait("@getApprovals").its("response.statusCode").should("eq", 200);
+      pw.url().should("include", "/filingApp/approvalList?municipalityId=");
       getOrderOfColumns(
         MUNICIPAL_DEFAULT_GRID_COLUMNS,
         `${this.userType}_${this.defaultGridColumnsAlias}`
@@ -152,7 +152,7 @@ class ApprovalGrid {
   selectMunicipality(municipality: string) {
     this.getElement().searchMunicipalityDropdown().type(municipality);
     this.getElement().anyList().contains(municipality).click();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   private clickColumn(index: number) {
@@ -175,7 +175,7 @@ class ApprovalGrid {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -248,7 +248,7 @@ class ApprovalGrid {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -269,7 +269,7 @@ class ApprovalGrid {
             break;
         }
       });
-    cy.wait(5000);
+    pw.wait(5000);
   }
 
   changeItemsPerPage(itemNumber: number) {
@@ -291,7 +291,7 @@ class ApprovalGrid {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -301,7 +301,7 @@ class ApprovalGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -316,7 +316,7 @@ class ApprovalGrid {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -326,7 +326,7 @@ class ApprovalGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -338,8 +338,8 @@ class ApprovalGrid {
 
   selectRowToApprove(anchorColumnName: string, anchorValue: string) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.waitForLoading();
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.waitForLoading();
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -348,25 +348,25 @@ class ApprovalGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns).eq(0).find("input").click();
+              pw.wrap($columns).eq(0).find("input").click();
             }
           });
       });
-    cy.intercept("PATCH", "https://**.azavargovapps.com/filings/approval-status/**/status/Approved").as("approveFiling");
+    pw.intercept("PATCH", "https://**.azavargovapps.com/filings/approval-status/**/status/Approved").as("approveFiling");
     this.clickStartApprovalForSelectedButton();
-    cy.wait("@getFiling").its("response.statusCode").should("eq", 200);
+    pw.wait("@getFiling").its("response.statusCode").should("eq", 200);
     // TODO: Implement POM for Review Approval page
-    cy.get(".NLGButtonPrimary").contains("Approve").click();
-    cy.get(".k-dialog-content").find("textarea").type("Approved");
-    cy.get(".k-dialog").find("button").contains("Approve").click();
-    cy.wait("@approveFiling").its("response.statusCode").should("eq", 200);
+    pw.get(".NLGButtonPrimary").contains("Approve").click();
+    pw.get(".k-dialog-content").find("textarea").type("Approved");
+    pw.get(".k-dialog").find("button").contains("Approve").click();
+    pw.wait("@approveFiling").its("response.statusCode").should("eq", 200);
   }
 
   selectRowToReject(anchorColumnName: string, anchorValue: string) {
-    cy.intercept("PATCH", "https://**.azavargovapps.com/filings/approval-status/**/status/Rejected").as("rejectFiling");
+    pw.intercept("PATCH", "https://**.azavargovapps.com/filings/approval-status/**/status/Rejected").as("rejectFiling");
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.waitForLoading();
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.waitForLoading();
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -375,16 +375,16 @@ class ApprovalGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns).eq(0).find("input").click();
+              pw.wrap($columns).eq(0).find("input").click();
             }
           });
       });
     this.clickStartApprovalForSelectedButton();
     // TODO: Implement POM for Review Approval page
-    cy.get(".NLGButtonSecondary").contains("Reject").click();
-    cy.get(".k-dialog-content").find("textarea").type("Rejected");
-    cy.get(".k-dialog").find("button").contains("Reject").click();
-    cy.wait("@rejectFiling").its("response.statusCode").should("eq", 200);
+    pw.get(".NLGButtonSecondary").contains("Reject").click();
+    pw.get(".k-dialog-content").find("textarea").type("Rejected");
+    pw.get(".k-dialog").find("button").contains("Reject").click();
+    pw.wait("@rejectFiling").its("response.statusCode").should("eq", 200);
   }
 }
 

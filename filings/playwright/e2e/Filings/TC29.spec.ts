@@ -32,7 +32,7 @@ const deleteMultipleFiling = (
 
 test.describe("As a taxpayer, I should be able to search filing list with data from its columns", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 6 });
+    pw.login({ accountType: "ags", accountIndex: 6 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -46,7 +46,7 @@ test.describe("As a taxpayer, I should be able to search filing list with data f
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -55,9 +55,9 @@ test.describe("As a taxpayer, I should be able to search filing list with data f
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -79,13 +79,13 @@ test.describe("As a taxpayer, I should be able to search filing list with data f
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
-    cy.logout();
+    pw.logout();
 
-    cy.get("@referenceId").then((referenceId) => {
-      cy.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
+    pw.get("@referenceId").then((referenceId) => {
+      pw.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
       taxpayerFilingGrid.init();
       taxpayerFilingGrid.searchFiling(String(referenceId));
       taxpayerFilingGrid.getElement().rows().its("length").should("be.eq", 1);

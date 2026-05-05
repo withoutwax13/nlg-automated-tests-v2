@@ -34,7 +34,7 @@ const deleteMultipleFiling = (
 
 test.describe("As a municipal, I should be able to download the PDF of specific filing by selecting the PDF image icon", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags" });
+    pw.login({ accountType: "ags" });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -48,7 +48,7 @@ test.describe("As a municipal, I should be able to download the PDF of specific 
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -57,9 +57,9 @@ test.describe("As a municipal, I should be able to download the PDF of specific 
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 5, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 5, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -81,13 +81,13 @@ test.describe("As a municipal, I should be able to download the PDF of specific 
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
-    cy.logout();
+    pw.logout();
 
-    cy.get("@referenceId").then((referenceId) => {
-      cy.login({ accountType: "municipal", accountIndex: 1, notFirstLogin: true });
+    pw.get("@referenceId").then((referenceId) => {
+      pw.login({ accountType: "municipal", accountIndex: 1, notFirstLogin: true });
       municipalFilingGrid.init();
       municipalFilingGrid.toggleActionButton(
         "Download",

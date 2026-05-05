@@ -9,7 +9,7 @@ test.describe("User should not be able to proceed to Preview step if the require
     const form = new Form({ isRenewal: false });
     const filing = new Filing();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 4 });
+    pw.login({ accountType: "taxpayer", accountIndex: 4 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -17,7 +17,7 @@ test.describe("User should not be able to proceed to Preview step if the require
     filing.clickSubmitNewRegistrationButton();
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
-    cy.getUniqueRegistrationData(randomSeed, false, [
+    pw.getUniqueRegistrationData(randomSeed, false, [
       "applicantInfo.signature",
     ]).then(
       (customData: {
@@ -33,7 +33,7 @@ test.describe("User should not be able to proceed to Preview step if the require
         form.enterLocationDetails(customData.locationInfo.locations);
         form.clickNextbutton();
         form.enterApplicantDetails(customData.applicantInfo, true);
-        cy.waitForLoading();
+        pw.waitForLoading();
         form.getElement().nextButton().should("be.disabled");
       }
     );

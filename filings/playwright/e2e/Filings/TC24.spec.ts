@@ -28,7 +28,7 @@ const deleteMultipleFiling = (
 
 test.describe("As a taxpayer, I should be able to delete a draft filing.", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 3 });
+    pw.login({ accountType: "ags", accountIndex: 3 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -42,7 +42,7 @@ test.describe("As a taxpayer, I should be able to delete a draft filing.", () =>
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -51,9 +51,9 @@ test.describe("As a taxpayer, I should be able to delete a draft filing.", () =>
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 8, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 8, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");

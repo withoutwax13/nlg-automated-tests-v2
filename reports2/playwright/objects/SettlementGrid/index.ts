@@ -48,30 +48,30 @@ class SettlementGrid {
 
   private elements() {
     return {
-      pageTitle: () => cy.get("h2"),
-      noRecordFoundComponent: () => cy.get(".k-grid-norecords-template"),
-      searchBox: () => cy.get("span").find(".fa-magnifying-glass").parent(),
-      startDateInput: () => cy.get(".k-datepicker").first(),
-      endDateInput: () => cy.get(".k-datepicker").last(),
-      columns: () => cy.get("thead").find("tr").find("th"),
+      pageTitle: () => pw.get("h2"),
+      noRecordFoundComponent: () => pw.get(".k-grid-norecords-template"),
+      searchBox: () => pw.get("span").find(".fa-magnifying-glass").parent(),
+      startDateInput: () => pw.get(".k-datepicker").first(),
+      endDateInput: () => pw.get(".k-datepicker").last(),
+      columns: () => pw.get("thead").find("tr").find("th"),
       rows: () =>
-        cy.get("tbody").then(($tbody) => {
+        pw.get("tbody").then(($tbody) => {
           if ($tbody.find("tr").length !== 0) {
             return $tbody.find("tr");
           }
         }),
       customizeTableViewButton: () =>
-        cy.get(".NLGNewLayoutSecondaryButton").contains("Customize"),
+        pw.get(".NLGNewLayoutSecondaryButton").contains("Customize"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -85,7 +85,7 @@ class SettlementGrid {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -93,9 +93,9 @@ class SettlementGrid {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
@@ -103,16 +103,16 @@ class SettlementGrid {
           .find(".k-button")
           .contains("Filter"),
       searchMunicipalityDropdown: () =>
-        cy.get('input[placeholder="Select government..."]'),
-      anyList: () => cy.get("li"),
-      anyButton: () => cy.get("button"),
+        pw.get('input[placeholder="Select government..."]'),
+      anyList: () => pw.get("li"),
+      anyButton: () => pw.get("button"),
       clearAllFiltersButton: () =>
-        cy.get("*").contains("Clear All"),
+        pw.get("*").contains("Clear All"),
       exportButton: () =>
-        cy.get(".NLGButtonPrimary").contains("Export"),
+        pw.get(".NLGButtonPrimary").contains("Export"),
       generateReportButton: () =>
-        cy.get(".NLGButtonPrimary").contains("Generate Report"),
-      itemsData: () => cy.get(".k-pager-info"),
+        pw.get(".NLGButtonPrimary").contains("Generate Report"),
+      itemsData: () => pw.get(".k-pager-info"),
     };
   }
 
@@ -121,8 +121,8 @@ class SettlementGrid {
   }
 
   init(resetSavedGridSettingsInMemory?: boolean) {
-    cy.visit("/reports/settlementReport");
-    cy.waitForLoading(10);
+    pw.visit("/reports/settlementReport");
+    pw.waitForLoading(10);
     if (!["ags", "municipal"].includes(this.userType)) {
       throw new Error("Invalid user type");
     }
@@ -148,7 +148,7 @@ class SettlementGrid {
     this.getElement().searchMunicipalityDropdown().clear();
     this.getElement().searchMunicipalityDropdown().type(municipality);
     this.getElement().anyList().contains(municipality).click();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   private clickColumn(index: number) {
@@ -179,7 +179,7 @@ class SettlementGrid {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -247,7 +247,7 @@ class SettlementGrid {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -293,7 +293,7 @@ class SettlementGrid {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -303,7 +303,7 @@ class SettlementGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -318,7 +318,7 @@ class SettlementGrid {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -332,7 +332,7 @@ class SettlementGrid {
                 .replace(/\s+/g, " ")
                 .trim() === anchorValue
             ) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -347,23 +347,23 @@ class SettlementGrid {
     selector: any;
     intendedDateValue: string;
   }) {
-    cy.get(props.selector).type(`${props.date.month}`);
+    pw.get(props.selector).type(`${props.date.month}`);
     this.getElement().pageTitle().click();
-    cy.get(props.selector).type(`{rightArrow}${props.date.day}`);
+    pw.get(props.selector).type(`{rightArrow}${props.date.day}`);
     this.getElement().pageTitle().click();
-    cy.get(props.selector).type(`{rightArrow}{rightArrow}${props.date.year}`);
+    pw.get(props.selector).type(`{rightArrow}{rightArrow}${props.date.year}`);
     this.getElement().pageTitle().click();
-    cy.get(props.selector)
+    pw.get(props.selector)
       .invoke("attr", "value")
       .then(($dateValue) => {
         if ($dateValue !== props.intendedDateValue) {
           console.log("Date value: ", $dateValue);
           console.log("Intended date value: ", props.intendedDateValue);
-          cy.get(props.selector).type(`{backspace}`);
+          pw.get(props.selector).type(`{backspace}`);
           this.getElement().pageTitle().click();
-          cy.get(props.selector).type(`{leftArrow}{backspace}`);
+          pw.get(props.selector).type(`{leftArrow}{backspace}`);
           this.getElement().pageTitle().click();
-          cy.get(props.selector).type(`{leftArrow}{leftArrow}{backspace}`);
+          pw.get(props.selector).type(`{leftArrow}{leftArrow}{backspace}`);
           this.getElement().pageTitle().click();
           this.recursiveDateInput(props);
         }
@@ -379,17 +379,17 @@ class SettlementGrid {
     day: string;
     year: string;
   }) {
-    cy.get(".fa-calendar-days").click();
-    cy.get(".k-animation-container input")
+    pw.get(".fa-calendar-days").click();
+    pw.get(".k-animation-container input")
       .first()
       .type(`${month}{rightArrow}${day}{rightArrow}${year}`);
-    cy.get(".k-animation-container").find("button").contains("Filter").click();
-    cy.waitForLoading();
+    pw.get(".k-animation-container").find("button").contains("Filter").click();
+    pw.waitForLoading();
   }
 
   clickGenerateReportButton() {
     this.getElement().generateReportButton().click();
-    cy.waitForLoading(10);
+    pw.waitForLoading(10);
   }
 
   getTotalItems(variableAlias: string) {
@@ -398,7 +398,7 @@ class SettlementGrid {
       .invoke("text")
       .then((text: string) => {
         const totalItems = parseInt(text.split("of")[1].replace(/\D/g, ""));
-        cy.wrap(totalItems).as(variableAlias);
+        pw.wrap(totalItems).as(variableAlias);
       });
   }
 
@@ -408,7 +408,7 @@ class SettlementGrid {
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
     gridSetting.showColumn(columnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   hideColumn(columnName: string) {
@@ -417,7 +417,7 @@ class SettlementGrid {
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
     gridSetting.hideColumn(columnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   feezeColumn(columnName: string) {
@@ -426,7 +426,7 @@ class SettlementGrid {
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
     gridSetting.freezeColumn(columnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   unfreezeColumn(columnName: string) {
@@ -435,22 +435,22 @@ class SettlementGrid {
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
     gridSetting.unfreezeColumn(columnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   verifyColumnVisibility(columnName: string, isVisibleAlias: string) {
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}_visibility`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}_visibility`)
       .should("exist")
       .then((visibilityStatus: any) => {
-        cy.wrap(visibilityStatus[columnName]).as(isVisibleAlias);
+        pw.wrap(visibilityStatus[columnName]).as(isVisibleAlias);
       });
   }
 
   verifyColumnOrder(columnName: string, orderAlias: string) {
-    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
-        cy.wrap(columnIndexes[columnName]).as(orderAlias);
+        pw.wrap(columnIndexes[columnName]).as(orderAlias);
       });
   }
 
@@ -460,7 +460,7 @@ class SettlementGrid {
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
     gridSetting.restoreDefaultSettings();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   moveColumnToLocationOf(columnName: string, targetColumnName: string) {
@@ -469,7 +469,7 @@ class SettlementGrid {
       visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
     });
     gridSetting.moveColumnToLocationOf(columnName, targetColumnName);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 }
 

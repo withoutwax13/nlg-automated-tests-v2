@@ -33,7 +33,7 @@ const deleteMultipleFiling = (
 
 test.describe("As an AGS user, I should be able to see Payment Submitted logs on the audit log for Funded filings", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 5 });
+    pw.login({ accountType: "ags", accountIndex: 5 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -47,7 +47,7 @@ test.describe("As an AGS user, I should be able to see Payment Submitted logs on
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -56,9 +56,9 @@ test.describe("As an AGS user, I should be able to see Payment Submitted logs on
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -80,17 +80,17 @@ test.describe("As an AGS user, I should be able to see Payment Submitted logs on
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
-    cy.logout();
+    pw.logout();
 
-    cy.get("@referenceId").then((referenceId) => {
-      cy.login({ accountType: "ags", accountIndex: 5, notFirstLogin: true });
+    pw.get("@referenceId").then((referenceId) => {
+      pw.login({ accountType: "ags", accountIndex: 5, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.checkAuditLog("Reference ID", String(referenceId));
       auditLog.findRowByAction("Payment Submitted", "paymentSubmittedRow");
-      cy.get("@paymentSubmittedRow").should("exist");
+      pw.get("@paymentSubmittedRow").should("exist");
     });
   });
 });

@@ -1,13 +1,13 @@
 class BusinessResetModal {
   private elements() {
     return {
-      modal: () => cy.get(".k-dialog"),
-      modalTitle: () => cy.get(".k-dialog-title"),
-      modalContent: () => cy.get(".k-dialog-content"),
-      cancelButton: () => cy.get("button").contains("Cancel"),
-      deleteDataButton: () => cy.get("button").contains("Delete Data"),
-      sureWantToDeleteDataCheckbox: () => cy.get(".k-checkbox-label"),
-      closeModalButton: () => cy.get('button[aria-label="Close"]'),
+      modal: () => pw.get(".k-dialog"),
+      modalTitle: () => pw.get(".k-dialog-title"),
+      modalContent: () => pw.get(".k-dialog-content"),
+      cancelButton: () => pw.get("button").contains("Cancel"),
+      deleteDataButton: () => pw.get("button").contains("Delete Data"),
+      sureWantToDeleteDataCheckbox: () => pw.get(".k-checkbox-label"),
+      closeModalButton: () => pw.get('button[aria-label="Close"]'),
     };
   }
 

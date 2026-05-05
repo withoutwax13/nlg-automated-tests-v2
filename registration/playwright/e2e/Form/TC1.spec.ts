@@ -9,7 +9,7 @@ test.describe("User should be able to add locations if opted for registering mul
     const form = new Form({ isRenewal: false });
     const filing = new Filing();
 
-    cy.login({ accountType: "taxpayer" });
+    pw.login({ accountType: "taxpayer" });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -17,7 +17,7 @@ test.describe("User should be able to add locations if opted for registering mul
     filing.clickSubmitNewRegistrationButton();
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(true);
-    cy.getUniqueRegistrationData(randomSeed, true).then(
+    pw.getUniqueRegistrationData(randomSeed, true).then(
       (customData: { basicInfo: any; locationInfo: { locations: any[] } }) => {
         form.enterBusinessOwnerInformation(customData.basicInfo);
         form.enterLegalBusinessInformation(customData.basicInfo);

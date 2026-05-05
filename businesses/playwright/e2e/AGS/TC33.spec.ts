@@ -7,7 +7,7 @@ const agsBusinessGrid = new BusinessGrid({
 
 test.describe("As an AGS, Gov user, I want the system to prevent deleting a business record with filings", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags" });
+    pw.login({ accountType: "ags" });
     agsBusinessGrid.init();
     agsBusinessGrid.deleteBusiness("Test Trade Name 50363 1");
     agsBusinessGrid.getElement().noRecordFoundComponent().should("not.exist");

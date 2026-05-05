@@ -10,7 +10,7 @@ test.describe.skip(
         userType: "ags",
         municipalitySelection: "City of Arrakis",
       });
-      cy.login({ accountType: "ags", accountIndex: 2 });
+      pw.login({ accountType: "ags", accountIndex: 2 });
       agsDelinquencyGrid.init();
       agsDelinquencyGrid
         .getElement()

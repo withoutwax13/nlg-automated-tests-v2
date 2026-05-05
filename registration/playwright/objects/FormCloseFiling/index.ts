@@ -8,13 +8,13 @@ class FormClosing extends Form {
   private formClosingElements() {
     return {
       ...super.getElement(),
-      modalTitle: () => cy.get(".k-dialog-title"),
-      modalContent: () => cy.get(".k-dialog-content"),
+      modalTitle: () => pw.get(".k-dialog-title"),
+      modalContent: () => pw.get(".k-dialog-content"),
       deleteAndCloseButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Delete And Close"),
+        pw.get(".NLGButtonSecondary").contains("Delete And Close"),
       saveAndCloseButton: () =>
-        cy.get(".NLGButtonPrimary").contains("Save And Close"),
-      cancelButton: () => cy.get('button[aria-label="Close"]'),
+        pw.get(".NLGButtonPrimary").contains("Save And Close"),
+      cancelButton: () => pw.get('button[aria-label="Close"]'),
     };
   }
 

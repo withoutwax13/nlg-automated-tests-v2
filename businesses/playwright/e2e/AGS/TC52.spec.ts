@@ -10,14 +10,14 @@ const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 
 test.describe("As a user, when the business is active, I should be able to update form submission requirements in the business details page", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags" });
+    pw.login({ accountType: "ags" });
     agsBusinessGrid.init();
     agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     agsBusinessDetails
       .getElement()
       .formsSectionFormList()
       .each(($form) => {
-        cy.wrap($form).find("input").should("be.enabled");
+        pw.wrap($form).find("input").should("be.enabled");
       });
   });
 });

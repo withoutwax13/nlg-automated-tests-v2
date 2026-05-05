@@ -33,7 +33,7 @@ const deleteMultipleFiling = (
 
 test.describe.skip("As a Taxpayer user, I should be able to save and delete credit/debit cards information", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 2 });
+    pw.login({ accountType: "ags", accountIndex: 2 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -47,7 +47,7 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete cred
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -56,8 +56,8 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete cred
         );
       }
     });
-    cy.logout();
-    cy.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
+    pw.logout();
+    pw.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -93,7 +93,7 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete cred
       .savedCreditDebitCardItems()
       .its("length")
       .then((savedCreditDebitCardItems) => {
-        cy.wrap(savedCreditDebitCardItems).as("savedCreditDebitCardItems");
+        pw.wrap(savedCreditDebitCardItems).as("savedCreditDebitCardItems");
       });
     profile.deleteSavedPaymentMethod("card", 0);
     profile
@@ -101,7 +101,7 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete cred
       .savedCreditDebitCardItems()
       .its("length")
       .then((currentLength) => {
-        cy.get("@savedCreditDebitCardItems").then(
+        pw.get("@savedCreditDebitCardItems").then(
           (savedCreditDebitCardItems) => {
             expect(Number(currentLength)).to.not.eq(
               Number(savedCreditDebitCardItems)

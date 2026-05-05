@@ -32,7 +32,7 @@ const deleteMultipleFiling = (
 
 test.describe("As a taxpayer, I should be able to reattempt a declined filing.", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 4 });
+    pw.login({ accountType: "ags", accountIndex: 4 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -46,7 +46,7 @@ test.describe("As a taxpayer, I should be able to reattempt a declined filing.",
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -55,9 +55,9 @@ test.describe("As a taxpayer, I should be able to reattempt a declined filing.",
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -79,22 +79,22 @@ test.describe("As a taxpayer, I should be able to reattempt a declined filing.",
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
-    cy.logout();
+    pw.logout();
 
-    cy.get("@referenceId").then((referenceId) => {
-      cy.login({ accountType: "ags", accountIndex: 4, notFirstLogin: true });
+    pw.get("@referenceId").then((referenceId) => {
+      pw.login({ accountType: "ags", accountIndex: 4, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus(
         "Declined",
         "Reference ID",
         String(referenceId)
       );
-      cy.logout();
+      pw.logout();
 
-      cy.login({ accountType: "taxpayer", notFirstLogin: true });
+      pw.login({ accountType: "taxpayer", notFirstLogin: true });
       taxpayerFilingGrid.init();
       taxpayerFilingGrid.toggleActionButton(
         "Reattempt Payment",
@@ -109,7 +109,7 @@ test.describe("As a taxpayer, I should be able to reattempt a declined filing.",
       applicationConfirmation.clickCloseButton();
       taxpayerFilingGrid.init();
       taxpayerFilingGrid.getDataOfColumn("Filing Status", "Reference ID", String(referenceId), "newFilingStatus");
-      cy.get("@newFilingStatus").then((newFilingStatus) => {
+      pw.get("@newFilingStatus").then((newFilingStatus) => {
         expect(newFilingStatus).to.equal("Pending");
       });
     });

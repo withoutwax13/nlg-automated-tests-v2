@@ -12,7 +12,7 @@ const agsBusinessUpdatePage = new BusinessUpdate({ userType: "ags" });
 
 test.describe("As a user, if there are no changes made in the update business page, the save button should not exist", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 1 });
+    pw.login({ accountType: "ags", accountIndex: 1 });
     agsBusinessGrid.init();
     agsBusinessGrid.clickClearAllFiltersButton();
     agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13857");

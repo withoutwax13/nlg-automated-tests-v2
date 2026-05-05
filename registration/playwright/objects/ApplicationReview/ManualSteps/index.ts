@@ -23,9 +23,9 @@ class ManualStep {
    */
   private elements() {
     return {
-      manualStepDropdown: () => cy.get("h3").contains("Manual Step").next(),
-      rejectButton: () => cy.get(".NLGButtonSecondary").contains("Reject"),
-      approveButton: () => cy.get(".NLGButtonPrimary").contains("Approve"),
+      manualStepDropdown: () => pw.get("h3").contains("Manual Step").next(),
+      rejectButton: () => pw.get(".NLGButtonSecondary").contains("Reject"),
+      approveButton: () => pw.get(".NLGButtonPrimary").contains("Approve"),
       manualStepStatusData: () =>
         cy
           .get("h3")
@@ -36,13 +36,13 @@ class ManualStep {
           .first()
           .find("div")
           .first(),
-      internalNotesTab: () => cy.get("li").find("a").contains("Internal Notes"),
-      documentsTab: () => cy.get("li").find("a").contains("Documents"),
+      internalNotesTab: () => pw.get("li").find("a").contains("Internal Notes"),
+      documentsTab: () => pw.get("li").find("a").contains("Documents"),
       addNewNoteButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Add a Note"),
-      noteDataAccordion: () => cy.get(".internalNotesWrapper"),
+        pw.get(".NLGButtonSecondary").contains("Add a Note"),
+      noteDataAccordion: () => pw.get(".internalNotesWrapper"),
       uploadDocumentButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Upload Document"),
+        pw.get(".NLGButtonSecondary").contains("Upload Document"),
       documentUploadList: () =>
         cy
           .get("li")
@@ -78,9 +78,9 @@ class ManualStep {
           .find("span")
           .eq(1),
       manualStepApproverInfo: () =>
-        cy.get("h3").contains("Manual Step").parent().next().find("p").first(),
-      anylist: () => cy.get("li"),
-      manualStepConfirmationModal: () => cy.get(".k-dialog"),
+        pw.get("h3").contains("Manual Step").parent().next().find("p").first(),
+      anylist: () => pw.get("li"),
+      manualStepConfirmationModal: () => pw.get(".k-dialog"),
       manualStepConfirmationModalApproveButton: () =>
         this.getElements()
           .manualStepConfirmationModal()

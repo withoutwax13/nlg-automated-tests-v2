@@ -5,7 +5,7 @@ const interceptAuditAuthLogin = () => {
 };
 
 const waitForAuditAuthLogin = () => {
-  return cy.wait("@AuditAuthLogin");
+  return pw.wait("@AuditAuthLogin");
 };
 
 const interceptDepartments = () => {
@@ -15,8 +15,8 @@ const interceptDepartments = () => {
 };
 
 const waitForDepartments = () => {
-  cy.wait("@getDepartments").its("response.statusCode").should("eq", 200);
-  cy.wait("@getDepartments").its("response.statusCode").should("eq", 200);
+  pw.wait("@getDepartments").its("response.statusCode").should("eq", 200);
+  pw.wait("@getDepartments").its("response.statusCode").should("eq", 200);
   return cy
     .wait("@getDepartments")
     .its("response.statusCode")
@@ -30,7 +30,7 @@ const interceptSelectedDepartment = () => {
 };
 
 const waitForSelectedDepartment = () => {
-  return cy.wait("@getSelectedDepartment");
+  return pw.wait("@getSelectedDepartment");
 };
 
 export default {

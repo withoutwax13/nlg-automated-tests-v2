@@ -7,14 +7,14 @@ class BusinessDetails {
 
   private elements() {
     return {
-      anyList: () => cy.get("li"),
-      pageTitle: () => cy.get("h1"),
-      backToBusinessesButton: () => cy.get(".NLG-Hyperlink").contains("Back"),
-      saveButton: () => cy.get(".NLGButtonPrimary").contains("Save"),
+      anyList: () => pw.get("li"),
+      pageTitle: () => pw.get("h1"),
+      backToBusinessesButton: () => pw.get(".NLG-Hyperlink").contains("Back"),
+      saveButton: () => pw.get(".NLGButtonPrimary").contains("Save"),
       discardChangesButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Discard Changes"),
+        pw.get(".NLGButtonSecondary").contains("Discard Changes"),
       businessStatusIndicator: () => this.getElement().pageTitle().next(),
-      aboutBusinessSection: () => cy.get("section").eq(0),
+      aboutBusinessSection: () => pw.get("section").eq(0),
       editBusinessInfoButton: () =>
         this.getElement()
           .aboutBusinessSection()
@@ -24,7 +24,7 @@ class BusinessDetails {
       sectionTabs: () => this.getElement().aboutBusinessSection().next(),
       sectionTabsItems: (tabName: string) =>
         this.getElement().sectionTabs().find("ul").find("li").contains(tabName),
-      formsSection: () => cy.get("section").eq(1).find("h3").parent().parent(),
+      formsSection: () => pw.get("section").eq(1).find("h3").parent().parent(),
       formsSectionTitle: () => this.getElement().formsSection().find("h3"),
       formsSectionHelpText: () => this.getElement().formsSection().find("p"),
       formsSectionFormList: () =>
@@ -37,7 +37,7 @@ class BusinessDetails {
         this.getElement().formsSectionFormList().contains(formName).parent().parent(),
 
       businessStatusSection: () =>
-        cy.get("section").eq(1).find("h3").parent("section"),
+        pw.get("section").eq(1).find("h3").parent("section"),
       startDateDelinquencyTrackingInput: () =>
         cy
           .get("label")
@@ -53,7 +53,7 @@ class BusinessDetails {
           .next()
           .find("input"),
       operatingStatusDropdown: () =>
-        cy.get("label").contains("Operating Status").parent().next().find("i"),
+        pw.get("label").contains("Operating Status").parent().next().find("i"),
 
       notesSection: () => this.getElement().sectionTabs().find("div[class*='businessDetailsSectionContent']"),
       addNoteButton: () =>
@@ -109,7 +109,7 @@ class BusinessDetails {
   }
 
   getFormRequirements(aliasVariable) {
-    cy.wrap([]).as(aliasVariable);
+    pw.wrap([]).as(aliasVariable);
     return this.getElement()
       .formsSectionFormList()
       .each(($form, $index) => {
@@ -118,17 +118,17 @@ class BusinessDetails {
           .eq($index)
           .find("span")
           .invoke("text")
-          .then((text) => cy.wrap(text).as("formName"));
-        cy.get(aliasVariable).then((formRequirements: any) => {
-          cy.get("@formName").then((formName) => {
-            cy.wrap([...formRequirements, formName]).as(aliasVariable);
+          .then((text) => pw.wrap(text).as("formName"));
+        pw.get(aliasVariable).then((formRequirements: any) => {
+          pw.get("@formName").then((formName) => {
+            pw.wrap([...formRequirements, formName]).as(aliasVariable);
           });
         });
       });
   }
 
   getEnabledFormRequirements(aliasVariable: string) {
-    cy.wrap([]).as(aliasVariable);
+    pw.wrap([]).as(aliasVariable);
     return this.getElement()
       .formsSectionFormList()
       .each(($form, $index) => {
@@ -144,10 +144,10 @@ class BusinessDetails {
                 .eq($index)
                 .find("span")
                 .invoke("text")
-                .then((text) => cy.wrap(text).as("formName"));
-              cy.get(aliasVariable).then((enabledFormRequirements: any) => {
-                cy.get("@formName").then((formName) => {
-                  cy.wrap([...enabledFormRequirements, formName]).as(
+                .then((text) => pw.wrap(text).as("formName"));
+              pw.get(aliasVariable).then((enabledFormRequirements: any) => {
+                pw.get("@formName").then((formName) => {
+                  pw.wrap([...enabledFormRequirements, formName]).as(
                     aliasVariable
                   );
                 });
@@ -201,7 +201,7 @@ class BusinessDetails {
   addNote(note: string) {
     this.clickAddNoteButton();
     // TODO: Implement Add Note POM
-    cy.get("textarea").type(note);
+    pw.get("textarea").type(note);
     this.clickSaveButton();
   }
 
@@ -211,23 +211,23 @@ class BusinessDetails {
 
   deleteNoteItem(pos: number) {
     this.getElement().deleteNoteButton(pos).click( {force: true} );
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   uploadDocument(fileName: string) {
     const fileToUpload = fileName || "data.json";
     this.getElement().uploadDocumentButton().click( {force: true} );
     // TODO: Implement Upload Document POM
-    cy.get('input[placeholder="Enter file name"]').type(fileName);
-    cy.get('input[type="files"]').attachFile(fileToUpload);
-    cy.get(".NLGButtonPrimary").contains("Upload").click( {force: true} );
-    cy.waitForLoading();
+    pw.get('input[placeholder="Enter file name"]').type(fileName);
+    pw.get('input[type="files"]').attachFile(fileToUpload);
+    pw.get(".NLGButtonPrimary").contains("Upload").click( {force: true} );
+    pw.waitForLoading();
   }
 
   enableForm(formName: string) {
     this.getElement().formSectionFormListItem(formName).find("input").check();
     this.clickSaveButton();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 }
 

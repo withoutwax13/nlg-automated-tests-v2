@@ -7,7 +7,7 @@ test.describe("As a municipal user, I should be able to hide/show columns in the
     const municipalityFormGrid = new FormGrid({
       userType: "municipal",
     });
-    cy.login({ accountType: "municipal", accountIndex: 3 });
+    pw.login({ accountType: "municipal", accountIndex: 3 });
     defaultColumns.slice(1, 3).forEach((column) => {
       // Limiting to 2 columns to save resource usage
       municipalityFormGrid.init();
@@ -22,9 +22,9 @@ test.describe("As a municipal user, I should be able to hide/show columns in the
         column,
         `${column.replace(/\s+/g, "")}VisibilityAfterHide`
       );
-      cy.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeHide`).then(
+      pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeHide`).then(
         (beforeToggle) => {
-          cy.get(`@${column.replace(/\s+/g, "")}VisibilityAfterHide`).then(
+          pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterHide`).then(
             (afterToggle) => {
               expect(beforeToggle).to.not.equal(afterToggle);
             }
@@ -42,9 +42,9 @@ test.describe("As a municipal user, I should be able to hide/show columns in the
         column,
         `${column.replace(/\s+/g, "")}VisibilityAfterShow`
       );
-      cy.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeShow`).then(
+      pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeShow`).then(
         (beforeToggle) => {
-          cy.get(`@${column.replace(/\s+/g, "")}VisibilityAfterShow`).then(
+          pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterShow`).then(
             (afterToggle) => {
               expect(beforeToggle).to.not.equal(afterToggle);
             }

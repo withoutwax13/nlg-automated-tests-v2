@@ -37,7 +37,7 @@ const newBusinessData = {
 
 test.describe("As an AGS user, I should be able to delete a business.", () => {
   test.beforeEach(() => {
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "ags",
       notFirstLogin: false,
@@ -45,7 +45,7 @@ test.describe("As an AGS user, I should be able to delete a business.", () => {
     });
   });
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 5 });
+    pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 5 });
     businessGrid.init();
     businessGrid.clickAddBusinessButton();
     addBusinessPage.fillFields(newBusinessData);
@@ -53,7 +53,7 @@ test.describe("As an AGS user, I should be able to delete a business.", () => {
     businessGrid.init(false, false);
     businessGrid.clickClearAllFiltersButton();
     businessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
 
     businessGrid.init();
     businessGrid.clickClearAllFiltersButton();

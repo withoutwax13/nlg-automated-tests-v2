@@ -1,7 +1,7 @@
 class BusinessDetailsModal {
   private elements() {
     return {
-      modal: () => cy.get(".k-dialog"),
+      modal: () => pw.get(".k-dialog"),
       modalTitle: () => this.getElement().modal().find(".k-dialog-title"),
       closeModalButton: () =>
         this.getElement().modal().find('button[aria-label="Close"]'),
@@ -37,16 +37,16 @@ class BusinessDetailsModal {
   }
 
   getRemittanceRequirements(aliasVariable: string) {
-    cy.wrap([]).as(aliasVariable);
+    pw.wrap([]).as(aliasVariable);
     this.getElement()
       .remittanceRequirementsList()
       .then(($list) => {
         $list.find("li").each(($li) => {
-          cy.wrap($li)
+          pw.wrap($li)
             .invoke("text")
             .then((text) => {
-              cy.get(`@${aliasVariable}`).then((remittanceRequirements) => {
-                cy.wrap([...remittanceRequirements, text]).as(aliasVariable);
+              pw.get(`@${aliasVariable}`).then((remittanceRequirements) => {
+                pw.wrap([...remittanceRequirements, text]).as(aliasVariable);
               });
             });
         });

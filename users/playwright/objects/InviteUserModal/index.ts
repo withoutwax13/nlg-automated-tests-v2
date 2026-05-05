@@ -1,7 +1,7 @@
 class InviteUserModal {
   private elements() {
     return {
-      modal: () => cy.get(".k-dialog"),
+      modal: () => pw.get(".k-dialog"),
       title: () => this.getElement().modal().find(".k-dialog-title"),
       closeModalButton: () =>
         this.getElement().modal().find('button[aria-label="Close"]'),
@@ -38,12 +38,12 @@ class InviteUserModal {
 
   selectSubscriptionType(subscriptionType: string) {
     this.getElement().subscriptionTypeDropdown().click();
-    cy.get(".k-list-item").contains(subscriptionType).click();
+    pw.get(".k-list-item").contains(subscriptionType).click();
   }
 
   selectMunicipality(municipality: string) {
     this.getElement().municipalityDropdown().click();
-    cy.get(".k-list-item").contains(municipality).click();
+    pw.get(".k-list-item").contains(municipality).click();
   }
 
   clickCloseModalButton() {
@@ -84,7 +84,7 @@ class InviteUserModal {
 
   typeEmail(email: string) {
     this.getElement().emailInput().type(email);
-    cy.wait(3000); // Wait for the email input to be processed
+    pw.wait(3000); // Wait for the email input to be processed
   }
 }
 

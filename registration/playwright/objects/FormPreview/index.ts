@@ -8,11 +8,11 @@ class FormPreview extends Form {
   private formPreviewElements() {
     return {
       ...super.getElement(),
-      submitButton: () => cy.get(".NLGButtonPrimary").contains(/Go to Payment|Submit/),
-      accordion: () => cy.get(".k-expander").eq(0).parent(),
+      submitButton: () => pw.get(".NLGButtonPrimary").contains(/Go to Payment|Submit/),
+      accordion: () => pw.get(".k-expander").eq(0).parent(),
       accordionSteps: () => this.getElement().accordion().find(".k-expander"),
-      paymentDetails: () => cy.get("h2").contains("Payment Details").next(),
-      duplicateRegistrationWarning: () => cy.get("*").contains("Duplicate Registration Detected")
+      paymentDetails: () => pw.get("h2").contains("Payment Details").next(),
+      duplicateRegistrationWarning: () => pw.get("*").contains("Duplicate Registration Detected")
     };
   }
 

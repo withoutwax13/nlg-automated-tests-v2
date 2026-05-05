@@ -8,35 +8,35 @@ class Form {
    */
   private elements() {
     return {
-      nextButton: () => cy.get(".NLGButtonPrimary").contains("Next"),
-      formTitle: () => cy.get("h1"),
-      stepper: () => cy.get(".k-stepper").find("ol"),
+      nextButton: () => pw.get(".NLGButtonPrimary").contains("Next"),
+      formTitle: () => pw.get("h1"),
+      stepper: () => pw.get(".k-stepper").find("ol"),
       getStepper: (step: string) => this.elements().stepper().find(".k-step-text").contains(step).parent().parent(),
-      backButton: () => cy.get(".NLGButtonSecondary").contains("Back"),
+      backButton: () => pw.get(".NLGButtonSecondary").contains("Back"),
       saveAndCloseButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Save And Close"),
+        pw.get(".NLGButtonSecondary").contains("Save And Close"),
       managerOperatorFullName: () =>
-        cy.get('span[data-cy="Manager/Operator Full Name-masked-input"]'),
-      managerOperatorTitle: () => cy.get('input[name="OperatorTitleRB"]'),
-      managerOperatorPhoneNumber: () => cy.get('input[name="OperatorPhoneRB"]'),
+        pw.get('span[data-cy="Manager/Operator Full Name-masked-input"]'),
+      managerOperatorTitle: () => pw.get('input[name="OperatorTitleRB"]'),
+      managerOperatorPhoneNumber: () => pw.get('input[name="OperatorPhoneRB"]'),
       managerOperatorEmail: () =>
-        cy.get('input[name="OperatorEmailAddressRB"]'),
+        pw.get('input[name="OperatorEmailAddressRB"]'),
       managerEmergencyPhoneNumber: () =>
-        cy.get('input[name="EmergencyPhoneNumberRB"]'),
-      agencyName: () => cy.get("#AgencyName"),
-      agencyTypeDropdown: () => cy.get('div[data-cy="Agency Type-dropdown"]'),
-      preparerFullName: () => cy.get("#TaxPreparerFullName"),
-      preparerTitle: () => cy.get("#Title"),
-      preparerPhone: () => cy.get("#TaxPreparerPhoneNumber"),
-      preparerEmailAddress: () => cy.get("#PreparerEmail"),
-      signature: () => cy.get("#Signature"),
+        pw.get('input[name="EmergencyPhoneNumberRB"]'),
+      agencyName: () => pw.get("#AgencyName"),
+      agencyTypeDropdown: () => pw.get('div[data-cy="Agency Type-dropdown"]'),
+      preparerFullName: () => pw.get("#TaxPreparerFullName"),
+      preparerTitle: () => pw.get("#Title"),
+      preparerPhone: () => pw.get("#TaxPreparerPhoneNumber"),
+      preparerEmailAddress: () => pw.get("#PreparerEmail"),
+      signature: () => pw.get("#Signature"),
       agencyCheckbox: () =>
-        cy.get(
+        pw.get(
           '*[data-cy="Check box if you are a representative of an Agency registering on behalf of a business owner.-checkbox"]'
         ),
-      applicantInfoDateData: () => cy.get("#Date"),
-      skipRequiredFieldsCheckbox: () => cy.get("[for='checkbox-AGS-Nav']"),
-      overrideEnabledInfoText: () => cy.get(".fa-exclamation-triangle").parent(),
+      applicantInfoDateData: () => pw.get("#Date"),
+      skipRequiredFieldsCheckbox: () => pw.get("[for='checkbox-AGS-Nav']"),
+      overrideEnabledInfoText: () => pw.get(".fa-exclamation-triangle").parent(),
     };
   }
 
@@ -96,8 +96,8 @@ class Form {
 
     const element =
       selectorCountOnMultiple === undefined
-        ? cy.get(selector)
-        : cy.get(selector).eq(selectorCountOnMultiple);
+        ? pw.get(selector)
+        : pw.get(selector).eq(selectorCountOnMultiple);
 
     switch (method) {
       case "type":
@@ -107,7 +107,7 @@ class Form {
         break;
       case "select":
         element.click();
-        cy.get("li").contains(data).click();
+        pw.get("li").contains(data).click();
         break;
       case "click":
         element.click();
@@ -132,8 +132,8 @@ class Form {
       "select",
       getValidDate()
     );
-    cy.waitForLoading();
-    cy.get("div").then(($el) => {
+    pw.waitForLoading();
+    pw.get("div").then(($el) => {
       if ($el.text().includes("You have already filed for this period")) {
         this.handleSelectingUnavailableFilingPeriod(++counter);
       }
@@ -178,15 +178,15 @@ class Form {
   saveAndCloseFiling() {
     this.getElement().saveAndCloseButton().click();
     // TODO: Add save and close modal POM
-    cy.get('.k-actions').find('button').contains('Save And Close').click();
-    cy.waitForLoading();
+    pw.get('.k-actions').find('button').contains('Save And Close').click();
+    pw.waitForLoading();
   }
 
   deleteAndCloseFiling() {
     this.getElement().saveAndCloseButton().click();
     // TODO: Add save and close modal POM
-    cy.get('.k-actions').find('button').contains('Delete And Close').click();
-    cy.waitForLoading();
+    pw.get('.k-actions').find('button').contains('Delete And Close').click();
+    pw.waitForLoading();
   }
 
   clickSkipRequiredFieldsCheckbox() {

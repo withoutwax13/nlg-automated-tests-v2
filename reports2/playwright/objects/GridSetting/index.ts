@@ -12,7 +12,7 @@ class GridSetting {
 
   private elements() {
     return {
-      modal: () => cy.get(".k-dialog"),
+      modal: () => pw.get(".k-dialog"),
       modalTitle: () => this.getElement().modal().find(".k-dialog-title"),
       closeButton: () => this.getElement().modal().find('[aria-label="Close"]'),
       buttonGroup: () => this.getElement().modal().find(".k-dialog-actions"),
@@ -20,7 +20,7 @@ class GridSetting {
         this.getElement().buttonGroup().find("button").contains("Cancel"),
       saveChangesButton: () =>
         this.getElement().buttonGroup().find("button").contains("Save Changes"),
-      gridSettingMainContainer: () => cy.get(".NLG-GridSettings"),
+      gridSettingMainContainer: () => pw.get(".NLG-GridSettings"),
       restoreDefaulSettingsButton: () =>
         this.getElement()
           .gridSettingMainContainer()
@@ -70,13 +70,13 @@ class GridSetting {
       .then((checked) => {
         if (checked === "false") {
           this.getElement().columnRowVisibilityToggle(columnName).click();
-          cy.get(`@${this.visibilityStatusAlias}`).then((visibilityStatus) => {
-            cy.wrap({ ...visibilityStatus, [columnName]: true }).as(
+          pw.get(`@${this.visibilityStatusAlias}`).then((visibilityStatus) => {
+            pw.wrap({ ...visibilityStatus, [columnName]: true }).as(
               this.visibilityStatusAlias
             );
           });
         } else {
-          cy.log(`Column ${columnName} is already visible`);
+          pw.log(`Column ${columnName} is already visible`);
         }
       });
     this.clickSaveChangesButton();
@@ -89,13 +89,13 @@ class GridSetting {
       .then((checked) => {
         if (checked === "true") {
           this.getElement().columnRowVisibilityToggle(columnName).click();
-          cy.get(`@${this.visibilityStatusAlias}`).then((visibilityStatus) => {
-            cy.wrap({ ...visibilityStatus, [columnName]: false }).as(
+          pw.get(`@${this.visibilityStatusAlias}`).then((visibilityStatus) => {
+            pw.wrap({ ...visibilityStatus, [columnName]: false }).as(
               this.visibilityStatusAlias
             );
           });
         } else {
-          cy.log(`Column ${columnName} is already hidden`);
+          pw.log(`Column ${columnName} is already hidden`);
         }
       });
     this.clickSaveChangesButton();
@@ -109,7 +109,7 @@ class GridSetting {
         if (checked === "false") {
           this.getElement().columnRowFreezeToggle(columnName).click();
         } else {
-          cy.log(`Column ${columnName} is already frozen`);
+          pw.log(`Column ${columnName} is already frozen`);
         }
       });
     this.clickSaveChangesButton();
@@ -123,7 +123,7 @@ class GridSetting {
         if (checked === "true") {
           this.getElement().columnRowFreezeToggle(columnName).click();
         } else {
-          cy.log(`Column ${columnName} is already unfrozen`);
+          pw.log(`Column ${columnName} is already unfrozen`);
         }
       });
     this.clickSaveChangesButton();

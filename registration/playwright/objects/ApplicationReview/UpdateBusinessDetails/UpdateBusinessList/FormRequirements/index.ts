@@ -2,13 +2,13 @@ class FormRequirements {
   constructor() {}
   private elements() {
     return {
-      formList: () => cy.get(".k-dialog-content").find("div").eq(1).find("div"),
-      locationAddressData: () => cy.get(".k-dialog-content").find("b"),
-      startDateDelinquencyTracker: () => cy.get(".k-dateinput").eq(0),
-      businessCloseDataTracker: () => cy.get(".k-dateinput").eq(1),
-      cancelButton: () => cy.get(".NLGButtonSecondary").contains("Cancel"),
-      saveButton: () => cy.get(".NLGButtonPrimary").contains("Save"),
-      modalTitle: () => cy.get(".k-dialog-title"),
+      formList: () => pw.get(".k-dialog-content").find("div").eq(1).find("div"),
+      locationAddressData: () => pw.get(".k-dialog-content").find("b"),
+      startDateDelinquencyTracker: () => pw.get(".k-dateinput").eq(0),
+      businessCloseDataTracker: () => pw.get(".k-dateinput").eq(1),
+      cancelButton: () => pw.get(".NLGButtonSecondary").contains("Cancel"),
+      saveButton: () => pw.get(".NLGButtonPrimary").contains("Save"),
+      modalTitle: () => pw.get(".k-dialog-title"),
     };
   }
   getElements() {

@@ -115,8 +115,8 @@ class ApplicationGrid {
    * @returns {void}
    */
   init(firstInit = true) {
-    cy.visit("/registrationApp/applicationsList");
-    cy.waitForLoading(60);
+    pw.visit("/registrationApp/applicationsList");
+    pw.waitForLoading(60);
     if (this.userType === "municipal") {
       getOrderOfColumns(
         MUNICIPAL_APPLICATION_COLUMNS,
@@ -142,21 +142,21 @@ class ApplicationGrid {
    */
   private elements() {
     return {
-      columns: () => cy.get("thead").find("tr").find("th"),
-      rows: () => cy.get("tbody").find("tr"),
-      noRecordFoundComponent: () => cy.get(".k-grid-norecords-template"),
+      columns: () => pw.get("thead").find("tr").find("th"),
+      rows: () => pw.get("tbody").find("tr"),
+      noRecordFoundComponent: () => pw.get(".k-grid-norecords-template"),
       customizeTableViewButton: () =>
-        cy.get("*").contains("Customize"),
+        pw.get("*").contains("Customize"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -170,7 +170,7 @@ class ApplicationGrid {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -178,9 +178,9 @@ class ApplicationGrid {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
@@ -188,9 +188,9 @@ class ApplicationGrid {
           .find(".k-button")
           .contains("Filter"),
       searchMunicipalityDropdown: () =>
-        cy.get('input[placeholder="Search government …"]'),
-      anyList: () => cy.get("li"),
-      reviewerCountSytemInfo: () => cy.get(".count-of-reviews"),
+        pw.get('input[placeholder="Search government …"]'),
+      anyList: () => pw.get("li"),
+      reviewerCountSytemInfo: () => pw.get(".count-of-reviews"),
       startApplicationWorkflowForSelectedApplicationsButton: () =>
         cy
           .get(".NLG-HyperlinkNoPadding")
@@ -201,7 +201,7 @@ class ApplicationGrid {
           .parent()
           .prev(),
       clearAllFiltersButton: () =>
-        cy.get("*").contains("Clear All"),
+        pw.get("*").contains("Clear All"),
     };
   }
 
@@ -220,7 +220,7 @@ class ApplicationGrid {
   selectMunicipality(municipality: string) {
     this.getElement().searchMunicipalityDropdown().type(municipality);
     this.getElement().anyList().contains(municipality).click( {force: true} )
-    cy.waitForLoading(60);
+    pw.waitForLoading(60);
   }
 
   /**
@@ -262,7 +262,7 @@ class ApplicationGrid {
    * @param columnName - The name of the column to sort.
    */
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -360,7 +360,7 @@ class ApplicationGrid {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -423,7 +423,7 @@ class ApplicationGrid {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -433,7 +433,7 @@ class ApplicationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -455,7 +455,7 @@ class ApplicationGrid {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -465,7 +465,7 @@ class ApplicationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -519,7 +519,7 @@ class ApplicationGrid {
     numberToRandomlySelect?: number;
   }) {
     const { anchorColumnName, anchorValue, numberToRandomlySelect } = params;
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         if (anchorColumnName && anchorValue) {
@@ -530,7 +530,7 @@ class ApplicationGrid {
             .each(($row) => {
               const $columns = $row.find("td");
               if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-                cy.wrap($columns).eq(0).find(".k-checkbox").click( {force: true} );
+                pw.wrap($columns).eq(0).find(".k-checkbox").click( {force: true} );
               }
             });
         } else if (numberToRandomlySelect) {
@@ -538,7 +538,7 @@ class ApplicationGrid {
             .rows()
             .each(($row, index) => {
               if (index < numberToRandomlySelect) {
-                cy.wrap($row).find(".k-checkbox").click( {force: true} );
+                pw.wrap($row).find(".k-checkbox").click( {force: true} );
               }
             });
         }
@@ -551,7 +551,7 @@ class ApplicationGrid {
    * @param anchorValue - The value to filter the anchor column by.
    */
   clickApplicationCertificate(anchorColumnName: string, anchorValue: string) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -562,7 +562,7 @@ class ApplicationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns).eq(certificateColumnIndex).click( {force: true} );
+              pw.wrap($columns).eq(certificateColumnIndex).click( {force: true} );
             }
           });
       });
@@ -574,7 +574,7 @@ class ApplicationGrid {
    * @param anchorValue - The value to filter the anchor column by.
    */
   clickApplicationMessage(anchorColumnName: string, anchorValue: string) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -585,7 +585,7 @@ class ApplicationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns).eq(messageColumnIndex).find("i").click( {force: true} );
+              pw.wrap($columns).eq(messageColumnIndex).find("i").click( {force: true} );
             }
           });
       });
@@ -597,7 +597,7 @@ class ApplicationGrid {
    * @param anchorValue - The value to filter the anchor column by.
    */
   clickApplicationPDF(anchorColumnName: string, anchorValue: string) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -608,7 +608,7 @@ class ApplicationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns).eq(pdfColumnIndex).click( {force: true} );
+              pw.wrap($columns).eq(pdfColumnIndex).click( {force: true} );
             }
           });
       });
@@ -625,11 +625,11 @@ class ApplicationGrid {
     anchorColumnName: string,
     anchorValue: string
   ) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
-        cy.log(anchorColumnName);
-        cy.log(columnIndexes[anchorColumnName]);
+        pw.log(anchorColumnName);
+        pw.log(columnIndexes[anchorColumnName]);
         this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
         const anchorColumnIndex = columnIndexes[anchorColumnName];
         const approvalPaymentStatusColumnIndex =
@@ -639,7 +639,7 @@ class ApplicationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns)
+              pw.wrap($columns)
                 .eq(approvalPaymentStatusColumnIndex)
                 .find("i")
                 .click( {force: true} );
@@ -648,12 +648,12 @@ class ApplicationGrid {
           });
       });
     // TODO: Manually change the approval payment status modal POM
-    cy.get(".k-dialog-content")
+    pw.get(".k-dialog-content")
       .find("label")
       .contains(toApprovalPaymentStatus)
       .click( {force: true} );
-    cy.get(".NLGButtonPrimary").contains("Save").click( {force: true} );
-    cy.waitForLoading();
+    pw.get(".NLGButtonPrimary").contains("Save").click( {force: true} );
+    pw.waitForLoading();
   }
 
   /**
@@ -662,7 +662,7 @@ class ApplicationGrid {
    * @param anchorValue - The value to filter the anchor column by.
    */
   payApplication(anchorColumnName: string, anchorValue: string) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -673,7 +673,7 @@ class ApplicationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns).eq(applicationStatusIndex).find("i").click( {force: true} );
+              pw.wrap($columns).eq(applicationStatusIndex).find("i").click( {force: true} );
               this.getElement().anyList().contains(`Pay Now`).click( {force: true} );
             }
           });

@@ -25,7 +25,7 @@ test.describe("As an AGS user, I want to be able to update the payment status fo
     });
     const applicationReview = new ApplicationReview({ userType: "ags" });
 
-    cy.login({ accountType: "taxpayer", accountIndex: 6 });
+    pw.login({ accountType: "taxpayer", accountIndex: 6 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -34,7 +34,7 @@ test.describe("As an AGS user, I want to be able to update the payment status fo
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
 
-    cy.getUniqueRegistrationData(randomSeed(), false).then(
+    pw.getUniqueRegistrationData(randomSeed(), false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };
@@ -55,11 +55,11 @@ test.describe("As an AGS user, I want to be able to update the payment status fo
           .referenceIdData()
           .invoke("text")
           .then((referenceId) => {
-            cy.wrap(referenceId).as("referenceId");
+            pw.wrap(referenceId).as("referenceId");
           });
         applicationConfirmation.clickCloseButton();
         taxpayerApplicationGrid.init();
-        cy.get("@referenceId").then((referenceId) => {
+        pw.get("@referenceId").then((referenceId) => {
           taxpayerApplicationGrid.getDataOfColumn(
             "Registration Record ID",
             "Reference ID",
@@ -67,14 +67,14 @@ test.describe("As an AGS user, I want to be able to update the payment status fo
             "registrationRecordId"
           );
         });
-        cy.logout();
-        cy.login({
+        pw.logout();
+        pw.login({
           accountType: "ags",
           notFirstLogin: true,
           accountIndex: 6,
         });
         agsApplicationGrid.init();
-        cy.get("@registrationRecordId").then((registrationRecordId) => {
+        pw.get("@registrationRecordId").then((registrationRecordId) => {
           agsApplicationGrid.selectRowToReview({
             anchorColumnName: "Registration Record ID",
             anchorValue: String(registrationRecordId),
@@ -111,8 +111,8 @@ test.describe("As an AGS user, I want to be able to update the payment status fo
               );
             });
           applicationReview.clickGoBackApplicationsButton();
-          cy.logout();
-          cy.login({
+          pw.logout();
+          pw.login({
             accountType: "taxpayer",
             accountIndex: 6,
             notFirstLogin: true,
@@ -124,8 +124,8 @@ test.describe("As an AGS user, I want to be able to update the payment status fo
           );
           paymentPage.payViaAnySavedPaymentMethod();
           applicationConfirmation.clickCloseButton();
-          cy.logout();
-          cy.login({
+          pw.logout();
+          pw.login({
             accountType: "ags",
             accountIndex: 6,
             notFirstLogin: true,
@@ -150,9 +150,9 @@ test.describe("As an AGS user, I want to be able to update the payment status fo
             String(registrationRecordId),
             "approvalPaymentStatusAfterManualChange"
           );
-          cy.get("@approvalPaymentStatusBeforeManualChange").then(
+          pw.get("@approvalPaymentStatusBeforeManualChange").then(
             (approvalPaymentStatusBeforeManualChange) => {
-              cy.get("@approvalPaymentStatusAfterManualChange").then(
+              pw.get("@approvalPaymentStatusAfterManualChange").then(
                 (approvalPaymentStatusAfterManualChange) => {
                   expect(approvalPaymentStatusBeforeManualChange).to.not.equal(
                     approvalPaymentStatusAfterManualChange

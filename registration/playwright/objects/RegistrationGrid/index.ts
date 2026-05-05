@@ -68,9 +68,9 @@ class RegistrationGrid {
   }
 
   init() {
-    cy.visit("/registrationApp/registrationList");
+    pw.visit("/registrationApp/registrationList");
     if (this.userType === "municipal") {
-      cy.waitForLoading(120);
+      pw.waitForLoading(120);
       getOrderOfColumns(
         MUNICIPAL_REGISTRATION_COLUMNS,
         this.defaultGridColumnsAlias
@@ -86,20 +86,20 @@ class RegistrationGrid {
 
   private elements() {
     return {
-      columns: () => cy.get("thead").find("tr").find("th"),
-      rows: () => cy.get("tbody").find("tr"),
-      noRecordFoundComponent: () => cy.get(".k-grid-norecords-template"),
-      customizeTableViewButton: () => cy.get("*").contains("Customize"),
+      columns: () => pw.get("thead").find("tr").find("th"),
+      rows: () => pw.get("tbody").find("tr"),
+      noRecordFoundComponent: () => pw.get(".k-grid-norecords-template"),
+      customizeTableViewButton: () => pw.get("*").contains("Customize"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -113,7 +113,7 @@ class RegistrationGrid {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -121,9 +121,9 @@ class RegistrationGrid {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
@@ -131,11 +131,11 @@ class RegistrationGrid {
           .find(".k-button")
           .contains("Filter"),
       searchMunicipalityDropdown: () =>
-        cy.get('input[placeholder="Search government …"]'),
-      anyList: () => cy.get("li"),
+        pw.get('input[placeholder="Search government …"]'),
+      anyList: () => pw.get("li"),
       clearAllFiltersButton: () =>
-        cy.get("*").contains("Clear All"),
-      toastComponent: () => cy.get(".Toastify"),
+        pw.get("*").contains("Clear All"),
+      toastComponent: () => pw.get(".Toastify"),
     };
   }
 
@@ -146,7 +146,7 @@ class RegistrationGrid {
   selectMunicipality(municipality: string) {
     this.getElement().searchMunicipalityDropdown().type(municipality);
     this.getElement().anyList().contains(municipality).click( {force: true} );
-    cy.waitForLoading(120);
+    pw.waitForLoading(120);
   }
 
   private clickColumn(index: number) {
@@ -169,7 +169,7 @@ class RegistrationGrid {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -242,7 +242,7 @@ class RegistrationGrid {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -288,7 +288,7 @@ class RegistrationGrid {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -298,7 +298,7 @@ class RegistrationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -313,7 +313,7 @@ class RegistrationGrid {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -323,7 +323,7 @@ class RegistrationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -335,7 +335,7 @@ class RegistrationGrid {
     anchorValue: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -345,13 +345,13 @@ class RegistrationGrid {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
               if (isExpand) {
-                cy.wrap($columns)
+                pw.wrap($columns)
                   .eq(0)
                   .find("i")
                   .invoke("attr", "class")
                   .then((iconClass) => {
                     if (iconClass.includes("fa-angle-right")) {
-                      cy.wrap($columns).eq(0).find("i").click( {force: true} );
+                      pw.wrap($columns).eq(0).find("i").click( {force: true} );
                     }
                   });
               }
@@ -366,7 +366,7 @@ class RegistrationGrid {
     anchorValue: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -376,12 +376,12 @@ class RegistrationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns)
+              pw.wrap($columns)
                 .eq(actionColumnIndex)
 
                 .click( {force: true} );
               this.getElement().anyList().contains(action).click( {force: true} );
-              cy.waitForLoading();
+              pw.waitForLoading();
             }
           });
       });
@@ -393,7 +393,7 @@ class RegistrationGrid {
     anchorValue: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -403,27 +403,27 @@ class RegistrationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns).eq(regStatusColumnIndex).find("i").click( {force: true} );
+              pw.wrap($columns).eq(regStatusColumnIndex).find("i").click( {force: true} );
               this.getElement().anyList().contains(toRegStatus).click( {force: true} );
             }
           });
       });
 
     // TODO: manually change registration status modal POM
-    cy.get(".NLGButtonPrimary")
+    pw.get(".NLGButtonPrimary")
       .contains(`Update status to ${toRegStatus}`)
       .click( {force: true} );
 
     if (toRegStatus === "Active") {
-      cy.get('button[aria-label="Toggle calendar"]').click( {force: true} );
-      cy.get(".k-button-text").contains("TODAY").click( {force: true} );
+      pw.get('button[aria-label="Toggle calendar"]').click( {force: true} );
+      pw.get(".k-button-text").contains("TODAY").click( {force: true} );
 
-      cy.get(".NLGButtonPrimary")
+      pw.get(".NLGButtonPrimary")
         .contains(`Update status to ${toRegStatus}`)
         .click( {force: true} );
     }
 
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   manuallyChangeRegistrationDateByYear(
@@ -434,7 +434,7 @@ class RegistrationGrid {
     anchorValue: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -444,18 +444,18 @@ class RegistrationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns).eq(datePickerColumnIndex).find("i").click( {force: true} );
+              pw.wrap($columns).eq(datePickerColumnIndex).find("i").click( {force: true} );
             }
           });
       });
     const toAdjust = isAddYear
       ? "{upArrow}".repeat(yearFactor)
       : "{downArrow}".repeat(yearFactor);
-    cy.get(".k-datepicker").find("input").click( {force: true} );
-    cy.get(".k-datepicker")
+    pw.get(".k-datepicker").find("input").click( {force: true} );
+    pw.get(".k-datepicker")
       .find("input")
       .type(`{rightArrow}{rightArrow}{rightArrow}${toAdjust}`);
-    cy.get(".NLGButtonPrimary").contains("Update Date").click( {force: true} );
+    pw.get(".NLGButtonPrimary").contains("Update Date").click( {force: true} );
   }
 
   manuallyChangeRegistrationDateByDay(
@@ -466,7 +466,7 @@ class RegistrationGrid {
     anchorValue: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -476,17 +476,17 @@ class RegistrationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns).eq(datePickerColumnIndex).find("i").click( {force: true} );
+              pw.wrap($columns).eq(datePickerColumnIndex).find("i").click( {force: true} );
             }
           });
       });
     const toAdjust = isAddDay
       ? "{upArrow}".repeat(dayFactor)
       : "{downArrow}".repeat(dayFactor);
-    cy.get(".k-datepicker")
+    pw.get(".k-datepicker")
       .find("input")
       .type(`{rightArrow}{rightArrow}${toAdjust}`);
-    cy.get(".NLGButtonPrimary").contains("Update Date").click( {force: true} );
+    pw.get(".NLGButtonPrimary").contains("Update Date").click( {force: true} );
   }
 
   manuallyChangeRegistrationDateByMonth(
@@ -497,7 +497,7 @@ class RegistrationGrid {
     anchorValue: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -507,15 +507,15 @@ class RegistrationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns).eq(datePickerColumnIndex).find("i").click( {force: true} );
+              pw.wrap($columns).eq(datePickerColumnIndex).find("i").click( {force: true} );
             }
           });
       });
     const toAdjust = isAddMonth
       ? "{upArrow}".repeat(monthFactor)
       : "{downArrow}".repeat(monthFactor);
-    cy.get(".k-datepicker").find("input").type(`{rightArrow}${toAdjust}`);
-    cy.get(".NLGButtonPrimary").contains("Update Date").click( {force: true} );
+    pw.get(".k-datepicker").find("input").type(`{rightArrow}${toAdjust}`);
+    pw.get(".NLGButtonPrimary").contains("Update Date").click( {force: true} );
   }
 
   manuallyChangeRegistrationDate(
@@ -526,7 +526,7 @@ class RegistrationGrid {
     isToday?: boolean
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnsAlias}`)
+    pw.get(`@${this.defaultGridColumnsAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const anchorColumnIndex = columnIndexes[anchorColumnName];
@@ -536,20 +536,20 @@ class RegistrationGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns).eq(datePickerColumnIndex).find("i").click( {force: true} );
+              pw.wrap($columns).eq(datePickerColumnIndex).find("i").click( {force: true} );
             }
           });
       });
     // TODO: manually change registration date modal POM
     if (isToday === undefined) {
-      cy.get(".k-datepicker")
+      pw.get(".k-datepicker")
         .find("input")
         .type(`${value.split("/").join("{rightArrow}")}`);
-      cy.get(".NLGButtonPrimary").contains("Update Date").click( {force: true} );
+      pw.get(".NLGButtonPrimary").contains("Update Date").click( {force: true} );
     } else {
-      cy.get('button[aria-label="Toggle calendar"]').click( {force: true} );
-      cy.get(".k-button-text").contains("TODAY").click( {force: true} );
-      cy.get(".NLGButtonPrimary").contains("Update Date").click( {force: true} );
+      pw.get('button[aria-label="Toggle calendar"]').click( {force: true} );
+      pw.get(".k-button-text").contains("TODAY").click( {force: true} );
+      pw.get(".NLGButtonPrimary").contains("Update Date").click( {force: true} );
     }
   }
 }

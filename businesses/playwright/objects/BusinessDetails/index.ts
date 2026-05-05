@@ -11,15 +11,15 @@ class BusinessDetails {
 
   private elements() {
     return {
-      anyList: () => cy.get("li"),
-      pageTitle: () => cy.get("h1"),
-      toastComponent: () => cy.get(".Toastify"),
-      backToBusinessesButton: () => cy.get(".NLG-Hyperlink").contains("Back"),
-      saveButton: () => cy.get(".NLGButtonPrimary").contains("Save"),
+      anyList: () => pw.get("li"),
+      pageTitle: () => pw.get("h1"),
+      toastComponent: () => pw.get(".Toastify"),
+      backToBusinessesButton: () => pw.get(".NLG-Hyperlink").contains("Back"),
+      saveButton: () => pw.get(".NLGButtonPrimary").contains("Save"),
       discardChangesButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Discard Changes"),
+        pw.get(".NLGButtonSecondary").contains("Discard Changes"),
       businessStatusIndicator: () => this.getElement().pageTitle().next(),
-      aboutBusinessSection: () => cy.get("section").eq(0),
+      aboutBusinessSection: () => pw.get("section").eq(0),
       editBusinessInfoButton: () =>
         this.getElement()
           .aboutBusinessSection()
@@ -29,7 +29,7 @@ class BusinessDetails {
       sectionTabs: () => this.getElement().aboutBusinessSection().next(),
       sectionTabsItems: (tabName: string) =>
         this.getElement().sectionTabs().find("ul").find("li").contains(tabName),
-      formsSection: () => cy.get("section").eq(1).find("h3").parent().parent(),
+      formsSection: () => pw.get("section").eq(1).find("h3").parent().parent(),
       formsSectionTitle: () => this.getElement().formsSection().find("h3"),
       formsSectionHelpText: () => this.getElement().formsSection().find("p"),
       formsSectionFormList: () =>
@@ -45,7 +45,7 @@ class BusinessDetails {
         this.getElement().formsSectionFormList().contains(formName).parent(),
 
       businessStatusSection: () =>
-        cy.get("section").eq(1).find("h3").parent("section"),
+        pw.get("section").eq(1).find("h3").parent("section"),
       startDateDelinquencyTrackingInput: () =>
         cy
           .get("label")
@@ -61,7 +61,7 @@ class BusinessDetails {
           .next()
           .find("input"),
       operatingStatusDropdown: () =>
-        cy.get("label").contains("Operating Status").parent().next().find("i"),
+        pw.get("label").contains("Operating Status").parent().next().find("i"),
 
       notesSection: () => this.getElement().sectionTabs().find("div[class*='businessDetailsSectionContent']"),
       addNoteButton: () =>
@@ -90,10 +90,10 @@ class BusinessDetails {
   }
 
   clickSaveButton() {
-    cy.intercept("PUT", "https://**.azavargovapps.com/businesses/**/update").as("updateBusiness");
+    pw.intercept("PUT", "https://**.azavargovapps.com/businesses/**/update").as("updateBusiness");
     this.getElement().saveButton().click();
-    cy.wait("@updateBusiness");
-    cy.get("@updateBusiness").its("response.statusCode").should("eq", 200);
+    pw.wait("@updateBusiness");
+    pw.get("@updateBusiness").its("response.statusCode").should("eq", 200);
   }
 
   clickDiscardChangesButton() {
@@ -122,7 +122,7 @@ class BusinessDetails {
 
   getFormRequirements(aliasVariable) {
     if (this.userType !== "taxpayer") {
-      cy.wrap([]).as(aliasVariable);
+      pw.wrap([]).as(aliasVariable);
       return this.getElement()
         .formsSectionFormList()
         .each(($form, $index) => {
@@ -131,24 +131,24 @@ class BusinessDetails {
             .eq($index)
             .find("span")
             .invoke("text")
-            .then((text) => cy.wrap(text).as("formName"));
-          cy.get(`@${aliasVariable}`).then((formRequirements: any) => {
-            cy.get("@formName").then((formName) => {
-              cy.wrap([...formRequirements, formName]).as(aliasVariable);
+            .then((text) => pw.wrap(text).as("formName"));
+          pw.get(`@${aliasVariable}`).then((formRequirements: any) => {
+            pw.get("@formName").then((formName) => {
+              pw.wrap([...formRequirements, formName]).as(aliasVariable);
             });
           });
         });
     } else {
-      cy.wrap([]).as(aliasVariable);
+      pw.wrap([]).as(aliasVariable);
       return this.getElement()
         .taxpayerFormsSectionFormList()
         .find("li")
         .each(($form) => {
-          cy.wrap($form)
+          pw.wrap($form)
             .invoke("text")
             .then((text) => {
-              cy.get(`@${aliasVariable}`).then((formRequirements: any) => {
-                cy.wrap([...formRequirements, text]).as(aliasVariable);
+              pw.get(`@${aliasVariable}`).then((formRequirements: any) => {
+                pw.wrap([...formRequirements, text]).as(aliasVariable);
               });
             });
         });
@@ -156,7 +156,7 @@ class BusinessDetails {
   }
 
   getEnabledFormRequirements(aliasVariable: string) {
-    cy.wrap([]).as(aliasVariable);
+    pw.wrap([]).as(aliasVariable);
     return this.getElement()
       .formsSectionFormList()
       .each(($form, $index) => {
@@ -172,10 +172,10 @@ class BusinessDetails {
                 .eq($index)
                 .find("span")
                 .invoke("text")
-                .then((text) => cy.wrap(text).as("formName"));
-              cy.get(aliasVariable).then((enabledFormRequirements: any) => {
-                cy.get("@formName").then((formName) => {
-                  cy.wrap([...enabledFormRequirements, formName]).as(
+                .then((text) => pw.wrap(text).as("formName"));
+              pw.get(aliasVariable).then((enabledFormRequirements: any) => {
+                pw.get("@formName").then((formName) => {
+                  pw.wrap([...enabledFormRequirements, formName]).as(
                     aliasVariable
                   );
                 });
@@ -233,18 +233,18 @@ class BusinessDetails {
   }
 
   clickCancelNoteButton() {
-    cy.get("button").contains("Cancel").scrollIntoView();
-    cy.get("button").contains("Cancel").click();
+    pw.get("button").contains("Cancel").scrollIntoView();
+    pw.get("button").contains("Cancel").click();
   }
 
   addNote(note: string) {
     this.clickAddNoteButton();
     // TODO: Implement Add Note POM
-    cy.get("textarea").type(note);
-    cy.intercept("PATCH", "https://**.azavargovapps.com/businesses/MunicipalBusiness/Note?businessHandle=**").as("addNote");
+    pw.get("textarea").type(note);
+    pw.intercept("PATCH", "https://**.azavargovapps.com/businesses/MunicipalBusiness/Note?businessHandle=**").as("addNote");
     this.getElement().saveButton().click();
-    cy.wait("@addNote");
-    cy.get("@addNote").its("response.statusCode").should("eq", 200);
+    pw.wait("@addNote");
+    pw.get("@addNote").its("response.statusCode").should("eq", 200);
   }
 
   clickNoteItem(pos: number) {
@@ -252,25 +252,25 @@ class BusinessDetails {
   }
 
   deleteNoteItem(pos: number) {
-    cy.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("deleteNote");
+    pw.intercept("PUT", "https://**.azavargovapps.com/businesses/municipalityBusiness/update").as("deleteNote");
     this.getElement().deleteNoteButton(pos).click();
-    cy.wait("@deleteNote");
-    cy.get("@deleteNote").its("response.statusCode").should("eq", 200);
+    pw.wait("@deleteNote");
+    pw.get("@deleteNote").its("response.statusCode").should("eq", 200);
   }
 
   uploadDocument(fileName: string) {
-    cy.intercept("PATCH", "https://**.azavargovapps.com/businesses/MunicipalBusiness/Document/upload?businessHandle=**").as("uploadDocumentPatch");
-    cy.intercept("PUT", "https://nlg-businessesdata-**-businessuploadeddocumentsbu-**.s3-fips.**.amazonaws.com/**").as("uploadDocumentPut");
+    pw.intercept("PATCH", "https://**.azavargovapps.com/businesses/MunicipalBusiness/Document/upload?businessHandle=**").as("uploadDocumentPatch");
+    pw.intercept("PUT", "https://nlg-businessesdata-**-businessuploadeddocumentsbu-**.s3-fips.**.amazonaws.com/**").as("uploadDocumentPut");
     const fileToUpload = "example.json";
     this.getElement().uploadDocumentButton().click();
     // TODO: Implement Upload Document POM
-    cy.get('input[placeholder="Enter file name"]').type(fileName);
-    cy.get("#files").attachFile(fileToUpload);
-    cy.get(".NLGButtonPrimary").contains("Upload").click();
-    cy.wait("@uploadDocumentPatch");
-    cy.get("@uploadDocumentPatch").its("response.statusCode").should("eq", 200);
-    cy.wait("@uploadDocumentPut");
-    cy.get("@uploadDocumentPut").its("response.statusCode").should("eq", 200);
+    pw.get('input[placeholder="Enter file name"]').type(fileName);
+    pw.get("#files").attachFile(fileToUpload);
+    pw.get(".NLGButtonPrimary").contains("Upload").click();
+    pw.wait("@uploadDocumentPatch");
+    pw.get("@uploadDocumentPatch").its("response.statusCode").should("eq", 200);
+    pw.wait("@uploadDocumentPut");
+    pw.get("@uploadDocumentPut").its("response.statusCode").should("eq", 200);
   }
 
   getBusinessData(businessField: string, valueAlias: string) {
@@ -285,7 +285,7 @@ class BusinessDetails {
         .contains(businessField)
         .next()
         .invoke("text")
-        .then((text) => cy.wrap(text).as(valueAlias));
+        .then((text) => pw.wrap(text).as(valueAlias));
     } else {
       this.getElement()
         .aboutBusinessSection()
@@ -298,7 +298,7 @@ class BusinessDetails {
         .contains(businessField)
         .next()
         .invoke("text")
-        .then((text) => cy.wrap(text).as(valueAlias));
+        .then((text) => pw.wrap(text).as(valueAlias));
     }
   }
 }

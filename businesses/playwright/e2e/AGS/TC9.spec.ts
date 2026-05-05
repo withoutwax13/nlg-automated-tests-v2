@@ -37,7 +37,7 @@ const newBusinessData = {
 
 test.describe("As an AGS user, I should be able to add a business.", () => {
   test.beforeEach(() => {
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "ags",
       notFirstLogin: false,
@@ -45,7 +45,7 @@ test.describe("As an AGS user, I should be able to add a business.", () => {
     });
   });
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
+    pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
     businessGrid.init();
     businessGrid.clickAddBusinessButton();
     addBusinessPage.fillFields(newBusinessData);
@@ -53,7 +53,7 @@ test.describe("As an AGS user, I should be able to add a business.", () => {
     businessGrid.init();
     businessGrid.clickClearAllFiltersButton();
     businessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
-    cy.logout();
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.logout();
   });
 });

@@ -12,13 +12,13 @@ test.describe(
         municipalitySelection: "City of Arrakis",
       });
       const manageDelinquencyModal = new ManageDelinquencyModal();
-      cy.login({ accountType: "ags", accountIndex: 1 });
+      pw.login({ accountType: "ags", accountIndex: 1 });
       agsDelinquencyGrid.init();
       agsDelinquencyGrid.manageDelinquencyItemByOrder(0);
       manageDelinquencyModal.saveBusinessDetails("testBusinessData");
       manageDelinquencyModal.typeExplanation("Test explanation");
       manageDelinquencyModal.clickDismissButton();
-      cy.get("@testBusinessData").then((testBusinessData: any) => {
+      pw.get("@testBusinessData").then((testBusinessData: any) => {
         agsDelinquencyGrid.filterColumn(
           "Business Name (DBA)",
           testBusinessData.businessName,
@@ -38,7 +38,7 @@ test.describe(
       });
       agsDelinquencyGrid.getElement().noRecordFoundComponent().should("exist");
       agsDelinquencyGrid.clickClearAllFiltersButton();
-      cy.get("@testBusinessData").then((testBusinessData: any) => {
+      pw.get("@testBusinessData").then((testBusinessData: any) => {
         agsDelinquencyGrid.clickManageDelinquencyItem([
           {
             anchorColumnName: "Is Dismissed",

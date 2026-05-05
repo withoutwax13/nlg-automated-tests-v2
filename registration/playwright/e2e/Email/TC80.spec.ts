@@ -10,7 +10,7 @@ test.describe.skip("After submitting an application without fee, taxpayer user m
   test("Initiating test", () => {
     const expectedFormName = "Business License (Annual) - E2E #1";
     const expectedGovernmentName = "City of Arrakis";
-    const testmailVars = Cypress.env("testmail");
+    const testmailVars = PW.env("testmail");
     const testmailTag = "taxpayeronly1";
     const ENDPOINT = `${testmailVars.endpoint}?apikey=${testmailVars.apiKey}&namespace=${testmailVars.namespace}&tag=${testmailTag}`;
 
@@ -19,7 +19,7 @@ test.describe.skip("After submitting an application without fee, taxpayer user m
     const filing = new Filing();
     const applicationConfirmation = new ApplicationConfirmation();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 10 });
+    pw.login({ accountType: "taxpayer", accountIndex: 10 });
     filing.goToSubmitFormsTab();
     filing.selectGovernment(expectedGovernmentName);
     filing.selectForm(expectedFormName);
@@ -27,7 +27,7 @@ test.describe.skip("After submitting an application without fee, taxpayer user m
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
 
-    cy.getUniqueRegistrationData(randomSeed(), false).then(
+    pw.getUniqueRegistrationData(randomSeed(), false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };
@@ -48,34 +48,34 @@ test.describe.skip("After submitting an application without fee, taxpayer user m
           .referenceIdData()
           .invoke("text")
           .then((referenceId) => {
-            cy.wrap(referenceId).as("referenceId");
+            pw.wrap(referenceId).as("referenceId");
           });
         applicationConfirmation.clickCloseButton();
-        cy.wait(30000); // Waiting for email to be sent
-        cy.get("@referenceId").then((referenceId) => {
-          cy.request("GET", `${ENDPOINT}&livequery=true`).then((response) => {
+        pw.wait(30000); // Waiting for email to be sent
+        pw.get("@referenceId").then((referenceId) => {
+          pw.request("GET", `${ENDPOINT}&livequery=true`).then((response) => {
             const email = response.body.emails[0];
             console.log(email);
 
             // Verify sender and subject
-            cy.wrap(email.from).should(
+            pw.wrap(email.from).should(
               "equal",
               "Localgov <no-reply@azavargovapps.com>"
             );
-            cy.wrap(email.subject).should(
+            pw.wrap(email.subject).should(
               "equal",
               "An Application Has Been Submitted on Localgov [Without Fee]"
             );
-            cy.wrap(email.html).should("include", "Status: Pending");
-            cy.wrap(email.html).should(
+            pw.wrap(email.html).should("include", "Status: Pending");
+            pw.wrap(email.html).should(
               "include",
               `Reference ID: ${String(referenceId).toUpperCase()}`
             );
-            cy.wrap(email.html).should(
+            pw.wrap(email.html).should(
               "include",
               `Form Name: ${expectedFormName}`
             );
-            cy.wrap(email.html).should(
+            pw.wrap(email.html).should(
               "include",
               `Government: ${expectedGovernmentName}`
             );

@@ -2,7 +2,7 @@
     "compilerOptions": {
       "target": "es2015",
       "lib": ["es2016", "dom"],
-      "types": ["cypress"],
+      "types": ["node", "playwright"],
       "esModuleInterop": true,
       "resolveJsonModule": true,
     "module": "commonjs",

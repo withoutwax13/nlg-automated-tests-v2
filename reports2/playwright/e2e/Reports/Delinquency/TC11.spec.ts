@@ -55,7 +55,7 @@ test.describe.skip(
         municipalitySelection: "City of Arrakis",
       });
       const manageDelinquencyModal = new ManageDelinquencyModal();
-      cy.login({ accountType: "ags", accountIndex: 3 });
+      pw.login({ accountType: "ags", accountIndex: 3 });
       businessGrid.init();
       businessGrid.clickAddBusinessButton();
       businessAddPage.fillFields(newBusinessData);
@@ -93,7 +93,7 @@ test.describe.skip(
       ]);
       manageDelinquencyModal.getElement().modal().should("exist");
       manageDelinquencyModal.saveBusinessDetails("testBusinessData");
-      cy.get("@testBusinessData").then((testBusinessData: any) => {
+      pw.get("@testBusinessData").then((testBusinessData: any) => {
         expect(testBusinessData.businessName).to.equal(
           newBusinessData.locationDba
         );

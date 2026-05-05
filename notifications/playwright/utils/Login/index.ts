@@ -16,13 +16,13 @@ const interceptAwsCognito = () => {
     .as("cognitoAwsAPI");
 };
 
-const waitForHubspotChat = () => cy.wait("@hubspotChatAPI");
-const waitForLeadFlowConfig = () => cy.wait("@leadFlowConfigAPI");
+const waitForHubspotChat = () => pw.wait("@hubspotChatAPI");
+const waitForLeadFlowConfig = () => pw.wait("@leadFlowConfigAPI");
 
 const waitForAwsCognito = (isMultipleWait: boolean = true) => {
   return isMultipleWait
-    ? cy.wait(["@cognitoAwsAPI", "@cognitoAwsAPI"])
-    : cy.wait("@cognitoAwsAPI");
+    ? pw.wait(["@cognitoAwsAPI", "@cognitoAwsAPI"])
+    : pw.wait("@cognitoAwsAPI");
 };
 
 export default {

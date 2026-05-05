@@ -23,7 +23,7 @@ test.describe("As a user, pending application should be deleted if the correspon
       municipalitySelection: "City of Arrakis",
     });
 
-    cy.login({ accountType: "taxpayer", accountIndex: 4 });
+    pw.login({ accountType: "taxpayer", accountIndex: 4 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -32,7 +32,7 @@ test.describe("As a user, pending application should be deleted if the correspon
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
 
-    cy.getUniqueRegistrationData(randomSeed(), false).then(
+    pw.getUniqueRegistrationData(randomSeed(), false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };
@@ -53,20 +53,20 @@ test.describe("As a user, pending application should be deleted if the correspon
           .referenceIdData()
           .invoke("text")
           .then((referenceId) => {
-            cy.wrap(referenceId).as("referenceId");
+            pw.wrap(referenceId).as("referenceId");
           });
         applicationConfirmation.clickCloseButton();
-        cy.logout();
-        cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
+        pw.logout();
+        pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
         agsApplicationGrid.init();
-        cy.get("@referenceId").then((referenceId) => {
+        pw.get("@referenceId").then((referenceId) => {
           agsApplicationGrid.getDataOfColumn(
             "Application Status",
             "Reference ID",
             String(referenceId),
             "applicationStatus"
           );
-          cy.get("@applicationStatus").then((applicationStatus) => {
+          pw.get("@applicationStatus").then((applicationStatus) => {
             expect(applicationStatus).to.equal("Pending");
           });
           filingGrid.init();

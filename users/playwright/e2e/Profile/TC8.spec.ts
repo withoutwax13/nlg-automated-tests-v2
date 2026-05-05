@@ -6,7 +6,7 @@ const randomSeed = Math.floor(Math.random() * 10000);
 const profile = new Profile();
 test.describe("As a user, I should be able to edit my account details", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "taxpayer", accountIndex: 3 });
+    pw.login({ accountType: "taxpayer", accountIndex: 3 });
     profile.init();
     profile.typeFirstName(`QA #${randomSeed}`);
     profile

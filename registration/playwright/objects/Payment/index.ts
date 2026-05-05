@@ -1,10 +1,10 @@
 class Payment {
     private elements () {
         return {
-            savedPaymentMethods: () => cy.get('label[for="savedPayment"]'),
-            savedPaymentMethodItems: () => cy.get('.form-section').eq(0).find('.radio').find('.form-check'),
-            termsAndConditionsCheckbox: () => cy.get('input[data-cy="I have read and agree to the Terms and Conditions of this online payment system.-checkbox"]'),
-            finishAndPayButton: () => cy.get('button').contains('Finish and Pay')
+            savedPaymentMethods: () => pw.get('label[for="savedPayment"]'),
+            savedPaymentMethodItems: () => pw.get('.form-section').eq(0).find('.radio').find('.form-check'),
+            termsAndConditionsCheckbox: () => pw.get('input[data-cy="I have read and agree to the Terms and Conditions of this online payment system.-checkbox"]'),
+            finishAndPayButton: () => pw.get('button').contains('Finish and Pay')
         }
     }
 
@@ -18,12 +18,12 @@ class Payment {
 
     selectSavedPaymentMethod(order: number) {
         this.getElements().savedPaymentMethodItems().eq(order).click( {force: true} );
-        cy.waitForLoading();
+        pw.waitForLoading();
     }
 
     clickTermsAndConditionsCheckbox() {
         this.getElements().termsAndConditionsCheckbox().click( {force: true} );
-        cy.waitForLoading();
+        pw.waitForLoading();
     }
 
     clickFinishAndPayButton() {

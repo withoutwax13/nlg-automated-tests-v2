@@ -6,13 +6,13 @@ test.describe.skip(
   { tags: ["sanity", "regression"] },
   () => {
     test("Initiating test", () => {
-      cy.intercept("GET", "https://**.azavargovapps.com/forms/municipality/**").as(
+      pw.intercept("GET", "https://**.azavargovapps.com/forms/municipality/**").as(
         "getFilingForm"
       );
       const taxpayerDelinquencyGrid = new DelinquencyGrid({
         userType: "taxpayer",
       });
-      cy.login({ accountType: "taxpayer" });
+      pw.login({ accountType: "taxpayer" });
       taxpayerDelinquencyGrid.init();
       taxpayerDelinquencyGrid
         .getElement()
@@ -22,7 +22,7 @@ test.describe.skip(
         "Submit Now",
         1
       );
-      cy.get("@getFilingForm").its("response.statusCode").should("eq", 200);
+      pw.get("@getFilingForm").its("response.statusCode").should("eq", 200);
     });
   }
 );

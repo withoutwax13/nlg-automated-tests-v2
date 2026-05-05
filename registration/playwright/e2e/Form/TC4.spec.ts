@@ -9,7 +9,7 @@ test.describe("User should not be able to proceed to Applicant info step if the 
     const form = new Form({ isRenewal: false });
     const filing = new Filing();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 3 });
+    pw.login({ accountType: "taxpayer", accountIndex: 3 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -17,7 +17,7 @@ test.describe("User should not be able to proceed to Applicant info step if the 
     filing.clickSubmitNewRegistrationButton();
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
-    cy.getUniqueRegistrationData(randomSeed, false, [
+    pw.getUniqueRegistrationData(randomSeed, false, [
       "locationInfo.locations[0].locationDBA",
     ]).then(
       (customData: { basicInfo: any; locationInfo: { locations: any[] } }) => {
@@ -27,7 +27,7 @@ test.describe("User should not be able to proceed to Applicant info step if the 
         form.enterEmergencyPhoneNumbers(customData.basicInfo);
         form.clickNextbutton();
         form.enterLocationDetails(customData.locationInfo.locations);
-        cy.waitForLoading();
+        pw.waitForLoading();
         form.getElement().nextButton().should("be.disabled");
       }
     );

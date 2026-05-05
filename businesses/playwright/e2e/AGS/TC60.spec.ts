@@ -11,7 +11,7 @@ const randomSeed = Math.floor(Math.random() * 100000);
 
 test.describe("As a ags user, I should be able to upload documents to a business via the business details page", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 8 });
+    pw.login({ accountType: "ags", accountIndex: 8 });
     agsBusinessGrid.init();
     agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     agsBusinessDetails.clickDocumentsTab();

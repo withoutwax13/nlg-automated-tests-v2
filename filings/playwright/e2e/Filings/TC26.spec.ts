@@ -7,7 +7,7 @@ const taxpayerFilingGrid = new FilingGrid({
 
 test.describe("As a taxpayer, I should be able to export filings data.", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "taxpayer", accountIndex: 8 });
+    pw.login({ accountType: "taxpayer", accountIndex: 8 });
     taxpayerFilingGrid.init();
     taxpayerFilingGrid.clickExportButton();
   });

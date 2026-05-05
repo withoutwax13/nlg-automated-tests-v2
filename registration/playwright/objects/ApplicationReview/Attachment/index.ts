@@ -44,7 +44,7 @@ class Attachment {
       downloadAttachmentButton: (fileName: string) =>
         this.getElements().attachmentFileList().find("a").contains(fileName),
       uploadDocumentButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Upload Document"),
+        pw.get(".NLGButtonSecondary").contains("Upload Document"),
     };
   }
 

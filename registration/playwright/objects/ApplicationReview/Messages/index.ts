@@ -9,12 +9,12 @@ class Messages {
   private elements() {
     return {
       applicantNameData: () =>
-        cy.get("h3").contains("Applicant Messages").next(),
+        pw.get("h3").contains("Applicant Messages").next(),
       messageList: () =>
         this.getElements().applicantNameData().next().next().next(),
-      messageInput: () => cy.get("#messageTextArea"),
-      sendButton: () => cy.get("button").contains("Send"),
-      uploadFileInput: () => cy.get('input[type="files"]'),
+      messageInput: () => pw.get("#messageTextArea"),
+      sendButton: () => pw.get("button").contains("Send"),
+      uploadFileInput: () => pw.get('input[type="files"]'),
     };
   }
 
@@ -36,12 +36,12 @@ class Messages {
 
   /**
    * Uploads a file to the message input field.
-   * @param fileName - The name of the file to upload. This should be a file in the cypress/fixtures directory.
+   * @param fileName - The name of the file to upload. This should be a file in the playwright/fixtures directory.
    */
   uploadFile(fileName: string) {
     const fileToUpload = fileName || "data.json";
     this.elements().uploadFileInput().attachFile(fileToUpload);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   /**

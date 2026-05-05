@@ -10,7 +10,7 @@ test.describe(
         userType: "ags",
         municipalitySelection: "City of Arrakis",
       });
-      cy.login({ accountType: "ags", accountIndex: 4 });
+      pw.login({ accountType: "ags", accountIndex: 4 });
       settlementGrid.init();
       settlementGrid.getElement().exportButton().should("be.visible");
       settlementGrid.getElement().exportButton().should("not.be.disabled");

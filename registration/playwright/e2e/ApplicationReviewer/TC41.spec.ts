@@ -22,7 +22,7 @@ test.describe("As a gov user, I want to be able to do final approval", () => {
     });
     const applicationReview = new ApplicationReview({ userType: "municipal" });
 
-    cy.login({ accountType: "taxpayer", accountIndex: 6 });
+    pw.login({ accountType: "taxpayer", accountIndex: 6 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -31,7 +31,7 @@ test.describe("As a gov user, I want to be able to do final approval", () => {
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
 
-    cy.getUniqueRegistrationData(randomSeed(), false).then(
+    pw.getUniqueRegistrationData(randomSeed(), false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };
@@ -52,11 +52,11 @@ test.describe("As a gov user, I want to be able to do final approval", () => {
           .referenceIdData()
           .invoke("text")
           .then((referenceId) => {
-            cy.wrap(referenceId).as("referenceId");
+            pw.wrap(referenceId).as("referenceId");
           });
         applicationConfirmation.clickCloseButton();
         taxpayerApplicationGrid.init();
-        cy.get("@referenceId").then((referenceId) => {
+        pw.get("@referenceId").then((referenceId) => {
           taxpayerApplicationGrid.getDataOfColumn(
             "Registration Record ID",
             "Reference ID",
@@ -64,10 +64,10 @@ test.describe("As a gov user, I want to be able to do final approval", () => {
             "registrationRecordId"
           );
         });
-        cy.logout();
-        cy.login({ accountType: "municipal", notFirstLogin: true, accountIndex: 6 });
+        pw.logout();
+        pw.login({ accountType: "municipal", notFirstLogin: true, accountIndex: 6 });
         municipalApplicationGrid.init();
-        cy.get("@registrationRecordId").then((registrationRecordId) => {
+        pw.get("@registrationRecordId").then((registrationRecordId) => {
           municipalApplicationGrid.selectRowToReview({
             anchorColumnName: "Registration Record ID",
             anchorValue: String(registrationRecordId),

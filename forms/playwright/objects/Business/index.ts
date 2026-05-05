@@ -47,35 +47,35 @@ class Business {
   }
   private elements() {
     return {
-      backButton: () => cy.get("header").find("button").contains("Back"),
-      pageTitle: () => cy.get("h1"),
+      backButton: () => pw.get("header").find("button").contains("Back"),
+      pageTitle: () => pw.get("h1"),
       pageHelpContent: () => this.getElement().pageTitle().next(),
-      businessDetailsDropdown: () => cy.get("label").contains("Business Details").next().find("input[role='combobox']"),
-      anyList: () => cy.get("li"),
+      businessDetailsDropdown: () => pw.get("label").contains("Business Details").next().find("input[role='combobox']"),
+      anyList: () => pw.get("li"),
       addBusinessButton: () =>
-        cy.get(".NLGButtonPrimary").contains("Add Business"),
+        pw.get(".NLGButtonPrimary").contains("Add Business"),
       addABusinessButton: () =>
-        cy.get(".NLGButtonSecondary").contains("Add a Business"),
-      searchBox: () => cy.get("span").find(".fa-magnifying-glass").parent(),
-      columns: () => cy.get("thead").find("tr").find("th"),
+        pw.get(".NLGButtonSecondary").contains("Add a Business"),
+      searchBox: () => pw.get("span").find(".fa-magnifying-glass").parent(),
+      columns: () => pw.get("thead").find("tr").find("th"),
       rows: () =>
-        cy.get("tbody").then(($tbody) => {
+        pw.get("tbody").then(($tbody) => {
           if ($tbody.find("tr").length !== 0) {
             return $tbody.find("tr");
           }
         }),
       customizeTableViewButton: () =>
-        cy.get("*").contains("Customize Table View"),
+        pw.get("*").contains("Customize Table View"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -89,7 +89,7 @@ class Business {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -97,9 +97,9 @@ class Business {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
@@ -107,17 +107,17 @@ class Business {
           .find(".k-button")
           .contains("Filter"),
       searchMunicipalityDropdown: () =>
-        cy.get('input[placeholder="Search government ..."]'),
-      anyButton: () => cy.get("button"),
+        pw.get('input[placeholder="Search government ..."]'),
+      anyButton: () => pw.get("button"),
       clearAllFiltersButton: () =>
-        cy.get("*").contains("Clear All"),
-      toastComponent: () => cy.get(".Toastify"),
+        pw.get("*").contains("Clear All"),
+      toastComponent: () => pw.get(".Toastify"),
     };
   }
 
   init() {
-    cy.visit("/BusinessesApp/BusinessesList");
-    cy.waitForLoading(10);
+    pw.visit("/BusinessesApp/BusinessesList");
+    pw.waitForLoading(10);
     getOrderOfColumns(TAXPAYER_COLUMNS, this.defaultGridColumnAlias);
   }
 
@@ -153,7 +153,7 @@ class Business {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -221,7 +221,7 @@ class Business {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -267,7 +267,7 @@ class Business {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -277,7 +277,7 @@ class Business {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -292,7 +292,7 @@ class Business {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -306,7 +306,7 @@ class Business {
                 .replace(/\s+/g, " ")
                 .trim() === anchorValue
             ) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -325,22 +325,22 @@ class Business {
     this.getElement().anyList().contains(businessDba).click();
     this.getElement().pageTitle().click();
     this.getElement().addBusinessButton().click();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   deleteBusiness(businessDba: string) {
     this.getElementOfColumn("Actions", "DBA", businessDba, "actionButton");
-    cy.get("@actionButton").click();
+    pw.get("@actionButton").click();
     this.getElement().anyList().contains("Delete").click();
     // TODO: Add confirmation dialog handling POM
-    cy.get("button").contains("Delete Business").click();
+    pw.get("button").contains("Delete Business").click();
     this.getElement().toastComponent().should("exist");
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   viewBusinessDetails(businessDba: string) {
     this.getElementOfColumn("Actions", "DBA", businessDba, "actionButton");
-    cy.get("@actionButton").click();
+    pw.get("@actionButton").click();
     this.getElement().anyList().contains("Details").click();
   }
 }

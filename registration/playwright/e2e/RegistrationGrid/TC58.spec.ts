@@ -30,7 +30,7 @@ test.describe("When the business is linked and the application is approved, the 
       municipalitySelection: "City of Arrakis",
     });
 
-    cy.login({ accountType: "taxpayer", accountIndex: 4 });
+    pw.login({ accountType: "taxpayer", accountIndex: 4 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -39,13 +39,13 @@ test.describe("When the business is linked and the application is approved, the 
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
 
-    cy.getUniqueRegistrationData(randomSeed(), false).then(
+    pw.getUniqueRegistrationData(randomSeed(), false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };
         applicantInfo: any;
       }) => {
-        cy.wrap(customData).as("initialRegistrationData");
+        pw.wrap(customData).as("initialRegistrationData");
         form.enterBusinessOwnerInformation(customData.basicInfo);
         form.enterLegalBusinessInformation(customData.basicInfo);
         form.checkForConsistentLegalBusinessAddressAndBusinessOwnerInformation();
@@ -61,11 +61,11 @@ test.describe("When the business is linked and the application is approved, the 
           .referenceIdData()
           .invoke("text")
           .then((referenceId) => {
-            cy.wrap(referenceId).as("referenceId");
+            pw.wrap(referenceId).as("referenceId");
           });
         applicationConfirmation.clickCloseButton();
         taxpayerApplicationGrid.init();
-        cy.get("@referenceId").then((referenceId) => {
+        pw.get("@referenceId").then((referenceId) => {
           taxpayerApplicationGrid.getDataOfColumn(
             "Registration Record ID",
             "Reference ID",
@@ -73,10 +73,10 @@ test.describe("When the business is linked and the application is approved, the 
             "revokedRegistrationRecordId"
           );
         });
-        cy.logout();
-        cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
+        pw.logout();
+        pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
         agsApplicationGrid.init();
-        cy.get("@revokedRegistrationRecordId").then(
+        pw.get("@revokedRegistrationRecordId").then(
           (revokedRegistrationRecordId) => {
             agsApplicationGrid.selectRowToReview({
               anchorColumnName: "Registration Record ID",
@@ -106,9 +106,9 @@ test.describe("When the business is linked and the application is approved, the 
             applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.clickSaveButton();
             applicationReview.toggleActions("Approve");
             applicationReview.clickGoBackApplicationsButton();
-            cy.logout();
+            pw.logout();
 
-            cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
+            pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
             taxpayerApplicationGrid.init();
             taxpayerApplicationGrid.payApplication(
               "Registration Record ID",
@@ -116,9 +116,9 @@ test.describe("When the business is linked and the application is approved, the 
             );
             paymentPage.payViaAnySavedPaymentMethod();
             applicationConfirmation.clickCloseButton();
-            cy.logout();
+            pw.logout();
 
-            cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
+            pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
             agsApplicationGrid.init();
             agsApplicationGrid.manuallyChangeApplicationPaymentStatus(
               "Fully Paid",
@@ -131,7 +131,7 @@ test.describe("When the business is linked and the application is approved, the 
               "Registration Record ID",
               String(revokedRegistrationRecordId)
             );
-            cy.logout();
+            pw.logout();
           }
         );
       }
@@ -156,7 +156,7 @@ test.describe("When the business is linked and the application is approved, the 
       municipalitySelection: "City of Arrakis",
     });
 
-    cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
+    pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -165,7 +165,7 @@ test.describe("When the business is linked and the application is approved, the 
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
 
-    cy.getUniqueRegistrationData(randomSeed(), false).then(
+    pw.getUniqueRegistrationData(randomSeed(), false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };
@@ -186,11 +186,11 @@ test.describe("When the business is linked and the application is approved, the 
           .referenceIdData()
           .invoke("text")
           .then((referenceId) => {
-            cy.wrap(referenceId).as("referenceId");
+            pw.wrap(referenceId).as("referenceId");
           });
         applicationConfirmation.clickCloseButton();
         taxpayerApplicationGrid.init();
-        cy.get("@referenceId").then((referenceId) => {
+        pw.get("@referenceId").then((referenceId) => {
           taxpayerApplicationGrid.getDataOfColumn(
             "Registration Record ID",
             "Reference ID",
@@ -198,10 +198,10 @@ test.describe("When the business is linked and the application is approved, the 
             "registrationRecordId"
           );
         });
-        cy.logout();
-        cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
+        pw.logout();
+        pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
         agsApplicationGrid.init();
-        cy.get("@registrationRecordId").then((registrationRecordId) => {
+        pw.get("@registrationRecordId").then((registrationRecordId) => {
           agsApplicationGrid.selectRowToReview({
             anchorColumnName: "Registration Record ID",
             anchorValue: String(registrationRecordId),
@@ -214,7 +214,7 @@ test.describe("When the business is linked and the application is approved, the 
           applicationReview.updateBusinessDetailsTab.updateBusinessList.clickReviewBusinessButton(
             customData.locationInfo.locations[0].locationAddress1
           );
-          cy.get("@initialRegistrationData").then((data) => {
+          pw.get("@initialRegistrationData").then((data) => {
             const initialRegistrationData = data as any;
             applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.disregardSimilarBusinessRecords();
             applicationReview.updateBusinessDetailsTab.updateBusinessList.reviewBusinessListModal.toggleLinkExistingBusiness();
@@ -240,9 +240,9 @@ test.describe("When the business is linked and the application is approved, the 
           applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.clickSaveButton();
           applicationReview.toggleActions("Approve");
           applicationReview.clickGoBackApplicationsButton();
-          cy.logout();
+          pw.logout();
 
-          cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
+          pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
           taxpayerApplicationGrid.init();
           taxpayerApplicationGrid.payApplication(
             "Registration Record ID",
@@ -250,16 +250,16 @@ test.describe("When the business is linked and the application is approved, the 
           );
           paymentPage.payViaAnySavedPaymentMethod();
           applicationConfirmation.clickCloseButton();
-          cy.logout();
+          pw.logout();
 
-          cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
+          pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
           agsApplicationGrid.init();
           agsApplicationGrid.manuallyChangeApplicationPaymentStatus(
             "Fully Paid",
             "Registration Record ID",
             String(registrationRecordId)
           );
-          cy.get("@revokedRegistrationRecordId").then(
+          pw.get("@revokedRegistrationRecordId").then(
             (revokedRegistrationRecordId) => {
               agsRegistrationGrid.init();
               agsRegistrationGrid.filterColumn(

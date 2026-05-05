@@ -7,7 +7,7 @@ test.describe("As a municipal user, I should be able to reorganize the order of 
     const munincipalFormGrid = new FormGrid({
       userType: "municipal",
     });
-    cy.login({ accountType: "municipal", accountIndex: 4 });
+    pw.login({ accountType: "municipal", accountIndex: 4 });
 
     const columnPairs = [];
     const columnsToTest = defaultColumns.slice(1, 5); // Limiting to 4 columns to save resource usage
@@ -39,18 +39,18 @@ test.describe("As a municipal user, I should be able to reorganize the order of 
         column,
         `${column.replace(/\s+/g, "")}IndexAfterMove`
       );
-      cy.get(`@${column.replace(/\s+/g, "")}IndexBeforeMove`).then(
+      pw.get(`@${column.replace(/\s+/g, "")}IndexBeforeMove`).then(
         (beforeMove) => {
-          cy.get(`@${column.replace(/\s+/g, "")}IndexAfterMove`).then(
+          pw.get(`@${column.replace(/\s+/g, "")}IndexAfterMove`).then(
             (afterMove) => {
               expect(beforeMove).to.not.equal(afterMove);
             }
           );
         }
       );
-      cy.get(`@${targetColumn.replace(/\s+/g, "")}IndexBeforeMove`).then(
+      pw.get(`@${targetColumn.replace(/\s+/g, "")}IndexBeforeMove`).then(
         (beforeMove) => {
-          cy.get(`@${targetColumn.replace(/\s+/g, "")}IndexAfterMove`).then(
+          pw.get(`@${targetColumn.replace(/\s+/g, "")}IndexAfterMove`).then(
             (afterMove) => {
               expect(beforeMove).to.not.equal(afterMove);
             }

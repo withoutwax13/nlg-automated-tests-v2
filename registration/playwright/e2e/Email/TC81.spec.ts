@@ -11,7 +11,7 @@ test.describe.skip("After submitting an application with fee, taxpayer user must
   test("Initiating test", () => {
     const expectedFormName = "Business License (One-Time) - E2E #2";
     const expectedGovernmentName = "City of Arrakis";
-    const testmailVars = Cypress.env("testmail");
+    const testmailVars = PW.env("testmail");
     const ENDPOINT = `${testmailVars.endpoint}?apikey=${testmailVars.apiKey}&namespace=${testmailVars.namespace}`;
 
     const form = new Form({ isRenewal: false });
@@ -20,7 +20,7 @@ test.describe.skip("After submitting an application with fee, taxpayer user must
     const applicationConfirmation = new ApplicationConfirmation();
     const payment = new Payment();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 10 });
+    pw.login({ accountType: "taxpayer", accountIndex: 10 });
     filing.goToSubmitFormsTab();
     filing.selectGovernment(expectedGovernmentName);
     filing.selectForm(expectedFormName);
@@ -28,7 +28,7 @@ test.describe.skip("After submitting an application with fee, taxpayer user must
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
 
-    cy.getUniqueRegistrationData(randomSeed(), false).then(
+    pw.getUniqueRegistrationData(randomSeed(), false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };
@@ -43,61 +43,61 @@ test.describe.skip("After submitting an application with fee, taxpayer user must
         form.clickNextbutton();
         form.enterApplicantDetails(customData.applicantInfo, true);
         form.clickNextbutton();
-        cy.intercept(
+        pw.intercept(
           "GET",
           "https://api-dev.azavargovapps.com/payments/payment/**"
         ).as("getPaymentData");
         formPreviewPage.clickSubmitButton();
         payment.payViaAnySavedPaymentMethod();
-        cy.wait("@getPaymentData").then((interception) => {
+        pw.wait("@getPaymentData").then((interception) => {
           const paymentData = interception.response.body;
-          cy.wrap(paymentData.PaymentId).as("transactionId");
-          cy.wrap(paymentData.Amount).as("paymentAmount");
+          pw.wrap(paymentData.PaymentId).as("transactionId");
+          pw.wrap(paymentData.Amount).as("paymentAmount");
         });
         applicationConfirmation
           .getElement()
           .referenceIdData()
           .invoke("text")
           .then((referenceId) => {
-            cy.wrap(referenceId).as("referenceId");
+            pw.wrap(referenceId).as("referenceId");
           });
         applicationConfirmation.clickCloseButton();
-        cy.wait(5000); // Waiting for email to be sent
-        cy.get("@referenceId").then((referenceId) => {
-          cy.request("GET", `${ENDPOINT}&livequery=true`).then((response) => {
+        pw.wait(5000); // Waiting for email to be sent
+        pw.get("@referenceId").then((referenceId) => {
+          pw.request("GET", `${ENDPOINT}&livequery=true`).then((response) => {
             const email = response.body.emails[0];
             console.log(email);
 
             // Verify sender and subject
-            cy.wrap(email.from).should(
+            pw.wrap(email.from).should(
               "equal",
               "Localgov <no-reply@azavargovapps.com>"
             );
-            cy.wrap(email.subject).should(
+            pw.wrap(email.subject).should(
               "equal",
               "An Application Has Been Submitted on Localgov [With Fee]"
             );
-            cy.wrap(email.html).should("include", "Status: Pending");
-            cy.wrap(email.html).should(
+            pw.wrap(email.html).should("include", "Status: Pending");
+            pw.wrap(email.html).should(
               "include",
               `Reference ID: ${String(referenceId).toUpperCase()}`
             );
-            cy.wrap(email.html).should(
+            pw.wrap(email.html).should(
               "include",
               `Form Name: ${expectedFormName}`
             );
-            cy.wrap(email.html).should(
+            pw.wrap(email.html).should(
               "include",
               `Government: ${expectedGovernmentName}`
             );
-            cy.get("@paymentAmount").then((paymentAmount) => {
-              cy.wrap(email.html).should(
+            pw.get("@paymentAmount").then((paymentAmount) => {
+              pw.wrap(email.html).should(
                 "include",
                 `Total Payment Paid: $${paymentAmount}`
               );
             });
-            cy.get("@transactionId").then((transactionId) => {
-              cy.wrap(email.html).should(
+            pw.get("@transactionId").then((transactionId) => {
+              pw.wrap(email.html).should(
                 "include",
                 `Transaction ID: ${transactionId}`
               );

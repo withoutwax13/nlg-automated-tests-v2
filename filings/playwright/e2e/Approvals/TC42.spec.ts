@@ -34,7 +34,7 @@ const deleteMultipleFiling = (
 
 test.describe.skip("As an AGS user, I should be able to view approval list page of a Municipality.", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 8 });
+    pw.login({ accountType: "ags", accountIndex: 8 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -48,7 +48,7 @@ test.describe.skip("As an AGS user, I should be able to view approval list page 
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -57,9 +57,9 @@ test.describe.skip("As an AGS user, I should be able to view approval list page 
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 8, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 8, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -81,13 +81,13 @@ test.describe.skip("As an AGS user, I should be able to view approval list page 
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
     taxpayerFilingGrid.init();
-    cy.get("@referenceId").then((referenceId) => {
-      cy.logout();
-      cy.login({ accountType: "ags", accountIndex: 8, notFirstLogin: true });
+    pw.get("@referenceId").then((referenceId) => {
+      pw.logout();
+      pw.login({ accountType: "ags", accountIndex: 8, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus("Funded", "Reference ID", String(referenceId));
       agsApprovalGrid.init();

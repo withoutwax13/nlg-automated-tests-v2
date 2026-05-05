@@ -25,7 +25,7 @@ test.describe("As a taxpayer, I want the system to prohibit me from sending dupl
     const applicationReview = new ApplicationReview({ userType: "ags" });
     const paymentPage = new Payment();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 9 });
+    pw.login({ accountType: "taxpayer", accountIndex: 9 });
 
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
@@ -34,7 +34,7 @@ test.describe("As a taxpayer, I want the system to prohibit me from sending dupl
     form.clickNextbutton();
     form.selectIsRegisteringMultipleLocations(false);
 
-    cy.getUniqueRegistrationData(randomSeed(), false).then(
+    pw.getUniqueRegistrationData(randomSeed(), false).then(
       (customData: {
         basicInfo: any;
         locationInfo: { locations: any[] };
@@ -55,11 +55,11 @@ test.describe("As a taxpayer, I want the system to prohibit me from sending dupl
           .referenceIdData()
           .invoke("text")
           .then((referenceId) => {
-            cy.wrap(referenceId).as("referenceId");
+            pw.wrap(referenceId).as("referenceId");
           });
         applicationConfirmation.clickCloseButton();
         taxpayerApplicationGrid.init();
-        cy.get("@referenceId").then((referenceId) => {
+        pw.get("@referenceId").then((referenceId) => {
           taxpayerApplicationGrid.getDataOfColumn(
             "Registration Record ID",
             "Reference ID",
@@ -68,10 +68,10 @@ test.describe("As a taxpayer, I want the system to prohibit me from sending dupl
           );
         });
 
-        cy.logout();
-        cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 9 });
+        pw.logout();
+        pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 9 });
         agsApplicationGrid.init();
-        cy.get("@registrationRecordId").then((registrationRecordId) => {
+        pw.get("@registrationRecordId").then((registrationRecordId) => {
           agsApplicationGrid.selectRowToReview({
             anchorColumnName: "Registration Record ID",
             anchorValue: String(registrationRecordId),
@@ -100,9 +100,9 @@ test.describe("As a taxpayer, I want the system to prohibit me from sending dupl
           applicationReview.updateBusinessDetailsTab.updateBusinessList.formRequirementsModal.clickSaveButton();
           applicationReview.toggleActions("Approve");
           applicationReview.clickGoBackApplicationsButton();
-          cy.logout();
+          pw.logout();
 
-          cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 9 });
+          pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 9 });
           taxpayerApplicationGrid.init();
           taxpayerApplicationGrid.payApplication(
             "Registration Record ID",
@@ -110,9 +110,9 @@ test.describe("As a taxpayer, I want the system to prohibit me from sending dupl
           );
           paymentPage.payViaAnySavedPaymentMethod();
           applicationConfirmation.clickCloseButton();
-          cy.logout();
+          pw.logout();
 
-          cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 9 });
+          pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 9 });
           agsApplicationGrid.init();
           agsApplicationGrid.manuallyChangeApplicationPaymentStatus(
             "Fully Paid",
@@ -120,10 +120,10 @@ test.describe("As a taxpayer, I want the system to prohibit me from sending dupl
             String(registrationRecordId)
           );
         });
-        cy.logout();
+        pw.logout();
 
         // Submit another registration with the same data
-        cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 9 });
+        pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 9 });
         filing.goToSubmitFormsTab();
         filing.selectGovernment("City of Arrakis");
         filing.selectForm("Business License (Annual) - E2E #1");

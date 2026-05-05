@@ -23,9 +23,9 @@ class UpdateBusinessDetails {
   private elements() {
     return {
       updateBusinessDetailsButton: () =>
-        cy.get(".NLGButtonSecondaryDanger").contains("Update Business Details"),
-      locationsList: () => cy.get(".fa-magnifying-glass-plus").parent("div"),
-      viewLocationIconButton: () => cy.get(".fa-magnifying-glass-plus"),
+        pw.get(".NLGButtonSecondaryDanger").contains("Update Business Details"),
+      locationsList: () => pw.get(".fa-magnifying-glass-plus").parent("div"),
+      viewLocationIconButton: () => pw.get(".fa-magnifying-glass-plus"),
     };
   }
 

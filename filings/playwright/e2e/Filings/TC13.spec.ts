@@ -8,9 +8,9 @@ const agsFilingGrid = new FilingGrid({
 
 test.describe("As an AGS user, I should be able to view requested extract.", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 8 });
+    pw.login({ accountType: "ags", accountIndex: 8 });
     agsFilingGrid.init();
     agsFilingGrid.clickViewRequestedExtractButton();
-    cy.url().should("include", "/filingsExtractRequests?");
+    pw.url().should("include", "/filingsExtractRequests?");
   });
 });

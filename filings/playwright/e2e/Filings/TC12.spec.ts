@@ -8,7 +8,7 @@ const agsFilingGrid = new FilingGrid({
 
 test.describe("As an AGS user, I should be able to view filings data of a specific government.", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 8 });
+    pw.login({ accountType: "ags", accountIndex: 8 });
     agsFilingGrid.init();
     agsFilingGrid.getElement().rows().its("length").should("be.gt", 0);
   });

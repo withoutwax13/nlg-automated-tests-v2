@@ -1,7 +1,7 @@
 class SetBusinessStatusModal {
   private elements() {
     return {
-      modal: () => cy.get(".k-dialog"),
+      modal: () => pw.get(".k-dialog"),
       modalTitle: () => this.elements().modal().find(".k-dialog-title"),
       businessCloseDateInput: () =>
         this.getElement()
@@ -29,7 +29,7 @@ class SetBusinessStatusModal {
         this.getElement().modal().find("button").contains("Cancel"),
       closeButton: () =>
         this.getElement().modal().find("button[aria-label='Close']"),
-      anyList: () => cy.get("li"),
+      anyList: () => pw.get("li"),
     };
   }
 
@@ -39,7 +39,7 @@ class SetBusinessStatusModal {
 
   clickSaveButton() {
     this.getElement().saveButton().click();
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   clickCancelButton() {

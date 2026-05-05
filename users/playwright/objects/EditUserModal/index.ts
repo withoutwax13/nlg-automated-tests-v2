@@ -1,16 +1,16 @@
 class EditUserModal {
   private elements() {
     return {
-      modal: () => cy.get(".k-dialog"),
-      title: () => cy.get(".k-dialog-title"),
-      closeModalButton: () => cy.get('button[aria-label="Close"]'),
-      modalContent: () => cy.get(".k-dialog-content"),
-      isEnabledRadioButton: () => cy.get(".k-checkbox-wrap"),
-      isEnabledLabel: () => cy.get(".k-checkbox-label"),
-      cancelButton: () => cy.get("button").contains("Cancel"),
-      updateButton: () => cy.get("button").contains("Update"),
-      firstNameInput: () => cy.find("input[name='FirstName']"),
-      lastNameInput: () => cy.find("input[name='LastName']"),
+      modal: () => pw.get(".k-dialog"),
+      title: () => pw.get(".k-dialog-title"),
+      closeModalButton: () => pw.get('button[aria-label="Close"]'),
+      modalContent: () => pw.get(".k-dialog-content"),
+      isEnabledRadioButton: () => pw.get(".k-checkbox-wrap"),
+      isEnabledLabel: () => pw.get(".k-checkbox-label"),
+      cancelButton: () => pw.get("button").contains("Cancel"),
+      updateButton: () => pw.get("button").contains("Update"),
+      firstNameInput: () => pw.find("input[name='FirstName']"),
+      lastNameInput: () => pw.find("input[name='LastName']"),
     };
   }
 

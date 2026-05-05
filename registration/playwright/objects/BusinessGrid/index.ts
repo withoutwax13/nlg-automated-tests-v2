@@ -145,39 +145,39 @@ class BusinessGrid {
   }
   private elements() {
     return {
-      pageTitle: () => cy.get("h1"),
+      pageTitle: () => pw.get("h1"),
       pageHelpContent: () => this.getElement().pageTitle().next(),
-      anyList: () => cy.get("li"),
-      noRecordFoundComponent: () => cy.get(".k-grid-norecords-template"),
+      anyList: () => pw.get("li"),
+      noRecordFoundComponent: () => pw.get(".k-grid-norecords-template"),
       addBusinessButton: () =>
-        cy.get(".NLGNewLayoutSecondaryButton").contains("Add a Business"),
+        pw.get(".NLGNewLayoutSecondaryButton").contains("Add a Business"),
       uploadBusinessButton: () =>
-        cy.get(".NLGNewLayoutSecondaryButton").contains("Upload Businesses"),
-      exportButton: () => cy.get(".NLGButtonPrimary").contains("Export"),
+        pw.get(".NLGNewLayoutSecondaryButton").contains("Upload Businesses"),
+      exportButton: () => pw.get(".NLGButtonPrimary").contains("Export"),
       resetDataButton: () =>
-        cy.get(".NLGNewLayoutSecondaryButton").contains("Reset All Data"),
+        pw.get(".NLGNewLayoutSecondaryButton").contains("Reset All Data"),
       businessConfigurationButton: () =>
-        cy.get(".NLGNewLayoutSecondaryButton").find(".a-magnifying-glass-plus"),
-      searchBox: () => cy.get("span").find(".fa-magnifying-glass").parent(),
-      columns: () => cy.get("thead").find("tr").find("th"),
+        pw.get(".NLGNewLayoutSecondaryButton").find(".a-magnifying-glass-plus"),
+      searchBox: () => pw.get("span").find(".fa-magnifying-glass").parent(),
+      columns: () => pw.get("thead").find("tr").find("th"),
       rows: () =>
-        cy.get("tbody").then(($tbody) => {
+        pw.get("tbody").then(($tbody) => {
           if ($tbody.find("tr").length !== 0) {
             return $tbody.find("tr");
           }
         }),
       customizeTableViewButton: () =>
-        cy.get("*").contains("Customize Table View"),
+        pw.get("*").contains("Customize Table View"),
       columnFilter: () => this.getElement().columns().find("span").find("a"),
       columnSort: () => this.getElement().columns().find("a").find("i"),
       specificColumnFilter: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("span").find("a"),
       specificColumnSort: (columnOrder: number) =>
         this.getElement().columns().eq(columnOrder).find("a").find("i"),
-      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdown: () => pw.get(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) =>
-        cy.get("li").contains(itemNumber),
-      pagination: () => cy.get(".k-pager-numbers-wrap"),
+        pw.get("li").contains(itemNumber),
+      pagination: () => pw.get(".k-pager-numbers-wrap"),
       goToFirstPageButton: () =>
         this.getElement().pagination().find("button").eq(0),
       goToPreviousPageButton: () =>
@@ -191,7 +191,7 @@ class BusinessGrid {
           .pagination()
           .find('button[title="Go to the last page"]'),
       filterOperationsDropdown: () =>
-        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+        pw.get(".k-filter-menu-container").find(".k-dropdownlist"),
       filterOperationsDropdownItem: (item: string) =>
         cy
           .get(".k-list-ul")
@@ -199,9 +199,9 @@ class BusinessGrid {
           .find(".k-list-item-text")
           .contains(item),
       filterValueInput: () =>
-        cy.get(".k-filter-menu-container").find(".k-input"),
-      filterValueDateInput: () => cy.get(".k-dateinput"),
-      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+        pw.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => pw.get(".k-dateinput"),
+      filterMultiSelectItem: () => pw.get(".k-multicheck-wrap").find("li"),
       filterFilterButton: () =>
         cy
           .get(".k-filter-menu-container")
@@ -209,11 +209,11 @@ class BusinessGrid {
           .find(".k-button")
           .contains("Filter"),
       searchMunicipalityDropdown: () =>
-        cy.get('input[placeholder="Search government ..."]'),
-      anyButton: () => cy.get("button"),
-      clearAllFiltersButton: () => cy.get("*").contains("Clear All"),
-      toastComponent: () => cy.get(".Toastify"),
-      gridPopup: () => cy.get(".k-popup"),
+        pw.get('input[placeholder="Search government ..."]'),
+      anyButton: () => pw.get("button"),
+      clearAllFiltersButton: () => pw.get("*").contains("Clear All"),
+      toastComponent: () => pw.get(".Toastify"),
+      gridPopup: () => pw.get(".k-popup"),
       gridPopupTitle: () =>
         this.getElement().gridPopup().find("div").find("div").find("div"),
       gridPopupContent: () => this.getElement().gridPopupTitle().next(),
@@ -238,19 +238,19 @@ class BusinessGrid {
   }
 
   init() {
-    cy.intercept(
+    pw.intercept(
       "GET",
       "https://**.azavargovapps.com/businesses/municipalityBusinessConfig/**"
     ).as("govBusinessConfig");
-    cy.intercept("GET", "https://**.lambda-url.us-east-1.on.aws/?municipalityId=**").as("lambdaRequestMunicipalityId");
-    cy.intercept("GET", "https://**.azavargovapps.com/municipalities/ActiveTaxAndFeesSubscriptions").as("activeTaxAndFeesSubscriptions");
-    cy.intercept(
+    pw.intercept("GET", "https://**.lambda-url.us-east-1.on.aws/?municipalityId=**").as("lambdaRequestMunicipalityId");
+    pw.intercept("GET", "https://**.azavargovapps.com/municipalities/ActiveTaxAndFeesSubscriptions").as("activeTaxAndFeesSubscriptions");
+    pw.intercept(
       "GET",
       "https://**.azavargovapps.com/users/usersGridSettings/**"
     ).as("userGridSettings");
-    cy.intercept("GET", "https://**.azavargovapps.com/users/**").as("userDetailsRequest");
-    cy.visit("/BusinessesApp/BusinessesList");
-    cy.waitForLoading(90);
+    pw.intercept("GET", "https://**.azavargovapps.com/users/**").as("userDetailsRequest");
+    pw.visit("/BusinessesApp/BusinessesList");
+    pw.waitForLoading(90);
     switch (this.userType) {
       case "taxpayer":
         getOrderOfColumns(TAXPAYER_COLUMNS, this.defaultGridColumnAlias);
@@ -260,7 +260,7 @@ class BusinessGrid {
         break;
       case "ags":
         this.searchMunicipality(this.municipalitySelection);
-        cy.waitForLoading(90);
+        pw.waitForLoading(90);
         getOrderOfColumns(AGS_COLUMNS, this.defaultGridColumnAlias);
         break;
       default:
@@ -305,7 +305,7 @@ class BusinessGrid {
   }
 
   sortColumn(isAscending: boolean, columnName: string) {
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -373,7 +373,7 @@ class BusinessGrid {
     filterType: string = "text",
     filterOperation: string = "Contains"
   ) {
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[columnName];
@@ -419,7 +419,7 @@ class BusinessGrid {
     targetColumnDataAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -429,7 +429,7 @@ class BusinessGrid {
           .each(($row) => {
             const $columns = $row.find("td");
             if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
-              cy.wrap($columns.eq(columnIndex).text()).as(
+              pw.wrap($columns.eq(columnIndex).text()).as(
                 targetColumnDataAlias
               );
             }
@@ -444,7 +444,7 @@ class BusinessGrid {
     targetColumnElementAlias: string
   ) {
     this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
-    cy.get(`@${this.defaultGridColumnAlias}`)
+    pw.get(`@${this.defaultGridColumnAlias}`)
       .should("exist")
       .then((columnIndexes: any) => {
         const columnIndex = columnIndexes[targetColumnName];
@@ -460,7 +460,7 @@ class BusinessGrid {
                 .replace(/\s+/g, " ")
                 .trim() === anchorValue
             ) {
-              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+              pw.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
             }
           });
       });
@@ -488,16 +488,16 @@ class BusinessGrid {
 
   deleteBusiness(businessDba: string) {
     this.getElementOfColumn("Actions", "DBA", businessDba, "actionButton");
-    cy.get("@actionButton").click( {force: true} );
+    pw.get("@actionButton").click( {force: true} );
     this.getElement().anyList().contains("Delete").click( {force: true} );
     this.businessDeleteModal.clickDeleteButton();
     this.getElement().toastComponent().should("exist");
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   viewBusinessDetails(businessDba: string) {
     this.getElementOfColumn("Actions", "DBA", businessDba, "actionButton");
-    cy.get("@actionButton").click( {force: true} );
+    pw.get("@actionButton").click( {force: true} );
     this.getElement().anyList().contains("View Details").click( {force: true} );
   }
 
@@ -511,7 +511,7 @@ class BusinessGrid {
       businessDba,
       "delinquencyStartDateInput"
     );
-    cy.get("@delinquencyStartDateInput").click( {force: true} );
+    pw.get("@delinquencyStartDateInput").click( {force: true} );
     this.getElement().gridPopupDateInput().click( {force: true} );
     this.getElement().gridPopupDateInput().type(`${date.month}`);
 
@@ -522,7 +522,7 @@ class BusinessGrid {
     this.getElement()
       .gridPopupDateInput()
       .type(`{rightarrow}{rightarrow}0000${date.year}`);
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   setCloseDate(
@@ -530,7 +530,7 @@ class BusinessGrid {
     date: { month: number; date: number; year: number }
   ) {
     this.getElementOfColumn("Close Date", "DBA", businessDba, "closeDateInput");
-    cy.get("@closeDateInput").click( {force: true} );
+    pw.get("@closeDateInput").click( {force: true} );
     this.getElement().gridPopupDateInput().click( {force: true} );
     this.getElement().gridPopupDateInput().type(`${date.month}`);
 
@@ -542,7 +542,7 @@ class BusinessGrid {
       .gridPopupDateInput()
       .type(`{rightarrow}{rightarrow}0000${date.year}`);
     this.getElement().gridPopupSaveButton().should("not.be.disabled").click( {force: true} );
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   addRequiredForms(businessDba: string, forms: string[]) {
@@ -552,7 +552,7 @@ class BusinessGrid {
       businessDba,
       "requiredFormsCellAdd"
     );
-    cy.get("@requiredFormsCellAdd").click( {force: true} );
+    pw.get("@requiredFormsCellAdd").click( {force: true} );
     forms.forEach((form) => {
       this.getElement()
         .gridPopupSelectionItem(form)
@@ -568,7 +568,7 @@ class BusinessGrid {
         });
     });
     this.getElement().gridPopupSaveButton().should("not.be.disabled").click( {force: true} );
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   removeRequiredForms(businessDba: string, forms: string[]) {
@@ -578,7 +578,7 @@ class BusinessGrid {
       businessDba,
       "requiredFormsCellRemove"
     );
-    cy.get("@requiredFormsCellRemove").click( {force: true} );
+    pw.get("@requiredFormsCellRemove").click( {force: true} );
     forms.forEach((form) => {
       this.getElement()
         .gridPopupSelectionItem(form)
@@ -594,18 +594,18 @@ class BusinessGrid {
         });
     });
     this.getElement().gridPopupSaveButton().should("not.be.disabled").click( {force: true} );
-    cy.waitForLoading();
+    pw.waitForLoading();
   }
 
   checkEnabledRequiredForms(businessDba: string, aliasVariable: string) {
-    cy.wrap([]).as(aliasVariable);
+    pw.wrap([]).as(aliasVariable);
     this.getElementOfColumn(
       "Required Forms",
       "DBA",
       businessDba,
       "requiredFormsCellCheck"
     );
-    cy.get("@requiredFormsCellCheck").click( {force: true} );
+    pw.get("@requiredFormsCellCheck").click( {force: true} );
     this.getElement()
       .gridPopupContent()
       .find(".k-checkbox-wrap")
@@ -619,8 +619,8 @@ class BusinessGrid {
           .invoke("attr", "aria-checked")
           .then((isChecked) => {
             if (isChecked === "true") {
-              cy.get(`@${aliasVariable}`).then((forms) => {
-                cy.wrap([...forms, label]).as(aliasVariable);
+              pw.get(`@${aliasVariable}`).then((forms) => {
+                pw.wrap([...forms, label]).as(aliasVariable);
               });
             }
           });

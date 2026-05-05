@@ -9,7 +9,7 @@ const businessGrid = new BusinessGrid({
 
 test.describe("As a user, I should be able to reorganize the order of the columns.", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 9 });
+    pw.login({ accountType: "ags", accountIndex: 9 });
     const columnPairs = [];
     const columnsToTest = defaultColumns.slice(2, 4); // Limiting to 2 columns to save resource usage
     for (let i = 0; i < columnsToTest.length; i++) {
@@ -40,18 +40,18 @@ test.describe("As a user, I should be able to reorganize the order of the column
         column,
         `${column.replace(/\s+/g, "")}IndexAfterMove`
       );
-      cy.get(`@${column.replace(/\s+/g, "")}IndexBeforeMove`).then(
+      pw.get(`@${column.replace(/\s+/g, "")}IndexBeforeMove`).then(
         (beforeMove) => {
-          cy.get(`@${column.replace(/\s+/g, "")}IndexAfterMove`).then(
+          pw.get(`@${column.replace(/\s+/g, "")}IndexAfterMove`).then(
             (afterMove) => {
               expect(beforeMove).to.not.equal(afterMove);
             }
           );
         }
       );
-      cy.get(`@${targetColumn.replace(/\s+/g, "")}IndexBeforeMove`).then(
+      pw.get(`@${targetColumn.replace(/\s+/g, "")}IndexBeforeMove`).then(
         (beforeMove) => {
-          cy.get(`@${targetColumn.replace(/\s+/g, "")}IndexAfterMove`).then(
+          pw.get(`@${targetColumn.replace(/\s+/g, "")}IndexAfterMove`).then(
             (afterMove) => {
               expect(beforeMove).to.not.equal(afterMove);
             }

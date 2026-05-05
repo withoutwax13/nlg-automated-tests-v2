@@ -9,7 +9,7 @@ test.describe.skip(
       const municipalityDelinquencyGrid = new DelinquencyGrid({
         userType: "municipality",
       });
-      cy.login({ accountType: "municipality", accountIndex: 2 });
+      pw.login({ accountType: "municipality", accountIndex: 2 });
       municipalityDelinquencyGrid.init();
       municipalityDelinquencyGrid
         .getElement()

@@ -15,7 +15,7 @@ test.describe("As a AGS user, I should be able to see filings in 6 month ago.", 
     const today = new Date();
     today.toLocaleString("en-US", { timeZone: "America/Chicago" });
     
-    cy.login({ accountType: "ags" });
+    pw.login({ accountType: "ags" });
     agsFilingGrid.init();
     agsFilingGrid.setStartDate({
       month:
@@ -30,7 +30,7 @@ test.describe("As a AGS user, I should be able to see filings in 6 month ago.", 
     });
     agsFilingGrid.sortColumn(true ,"Filing Date");
     agsFilingGrid.getColumnCellsData("Filing Date");
-    cy.get("@columnCellsData").then((columnCellsData) => {
+    pw.get("@columnCellsData").then((columnCellsData) => {
       Array.from(columnCellsData).forEach((cellData) => {
         const filingDate = new Date(String(cellData));
         expect(filingDate).to.be.gte(sixMonthsAgo);

@@ -34,7 +34,7 @@ const deleteMultipleFiling = (
 
 test.describe.skip("As AGS user, I want to be able to start approval workflow a specific item in Approvals", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 7 });
+    pw.login({ accountType: "ags", accountIndex: 7 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -48,7 +48,7 @@ test.describe.skip("As AGS user, I want to be able to start approval workflow a 
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -57,9 +57,9 @@ test.describe.skip("As AGS user, I want to be able to start approval workflow a 
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -81,13 +81,13 @@ test.describe.skip("As AGS user, I want to be able to start approval workflow a 
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
     taxpayerFilingGrid.init();
-    cy.get("@referenceId").then((referenceId) => {
-      cy.logout();
-      cy.login({ accountType: "ags", accountIndex: 7, notFirstLogin: true });
+    pw.get("@referenceId").then((referenceId) => {
+      pw.logout();
+      pw.login({ accountType: "ags", accountIndex: 7, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus("Funded", "Reference ID", String(referenceId));
       agsApprovalGrid.init();

@@ -12,23 +12,23 @@ const municipalityGrid = new MunicipalityGrid({
 
 test.describe("As an Municipal user, I should be able to see the custom field on the filing list", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 3 });
+    pw.login({ accountType: "ags", accountIndex: 3 });
     municipalityGrid.init();
     municipalityGrid.selectMunicipality("City of Arrakis");
     municipalityGrid.addCustomField(
       `Custom Field Title ${randomSeed}`,
       `Custom Field Name ${randomSeed}`
     );
-    cy.logout();
-    cy.login({ accountType: "municipal", notFirstLogin: true });
+    pw.logout();
+    pw.login({ accountType: "municipal", notFirstLogin: true });
     municipalFilingGrid.init();
     municipalFilingGrid.isColumnExist(
       `Custom Field Title ${randomSeed}`,
       "isCustomFieldExist"
     );
-    cy.get("@isCustomFieldExist").should("be.true");
-    cy.logout();
-    cy.login({ accountType: "ags", accountIndex: 3, notFirstLogin: true });
+    pw.get("@isCustomFieldExist").should("be.true");
+    pw.logout();
+    pw.login({ accountType: "ags", accountIndex: 3, notFirstLogin: true });
     municipalityGrid.init();
     municipalityGrid.selectMunicipality("City of Arrakis");
     municipalityGrid.removeCustomField(`Custom Field Name ${randomSeed}`);

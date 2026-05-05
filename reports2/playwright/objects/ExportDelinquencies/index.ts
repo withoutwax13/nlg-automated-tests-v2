@@ -1,7 +1,7 @@
 class ExportDelinquencies {
   private elements() {
     return {
-      modal: () => cy.get(".k-dialog"),
+      modal: () => pw.get(".k-dialog"),
       modalTitle: () => this.getElement().modal().find(".k-dialog-title"),
       closeButton: () =>
         this.getElement().modal().find('button[aria-label="Close"]'),

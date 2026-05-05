@@ -34,7 +34,7 @@ const deleteMultipleFiling = (
 
 test.describe("As a government user, I want to be able to start all the pending Approvals", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 6 });
+    pw.login({ accountType: "ags", accountIndex: 6 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -48,7 +48,7 @@ test.describe("As a government user, I want to be able to start all the pending 
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -57,9 +57,9 @@ test.describe("As a government user, I want to be able to start all the pending 
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 8, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 8, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -81,17 +81,17 @@ test.describe("As a government user, I want to be able to start all the pending 
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
     taxpayerFilingGrid.init();
-    cy.get("@referenceId").then((referenceId) => {
-      cy.logout();
-      cy.login({ accountType: "ags", accountIndex: 6, notFirstLogin: true });
+    pw.get("@referenceId").then((referenceId) => {
+      pw.logout();
+      pw.login({ accountType: "ags", accountIndex: 6, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus("Funded", "Reference ID", String(referenceId));
-      cy.logout();
-      cy.login({ accountType: "municipal", accountIndex: 4, notFirstLogin: true });
+      pw.logout();
+      pw.login({ accountType: "municipal", accountIndex: 4, notFirstLogin: true });
       govApprovalGrid.init();
       govApprovalGrid.clickStartAllApprovals();
     });

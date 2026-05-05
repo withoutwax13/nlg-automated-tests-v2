@@ -25,34 +25,34 @@ const setupIntercepts = () => {
     },
   ];
   interceptData.forEach((intercept) => {
-    cy.intercept(intercept.method, intercept.url).as(intercept.alias);
+    pw.intercept(intercept.method, intercept.url).as(intercept.alias);
   });
 };
 
 const loginAndViewMunicipalities = () => {
-  cy.login({ accountType: "ags" });
-  cy.get(selector.navigateMunicipality).click();
-  cy.url().should("contain", "/municipalityApp/list/");
+  pw.login({ accountType: "ags" });
+  pw.get(selector.navigateMunicipality).click();
+  pw.url().should("contain", "/municipalityApp/list/");
 };
 
 const verifyMunicipality = () => {
-  cy.wait("@municipalList").its("response.statusCode").should("eq", 200);
-  cy.get(selector.dataLink).contains("Municipalities").click();
-  cy.get(selector.heading2Title).contains("Municipalities").should("exist");
+  pw.wait("@municipalList").its("response.statusCode").should("eq", 200);
+  pw.get(selector.dataLink).contains("Municipalities").click();
+  pw.get(selector.heading2Title).contains("Municipalities").should("exist");
 };
 
 const navigateToAddMunicipality = () => {
-  cy.get(selector.addMunicipalityButton).click();
-  cy.wait("@addMunicipality").its("response.statusCode").should("eq", 200);
-  cy.get(selector.addingMuniForm).should("exist").and("be.visible");
-  cy.get(selector.heading1Title)
+  pw.get(selector.addMunicipalityButton).click();
+  pw.wait("@addMunicipality").its("response.statusCode").should("eq", 200);
+  pw.get(selector.addingMuniForm).should("exist").and("be.visible");
+  pw.get(selector.heading1Title)
     .contains("Create a new Municipality")
     .should("exist");
 };
 
 const updateCountry = () => {
-  cy.get(selector.inputLabel).contains("Country").next().click();
-  cy.get(selector.optionListContainer)
+  pw.get(selector.inputLabel).contains("Country").next().click();
+  pw.get(selector.optionListContainer)
     .find(selector.optionList)
     .find(selector.optionItem)
     .contains("Canada")
@@ -60,8 +60,8 @@ const updateCountry = () => {
 };
 
 const updateProvince = () => {
-  cy.get(selector.inputLabel).contains("Government Province").next().click();
-  cy.get(selector.optionListContainer)
+  pw.get(selector.inputLabel).contains("Government Province").next().click();
+  pw.get(selector.optionListContainer)
     .find(selector.optionList)
     .find(selector.optionItem)
     .contains("AB")
@@ -69,8 +69,8 @@ const updateProvince = () => {
 };
 
 const updateTimezone = () => {
-  cy.get(selector.inputLabel).contains("Time Zone").next().click();
-  cy.get(selector.optionListContainer)
+  pw.get(selector.inputLabel).contains("Time Zone").next().click();
+  pw.get(selector.optionListContainer)
     .find(selector.optionList)
     .find(selector.optionItem)
     .contains("America/Edmonton")

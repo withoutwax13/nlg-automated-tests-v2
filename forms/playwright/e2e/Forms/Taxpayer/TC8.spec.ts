@@ -31,7 +31,7 @@ const deleteMultipleFiling = (
 
 test.describe("As a taxpayer, I should not be able to submit to a closed business when submitting a form.", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 7 });
+    pw.login({ accountType: "ags", accountIndex: 7 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -45,7 +45,7 @@ test.describe("As a taxpayer, I should not be able to submit to a closed busines
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -54,9 +54,9 @@ test.describe("As a taxpayer, I should not be able to submit to a closed busines
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 5, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 5, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");

@@ -1,14 +1,14 @@
 class BusinessConfiguration {
     private elements() {
         return {
-            pageTitle: () => cy.get("h1"),
-            backButton: () => cy.get("button").contains("Back"),
-            allowedFieldsConfigExpander: () => cy.get("#GridFieldsConfig"),
-            searchFieldsConfigExpander: () => cy.get("#SearchFieldsConfig"),
-            allowTaxpayersToFileNotRemmitanceFormsCheckbox: () => cy.get("label").contains("Allow Taxpayers to File Not Remittance Forms"),
-            useUniqueFieldWhenUploadBusinessLiostCheckbox: () => cy.get("label").contains("Use unique field when upload businesses list"),
-            saveButton: () => cy.get("button").contains("Save"),
-            cancelButton: () => cy.get("button").contains("Cancel"),
+            pageTitle: () => pw.get("h1"),
+            backButton: () => pw.get("button").contains("Back"),
+            allowedFieldsConfigExpander: () => pw.get("#GridFieldsConfig"),
+            searchFieldsConfigExpander: () => pw.get("#SearchFieldsConfig"),
+            allowTaxpayersToFileNotRemmitanceFormsCheckbox: () => pw.get("label").contains("Allow Taxpayers to File Not Remittance Forms"),
+            useUniqueFieldWhenUploadBusinessLiostCheckbox: () => pw.get("label").contains("Use unique field when upload businesses list"),
+            saveButton: () => pw.get("button").contains("Save"),
+            cancelButton: () => pw.get("button").contains("Cancel"),
         }
     }
 

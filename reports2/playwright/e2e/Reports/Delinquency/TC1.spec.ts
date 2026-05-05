@@ -10,7 +10,7 @@ test.describe(
         userType: "ags",
         municipalitySelection: "City of Arrakis",
       });
-      cy.login({ accountType: "ags" });
+      pw.login({ accountType: "ags" });
       delinquencyGrid.init();
       delinquencyGrid.getElement().exportButton().should("be.visible");
       delinquencyGrid.getElement().exportButton().should("not.be.disabled");

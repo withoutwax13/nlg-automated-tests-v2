@@ -40,14 +40,14 @@ const newBusinessData = {
 // Skipped, assertions alrady covered in TC11
 test.describe.skip("As a taxpayer, when a business has been added by an AGS user, I should be able to add the business in my account", () => {
   test.beforeEach(() => {
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
       notFirstLogin: false,
       accountIndex: 1,
     });
 
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "ags",
       notFirstLogin: true,
@@ -56,7 +56,7 @@ test.describe.skip("As a taxpayer, when a business has been added by an AGS user
   });
   test("Initiating test", () => {
     // add business data
-    cy.login({ accountType: "ags", notFirstLogin: true, accountIndex: 7 });
+    pw.login({ accountType: "ags", notFirstLogin: true, accountIndex: 7 });
     agsBusinessGrid.init();
     agsBusinessGrid.clickAddBusinessButton();
     agsAddBusinessPage.fillFields(newBusinessData);
@@ -64,17 +64,17 @@ test.describe.skip("As a taxpayer, when a business has been added by an AGS user
     agsBusinessGrid.init();
     agsBusinessGrid.clickClearAllFiltersButton();
     agsBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
-    cy.logout();
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.logout();
 
     // add business data to the taxpayer account
-    cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 1 });
+    pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 1 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
-    cy.logout();
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.logout();
   });
 });

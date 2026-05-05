@@ -1,23 +1,23 @@
 import { test, expect } from '../../support/pwtest';
 const interceptSearchResults = () => {
-  cy.intercept(
+  pw.intercept(
     "GET",
     "https://audit.api.localgov.org/v1/audits?**keyword=**"
   ).as("searchResults");
 };
 
 const waitForSearchResults = () => {
-  cy.wait("@searchResults").its("response.statusCode").should("eq", 200);
-  cy.wait(3000);
+  pw.wait("@searchResults").its("response.statusCode").should("eq", 200);
+  pw.wait(3000);
 };
 
 const loginAndSearch = (searchTerm) => {
-  cy.login();
+  pw.login();
   interceptSearchResults();
-  cy.get(`input[placeholder="Search..."]`).type(searchTerm);
+  pw.get(`input[placeholder="Search..."]`).type(searchTerm);
   waitForSearchResults();
-  cy.get("tbody > tr").each(($row) => {
-    cy.wrap($row)
+  pw.get("tbody > tr").each(($row) => {
+    pw.wrap($row)
       .find("td")
       .eq(1)
       .invoke("text")
@@ -29,10 +29,10 @@ const loginAndSearch = (searchTerm) => {
 
 const sortAndCollectCases = (columnIndex, ascendingCases, descendingCases) => {
   const collectCases = (casesArray) => {
-    cy.get("tbody")
+    pw.get("tbody")
       .find("tr")
       .each(($row) => {
-        cy.wrap($row)
+        pw.wrap($row)
           .find("td")
           .eq(columnIndex)
           .invoke("text")
@@ -43,19 +43,19 @@ const sortAndCollectCases = (columnIndex, ascendingCases, descendingCases) => {
   };
 
   // ascending
-  cy.get("tr").find("th").eq(columnIndex).click();
+  pw.get("tr").find("th").eq(columnIndex).click();
   waitForSearchResults();
   collectCases(ascendingCases);
 
   // descending
-  cy.get("tr").find("th").eq(columnIndex).click();
+  pw.get("tr").find("th").eq(columnIndex).click();
   waitForSearchResults();
   collectCases(descendingCases);
 };
 
 const verifySorting = (ascendingCases, descendingCases) => {
-  cy.wrap(ascendingCases).each((caseItem, index) => {
-    cy.wrap(caseItem).should(
+  pw.wrap(ascendingCases).each((caseItem, index) => {
+    pw.wrap(caseItem).should(
       "eq",
       descendingCases[descendingCases.length - 1 - index]
     );
@@ -72,17 +72,17 @@ test.describe("Data Grid Scenarios", () => {
       "Status",
       "Last Updated",
     ];
-    cy.login();
-    cy.get("table").should("be.visible");
-    cy.get("thead").find("tr").find("th").its("length").should("eq", 8);
+    pw.login();
+    pw.get("table").should("be.visible");
+    pw.get("thead").find("tr").find("th").its("length").should("eq", 8);
     columnHeaders.forEach((header, headerIndex) => {
-      cy.get("thead")
+      pw.get("thead")
         .find("tr")
         .find("th")
         .eq(headerIndex + 1)
         .should("contain.text", header);
     });
-    cy.get("tbody").should("be.visible");
+    pw.get("tbody").should("be.visible");
   });
 
   test("As a user, I should be able to search the data grid", () => {
@@ -94,13 +94,13 @@ test.describe("Data Grid Scenarios", () => {
       "not started",
       "2024-03-05",
     ];
-    cy.login();
+    pw.login();
     interceptSearchResults();
     searchItems.forEach((searchItem, index) => {
-      cy.get(`input[placeholder="Search..."]`).type(searchItem);
+      pw.get(`input[placeholder="Search..."]`).type(searchItem);
       waitForSearchResults();
-      cy.get("tbody > tr").each(($row) => {
-        cy.wrap($row)
+      pw.get("tbody > tr").each(($row) => {
+        pw.wrap($row)
           .find("td")
           .eq(index + 1)
           .invoke("text")
@@ -108,7 +108,7 @@ test.describe("Data Grid Scenarios", () => {
             expect($caseName.toLowerCase()).to.include(searchItem);
           });
       });
-      cy.get(`input[placeholder="Search..."]`).clear();
+      pw.get(`input[placeholder="Search..."]`).clear();
     });
   });
 
@@ -144,20 +144,20 @@ test.describe("Data Grid Scenarios", () => {
       { name: "audit complete", color: "rgb(85, 153, 112)" },
     ];
 
-    cy.login();
+    pw.login();
     interceptSearchResults();
 
-    cy.wrap(status).each((status) => {
-      cy.get(`input[placeholder="Search..."]`).clear().type(status.name);
+    pw.wrap(status).each((status) => {
+      pw.get(`input[placeholder="Search..."]`).clear().type(status.name);
       waitForSearchResults();
-      cy.get("tbody > tr").each(($row) => {
-        cy.wrap($row)
+      pw.get("tbody > tr").each(($row) => {
+        pw.wrap($row)
           .find("td")
           .eq(5)
           .invoke("text")
           .then(($status) => {
             expect($status.toLowerCase()).to.include(status.name);
-            cy.wrap($row)
+            pw.wrap($row)
               .find("td")
               .eq(5)
               .find("p")

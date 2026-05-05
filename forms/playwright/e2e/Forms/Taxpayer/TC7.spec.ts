@@ -34,11 +34,11 @@ const deleteMultipleFiling = (
 const deleteBusiness = (businessDba: string) => {
   business.init();
   business.filterColumn("DBA", businessDba, "text", "Contains");
-  cy.waitForLoading();
+  pw.waitForLoading();
   business.getElement().rows().its("length").as("businessRowsLength");
   business.clickClearAllFiltersButton();
-  cy.get("@businessRowsLength").then((businessRowsLength) => {
-    cy.log("businessRowsLength: " + businessRowsLength);
+  pw.get("@businessRowsLength").then((businessRowsLength) => {
+    pw.log("businessRowsLength: " + businessRowsLength);
     if (Number(businessRowsLength) > 0) {
       business.deleteBusiness(businessDba);
     }
@@ -47,7 +47,7 @@ const deleteBusiness = (businessDba: string) => {
 
 test.describe("As a taxpayer, I should be able to submit a tax form for a non-listed business.", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 9 });
+    pw.login({ accountType: "ags", accountIndex: 9 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -61,7 +61,7 @@ test.describe("As a taxpayer, I should be able to submit a tax form for a non-li
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -70,9 +70,9 @@ test.describe("As a taxpayer, I should be able to submit a tax form for a non-li
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -96,12 +96,12 @@ test.describe("As a taxpayer, I should be able to submit a tax form for a non-li
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
     deleteBusiness("Test DBA #4884");
   });
 });

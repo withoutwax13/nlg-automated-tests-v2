@@ -35,7 +35,7 @@ const deleteMultipleFiling = (
 test.describe.skip("As a government user, I want to be able to start approval workflow a specific item in Approvals", () => {
   // Skipped, assertions covered by TC37 and TC38
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 5 });
+    pw.login({ accountType: "ags", accountIndex: 5 });
     agsFilingGrid.init();
     agsFilingGrid.filterColumn(
       "Location DBA",
@@ -49,7 +49,7 @@ test.describe.skip("As a government user, I want to be able to start approval wo
       "multi-select"
     );
     agsFilingGrid.getElement().rows().its("length").as("rowsLength");
-    cy.get("@rowsLength").then((rowsLength) => {
+    pw.get("@rowsLength").then((rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
           Number(rowsLength),
@@ -58,9 +58,9 @@ test.describe.skip("As a government user, I want to be able to start approval wo
         );
       }
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -82,17 +82,17 @@ test.describe.skip("As a government user, I want to be able to start approval wo
       .referenceIdData()
       .invoke("text")
       .then((referenceId) => {
-        cy.wrap(referenceId).as("referenceId");
+        pw.wrap(referenceId).as("referenceId");
       });
     applicationConfirmation.clickCloseButton();
     taxpayerFilingGrid.init();
-    cy.get("@referenceId").then((referenceId) => {
-      cy.logout();
-      cy.login({ accountType: "ags", accountIndex: 5, notFirstLogin: true });
+    pw.get("@referenceId").then((referenceId) => {
+      pw.logout();
+      pw.login({ accountType: "ags", accountIndex: 5, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus("Funded", "Reference ID", String(referenceId));
-      cy.logout();
-      cy.login({ accountType: "municipal", accountIndex: 3, notFirstLogin: true });
+      pw.logout();
+      pw.login({ accountType: "municipal", accountIndex: 3, notFirstLogin: true });
       govApprovalGrid.init();
       govApprovalGrid.selectRowToReject("Reference ID", String(referenceId));
     });

@@ -7,7 +7,7 @@ const exportModal = new ExportModal();
 
 test.describe("As a municipal user, I should be able to export business list with Export View as Excel file", () => {
   test("Initiating test", () => {
-    cy.login({accountType: "municipal"});
+    pw.login({accountType: "municipal"});
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickExportButton();
     exportModal.clickExcelOption();

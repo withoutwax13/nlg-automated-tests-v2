@@ -36,14 +36,14 @@ const newBusinessData = {
 
 test.describe("As a taxpayer, when my business has been deleted by a municipal user, I should be able to verify that the business does not exist in my grid", () => {
   test.beforeEach(() => {
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
       notFirstLogin: false,
       accountIndex: 3,
     });
 
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
       notFirstLogin: true,
@@ -51,7 +51,7 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     });
   });
   test("Initiating test", () => {
-    cy.login({
+    pw.login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 1,
@@ -63,20 +63,20 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickClearAllFiltersButton();
     municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
 
-    cy.logout();
-    cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
+    pw.logout();
+    pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
 
-    cy.logout();
-    cy.login({
+    pw.logout();
+    pw.login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 1,
@@ -86,8 +86,8 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     municipalBusinessGrid.deleteBusiness(newBusinessData.locationDba);
     municipalBusinessGrid.getElement().toastComponent().should("exist");
 
-    cy.logout();
-    cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
+    pw.logout();
+    pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.filterColumn("DBA", newBusinessData.locationDba);
     taxpayerBusinessGrid.getElement().noRecordFoundComponent().should("exist");

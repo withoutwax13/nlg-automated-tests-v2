@@ -12,10 +12,10 @@ const randomDate = Math.floor(Math.random() * 28) + 1;
 
 test.describe("As a ags user, I should be able to update start date for delinquency tracking in the business details page", () => {
   test("Initiating test", () => {
-    cy.login({ accountType: "ags", accountIndex: 1 });
+    pw.login({ accountType: "ags", accountIndex: 1 });
     agsBusinessGrid.init();
     agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 74829");
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
     agsBusinessDetails.clickBusinessStatusTab();
 
     agsBusinessDetails.setStartDateDelinquencyTracking({

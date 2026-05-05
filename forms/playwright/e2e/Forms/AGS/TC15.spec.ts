@@ -9,31 +9,31 @@ const filing = new Filing({ isResumingDraftApplication: false });
 
 test.describe("As an AGS user, I should be able to configure the taxpayer form display arrangement", () => {
   test("Initiate test", () => {
-    cy.login({ accountType: "ags", accountIndex: 8 });
+    pw.login({ accountType: "ags", accountIndex: 8 });
     agsFormGrid.init();
     agsFormGrid.clickSettingsButton();
     formSetting.selectMunicipality("City of Arrakis");
     formSetting.saveFormOrders("agsFormOrderBeforeMove");
     formSetting.clickCancelButton();
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
-    cy.wrap([]).as("taxpayerFormOrderBeforeMove");
+    pw.wrap([]).as("taxpayerFormOrderBeforeMove");
     filing
       .getElements()
       .formList()
       .find("li")
       .each(($taxpayerDisplayedForm) => {
-        cy.get("@taxpayerFormOrderBeforeMove").then((taxpayerFormOrder) => {
-          cy.wrap([...taxpayerFormOrder, $taxpayerDisplayedForm.text()]).as(
+        pw.get("@taxpayerFormOrderBeforeMove").then((taxpayerFormOrder) => {
+          pw.wrap([...taxpayerFormOrder, $taxpayerDisplayedForm.text()]).as(
             "taxpayerFormOrderBeforeMove"
           );
         });
       });
-    cy.get("@taxpayerFormOrderBeforeMove").then((taxpayerFormOrder) => {
-      cy.get("@agsFormOrderBeforeMove").then((agsFormOrder) => {
+    pw.get("@taxpayerFormOrderBeforeMove").then((taxpayerFormOrder) => {
+      pw.get("@agsFormOrderBeforeMove").then((agsFormOrder) => {
         console.log(taxpayerFormOrder);
         console.log(agsFormOrder);
         expect(
@@ -47,13 +47,13 @@ test.describe("As an AGS user, I should be able to configure the taxpayer form d
         );
       });
     });
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "ags", accountIndex: 8, notFirstLogin: true });
+    pw.login({ accountType: "ags", accountIndex: 8, notFirstLogin: true });
     agsFormGrid.init();
     agsFormGrid.clickSettingsButton();
     formSetting.selectMunicipality("City of Arrakis");
-    cy.get("@agsFormOrderBeforeMove").then((agsFormOrder) => {
+    pw.get("@agsFormOrderBeforeMove").then((agsFormOrder) => {
       formSetting.moveFormToLocationOf(
         String(agsFormOrder[0]),
         String(agsFormOrder[agsFormOrder.length - 1])
@@ -61,25 +61,25 @@ test.describe("As an AGS user, I should be able to configure the taxpayer form d
     });
     formSetting.saveFormOrders("agsFormOrderAfterMove");
     formSetting.clickSaveButton();
-    cy.logout();
+    pw.logout();
 
-    cy.login({ accountType: "taxpayer", notFirstLogin: true });
+    pw.login({ accountType: "taxpayer", notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
-    cy.wrap([]).as("taxpayerFormOrderAfterMove");
+    pw.wrap([]).as("taxpayerFormOrderAfterMove");
     filing
       .getElements()
       .formList()
       .find("li")
       .each(($taxpayerDisplayedForm) => {
-        cy.get("@taxpayerFormOrderAfterMove").then((taxpayerFormOrder) => {
-          cy.wrap([...taxpayerFormOrder, $taxpayerDisplayedForm.text()]).as(
+        pw.get("@taxpayerFormOrderAfterMove").then((taxpayerFormOrder) => {
+          pw.wrap([...taxpayerFormOrder, $taxpayerDisplayedForm.text()]).as(
             "taxpayerFormOrderAfterMove"
           );
         });
       });
-    cy.get("@taxpayerFormOrderAfterMove").then((taxpayerFormOrder) => {
-      cy.get("@agsFormOrderAfterMove").then((agsFormOrder) => {
+    pw.get("@taxpayerFormOrderAfterMove").then((taxpayerFormOrder) => {
+      pw.get("@agsFormOrderAfterMove").then((agsFormOrder) => {
         expect(
           taxpayerFormOrder
             .filter((item) => item !== undefined && item !== null)

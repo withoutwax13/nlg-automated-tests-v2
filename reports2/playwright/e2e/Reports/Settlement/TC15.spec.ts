@@ -9,7 +9,7 @@ test.describe(
       const settlementGrid = new SettlementGrid({
         userType: "municipal",
       });
-      cy.login({ accountType: "municipal", accountIndex: 4 });
+      pw.login({ accountType: "municipal", accountIndex: 4 });
       settlementGrid.init();
       settlementGrid.getElement().exportButton().should("be.visible");
       settlementGrid.getElement().exportButton().should("not.be.disabled");

@@ -1,7 +1,7 @@
 class ManageDelinquencyModal {
   private elements() {
     return {
-      modal: () => cy.get(".k-dialog"),
+      modal: () => pw.get(".k-dialog"),
       modalTitle: () => this.getElement().modal().find(".k-dialog-title"),
       closeModalButton: () =>
         this.getElement().modal().find('button[aria-label="Close"]'),
@@ -45,12 +45,12 @@ class ManageDelinquencyModal {
   }
 
   clickDismissButton() {
-    cy.intercept("POST", "https://**.azavargovapps.com/reports/DismissDelinquencyReport/**").as("dismissDelinquencyReport");
-    cy.intercept("GET", "https://**.azavargovapps.com/reports/DelinquencyReports/**").as("getDelinquencyReportAfterDismissal");
+    pw.intercept("POST", "https://**.azavargovapps.com/reports/DismissDelinquencyReport/**").as("dismissDelinquencyReport");
+    pw.intercept("GET", "https://**.azavargovapps.com/reports/DelinquencyReports/**").as("getDelinquencyReportAfterDismissal");
     this.getElement().dismissButton().click();
-    cy.wait("@dismissDelinquencyReport").its("response.statusCode").should("eq", 200);
-    cy.wait("@getDelinquencyReportAfterDismissal").its("response.statusCode").should("eq", 200);
-    cy.wait(2000); // Wait for 2 seconds to ensure that the dismissal action is fully processed before proceeding with the next steps in the test
+    pw.wait("@dismissDelinquencyReport").its("response.statusCode").should("eq", 200);
+    pw.wait("@getDelinquencyReportAfterDismissal").its("response.statusCode").should("eq", 200);
+    pw.wait(2000); // Wait for 2 seconds to ensure that the dismissal action is fully processed before proceeding with the next steps in the test
   }
 
   clickCancelButton() {
@@ -70,13 +70,13 @@ class ManageDelinquencyModal {
   }
 
   saveBusinessDetails(variableAlias: string) {
-    cy.wrap({}).as(variableAlias);
+    pw.wrap({}).as(variableAlias);
     this.getElement()
       .businessNameData()
       .invoke("text")
       .then(($businessName) => {
-        cy.get(`@${variableAlias}`).then((testBusinessData) => {
-          cy.wrap({ ...testBusinessData, businessName: $businessName }).as(
+        pw.get(`@${variableAlias}`).then((testBusinessData) => {
+          pw.wrap({ ...testBusinessData, businessName: $businessName }).as(
             variableAlias
           );
         });
@@ -85,8 +85,8 @@ class ManageDelinquencyModal {
       .formTitleData()
       .invoke("text")
       .then(($formTitle) => {
-        cy.get(`@${variableAlias}`).then((testBusinessData) => {
-          cy.wrap({ ...testBusinessData, formTitle: $formTitle }).as(
+        pw.get(`@${variableAlias}`).then((testBusinessData) => {
+          pw.wrap({ ...testBusinessData, formTitle: $formTitle }).as(
             variableAlias
           );
         });
@@ -95,8 +95,8 @@ class ManageDelinquencyModal {
       .filingPeriodData()
       .invoke("text")
       .then(($filingPeriod) => {
-        cy.get(`@${variableAlias}`).then((testBusinessData) => {
-          cy.wrap({ ...testBusinessData, filingPeriod: $filingPeriod }).as(
+        pw.get(`@${variableAlias}`).then((testBusinessData) => {
+          pw.wrap({ ...testBusinessData, filingPeriod: $filingPeriod }).as(
             variableAlias
           );
         });
@@ -104,13 +104,13 @@ class ManageDelinquencyModal {
   }
 
   saveDismissalDetails(variableAlias: string) {
-    cy.wrap({}).as(variableAlias);
+    pw.wrap({}).as(variableAlias);
     this.getElement()
       .dismissalExplanationData()
       .invoke("text")
       .then(($dismissalExplanation) => {
-        cy.get(`@${variableAlias}`).then((dismissalData) => {
-          cy.wrap({
+        pw.get(`@${variableAlias}`).then((dismissalData) => {
+          pw.wrap({
             ...dismissalData,
             dismissalExplanation: $dismissalExplanation,
           }).as(variableAlias);
@@ -120,8 +120,8 @@ class ManageDelinquencyModal {
       .dismisseByData()
       .invoke("text")
       .then(($dismissedBy) => {
-        cy.get(`@${variableAlias}`).then((dismissalData) => {
-          cy.wrap({ ...dismissalData, dismissedBy: $dismissedBy }).as(
+        pw.get(`@${variableAlias}`).then((dismissalData) => {
+          pw.wrap({ ...dismissalData, dismissedBy: $dismissedBy }).as(
             variableAlias
           );
         });
@@ -129,9 +129,9 @@ class ManageDelinquencyModal {
   }
 
   clickRevertDismissalButton() {
-    cy.intercept("POST", "https://**.azavargovapps.com/reports/RevertDismissDelinquencyReport/**").as("revertDismissal");
+    pw.intercept("POST", "https://**.azavargovapps.com/reports/RevertDismissDelinquencyReport/**").as("revertDismissal");
     this.getElement().revertDismissalButton().click();
-    cy.wait("@revertDismissal").its("response.statusCode").should("eq", 200);
+    pw.wait("@revertDismissal").its("response.statusCode").should("eq", 200);
   }
 }
 

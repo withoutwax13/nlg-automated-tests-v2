@@ -36,13 +36,13 @@ const newBusinessData = {
 
 test.describe("As a taxpayer user, I should be able to delete a business.", () => {
   test.beforeEach(() => {
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
       notFirstLogin: false,
       accountIndex: 5,
     });
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
       notFirstLogin: true,
@@ -50,7 +50,7 @@ test.describe("As a taxpayer user, I should be able to delete a business.", () =
     });
   });
   test("Initiating test", () => {
-    cy.login({
+    pw.login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 3,
@@ -62,26 +62,26 @@ test.describe("As a taxpayer user, I should be able to delete a business.", () =
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickClearAllFiltersButton();
     municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
 
-    cy.logout();
-    cy.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 5 });
+    pw.logout();
+    pw.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 5 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    cy.url().should("include", "/BusinessesApp/BusinessDetails/");
+    pw.url().should("include", "/BusinessesApp/BusinessDetails/");
 
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.deleteBusiness(newBusinessData.locationDba);
     taxpayerBusinessGrid.getElement().toastComponent().should("exist");
-    cy.logout();
+    pw.logout();
   });
   test.afterEach(() => {
     // delete business data
-    cy.deleteBusinessData({
+    pw.deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
       notFirstLogin: true,

@@ -8,10 +8,10 @@ class FormPreview extends Form {
   private formPreviewElements() {
     return {
       ...super.getElement(),
-      submitButton: () => cy.get(".NLGButtonPrimary").contains(/Go to Payment|Submit/),
-      accordion: () => cy.get(".k-expander").eq(0).parent(),
+      submitButton: () => pw.get(".NLGButtonPrimary").contains(/Go to Payment|Submit/),
+      accordion: () => pw.get(".k-expander").eq(0).parent(),
       accordionSteps: () => this.getElement().accordion().find(".k-expander"),
-      paymentDetails: () => cy.get("h2").contains("Payment Details").next(),
+      paymentDetails: () => pw.get("h2").contains("Payment Details").next(),
     };
   }
 
@@ -20,9 +20,9 @@ class FormPreview extends Form {
   }
 
   clickSubmitButton() {
-    cy.intercept("PATCH", "https://**.azavargovapps.com/filings/**/submit").as("submitFiling");
+    pw.intercept("PATCH", "https://**.azavargovapps.com/filings/**/submit").as("submitFiling");
     this.getElement().submitButton().should("be.enabled").click();
-    cy.wait("@submitFiling").its("response.statusCode").should("eq", 201);
+    pw.wait("@submitFiling").its("response.statusCode").should("eq", 201);
   }
 
   toggleStepAccordion(stepName: string, toExpand: boolean) {
