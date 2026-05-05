@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+      "target": "es5",
+      "lib": ["es2017", "dom"],
+      "types": ["cypress", "cypress-file-upload"],
+      "resolveJsonModule": true,
+      "esModuleInterop": true
+    },
+    "include": [
+      "**/*.ts"
+    ]
+}

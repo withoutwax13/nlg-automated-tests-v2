@@ -1,0 +1,604 @@
+import { getOrderOfColumns, validateFilterOperation } from "../../utils/Grid";
+import ExportFiling from "../ExportFiling";
+
+const VALID_ITEMS_PER_PAGE = [5, 10, 20, 50];
+const AGS_FILING_COLUMNS = [
+  "Actions",
+  "Filing Period",
+  "Location DBA",
+  "Location Address 1",
+  "Total Due",
+  "Payment Status",
+  "Transaction Date",
+  "Funding Date",
+  "Form Name",
+  "Approval Status",
+  "Filing Date",
+  "Payment Type",
+  "Reference ID",
+  "State Tax ID",
+  "Filing Frequency",
+];
+const MUNICIPAL_FILING_COLUMNS = [
+  "Actions",
+  "Filing Period",
+  "Location DBA",
+  "Location Address 1",
+  "Total Due",
+  "Payment Status",
+  "Transaction Date",
+  "Funding Date",
+  "Form Name",
+  "Approval Status",
+  "Filing Date",
+  "Payment Type",
+  "Reference ID",
+  "State Tax ID",
+  "Filing Frequency",
+];
+const TAXPAYER_FILING_COLUMNS = [
+  "Actions",
+  "Filing Period",
+  "Filing Status",
+  "Location DBA",
+  "Location Address 1",
+  "Total Due",
+  "Payment Status",
+  "Government",
+  "Transaction Date",
+  "Form Name",
+  "Approval Status",
+  "Filing Date",
+  "Payment Type",
+  "Reference ID",
+  "State Tax ID",
+  "Filing Frequency",
+];
+
+const removeSpaces = (text: string) => text.replace(/\s/g, "");
+
+class FilingGrid {
+  userType: string;
+  municipalitySelection: string;
+  defaultGridColumnsAlias: string;
+  sortType: string;
+  constructor(props: {
+    userType: string;
+    municipalitySelection?: string;
+    sortType?: string;
+  }) {
+    if (["ags", "municipal", "taxpayer"].indexOf(props.userType) === -1) {
+      throw new Error("Invalid user type");
+    }
+    this.userType = props.userType;
+    this.municipalitySelection =
+      props.municipalitySelection || "City of Arrakis";
+    this.defaultGridColumnsAlias = "defaultFilingGridColumns";
+    this.sortType = props.sortType ? props.sortType : "default";
+  }
+
+  init() {
+    cy.intercept("GET", "https://**.azavargovapps.com/users/**").as("getUserDetails");
+    cy.intercept("GET", "https://**.azavargovapps.com/municipalities/ActiveTaxAndFeesSubscriptions").as("getMunicipalitiesWithActiveSubscriptions");
+    cy.intercept("GET", "https://**.azavargovapps.com/forms/municipality-forms-names/**").as("getFormNames");
+    cy.intercept("GET", "https://**.azavargovapps.com/forms/municipality/**").as("getActiveForms");
+    cy.intercept("GET", "https://**.azavargovapps.com/municipalities/**").as("getMunicipalityDetails");
+    cy.intercept("GET", "https://**.azavargovapps.com/users/usersGridSettings/**").as("getGridSettings");
+    cy.intercept("GET", "https://**.azavargovapps.com/filings/?municipalityId=**").as("getFilings");
+    cy.visit("/filingApp/filingList");
+    if (this.userType === "ags") {
+      if (this.municipalitySelection === undefined) {
+        throw new Error("Municipality selection is required for AGS user type");
+      }
+      cy.wait("@getUserDetails").its("response.statusCode").should("eq", 200);
+      cy.wait("@getMunicipalitiesWithActiveSubscriptions").its("response.statusCode").should("eq", 200);
+      this.selectMunicipality(this.municipalitySelection);
+      cy.wait("@getFormNames").its("response.statusCode").should("eq", 200);
+      cy.wait("@getActiveForms").its("response.statusCode").should("eq", 200);
+      cy.wait("@getMunicipalityDetails").its("response.statusCode").should("eq", 200);
+      cy.wait("@getGridSettings").its("response.statusCode").should("eq", 200);
+      cy.wait("@getFilings").its("response.statusCode").should("eq", 200);
+      getOrderOfColumns(
+        AGS_FILING_COLUMNS,
+        `${this.userType}_${this.defaultGridColumnsAlias}`
+      );
+    } else if (this.userType === "municipal") {
+      getOrderOfColumns(
+        MUNICIPAL_FILING_COLUMNS,
+        `${this.userType}_${this.defaultGridColumnsAlias}`
+      );
+    } else {
+      getOrderOfColumns(
+        TAXPAYER_FILING_COLUMNS,
+        `${this.userType}_${this.defaultGridColumnsAlias}`
+      );
+    }
+    cy.url().should("include", "/filingApp/filingList");
+    cy.waitForLoading(3);
+  }
+
+  private elements() {
+    return {
+      searchBox: () => cy.get("div").find(".fa-magnifying-glass").parent(),
+      columns: () => cy.get("thead").find("tr").find("th"),
+      rows: () =>
+        cy.get("tbody").then(($tbody) => {
+          if ($tbody.find("tr").length !== 0) {
+            return $tbody.find("tr");
+          }
+        }),
+      customizeTableViewButton: () =>
+        cy.get("*").contains("Customize"),
+      columnFilter: () => this.getElement().columns().find("span").find("a"),
+      columnSort: () => this.getElement().columns().find("a").find("i"),
+      specificColumnFilter: (columnOrder: number) =>
+        this.getElement().columns().eq(columnOrder).find("span").find("a"),
+      specificColumnSort: (columnOrder: number) =>
+        this.getElement().columns().eq(columnOrder).find("a").find("i"),
+      itemsPerPageDropdown: () => cy.get(".k-dropdownlist"),
+      itemsPerPageDropdownItem: (itemNumber: number) =>
+        cy.get("li").contains(itemNumber),
+      pagination: () => cy.get(".k-pager-numbers-wrap"),
+      goToFirstPageButton: () =>
+        this.getElement().pagination().find("button").eq(0),
+      goToPreviousPageButton: () =>
+        this.getElement().pagination().find("button[").eq(1),
+      goToNextPageButton: () =>
+        this.getElement()
+          .pagination()
+          .find('button[title="Go to the next page"]'),
+      goToLastPageButton: () =>
+        this.getElement()
+          .pagination()
+          .find('button[title="Go to the last page"]'),
+      filterOperationsDropdown: () =>
+        cy.get(".k-filter-menu-container").find(".k-dropdownlist"),
+      filterOperationsDropdownItem: (item: string) =>
+        cy
+          .get(".k-list-ul")
+          .find("li")
+          .find(".k-list-item-text")
+          .contains(item),
+      filterValueInput: () =>
+        cy.get(".k-filter-menu-container").find(".k-input"),
+      filterValueDateInput: () => cy.get(".k-dateinput"),
+      filterMultiSelectItem: () => cy.get(".k-multicheck-wrap").find("li"),
+      filterFilterButton: () =>
+        cy
+          .get(".k-filter-menu-container")
+          .find(".k-actions")
+          .find(".k-button")
+          .contains("Filter"),
+      searchMunicipalityDropdown: () =>
+        cy.get('input[placeholder="Select government..."]'),
+      anyList: () => cy.get("li"),
+      anyButton: () => cy.get("button"),
+      clearAllFiltersButton: () =>
+        cy.get("*").contains("Clear All"),
+      exportButton: () => cy.get(".NLGButtonPrimary").contains("Export"),
+      viewRequestedExtractButton: () =>
+        cy.get("*").contains("View requested extracts"),
+    };
+  }
+
+  getElement() {
+    return this.elements();
+  }
+
+  selectMunicipality(municipality: string) {
+    this.getElement().searchMunicipalityDropdown().type(municipality);
+    this.getElement().anyList().contains(municipality).click();
+  }
+
+  private clickColumn(index: number) {
+    this.getElement().columns().eq(index).click();
+  }
+
+  private handleDBASorting(index: number, isAscending: boolean) {
+    if (!isAscending && this.sortType === "default") {
+      this.clickColumn(index);
+      this.sortType = "descending";
+    } else if (isAscending && this.sortType === "descending") {
+      this.clickColumn(index);
+      this.sortType = "ascending";
+    }
+  }
+
+  private handleGeneralSorting(index: number, isAscending: boolean) {
+    if (
+      isAscending &&
+      (this.sortType === "default" || this.sortType === "descending")
+    ) {
+      this.clickColumn(index);
+      this.sortType = "ascending";
+    } else if (!isAscending && this.sortType === "ascending") {
+      this.clickColumn(index);
+      this.sortType = "descending";
+    }
+  }
+
+  sortColumn(isAscending: boolean, columnName: string) {
+    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+      .should("exist")
+      .then((columnIndexes: any) => {
+        const columnIndex = columnIndexes[columnName];
+        this.clickColumn(columnIndex);
+        if (columnName === "DBA") {
+          this.handleDBASorting(columnIndex, isAscending);
+        } else {
+          this.handleGeneralSorting(columnIndex, isAscending);
+        }
+      });
+  }
+
+  private handleTextFilter(
+    columnIndex: number,
+    filterValue: string,
+    filterOperation: string
+  ) {
+    validateFilterOperation("text", filterOperation);
+    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    this.getElement().filterOperationsDropdown().click({ force: true });
+    this.getElement().filterOperationsDropdownItem(filterOperation).click({ force: true });
+    if (filterOperation !== "Is not null" && filterOperation !== "Is null") {
+      this.getElement().filterValueInput().type(filterValue, { force: true });
+    }
+    this.getElement().filterFilterButton().click({ force: true });
+  }
+
+  private handleDateFilter(
+    columnIndex: number,
+    filterValue: string,
+    filterOperation: string
+  ) {
+    validateFilterOperation("date", filterOperation);
+    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    this.getElement().filterOperationsDropdown().click({ force: true });
+    this.getElement().filterOperationsDropdownItem(filterOperation).click({ force: true });
+    this.getElement()
+      .filterValueDateInput()
+      .type(filterValue.split("/").join("{rightarrow}"), { force: true });
+    this.getElement().filterFilterButton().click({ force: true });
+  }
+
+  private handleNumberFilter(
+    columnIndex: number,
+    filterValue: string,
+    filterOperation: string
+  ) {
+    validateFilterOperation("number", filterOperation);
+    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    this.getElement().filterOperationsDropdown().click({ force: true });
+    this.getElement().filterOperationsDropdownItem(filterOperation).click({ force: true });
+    this.getElement().filterValueInput().type(filterValue);
+    this.getElement().filterFilterButton().click({ force: true });
+  }
+
+  private handleMultiSelectFilter(columnIndex: number, filterValue: string) {
+    this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    this.getElement()
+      .filterMultiSelectItem()
+      .contains(filterValue)
+      .parent()
+      .find("input")
+      .click({ force: true });
+    this.getElement().filterFilterButton().click({ force: true });
+  }
+
+  filterColumn(
+    columnName: string,
+    filterValue: string,
+    filterType: string = "text",
+    filterOperation: string = "Contains"
+  ) {
+    cy.waitForLoading(1);
+    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+      .should("exist")
+      .then((columnIndexes: any) => {
+        const columnIndex = columnIndexes[columnName];
+        switch (filterType) {
+          case "text":
+            this.handleTextFilter(columnIndex, filterValue, filterOperation);
+            break;
+          case "date":
+            this.handleDateFilter(columnIndex, filterValue, filterOperation);
+            break;
+          case "number":
+            this.handleNumberFilter(columnIndex, filterValue, filterOperation);
+            break;
+          case "multi-select":
+            this.handleMultiSelectFilter(columnIndex, filterValue);
+            break;
+          default:
+            break;
+        }
+      });
+    cy.waitForLoading();
+  }
+
+  changeItemsPerPage(itemNumber: number) {
+    if (!VALID_ITEMS_PER_PAGE.includes(itemNumber)) {
+      throw new Error("Invalid items per page number");
+    }
+    this.getElement().itemsPerPageDropdown().click();
+    this.getElement().itemsPerPageDropdownItem(itemNumber).click();
+  }
+
+  clickCustomizeTableViewButton() {
+    this.getElement().customizeTableViewButton().click();
+  }
+
+  clickClearAllFiltersButton() {
+    this.getElement().clearAllFiltersButton().click();
+  }
+
+  getDataOfColumn(
+    targetColumnName: string,
+    anchorColumnName: string,
+    anchorValue: string,
+    targetColumnDataAlias: string
+  ) {
+    this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
+    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+      .should("exist")
+      .then((columnIndexes: any) => {
+        const columnIndex = columnIndexes[targetColumnName];
+        const anchorColumnIndex = columnIndexes[anchorColumnName];
+        this.getElement()
+          .rows()
+          .each(($row) => {
+            const $columns = $row.find("td");
+            if ($columns.eq(anchorColumnIndex).text() === anchorValue) {
+              cy.wrap($columns.eq(columnIndex).text()).as(
+                targetColumnDataAlias
+              );
+            }
+          });
+      });
+  }
+
+  getElementOfColumn(
+    targetColumnName: string,
+    anchorColumnName: string,
+    anchorValue: string,
+    targetColumnElementAlias: string
+  ) {
+    this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
+    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+      .should("exist")
+      .then((columnIndexes: any) => {
+        const columnIndex = columnIndexes[targetColumnName];
+        const anchorColumnIndex = columnIndexes[anchorColumnName];
+        this.getElement()
+          .rows()
+          .each(($row) => {
+            const $columns = $row.find("td");
+            if (
+              String($columns.eq(anchorColumnIndex).text())
+                .replace(/\s+/g, " ")
+                .trim() === anchorValue
+            ) {
+              cy.wrap($columns.eq(columnIndex)).as(targetColumnElementAlias);
+            }
+          });
+      });
+  }
+
+  toggleActionButton(
+    action: string,
+    anchorColumnName: string,
+    anchorValue: string
+  ) {
+    this.getElementOfColumn(
+      "Actions",
+      anchorColumnName,
+      anchorValue,
+      `${removeSpaces(action)}${removeSpaces(anchorColumnName)}${removeSpaces(
+        anchorValue
+      )}`
+    );
+    cy.get(
+      `@${removeSpaces(action)}${removeSpaces(anchorColumnName)}${removeSpaces(
+        anchorValue
+      )}`
+    ).click();
+    this.getElement().anyList().contains(action).click();
+  }
+
+  deleteFiling(anchorColumnName: string, anchorValue: string) {
+    cy.intercept("DELETE", "https://**.azavargovapps.com/filings/delete/ReferenceId/**/MunicipalityId/**").as("deleteFiling");
+    if (this.userType === "taxpayer") {
+      this.toggleActionButton("Delete", anchorColumnName, anchorValue);
+      // TODO: Add delete confirmation POM
+      cy.get(".k-dialog-actions").find("button").contains("Delete").click();
+    } else if (this.userType === "ags") {
+      cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+        .should("exist")
+        .then((columnIndexes: any) => {
+          this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
+          const columnIndex = columnIndexes["Payment Status"];
+          const anchorColumnIndex = columnIndexes[anchorColumnName];
+
+          this.getElement()
+            .rows()
+            .each(($row) => {
+              const $columns = $row.find("td");
+              if (
+                String($columns.eq(anchorColumnIndex).text())
+                  .replace(/\s+/g, " ")
+                  .trim() === anchorValue
+              ) {
+                cy.wrap($columns.eq(columnIndex)).find("button[aria-haspopup='menu']").click();
+                this.getElement().anyList().contains("Delete Filing").click();
+                // TODO: Add delete confirmation POM
+                cy.get(".k-dialog-actions")
+                  .find("button")
+                  .contains("Delete")
+                  .click();
+                cy.wait("@deleteFiling").its("response.statusCode").should("eq", 200);
+                return false;
+              }
+            });
+        });
+    } else if (this.userType === "municipal") {
+      throw new Error("Delete action is not available for this user type");
+    }
+  }
+
+  updateStatus(
+    newStatus: string,
+    anchorColumnName: string,
+    anchorValue: string
+  ) {
+    cy.intercept("PATCH", "https://**.azavargovapps.com/filings/filing-status/**/status/**").as("updateFilingStatus");
+    if (this.userType !== "ags") {
+      throw new Error(
+        "Update status action is not available for this user type"
+      );
+    }
+    this.getElementOfColumn(
+      "Payment Status",
+      anchorColumnName,
+      anchorValue,
+      `paymentStatus_${removeSpaces(anchorColumnName)}${removeSpaces(
+        anchorValue
+      )}`
+    );
+    cy.get(
+      `@paymentStatus_${removeSpaces(anchorColumnName)}${removeSpaces(
+        anchorValue
+      )}`
+    )
+      .find("button[aria-haspopup='menu']")
+      .click();
+    this.getElement().anyList().contains("Update Status").click();
+    // TODO: Add update status modal POM
+    cy.get(".k-window-content")
+      .find(".k-radio-list")
+      .find(`input[value="${newStatus}"]`)
+      .click();
+    cy.get(".k-dialog-actions").find("button").contains("Save").click();
+    cy.wait("@updateFilingStatus").its("response.statusCode").should("eq", 200);
+  }
+
+  checkAuditLog(anchorColumnName: string, anchorValue: string) {
+    cy.window().then((win) => {
+      cy.stub(win, 'open').as('windowOpen');
+    });
+    this.getElementOfColumn(
+      "Payment Status",
+      anchorColumnName,
+      anchorValue,
+      `paymentStatus_${removeSpaces(anchorColumnName)}${removeSpaces(
+        anchorValue
+      )}`
+    );
+    cy.get(
+      `@paymentStatus_${removeSpaces(anchorColumnName)}${removeSpaces(
+        anchorValue
+      )}`
+    )
+      .find("button[aria-haspopup='menu']")
+      .first()
+      .click();
+    this.getElement().anyList().contains("Audit Log").click();
+    cy.get('@windowOpen').then((stub) => {
+      const newTabUrl = stub.args[0][0]; // Get the first argument (URL) of the first call
+      cy.visit(newTabUrl);
+    });
+    cy.waitForLoading();
+  }
+
+  clickExportButton(
+    isExportFullData: boolean = true,
+    fileType: "CSV" | "Excel" = "CSV"
+  ) {
+    const filingExportModal = new ExportFiling();
+    this.getElement().exportButton().click();
+    if (this.userType !== "taxpayer") {
+      switch (fileType) {
+        case "CSV":
+          filingExportModal.selectCSVFileType();
+          break;
+        case "Excel":
+          filingExportModal.selectExcelFileType();
+          break;
+        default:
+          filingExportModal.selectCSVFileType();
+          break;
+      }
+
+      if (isExportFullData) {
+        filingExportModal.clickExportFullDataButton();
+      } else {
+        filingExportModal.clickExportViewButton();
+      }
+    }
+  }
+
+  clickViewRequestedExtractButton() {
+    this.getElement().viewRequestedExtractButton().click();
+    cy.waitForLoading(5);
+  }
+
+  searchFiling(searchValue: string) {
+    this.getElement().searchBox().type(searchValue);
+    cy.waitForLoading(5);
+  }
+
+  setStartDate({
+    month,
+    day,
+    year,
+  }: {
+    month: string;
+    day: string;
+    year: string;
+  }) {
+    cy.get(".fa-calendar-days").click();
+    cy.get(".k-animation-container input").first().type(`${month}{rightArrow}${day}{rightArrow}${year}`);
+    cy.get(".k-animation-container").find("button").contains("Filter").click();
+    cy.waitForLoading();
+  }
+
+  getColumnCellsData(columnName: string) {
+    cy.wrap([]).as("columnCellsData");
+    cy.get(`@${this.userType}_${this.defaultGridColumnsAlias}`)
+      .should("exist")
+      .then((columnIndexes: any) => {
+        const columnIndex = columnIndexes[columnName];
+        this.getElement()
+          .rows()
+          .each(($row) => {
+            const $columns = $row.find("td");
+            cy.get("@columnCellsData").then((columnCellsData: any) => {
+              cy.wrap([...columnCellsData, $columns.eq(columnIndex).text()]).as(
+                "columnCellsData"
+              );
+            });
+          });
+      });
+  }
+
+  isColumnExist(columnName: string, variableAlias: string) {
+    getOrderOfColumns(
+      AGS_FILING_COLUMNS.includes(columnName)
+        ? AGS_FILING_COLUMNS
+        : [...AGS_FILING_COLUMNS, columnName],
+      `${this.userType}_${this.defaultGridColumnsAlias}AfterAdditionalColumn`
+    );
+    cy.get(
+      `@${this.userType}_${this.defaultGridColumnsAlias}AfterAdditionalColumn`
+    )
+      .should("exist")
+      .then((columnIndexes: any) => {
+        if (columnIndexes[columnName] !== undefined) {
+          cy.wrap(true).as(variableAlias);
+        } else {
+          cy.wrap(false).as(variableAlias);
+        }
+      });
+  }
+}
+
+export default FilingGrid;

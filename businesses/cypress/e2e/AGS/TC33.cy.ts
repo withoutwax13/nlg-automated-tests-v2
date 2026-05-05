@@ -1,0 +1,14 @@
+import BusinessGrid from "../../objects/BusinessGrid";
+const agsBusinessGrid = new BusinessGrid({
+  userType: "ags",
+  municipalitySelection: "City of Arrakis",
+});
+
+describe("As an AGS, Gov user, I want the system to prevent deleting a business record with filings", () => {
+  it("Initiating test", () => {
+    cy.login({ accountType: "ags" });
+    agsBusinessGrid.init();
+    agsBusinessGrid.deleteBusiness("Test Trade Name 50363 1");
+    agsBusinessGrid.getElement().noRecordFoundComponent().should("not.exist");
+  });
+});

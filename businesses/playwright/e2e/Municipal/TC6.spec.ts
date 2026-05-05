@@ -1,0 +1,45 @@
+import { test, expect } from '@playwright/test';
+import BusinessGrid from "../../objects/BusinessGrid";
+
+const municipalBusinessGrid = new BusinessGrid({
+  userType: "municipal"
+});
+
+const randomDate = {
+  date: Math.floor(Math.random() * 28) + 1,
+};
+
+test.describe("As a municipal user, I should be able to set close date from the grid", () => {
+  test("Initiating test", () => {
+    cy.login({ accountType: "municipal", accountIndex: 1 });
+    municipalBusinessGrid.init();
+    municipalBusinessGrid.clickClearAllFiltersButton();
+    municipalBusinessGrid.getDataOfColumn(
+      "Close Date",
+      "DBA",
+      "Arrakis Spice Company 13857",
+      "beforeCloseDate"
+    );
+    municipalBusinessGrid.clickClearAllFiltersButton();
+    municipalBusinessGrid.setCloseDate("Arrakis Spice Company 13857", {
+      month: 1,
+      date: randomDate.date,
+      year: 2029,
+    });
+    municipalBusinessGrid.getElement().toastComponent().should("exist");
+    municipalBusinessGrid.clickClearAllFiltersButton();
+    municipalBusinessGrid.getDataOfColumn(
+      "Close Date",
+      "DBA",
+      "Arrakis Spice Company 13857",
+      "afterCloseDate"
+    );
+    cy.get("@beforeCloseDate").then((beforeCloseDate) => {
+      cy.get("@afterCloseDate").then((afterCloseDate) => {
+        expect(beforeCloseDate).to.be.not.equal(
+          afterCloseDate
+        );
+      });
+    });
+  });
+});

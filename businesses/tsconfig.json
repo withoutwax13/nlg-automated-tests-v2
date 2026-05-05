@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "target": "es2015",
+      "lib": ["es2016", "dom", "es2017"],
+      "types": ["cypress"],
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+    "module": "commonjs",
+    },
+    "include": [
+      "**/*.ts"
+    ]
+}
