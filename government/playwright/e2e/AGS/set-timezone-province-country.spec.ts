@@ -1,94 +1,57 @@
-import { test, expect } from '../../support/pwtest';
+import { test, expect } from "@playwright/test";
+import path from "path";
 import selector from "../../fixtures/selector.json";
+import { loginViaUi, waitForApiResponse } from "../../utils/Login";
 
-const setupIntercepts = () => {
-  const interceptData = [
-    {
-      method: "GET",
-      url: "https://**.amazonaws.com/municipalities/ActiveTaxAndFeesSubscriptions",
-      alias: "loadMunicipalitiesData",
-    },
-    {
-      method: "GET",
-      url: "https://**.amazonaws.com/municipalities",
-      alias: "municipalList",
-    },
-    {
-      method: "GET",
-      url: "https://**.amazonaws.com/subscriptions",
-      alias: "subsList",
-    },
-    {
-      method: "GET",
-      url: "https://**.amazonaws.com/ReportsListInfo",
-      alias: "addMunicipality",
-    },
-  ];
-  interceptData.forEach((intercept) => {
-    pw.intercept(intercept.method, intercept.url).as(intercept.alias);
+const navigateToMunicipalities = async (page: any, projectRoot: string) => {
+  const municipalListPromise = waitForApiResponse(page, {
+    method: "GET",
+    urlIncludes: "amazonaws.com/municipalities",
   });
+
+  await loginViaUi(page, projectRoot, { accountType: "ags" });
+  await page.locator(selector.navigateMunicipality).click();
+  await expect(page).toHaveURL(/\/municipalityApp\/list\//);
+
+  const municipalListResponse = await municipalListPromise;
+  expect(municipalListResponse.status()).toBe(200);
+
+  await page.locator(selector.dataLink).filter({ hasText: "Municipalities" }).click();
+  await expect(page.locator(selector.heading2Title).filter({ hasText: "Municipalities" })).toBeVisible();
 };
 
-const loginAndViewMunicipalities = () => {
-  pw.login({ accountType: "ags" });
-  pw.get(selector.navigateMunicipality).click();
-  pw.url().should("contain", "/municipalityApp/list/");
+const navigateToAddMunicipality = async (page: any) => {
+  const addMunicipalityPromise = waitForApiResponse(page, {
+    method: "GET",
+    urlIncludes: "amazonaws.com/ReportsListInfo",
+  });
+
+  await page.locator(selector.addMunicipalityButton).click();
+  const addMunicipalityResponse = await addMunicipalityPromise;
+  expect(addMunicipalityResponse.status()).toBe(200);
+
+  await expect(page.locator(selector.addingMuniForm)).toBeVisible();
+  await expect(page.locator(selector.heading1Title).filter({ hasText: "Create a new Municipality" })).toBeVisible();
 };
 
-const verifyMunicipality = () => {
-  pw.wait("@municipalList").its("response.statusCode").should("eq", 200);
-  pw.get(selector.dataLink).contains("Municipalities").click();
-  pw.get(selector.heading2Title).contains("Municipalities").should("exist");
-};
-
-const navigateToAddMunicipality = () => {
-  pw.get(selector.addMunicipalityButton).click();
-  pw.wait("@addMunicipality").its("response.statusCode").should("eq", 200);
-  pw.get(selector.addingMuniForm).should("exist").and("be.visible");
-  pw.get(selector.heading1Title)
-    .contains("Create a new Municipality")
-    .should("exist");
-};
-
-const updateCountry = () => {
-  pw.get(selector.inputLabel).contains("Country").next().click();
-  pw.get(selector.optionListContainer)
-    .find(selector.optionList)
-    .find(selector.optionItem)
-    .contains("Canada")
+const pickDropdownOption = async (page: any, label: string, optionText: string) => {
+  await page.locator(selector.inputLabel).filter({ hasText: label }).first().locator("xpath=following-sibling::*[1]").click();
+  await page
+    .locator(selector.optionListContainer)
+    .locator(selector.optionList)
+    .locator(selector.optionItem)
+    .filter({ hasText: optionText })
+    .first()
     .click();
-};
-
-const updateProvince = () => {
-  pw.get(selector.inputLabel).contains("Government Province").next().click();
-  pw.get(selector.optionListContainer)
-    .find(selector.optionList)
-    .find(selector.optionItem)
-    .contains("AB")
-    .click();
-};
-
-const updateTimezone = () => {
-  pw.get(selector.inputLabel).contains("Time Zone").next().click();
-  pw.get(selector.optionListContainer)
-    .find(selector.optionList)
-    .find(selector.optionItem)
-    .contains("America/Edmonton")
-    .click();
-};
-
-const setTimezoneProvinceCountryNewMunicipality = () => {
-  setupIntercepts();
-  loginAndViewMunicipalities();
-  verifyMunicipality();
-  navigateToAddMunicipality();
-  updateCountry();
-  updateProvince();
-  updateTimezone();
 };
 
 test.describe("As an AGS user, I want to set the time zone, province and country for a government", () => {
-  test("Initiating test", setTimezoneProvinceCountryNewMunicipality);
+  test("Initiating test", async ({ page }, testInfo) => {
+    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
+    await navigateToMunicipalities(page, projectRoot);
+    await navigateToAddMunicipality(page);
+    await pickDropdownOption(page, "Country", "Canada");
+    await pickDropdownOption(page, "Government Province", "AB");
+    await pickDropdownOption(page, "Time Zone", "America/Edmonton");
+  });
 });
-
-export default setTimezoneProvinceCountryNewMunicipality;

@@ -1,21 +1,11 @@
-import { test, expect } from '../../support/pwtest';
-import BusinessDetails from "../../objects/BusinessDetails";
-import BusinessGrid from "../../objects/BusinessGrid";
-
-const agsBusinessGrid = new BusinessGrid({
-  userType: "ags",
-  municipalitySelection: "Arrakis",
-});
-const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
+import { test, expect } from "@playwright/test";
+import path from "path";
+import { loginViaUi } from "../../utils/Login";
 
 test.describe("As a user, I should not be able to add blank notes in the business details page", () => {
-  // Skipped, assertion moved to TC55
-  test.skip("Initiating test", () => {
-    pw.login({ accountType: "ags", accountIndex: 6 });
-    agsBusinessGrid.init();
-    agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
-    agsBusinessDetails.clickNotesTab();
-    agsBusinessDetails.clickAddNoteButton();
-    agsBusinessDetails.getElement().saveButton().should("be.disabled");
+  test("Initiating test", async ({ page }, testInfo) => {
+    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
+    await loginViaUi(page, projectRoot, { accountType: "ags", accountIndex: 0 });
+    await expect(page).toHaveURL(/.+/);
   });
 });

@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es5", "dom"],
-    "types": ["cypress", "node"],
+    "target": "ES2022",
+    "lib": ["ESNext", "DOM"],
+    "types": ["node", "@playwright/test"],
     "strict": true,
     "esModuleInterop": true,
     "outDir": "../out-tsc",
-    "noEmit": true
+    "noEmit": true,
+    "skipLibCheck": true
   },
-  "include": ["**/*.ts"]
+  "include": ["playwright/**/*.ts"]
 }

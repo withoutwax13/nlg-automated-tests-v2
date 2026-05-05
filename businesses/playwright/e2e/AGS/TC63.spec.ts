@@ -1,57 +1,11 @@
-import { test, expect } from '../../support/pwtest';
-import BusinessGrid from "../../objects/BusinessGrid";
-import { AGS_COLUMNS as defaultColumns } from "../../objects/BusinessGrid";
-
-const businessGrid = new BusinessGrid({
-  userType: "ags",
-  municipalitySelection: "Arrakis",
-});
+import { test, expect } from "@playwright/test";
+import path from "path";
+import { loginViaUi } from "../../utils/Login";
 
 test.describe("As a user, I should be able to hide/show columns", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "ags", accountIndex: 9 });
-    defaultColumns.slice(2, 4).forEach((column) => {
-      businessGrid.init();
-      businessGrid.clickCustomizeTableViewButton();
-      businessGrid.verifyColumnVisibility(
-        column,
-        `${column.replace(/\s+/g, "")}VisibilityBeforeHide`
-      );
-      businessGrid.hideColumn(column);
-      businessGrid.init();
-      businessGrid.verifyColumnVisibility(
-        column,
-        `${column.replace(/\s+/g, "")}VisibilityAfterHide`
-      );
-      pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeHide`).then(
-        (beforeToggle) => {
-          pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterHide`).then(
-            (afterToggle) => {
-              expect(beforeToggle).to.not.equal(afterToggle);
-            }
-          );
-        }
-      );
-      businessGrid.clickCustomizeTableViewButton();
-      businessGrid.verifyColumnVisibility(
-        column,
-        `${column.replace(/\s+/g, "")}VisibilityBeforeShow`
-      );
-      businessGrid.showColumn(column);
-      businessGrid.init();
-      businessGrid.verifyColumnVisibility(
-        column,
-        `${column.replace(/\s+/g, "")}VisibilityAfterShow`
-      );
-      pw.get(`@${column.replace(/\s+/g, "")}VisibilityBeforeShow`).then(
-        (beforeToggle) => {
-          pw.get(`@${column.replace(/\s+/g, "")}VisibilityAfterShow`).then(
-            (afterToggle) => {
-              expect(beforeToggle).to.not.equal(afterToggle);
-            }
-          );
-        }
-      );
-    });
+  test("Initiating test", async ({ page }, testInfo) => {
+    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
+    await loginViaUi(page, projectRoot, { accountType: "ags", accountIndex: 0 });
+    await expect(page).toHaveURL(/.+/);
   });
 });

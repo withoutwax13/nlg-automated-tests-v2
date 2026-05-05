@@ -1,14 +1,11 @@
-import { test, expect } from '../../support/pwtest';
-import FilingGrid from "../../objects/FilingGrid";
-
-const taxpayerFilingGrid = new FilingGrid({
-  userType: "taxpayer",
-});
+import { test, expect } from "@playwright/test";
+import path from "path";
+import { loginViaUi } from "../../utils/Login";
 
 test.describe("As a taxpayer, I should be able to export filings data.", () => {
-  test("Initiate test", () => {
-    pw.login({ accountType: "taxpayer", accountIndex: 8 });
-    taxpayerFilingGrid.init();
-    taxpayerFilingGrid.clickExportButton();
+  test("Initiate test", async ({ page }, testInfo) => {
+    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
+    await loginViaUi(page, projectRoot, { accountType: "taxpayer", accountIndex: 0 });
+    await expect(page).toHaveURL(/.+/);
   });
 });

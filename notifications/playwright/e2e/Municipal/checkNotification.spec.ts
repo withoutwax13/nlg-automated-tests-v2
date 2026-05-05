@@ -1,26 +1,28 @@
-import { test, expect } from '../../support/pwtest';
+import { expect, Page, test } from '@playwright/test';
 import selector from '../../fixtures/selector.json';
+import { loginViaUi, waitForApiResponse } from '../../utils/Login';
 
-const checkNotifications = () => {
-  pw.intercept(
-    "GET",
-    "https://**.amazonaws.com//filings?municipalityId=undefined"
-  ).as("taxpayerFilings");
-  pw.intercept(
-    "GET",
-    "https://**.amazonaws.com/Notifications?notificationStatus=undefined"
-  ).as("municipalNotification");
-  pw.login({ accountType: "municipal" });
-  pw.get(selector.notificationIcon).should('exist');
-  pw.get(selector.notificationIcon).click();
+const checkNotifications = async (page: Page): Promise<void> => {
+  await loginViaUi(page, 'municipal');
 
-  pw.wait("@municipalNotification").its("response.statusCode").should("eq", 200);
+  const notificationIcon = page.locator(selector.notificationIcon).first();
+  await expect(notificationIcon).toBeVisible();
 
-  pw.url().should('contain', "/NotificationsApp/NotificationsList");
+  const municipalNotificationResponse = waitForApiResponse(page, {
+    method: 'GET',
+    urlIncludes: '/Notifications?notificationStatus=undefined',
+  });
+
+  await notificationIcon.click();
+
+  expect((await municipalNotificationResponse).status()).toBe(200);
+  await expect(page).toHaveURL(/\/NotificationsApp\/NotificationsList/);
 };
 
-test.describe("As a municipal, I should be able to view notifications.", () => {
-  test("Initiating test", checkNotifications);
+test.describe('As a municipal, I should be able to view notifications.', () => {
+  test('Initiating test', async ({ page }) => {
+    await checkNotifications(page);
+  });
 });
 
 export default checkNotifications;

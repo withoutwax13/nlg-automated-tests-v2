@@ -2,7 +2,7 @@
     "compilerOptions": {
       "target": "es2015",
       "lib": ["es2016", "dom"],
-      "types": ["node", "playwright"],
+      "types": ["node", "@playwright/test"],
       "esModuleInterop": true,
       "resolveJsonModule": true,
     "module": "commonjs",

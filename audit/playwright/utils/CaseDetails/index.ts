@@ -1,41 +1,42 @@
-const interceptAuditXhr = () => {
-  return cy
-    .intercept("GET", "https://audit.api.localgov.org/v1/audits/**")
-    .as("getAudits");
+import { expect, Page, Response } from "@playwright/test";
+
+const waitForApiResponse = async (
+  page: Page,
+  label: string,
+  predicate: (response: Response) => boolean
+): Promise<Response> => {
+  const response = await page.waitForResponse(predicate);
+  expect(response.status(), `${label} should return HTTP 200`).toBe(200);
+  return response;
 };
 
-const waitForAuditXhr = () => {
-  return pw.wait("@getAudits");
+export const waitForAuditXhr = async (page: Page): Promise<Response> => {
+  return waitForApiResponse(page, "Audit details", (response) => {
+    return (
+      response.request().method() === "GET" &&
+      /https:\/\/audit\.api\.localgov\.org\/v1\/audits\/.+/.test(response.url())
+    );
+  });
 };
 
-const interceptCaseFields = () => {
-  return cy
-    .intercept(
-      "GET",
-      "https://audit.api.localgov.org/v1/fields?departmentTag=**"
-    )
-    .as("getCaseFields");
+export const waitForCaseFields = async (page: Page): Promise<Response> => {
+  return waitForApiResponse(page, "Case fields", (response) => {
+    return (
+      response.request().method() === "GET" &&
+      /https:\/\/audit\.api\.localgov\.org\/v1\/fields\?departmentTag=.+/.test(
+        response.url()
+      )
+    );
+  });
 };
 
-const waitForCaseFields = () => {
-  return pw.wait("@getCaseFields");
-};
-
-const interceptUsers = () => {
-  return cy
-    .intercept("GET", "https://audit.api.localgov.org/v1/users")
-    .as("getUsers");
-};
-
-const waitForUsers = () => {
-  return pw.wait("@getUsers");
-};
-
-export default {
-    interceptAuditXhr,
-    waitForAuditXhr,
-    interceptCaseFields,
-    waitForCaseFields,
-    interceptUsers,
-    waitForUsers,
+export const waitForUsers = async (page: Page): Promise<Response> => {
+  return waitForApiResponse(page, "Users", (response) => {
+    return (
+      response.request().method() === "GET" &&
+      /https:\/\/audit\.api\.localgov\.org\/v1\/users(?:\?.*)?$/.test(
+        response.url()
+      )
+    );
+  });
 };

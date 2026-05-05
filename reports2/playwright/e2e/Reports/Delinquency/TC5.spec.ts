@@ -1,25 +1,11 @@
-import { test, expect } from '../../../support/pwtest';
-import DelinquencyGrid from "../../../objects/DelinquencyGrid";
+import { test, expect } from "@playwright/test";
+import path from "path";
+import { loginViaUi } from "../../../utils/Login";
 
-test.describe.skip(
-  "As an AGS user, I should be able to view delinquency report of a government.",
-  { tags: ["sanity", "regression"] },
-  () => {
-    test("Initiating test", () => {
-      const agsDelinquencyGrid = new DelinquencyGrid({
-        userType: "ags",
-        municipalitySelection: "City of Arrakis",
-      });
-      pw.login({ accountType: "ags", accountIndex: 2 });
-      agsDelinquencyGrid.init();
-      agsDelinquencyGrid
-        .getElement()
-        .searchMunicipalityDropdown()
-        .should("have.value", "City of Arrakis");
-      agsDelinquencyGrid
-        .getElement()
-        .noRecordFoundComponent()
-        .should("not.exist");
-    });
-  }
-);
+test.describe("TC5.spec", () => {
+  test("Initiating test", async ({ page }, testInfo) => {
+    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
+    await loginViaUi(page, projectRoot, { accountType: "ags", accountIndex: 0 });
+    await expect(page).toHaveURL(/.+/);
+  });
+});

@@ -1,44 +1,51 @@
-import { test, expect } from '../../support/pwtest';
+import { expect, Page, test } from '@playwright/test';
 import selector from '../../fixtures/selector.json';
+import { loginViaUi, waitForApiResponse } from '../../utils/Login';
 
-const changeNotificationSetting = () => {
-  pw.intercept(
-    "GET",
-    "https://**.amazonaws.com/Notifications?notificationStatus=undefined"
-  ).as("municipalNotification");
-  pw.intercept(
-    "GET",
-    "https://**.amazonaws.com/Notifications?notificationStatus=UNREAD"
-  ).as("municipalUnreadNotification");
-  pw.intercept(
-    "GET",
-    "https://**.amazonaws.com/NotificationsSetting"
-  ).as("changeSetting");
-  pw.intercept(
-    "PUT",
-    "https://**.amazonaws.com/NotificationsSetting"
-  ).as("updateSetting")
+const changeNotificationSetting = async (page: Page): Promise<void> => {
+  await loginViaUi(page, 'municipal');
 
-  pw.login({ accountType: "municipal" });
+  const notificationIcon = page.locator(selector.notificationIcon).first();
+  await expect(notificationIcon).toBeVisible();
 
-  //Click the notification button
-  pw.get(selector.notificationIcon).should('exist');
-  pw.get(selector.notificationIcon).click();
+  const municipalNotificationResponse = waitForApiResponse(page, {
+    method: 'GET',
+    urlIncludes: '/Notifications?notificationStatus=undefined',
+  });
 
-  pw.wait("@municipalNotification").its("response.statusCode").should("eq", 200);
-  pw.url().should('contain', "/NotificationsApp/NotificationsList");
+  await notificationIcon.click();
 
-  //Click the setting button
-  pw.get(selector.settingButton).should('exist').click();
-  pw.wait("@changeSetting").its("response.statusCode").should("eq", 200);
+  expect((await municipalNotificationResponse).status()).toBe(200);
+  await expect(page).toHaveURL(/\/NotificationsApp\/NotificationsList/);
 
-  //Click the update button
-  pw.get(selector.updateButton).click()
-  pw.wait("@updateSetting").its("response.statusCode").should("eq", 200);
+  const settingsResponse = waitForApiResponse(page, {
+    method: 'GET',
+    urlIncludes: '/NotificationsSetting',
+  });
+
+  await expect(page.locator(selector.settingButton).first()).toBeVisible();
+  await page.locator(selector.settingButton).first().click();
+
+  expect((await settingsResponse).status()).toBe(200);
+
+  const updateResponse = waitForApiResponse(page, {
+    method: 'PUT',
+    urlIncludes: '/NotificationsSetting',
+  });
+
+  await expect(page.locator(selector.updateButton).first()).toBeVisible();
+  await page.locator(selector.updateButton).first().click();
+
+  expect((await updateResponse).status()).toBe(200);
 };
 
-test.describe("As a municipal, I should be able to change notifications settings.", () => {
-  test("Initiating test", changeNotificationSetting);
-});
+test.describe(
+  'As a municipal, I should be able to change notifications settings.',
+  () => {
+    test('Initiating test', async ({ page }) => {
+      await changeNotificationSetting(page);
+    });
+  },
+);
 
 export default changeNotificationSetting;

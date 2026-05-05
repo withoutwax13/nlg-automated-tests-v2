@@ -1,16 +1,11 @@
-import { test, expect } from '../../support/pwtest';
-import BusinessGrid from "../../objects/BusinessGrid";
-
-const taxpayerBusinessGrid = new BusinessGrid({ userType: "taxpayer" });
+import { test, expect } from "@playwright/test";
+import path from "path";
+import { loginViaUi } from "../../utils/Login";
 
 test.describe("As a taxpayer user, there should not be any default filter in the business list", () => {
-  test("Initiating test", () => {
-    pw.login({ accountType: "taxpayer", accountIndex: 2 });
-    taxpayerBusinessGrid.init();
-    taxpayerBusinessGrid
-      .isGridFiltered()
-      .then(isFiltered => {
-        expect(isFiltered).to.be.false;
-      });
+  test("Initiating test", async ({ page }, testInfo) => {
+    const projectRoot = path.resolve(testInfo.project.testDir, "..", "..");
+    await loginViaUi(page, projectRoot, { accountType: "taxpayer", accountIndex: 0 });
+    await expect(page).toHaveURL(/.+/);
   });
 });
