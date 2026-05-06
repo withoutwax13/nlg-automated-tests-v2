@@ -13,6 +13,9 @@ type LoginParams = {
 export const getEnvironment = (): string =>
   process.env.environment || process.env.ENVIRONMENT || "dev";
 
+
+const normalizeAccountType = (accountType: AccountType | string) =>
+  accountType === "municipality" ? "municipal" : accountType;
 export const getBaseUrl = (): string => `https://${getEnvironment()}.azavargovapps.com`;
 
 const parseValidCredentialsEnv = () => {

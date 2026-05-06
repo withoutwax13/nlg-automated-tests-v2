@@ -4,6 +4,7 @@ type AccountType = "taxpayer" | "municipal" | "ags";
 
 type LoginParams = {
   accountType?: AccountType;
+  accountIndex?: number;
 };
 
 type ResponsePattern = {
@@ -14,6 +15,9 @@ type ResponsePattern = {
 export const getEnvironment = (): string =>
   process.env.environment || process.env.ENVIRONMENT || "dev";
 
+
+const normalizeAccountType = (accountType: AccountType | string) =>
+  accountType === "municipality" ? "municipal" : accountType;
 export const getBaseUrl = (): string => `https://${getEnvironment()}.azavargovapps.com`;
 
 const parseValidCredentialsEnv = () => {

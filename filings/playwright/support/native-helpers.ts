@@ -2,12 +2,22 @@ import { expect, type Locator, type Page, type Response } from "@playwright/test
 import { login as runtimeLogin, waitForLoading as runtimeWaitForLoading } from "../utils/runtime";
 export * from "../utils/runtime";
 
+type AccountType = "taxpayer" | "municipal" | "municipality" | "ags" | "municipalDel";
+
 export const normalizeText = (value: string | null | undefined) =>
   (value || "").replace(/\s+/g, " ").trim();
 
 export const getEnvironment = () =>
   process.env.environment || process.env.ENVIRONMENT || "dev";
 
+
+type LoginParams = {
+  accountType?: AccountType;
+  accountIndex?: number;
+};
+
+const normalizeAccountType = (accountType: AccountType | string) =>
+  accountType === "municipality" ? "municipal" : accountType;
 export const getBaseUrl = () => `https://${getEnvironment()}.azavargovapps.com`;
 
 export const waitForResponse = async (
@@ -87,4 +97,35 @@ export const getPagerTotal = async (pagerInfo: Locator) => {
 };
 
 export const waitForLoading = runtimeWaitForLoading;
+
+const getCredentials = (accountType: AccountType, accountIndex = 0) => {
+  const normalizedType = normalizeAccountType(accountType);
+  const validCredentials = {
+    taxpayer: [{ username: "", password: "" }],
+    municipal: [{ username: "", password: "" }],
+    ags: [{ username: "", password: "" }],
+    municipalDel: [{ username: "", password: "" }],
+  } as const;
+
+  const fromMap = validCredentials[normalizedType]?.[accountIndex] || validCredentials[normalizedType]?.[0];
+  if (fromMap?.username && fromMap?.password) return fromMap;
+
+  const raw = process.env.validCredentials || process.env.VALIDCREDENTIALS || process.env.VALID_CREDENTIALS;
+  if (raw) {
+    try {
+      const envMap = JSON.parse(raw) as Record<string, Array<{ username?: string; email?: string; password?: string }>>;
+      const envAccount = envMap?.[normalizedType]?.[accountIndex] || envMap?.[normalizedType]?.[0];
+      if (envAccount?.password && (envAccount?.username || envAccount?.email)) {
+        return { username: envAccount.username || envAccount.email || "", password: envAccount.password };
+      }
+    } catch {}
+  }
+
+  const prefix = normalizedType.toUpperCase();
+  return {
+    username: process.env[`${prefix}_USERNAME`] || process.env.TEST_USERNAME || "",
+    password: process.env[`${prefix}_PASSWORD`] || process.env.TEST_PASSWORD || "",
+  };
+};
+
 export const login = runtimeLogin;
