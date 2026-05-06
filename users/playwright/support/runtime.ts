@@ -28,6 +28,12 @@ type Credential = { username: string; password: string };
 
 type CredentialSet = Record<string, Credential[]>;
 
+const parseEnvCredentials = (): CredentialSet | undefined => {
+  const raw = process.env.validCredentials || process.env.VALIDCREDENTIALS || process.env.VALID_CREDENTIALS;
+  if (!raw) return undefined;
+  try { return JSON.parse(raw) as CredentialSet; } catch { return undefined; }
+};
+
 const runtimeState: {
   page?: Page;
   request?: APIRequestContext;
@@ -120,7 +126,10 @@ export const getTestmail = (): TestmailConfig => {
 };
 
 export const getValidCredentials = (): CredentialSet => {
-  const fixtureCredentials = runtimeState.fixtureData?.accounts as CredentialSet | undefined;
+  const fixtureCredentials =
+    (runtimeState.fixtureData?.accounts as CredentialSet | undefined) ??
+    (runtimeState.fixtureData?.validCredentials as CredentialSet | undefined) ??
+    parseEnvCredentials();
   if (fixtureCredentials) {
     return fixtureCredentials;
   }

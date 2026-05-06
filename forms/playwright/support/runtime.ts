@@ -17,6 +17,12 @@ type AccountCredential = {
 
 type AccountsFixture = Record<string, AccountCredential[]>;
 
+const parseEnvCredentials = (): AccountsFixture | undefined => {
+  const raw = process.env.validCredentials || process.env.VALIDCREDENTIALS || process.env.VALID_CREDENTIALS;
+  if (!raw) return undefined;
+  try { return JSON.parse(raw) as AccountsFixture; } catch { return undefined; }
+};
+
 let activePage: Page | null = null;
 let activeBaseUrl = "";
 const aliases = new Map<string, AliasValue>();
@@ -42,7 +48,9 @@ const readFixtureData = () => {
 
 const getAccountsFixture = (): AccountsFixture | undefined => {
   const fixtureData = readFixtureData();
-  return fixtureData?.accounts;
+  return (fixtureData?.accounts as AccountsFixture | undefined) ??
+    (fixtureData?.validCredentials as AccountsFixture | undefined) ??
+    parseEnvCredentials();
 };
 
 const getPageOrThrow = () => {

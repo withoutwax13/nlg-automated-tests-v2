@@ -29,7 +29,13 @@ const runtime: RuntimeState = {
 const isHubspotConfig = (url: string) => url.includes("hubspot.com/lead-flows-config/");
 const isAwsCognito = (url: string) => url.includes("cognito-idp.") && url.includes(".amazonaws.com/");
 
-const accounts = ((fixtureData as any).accounts ?? (fixtureData as any).validCredentials) as
+const parseEnvCredentials = () => {
+  const raw = process.env.validCredentials || process.env.VALIDCREDENTIALS || process.env.VALID_CREDENTIALS;
+  if (!raw) return undefined;
+  try { return JSON.parse(raw); } catch { return undefined; }
+};
+
+const accounts = ((fixtureData as any).accounts ?? (fixtureData as any).validCredentials ?? parseEnvCredentials()) as
   | Record<AccountType, { username: string; password: string }[]>
   | undefined;
 
@@ -180,8 +186,15 @@ export const login = async ({
   const accountList = accounts?.[accountType];
   const account = accountList?.[accountIndex];
   if (!account) {
-    throw new Error(`Missing credentials for ${accountType}[${accountIndex}] in fixtureData.accounts/validCredentials`);
+    const prefix = accountType.toUpperCase();
+    const username = process.env[`${prefix}_USERNAME`] ?? process.env.TEST_USERNAME;
+    const password = process.env[`${prefix}_PASSWORD`] ?? process.env.TEST_PASSWORD;
+    if (!username || !password) {
+      throw new Error(`Missing credentials for ${accountType}[${accountIndex}] in fixtureData.accounts/validCredentials`);
+    }
+    accountList?.push({ username, password } as any);
   }
+  const resolved = accountList?.[accountIndex] ?? account;
   const leadFlowConfig = page
     .waitForResponse((response) => response.request().method() === "GET" && isHubspotConfig(response.url()))
     .catch(() => undefined);
@@ -201,10 +214,10 @@ export const login = async ({
     }
   }
 
-  await page.locator('[data-cy="email-address"]').fill(account.username);
-  await expect(page.locator('[data-cy="email-address"]')).toHaveValue(account.username);
-  await page.locator('[data-cy="password"]').fill(account.password);
-  await expect(page.locator('[data-cy="password"]')).toHaveValue(account.password);
+  await page.locator('[data-cy="email-address"]').fill(resolved.username);
+  await expect(page.locator('[data-cy="email-address"]')).toHaveValue(resolved.username);
+  await page.locator('[data-cy="password"]').fill(resolved.password);
+  await expect(page.locator('[data-cy="password"]')).toHaveValue(resolved.password);
   await page.locator('[data-cy="sign-in"]').first().click({ force: true });
   await cognitoResponses;
   await expectPathname(expectedPathByAccountType(accountType));

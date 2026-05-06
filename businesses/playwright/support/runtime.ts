@@ -29,7 +29,13 @@ const isAwsCognito = (url: string) => url.includes("cognito-idp.") && url.includ
 
 const getEnvironment = () => (process.env.environment || process.env.ENVIRONMENT || "dev").trim();
 
-const credentials = data.accounts;
+const parseEnvCredentials = () => {
+  const raw = process.env.validCredentials || process.env.VALIDCREDENTIALS || process.env.VALID_CREDENTIALS;
+  if (!raw) return undefined;
+  try { return JSON.parse(raw) as Record<AccountType, { username: string; password: string }[]>; } catch { return undefined; }
+};
+
+const credentials = (data as any).accounts || (data as any).validCredentials || parseEnvCredentials() || {};
 
 export const bindRuntime = (page: Page, request: APIRequestContext) => {
   runtime.page = page;
