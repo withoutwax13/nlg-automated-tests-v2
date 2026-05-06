@@ -86,3 +86,5 @@ export const waitForLoading = async (page: Page, seconds = 5) => {
   await page.waitForTimeout(seconds * 1000);
 };
 export const login = runtimeLogin;
+
+export const getBaseUrl = () => `https://${getEnvironment()}.azavargovapps.com`;
