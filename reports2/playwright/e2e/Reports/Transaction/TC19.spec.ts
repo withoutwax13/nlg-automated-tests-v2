@@ -6,7 +6,7 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As a user, I should be able to reorganize the order of columns on the transaction list",
-  { tags: ["sanity", "regression"] },
+  { tag: ["sanity", "regression"] },
   () => {
     test.skip("Initiating test", async ({ page }) => {
       const transactionGrid = new TransactionGrid(page, {

@@ -6,7 +6,7 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As a user, I should be able to reorganize the order of columns on the settlement list",
-  { tags: ["sanity", "regression"] },
+  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const settlementGrid = new SettlementGrid(page, {

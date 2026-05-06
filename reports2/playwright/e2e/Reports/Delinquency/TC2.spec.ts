@@ -4,7 +4,7 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As a Municipal user, I should be able to export the delinquency list",
-  { tags: ["sanity", "regression"] },
+  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const delinquencyGrid = new DelinquencyGrid(page, {

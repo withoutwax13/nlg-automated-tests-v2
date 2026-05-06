@@ -43,7 +43,7 @@ const oneYearBeforeCurrentDate = () => {
 
 test.describe.skip(
   "As an AGS user, if I added a form for a business as its remittance requirement and added a start date for delinquency tracking 1 year before the current date, it must produce a delinquency record",
-  { tags: ["regression"] },
+  { tag: ["regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const agsDelinquencyGrid = new DelinquencyGrid(page, {

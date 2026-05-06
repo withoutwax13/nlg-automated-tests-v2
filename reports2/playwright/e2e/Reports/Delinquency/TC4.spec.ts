@@ -5,7 +5,7 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As a municipal user, I should be able to dismiss and revert a delinquency report item of a government",
-  { tags: ["regression"] },
+  { tag: ["regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const municipalDelinquencyGrid = new DelinquencyGrid(page, {

@@ -4,7 +4,7 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As a municipal user, I should be able to export the transaction report",
-  { tags: ["sanity", "regression"] },
+  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const transactionGrid = new TransactionGrid(page, {

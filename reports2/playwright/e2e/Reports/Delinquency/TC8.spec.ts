@@ -6,7 +6,7 @@ import Login from "../../../utils/Login";
 
 test.describe.skip(
   "As a user, I should be able to hide/show columns on the delinquency list",
-  { tags: ["sanity", "regression"] },
+  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const delinquencyGrid = new DelinquencyGrid(page, {

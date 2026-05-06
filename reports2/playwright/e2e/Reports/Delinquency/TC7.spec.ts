@@ -4,7 +4,7 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As a taxpayer, I should be able to submit a filing via delinquency list action button",
-  { tags: ["sanity", "regression"] },
+  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const taxpayerDelinquencyGrid = new DelinquencyGrid(page, {

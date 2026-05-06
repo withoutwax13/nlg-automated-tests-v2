@@ -4,7 +4,7 @@ import Login from "../../../utils/Login";
 
 test.describe.skip(
   "As an AGS user, I should be able to view delinquency report of a government.",
-  { tags: ["sanity", "regression"] },
+  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const agsDelinquencyGrid = new DelinquencyGrid(page, {

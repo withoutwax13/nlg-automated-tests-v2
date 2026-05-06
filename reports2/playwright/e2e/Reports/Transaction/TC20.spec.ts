@@ -4,7 +4,7 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As an AGS, I should be able to export the transaction report of a government",
-  { tags: ["sanity", "regression"] },
+  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const transactionGrid = new TransactionGrid(page, {

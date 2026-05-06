@@ -14,7 +14,7 @@ const nineMonthsFromToday = () => {
 
 test.describe(
   "As an AGS user, I should be able to generate a distribution details from a date range of a government.",
-  { tags: ["sanity", "regression"] },
+  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const settlementGrid = new SettlementGrid(page, {

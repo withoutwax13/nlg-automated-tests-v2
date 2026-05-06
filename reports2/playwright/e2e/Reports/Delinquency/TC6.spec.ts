@@ -4,7 +4,7 @@ import Login from "../../../utils/Login";
 
 test.describe.skip(
   "As a municipal user, I should be able to view delinquency report.",
-  { tags: ["regression"] },
+  { tag: ["regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const municipalityDelinquencyGrid = new DelinquencyGrid(page, {

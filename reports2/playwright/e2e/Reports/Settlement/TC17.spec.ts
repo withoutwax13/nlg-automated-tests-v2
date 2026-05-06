@@ -14,7 +14,7 @@ const nineMonthsFromToday = () => {
 
 test.describe(
   "As an municipal user, I should be able to generate a distribution details from a date range",
-  { tags: ["regression"] },
+  { tag: ["regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const settlementGrid = new SettlementGrid(page, {

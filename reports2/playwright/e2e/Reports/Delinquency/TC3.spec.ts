@@ -5,7 +5,7 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As an AGS user, I should be able to dismiss and revert a delinquency report item of a government.",
-  { tags: ["sanity", "regression"] },
+  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const agsDelinquencyGrid = new DelinquencyGrid(page, {
