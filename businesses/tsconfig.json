@@ -1,13 +1,24 @@
 {
-    "compilerOptions": {
-      "target": "es2015",
-      "lib": ["es2016", "dom", "es2017"],
-      "types": ["node", "@playwright/test"],
-      "esModuleInterop": true,
-      "resolveJsonModule": true,
+  "compilerOptions": {
+    "target": "es2015",
+    "lib": [
+      "es2016",
+      "dom",
+      "es2017"
+    ],
+    "types": [
+      "node",
+      "@playwright/test"
+    ],
+    "esModuleInterop": true,
+    "ignoreDeprecations": "6.0",
+    "resolveJsonModule": true,
     "module": "commonjs",
-    },
-    "include": [
-      "**/*.ts"
-    ]
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strict": false
+  },
+  "include": [
+    "playwright/**/*.ts"
+  ]
 }

@@ -7,10 +7,7 @@ test.describe("As a taxpayer user, there should not be any default filter in the
   test("Initiating test", async () => {
     await login({ accountType: "taxpayer", accountIndex: 2 });
     taxpayerBusinessGrid.init();
-    taxpayerBusinessGrid
-      .isGridFiltered()
-      .then(isFiltered => {
-        expect(isFiltered).to.be.false;
-      });
+    const isFiltered = await taxpayerBusinessGrid.isGridFiltered();
+    expect(isFiltered).toBeFalsy();
   });
 });

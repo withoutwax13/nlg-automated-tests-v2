@@ -81,7 +81,7 @@ export const readXlsx = (filePath: string) => {
   });
 };
 
-export const saveDownloadAs = async (download: Awaited<ReturnType<Page["waitForEvent"]>>, filePath: string) => {
+export const saveDownloadAs = async (download: import("@playwright/test").Download, filePath: string) => {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   await download.saveAs(filePath);
 };

@@ -1,13 +1,24 @@
 {
-    "compilerOptions": {
-      "target": "es5",
-      "ignoreDeprecations": "6.0",
-      "lib": ["es2015", "dom"],
-      "types": ["node", "@playwright/test"],
-      "esModuleInterop": true,
-      "resolveJsonModule": true
-    },
-    "include": [
-      "**/*.ts"
-, "../demo/cypress/e2e/add-bank.cy.ts", "../demo/cypress/e2e/add-debit.cy.ts"    ]
+  "compilerOptions": {
+    "target": "es2019",
+    "lib": [
+      "es2019",
+      "dom"
+    ],
+    "types": [
+      "node",
+      "@playwright/test"
+    ],
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strict": false
+  },
+  "include": [
+    "playwright/**/*.ts"
+  ]
 }

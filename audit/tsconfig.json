@@ -1,12 +1,24 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    "target": "es2019",
+    "lib": [
+      "es2019",
+      "dom"
+    ],
+    "types": [
+      "node",
+      "@playwright/test"
+    ],
     "esModuleInterop": true,
-    "types": ["node", "@playwright/test"],
-    "skipLibCheck": true
+    "resolveJsonModule": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strict": false
   },
-  "include": ["**/*.ts"]
+  "include": [
+    "playwright/**/*.ts"
+  ]
 }

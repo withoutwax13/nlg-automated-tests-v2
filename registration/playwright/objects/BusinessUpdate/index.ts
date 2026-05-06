@@ -7,16 +7,14 @@ class BusinessUpdate extends BusinessAdd {
     this.userType = props.userType;
   }
 
-  deleteCustomField(customName: string) {
+  async deleteCustomField(customName: string) {
     if (this.userType === "taxpayer") {
       throw new Error("Taxpayer cannot proceed with this user flow.");
     }
-    this.getElement()
-      .customFieldBlocks()
-      .contains(customName)
-      .parent()
-      .next()
-      .click( {force: true} );
+
+    const page = (await import("../../support/runtime")).currentPage();
+    const block = page.locator(".custom-field-block").filter({ hasText: customName }).first();
+    await block.locator("button, [role='button']").last().click({ force: true });
   }
 }
 

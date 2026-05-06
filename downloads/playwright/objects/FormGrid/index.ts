@@ -268,7 +268,7 @@ class FormGrid {
     const columnIndexes = await this.getColumnIndexes();
     const columnIndex = columnIndexes[targetColumnName];
     const anchorColumnIndex = columnIndexes[anchorColumnName];
-    const rows = await this.getRows().all();
+    const rows = await (await this.getRows()).all();
 
     for (const row of rows) {
       const cells = row.locator("td");
@@ -296,7 +296,7 @@ class FormGrid {
     const columnIndexes = await this.getColumnIndexes();
     const columnIndex = columnIndexes[targetColumnName];
     const anchorColumnIndex = columnIndexes[anchorColumnName];
-    const rows = await this.getRows().all();
+    const rows = await (await this.getRows()).all();
 
     for (const row of rows) {
       const cells = row.locator("td");
@@ -389,7 +389,7 @@ class FormGrid {
     const columnData: string[] = [];
 
     while (true) {
-      const rows = await this.getRows().all();
+      const rows = await (await this.getRows()).all();
       for (const row of rows) {
         columnData.push((await row.locator("td").nth(columnIndex).innerText()).trim());
       }

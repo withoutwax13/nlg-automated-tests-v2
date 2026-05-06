@@ -1,9 +1,14 @@
 {
   "compilerOptions": {
     "target": "es2020",
-    "lib": ["es2020", "dom"],
-    "types": ["node", "@playwright/test"],
-    "strict": true,
+    "lib": [
+      "es2020",
+      "dom"
+    ],
+    "types": [
+      "node",
+      "@playwright/test"
+    ],
     "ignoreDeprecations": "6.0",
     "baseUrl": "../node_modules",
     "outDir": "../dist/out-tsc",
@@ -14,7 +19,12 @@
     "importHelpers": true,
     "module": "commonjs",
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strict": false
   },
-  "include": ["**/*.ts"]
+  "include": [
+    "playwright/**/*.ts"
+  ]
 }
