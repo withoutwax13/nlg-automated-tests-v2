@@ -76,7 +76,7 @@ class DelinquencyGrid {
         this.page.locator(".k-list-ul .k-list-item-text").filter({ hasText: item }).first(),
       filterValueInput: () => this.page.locator(".k-filter-menu-container .k-input").first(),
       filterValueDateInput: () => this.page.locator(".k-dateinput input").first(),
-      filterMultiSelectItem: () => this.page.locator(".k-multicheck-wrap li"),
+      filterMultiSelectItem: () => this.page.locator(".k-multicheck-wrap li .k-checkbox-label"),
       filterFilterButton: () => this.page.locator(".k-filter-menu-container .k-actions .k-button").filter({ hasText: "Filter" }).first(),
       searchMunicipalityDropdown: () => this.page.locator('input[placeholder="Select government..."]'),
       anyList: () => this.page.locator("li"),
@@ -164,8 +164,16 @@ class DelinquencyGrid {
   }
 
   private async handleMultiSelectFilter(columnIndex: number, filterValue: string) {
+    // 1. Open the filter menu
     await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-    await clickByText(this.getElement().filterMultiSelectItem(), filterValue);
+
+    // 2. Select the element that CONTAINS the text (mimics Cypress .contains)
+    const targetItem = this.getElement().filterMultiSelectItem()
+      .filter({ hasText: filterValue })
+      .first();
+
+    // 3. Perform action
+    await targetItem.click();
     await this.getElement().filterFilterButton().click();
   }
 
@@ -175,6 +183,7 @@ class DelinquencyGrid {
     filterType = "text",
     filterOperation = "Contains"
   ) {
+    await this.page.waitForTimeout(3000);
     const columnIndex = await this.getColumnIndex(columnName);
     switch (filterType) {
       case "text":
@@ -192,6 +201,7 @@ class DelinquencyGrid {
       default:
         break;
     }
+    await this.page.waitForTimeout(3000);
   }
 
   async changeItemsPerPage(itemNumber: number) {

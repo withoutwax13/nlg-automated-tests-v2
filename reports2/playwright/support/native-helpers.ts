@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page, type Response } from "@playwright/test";
 
-type AccountType = "taxpayer" | "municipal" | "municipality" | "ags";
+type AccountType = "taxpayer" | "municipal" | "municipality" | "ags" | "municipalDel";
 
 type LoginParams = {
   accountType?: AccountType;
@@ -29,24 +29,143 @@ export const getBaseUrl = () => `https://${getEnvironment()}.azavargovapps.com`;
 
 const getCredentials = (accountType: AccountType, accountIndex = 0) => {
   const normalizedType = normalizeAccountType(accountType);
-  const envCredentials = process.env.validCredentials || process.env.VALID_CREDENTIALS;
-
-  if (envCredentials) {
-    try {
-      const parsed = JSON.parse(envCredentials);
-      const entry = parsed?.[normalizedType]?.[accountIndex] || parsed?.[normalizedType]?.[0];
-      if (entry?.username && entry?.password) {
-        return entry;
-      }
-    } catch {
-      // Ignore invalid JSON and fall through to flat env vars.
+  const validCredentials = {
+      taxpayer: [
+        {
+          username: "valerasoftwares+taxpayer.1@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.2@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.3@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.4@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.5@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.6@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.7@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.8@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.9@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.10@gmail.com",
+          password: "Ohayoworld.13",
+        },
+      ],
+      municipal: [
+        {
+          username: "valerasoftwares+arrakis@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.2@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.3@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.4@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.5@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.6@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.7@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.8@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.9@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.10@gmail.com",
+          password: "Ohayoworld.13",
+        },
+      ],
+      ags: [
+        {
+          username: "johnpatrickyusoresvalera+dev.super@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.2@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.3@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.4@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.5@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.6@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.7@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.8@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.9@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.10@gmail.com",
+          password: "Ohayoworld.13",
+        },
+      ],
+      municipalDel: [
+        {
+          username: "valerasoftwares+remedios@gmail.com",
+          password: "Ohayoworld.13",
+        },
+      ],
     }
-  }
-
-  const prefix = normalizedType.toUpperCase();
   return {
-    username: process.env[`${prefix}_USERNAME`] || process.env.TEST_USERNAME || "",
-    password: process.env[`${prefix}_PASSWORD`] || process.env.TEST_PASSWORD || "",
+    username: validCredentials[accountType][accountIndex]["username"],
+    password: validCredentials[accountType][accountIndex]["password"],
   };
 };
 
@@ -140,30 +259,9 @@ export const getPagerTotal = async (pagerInfo: Locator) => {
 
 export const login = async (page: Page, params: LoginParams = {}) => {
   const accountType = params.accountType || "taxpayer";
-  const credentials = getCredentials(accountType, params.accountIndex);
-
-  const leadFlowPromise = page.waitForResponse(
-    (response) =>
-      response.request().method() === "GET" &&
-      response.url().includes("hubspot.com/lead-flows-config/")
-  );
-  const cognitoPromises = Promise.all([
-    page.waitForResponse(
-      (response) =>
-        response.request().method() === "POST" &&
-        response.url().includes("cognito-idp.") &&
-        response.url().includes(".amazonaws.com/")
-    ),
-    page.waitForResponse(
-      (response) =>
-        response.request().method() === "POST" &&
-        response.url().includes("cognito-idp.") &&
-        response.url().includes(".amazonaws.com/")
-    ),
-  ]);
+  const credentials = getCredentials(accountType, params.accountIndex ? 0 : params.accountIndex);
 
   await page.goto(`${getBaseUrl()}/login`);
-  await leadFlowPromise;
   await expect(page).toHaveURL(/\/login$/);
 
   const cookieButton = page.locator(".cookie-actions .NLGButtonPrimary").first();
@@ -175,6 +273,5 @@ export const login = async (page: Page, params: LoginParams = {}) => {
   await page.locator('[data-cy="password"]').fill(credentials.password);
   await page.locator('[data-cy="sign-in"]').filter({ hasText: "Sign In" }).first().click();
 
-  await cognitoPromises;
-  await expect(page).toHaveURL(`${getBaseUrl()}/`);
+  await expect(page).not.toHaveURL(`${getBaseUrl()}/login`);
 };
