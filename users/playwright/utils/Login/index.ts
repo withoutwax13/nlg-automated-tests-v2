@@ -1,4 +1,5 @@
 import type { Page, Response } from "@playwright/test";
+import { login as nativeLogin } from "../../support/runtime";
 
 const isHubspotChat = (response: Response) =>
   response.request().method() === "GET" &&
@@ -22,21 +23,9 @@ const interceptLeadFlowConfig = (page: Page) =>
 const interceptAwsCognito = (page: Page) =>
   page.waitForResponse((response) => isAwsCognito(response));
 
-const waitForHubspotChat = async (responsePromise: Promise<Response>) =>
-  responsePromise;
-
-const waitForLeadFlowConfig = async (responsePromise: Promise<Response>) =>
-  responsePromise;
-
-const waitForAwsCognito = async (
-  responsePromise: Promise<Response> | Array<Promise<Response>>
-) => (Array.isArray(responsePromise) ? Promise.all(responsePromise) : responsePromise);
-
 export default {
   interceptAwsCognito,
   interceptHubspotChat,
   interceptLeadFlowConfig,
-  waitForAwsCognito,
-  waitForHubspotChat,
-  waitForLeadFlowConfig,
+  login: nativeLogin,
 };
