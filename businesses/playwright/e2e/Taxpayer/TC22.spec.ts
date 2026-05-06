@@ -1,6 +1,7 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
 const taxpayerBusinessGrid = new BusinessGrid({ userType: "taxpayer" });
@@ -52,7 +53,7 @@ test.describe.skip("As a taxpayer, when a business has been added by a municipal
     });
   });
   test("Initiating test", async () => {
-    await login({ accountType: "municipal", notFirstLogin: true });
+    await Login.login({ accountType: "municipal", notFirstLogin: true });
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickAddBusinessButton();
     addBusinessPage.fillFields(newBusinessData);
@@ -63,7 +64,7 @@ test.describe.skip("As a taxpayer, when a business has been added by a municipal
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     await logout();
-    await login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 2 });
+    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 2 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);

@@ -1,6 +1,7 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const agsBusinessGrid = new BusinessGrid({ userType: "ags", municipalitySelection: "Arrakis" });
 const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
@@ -8,7 +9,7 @@ const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 test.describe("As a ags user, I should be able to delete notes to a business via the business details page", () => {
   // Skipped, assertions moved to TC55
   test.skip("Initiating test", async () => {
-    await login({ accountType: "ags", accountIndex: 7 });
+    await Login.login({ accountType: "ags", accountIndex: 7 });
     await agsBusinessGrid.init();
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     await agsBusinessDetails.clickNotesTab();

@@ -1,6 +1,7 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const randomSeed = Math.floor(Math.random() * 100000);
 const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
@@ -51,7 +52,7 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     });
   });
   test("Initiating test", async () => {
-    await login({
+    await Login.login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 1,
@@ -66,7 +67,7 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     await logout();
-    await login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
+    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
     await taxpayerBusinessGrid.init();
     await taxpayerBusinessGrid.clickAddBusinessButton();
     await taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
@@ -76,7 +77,7 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     await logout();
-    await login({
+    await Login.login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 1,
@@ -87,7 +88,7 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
 
     await logout();
-    await login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
+    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
     await taxpayerBusinessGrid.init();
     await taxpayerBusinessGrid.filterColumn("DBA", newBusinessData.locationDba);
     await expect(taxpayerBusinessGrid.getElement().noRecordFoundComponent()).toBeVisible();

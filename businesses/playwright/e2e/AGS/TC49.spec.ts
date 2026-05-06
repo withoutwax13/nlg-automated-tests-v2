@@ -3,6 +3,7 @@ import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessAdd from "../../objects/BusinessAdd";
 import SetBusinessStatusModal from "../../objects/SetBusinessStatusModal";
+import Login from "../../utils/Login";
 
 const addBusinessPage = new BusinessAdd({ userType: "ags" });
 const setBusinessStatusModal = new SetBusinessStatusModal();
@@ -49,7 +50,7 @@ const operatingStatus = ["Inactive", "Active/Seasonal", "Closed", "Sold"];
 
 test.describe("As a ags user, I should be able to update operating status in the business details page", () => {
   test("Initiating test", async () => {
-    await login({ accountType: "ags" });
+    await Login.login({ accountType: "ags" });
     await agsBusinessGrid.init();
     await addBusiness();
     await agsBusinessGrid.init();

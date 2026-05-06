@@ -8,6 +8,7 @@ import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
 import Filing from "../../objects/Filing";
 import FilingGrid from "../../objects/FilingGrid";
 import AuditLog from "../../objects/AuditLog";
+import Login from "../../utils/Login";
 
 const form = new Form();
 const formPreview = new FormPreview();
@@ -35,7 +36,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As an AGS user, I should be able to see Payment Submitted logs on the audit log for Funded filings", () => {
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "ags", accountIndex: 5 });
+    await Login.login({ accountType: "ags", accountIndex: 5 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -61,7 +62,7 @@ test.describe("As an AGS user, I should be able to see Payment Submitted logs on
     });
     await logout();
 
-    await login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -86,7 +87,7 @@ test.describe("As an AGS user, I should be able to see Payment Submitted logs on
     await logout();
 
     legacy.get("").then(async (referenceId) => {
-      await login({ accountType: "ags", accountIndex: 5, notFirstLogin: true });
+      await Login.login({ accountType: "ags", accountIndex: 5, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.checkAuditLog("Reference ID", String(referenceId));
       auditLog.findRowByAction("Payment Submitted", "paymentSubmittedRow");

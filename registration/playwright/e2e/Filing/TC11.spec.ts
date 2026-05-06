@@ -10,6 +10,7 @@ import {
   payApplicationAsTaxpayer,
 } from "../helpers";
 import { initTestRuntime, login } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 test.describe("As a taxpayer, I want the system to prohibit me from sending duplicate registrations", () => {
   test("Initiating test", async ({ page, request }, testInfo) => {
@@ -40,7 +41,7 @@ test.describe("As a taxpayer, I want the system to prohibit me from sending dupl
       toStatus: "Fully Paid",
     });
 
-    await login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 9 });
+    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 9 });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Business License (Annual) - E2E #1");

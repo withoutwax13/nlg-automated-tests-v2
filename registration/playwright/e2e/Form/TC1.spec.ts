@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import Filing from "../../objects/Filing";
 import Form from "../../objects/Form";
 import { getUniqueRegistrationData, initTestRuntime, login } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 const randomSeed = Math.floor(Math.random() * 1000);
 
@@ -12,7 +13,7 @@ test.describe("User should be able to add locations if opted for registering mul
     const filing = new Filing();
     const customData = await getUniqueRegistrationData(randomSeed, true);
 
-    await login({ accountType: "taxpayer" });
+    await Login.login({ accountType: "taxpayer" });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Business License (Annual) - E2E #1");

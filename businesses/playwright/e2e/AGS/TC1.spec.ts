@@ -1,5 +1,6 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const agsBusinessGrid = new BusinessGrid({
   userType: "ags",
@@ -12,7 +13,7 @@ const randomDate = {
 
 test.describe("As an AGS user, I should be able to set delinquency start date from the grid", () => {
   test("Initiating test", async () => {
-    await login({ accountType: "ags" });
+    await Login.login({ accountType: "ags" });
     await agsBusinessGrid.init();
     await agsBusinessGrid.clickClearAllFiltersButton();
     const beforeDelinquencyStartDate = await agsBusinessGrid.getDataOfColumn(

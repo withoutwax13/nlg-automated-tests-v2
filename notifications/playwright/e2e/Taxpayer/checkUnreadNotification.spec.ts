@@ -1,9 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 import selector from "../../fixtures/selector.json";
-import { login, waitForApiResponse } from "../../utils/Login";
+import Login, { login, waitForApiResponse } from "../../utils/Login";
 
 const checkUnreadNotification = async ({ page }: { page: Page }) => {
-  await login(page, { accountType: "taxpayer" });
+  await Login.login(page, { accountType: "taxpayer" });
 
   const notificationResponse = waitForApiResponse(page, {
     method: "GET",

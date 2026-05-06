@@ -1,6 +1,7 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const addBusinessPage = new BusinessAdd({ userType: "ags" });
 const businessGrid = new BusinessGrid({
@@ -45,7 +46,7 @@ test.describe("As an AGS user, I should be able to add a business.", () => {
     });
   });
   test("Initiating test", async () => {
-    await login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
+    await Login.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
     businessGrid.init();
     businessGrid.clickAddBusinessButton();
     addBusinessPage.fillFields(newBusinessData);

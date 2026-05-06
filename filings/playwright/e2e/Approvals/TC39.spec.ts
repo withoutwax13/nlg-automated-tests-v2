@@ -8,6 +8,7 @@ import Payment from "../../objects/Payment";
 import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
 import Filing from "../../objects/Filing";
 import FilingGrid from "../../objects/FilingGrid";
+import Login from "../../utils/Login";
 
 const govApprovalGrid = new ApprovalGrid({ userType: "municipal" });
 const form = new Form();
@@ -37,7 +38,7 @@ const deleteMultipleFiling = async (
 test.describe.skip("As a government user, I want to be able to start approval workflow a specific item in Approvals", () => {
   // Skipped, assertions covered by TC37 and TC38
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "ags", accountIndex: 5 });
+    await Login.login({ accountType: "ags", accountIndex: 5 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -62,7 +63,7 @@ test.describe.skip("As a government user, I want to be able to start approval wo
     });
     await logout();
 
-    await login({ accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -90,11 +91,11 @@ test.describe.skip("As a government user, I want to be able to start approval wo
     taxpayerFilingGrid.init();
     legacy.get("").then(async (referenceId) => {
       await logout();
-      await login({ accountType: "ags", accountIndex: 5, notFirstLogin: true });
+      await Login.login({ accountType: "ags", accountIndex: 5, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus("Funded", "Reference ID", String(referenceId));
       await logout();
-      await login({ accountType: "municipal", accountIndex: 3, notFirstLogin: true });
+      await Login.login({ accountType: "municipal", accountIndex: 3, notFirstLogin: true });
       govApprovalGrid.init();
       govApprovalGrid.selectRowToReject("Reference ID", String(referenceId));
     });

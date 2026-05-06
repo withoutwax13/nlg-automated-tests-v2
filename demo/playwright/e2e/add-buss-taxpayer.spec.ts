@@ -1,11 +1,11 @@
 import { test } from "@playwright/test";
+import Login from "../utils/Login";
 import {
   addBusinessToTaxpayerAccount,
   clearAllGridFilters,
   clickAddBusinessButton,
   filterGridColumn,
   gridHasNoRecords,
-  login,
   openTaxpayerBusinessGrid,
   waitForLoading,
 } from "../support/native-helpers";
@@ -36,7 +36,7 @@ test.describe("Add Business", () => {
 
   for (let i = 4; i < 10; i++) {
     test(`should add business to taxpayer account index ${i}`, async ({ page }) => {
-      await login(page, { accountType: "taxpayer", accountIndex: i });
+      await Login.login(page, { accountType: "taxpayer", accountIndex: i });
       await openTaxpayerBusinessGrid(page);
 
       for (const account of accounts) {

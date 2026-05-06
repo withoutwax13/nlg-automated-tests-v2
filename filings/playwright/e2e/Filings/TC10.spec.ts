@@ -6,6 +6,7 @@ import Payment from "../../objects/Payment";
 import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
 import Filing from "../../objects/Filing";
 import FilingGrid from "../../objects/FilingGrid";
+import Login from "../../utils/Login";
 
 const form = new Form();
 const formPreview = new FormPreview();
@@ -32,7 +33,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As a ags, I should be able to search filing list with data from its columns", () => {
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "ags", accountIndex: 7 });
+    await Login.login({ accountType: "ags", accountIndex: 7 });
     await agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -55,7 +56,7 @@ test.describe("As a ags, I should be able to search filing list with data from i
     }
     await logout();
 
-    await login({ accountType: "taxpayer", accountIndex: 3, notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", accountIndex: 3, notFirstLogin: true });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Food and Beverage");
@@ -76,7 +77,7 @@ test.describe("As a ags, I should be able to search filing list with data from i
     await applicationConfirmation.clickCloseButton(page);
     await logout();
 
-    await login({ accountType: "ags", accountIndex: 7, notFirstLogin: true });
+    await Login.login({ accountType: "ags", accountIndex: 7, notFirstLogin: true });
     await agsFilingGrid.init();
     await agsFilingGrid.searchFiling(String(referenceId).trim());
     expect(await agsFilingGrid.getElement(page).rows().count()).toBe(1);

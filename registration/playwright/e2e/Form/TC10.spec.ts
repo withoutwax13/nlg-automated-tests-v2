@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import Filing from "../../objects/Filing";
 import Form from "../../objects/Form";
 import { getUniqueRegistrationData, initTestRuntime, login, textOf } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 const randomSeed = Math.floor(Math.random() * 1000);
 
@@ -30,7 +31,7 @@ test.describe("User must see the current date on the Applicant info step", () =>
       day: "2-digit",
     });
 
-    await login({ accountType: "taxpayer", accountIndex: 9 });
+    await Login.login({ accountType: "taxpayer", accountIndex: 9 });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Business License (Annual) - E2E #1");

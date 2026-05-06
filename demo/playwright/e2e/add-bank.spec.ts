@@ -1,4 +1,5 @@
 import { test } from "@playwright/test";
+import Login from "../utils/Login";
 import {
   addBankAccountDetails,
   closeApplicationConfirmation,
@@ -10,7 +11,6 @@ import {
   filterGridColumn,
   getGridRowCount,
   goToSubmitFormsTab,
-  login,
   logout,
   openAgsFilingGrid,
   openProfile,
@@ -26,7 +26,7 @@ test.describe(
   () => {
     for (let i = 0; i < 10; i++) {
       test(`Initiating test for account ${i}`, async ({ page }) => {
-        await login(page, { accountType: "ags" });
+        await Login.login(page, { accountType: "ags" });
         await openAgsFilingGrid(page, "City of Arrakis");
 
         await filterGridColumn(page, {
@@ -49,7 +49,7 @@ test.describe(
 
         await logout(page);
 
-        await login(page, {
+        await Login.login(page, {
           accountType: "taxpayer",
           accountIndex: i,
           notFirstLogin: true,

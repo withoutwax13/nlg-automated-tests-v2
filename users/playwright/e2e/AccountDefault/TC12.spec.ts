@@ -1,13 +1,14 @@
 import { expect, test } from "@playwright/test";
 import Profile, { TAXPAYER_DEFAULT_HOME_PAGE as pageOptions } from "../../objects/Profile";
 import { bindRuntime, login, logout } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 const profile = new Profile();
 
 test.describe("As a taxpayer user, I should be able to set my default home page", () => {
   test("Initiating test", async ({ page, request }) => {
     bindRuntime(page, request);
-    await login({
+    await Login.login({
       accountType: "taxpayer",
       accountIndex: 10,
       customRedirectionAfterLoginAssertion: async () => {
@@ -19,7 +20,7 @@ test.describe("As a taxpayer user, I should be able to set my default home page"
       await profile.init();
       await profile.selectDefaultHomePage(pageName);
       await logout();
-      await login({
+      await Login.login({
         accountType: "taxpayer",
         accountIndex: 10,
         notFirstLogin: true,

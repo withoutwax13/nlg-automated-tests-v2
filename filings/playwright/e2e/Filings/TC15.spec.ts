@@ -7,6 +7,7 @@ import Payment from "../../objects/Payment";
 import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
 import Filing from "../../objects/Filing";
 import FilingGrid from "../../objects/FilingGrid";
+import Login from "../../utils/Login";
 
 const form = new Form();
 const formPreview = new FormPreview();
@@ -36,7 +37,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As a municipal, I should be able to download the PDF of specific filing by selecting the PDF image icon", () => {
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "ags" });
+    await Login.login({ accountType: "ags" });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -62,7 +63,7 @@ test.describe("As a municipal, I should be able to download the PDF of specific 
     });
     await logout();
 
-    await login({ accountType: "taxpayer", accountIndex: 5, notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", accountIndex: 5, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -87,7 +88,7 @@ test.describe("As a municipal, I should be able to download the PDF of specific 
     await logout();
 
     legacy.get("").then(async (referenceId) => {
-      await login({ accountType: "municipal", accountIndex: 1, notFirstLogin: true });
+      await Login.login({ accountType: "municipal", accountIndex: 1, notFirstLogin: true });
       municipalFilingGrid.init();
       municipalFilingGrid.toggleActionButton(
         "Download",

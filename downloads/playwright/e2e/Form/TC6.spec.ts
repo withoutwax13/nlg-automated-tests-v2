@@ -7,6 +7,7 @@ import {
   getDownloadsFolder,
 } from "../../utils/Files";
 import { login, readXlsx } from "../../support/native-helpers";
+import Login from "../../utils/Login";
 
 const excelDateToJSDate = (serial: number) => {
   const excelEpoch = new Date(1899, 11, 30);
@@ -32,7 +33,7 @@ test.describe("As municipal user, exported file's published date data should mat
   test("Initiate test", async ({ page }) => {
     const columnName = "Published Date";
     const formGrid = new FormGrid(page, { userType: "municipal" });
-    await login(page, { accountType: "municipal" });
+    await Login.login(page, { accountType: "municipal" });
     await formGrid.init();
     const columnValues = await formGrid.getArrayDataOfColumn(columnName);
 

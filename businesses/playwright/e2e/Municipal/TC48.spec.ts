@@ -3,6 +3,7 @@ import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessAdd from "../../objects/BusinessAdd";
 import SetBusinessStatusModal from "../../objects/SetBusinessStatusModal";
+import Login from "../../utils/Login";
 
 const addBusinessPage = new BusinessAdd({ userType: "municipal" });
 const setBusinessStatusModal = new SetBusinessStatusModal();
@@ -53,7 +54,7 @@ const operatingStatus = [
 
 test.describe("As a municipal user, I should be able to update operating status in the business details page", () => {
   test("Initiating test", async () => {
-    await login({ accountType: "municipal" });
+    await Login.login({ accountType: "municipal" });
     await municipalBusinessGrid.init();
     await addBusiness();
     await municipalBusinessGrid.init();

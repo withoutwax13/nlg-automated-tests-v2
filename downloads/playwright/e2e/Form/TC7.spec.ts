@@ -7,12 +7,13 @@ import {
   getDownloadsFolder,
 } from "../../utils/Files";
 import { login, readXlsx } from "../../support/native-helpers";
+import Login from "../../utils/Login";
 
 test.describe("As municipal user, exported file's filing frequency data should match the grid", () => {
   test("Initiate test", async ({ page }) => {
     const columnName = "Filing Frequency";
     const formGrid = new FormGrid(page, { userType: "municipal" });
-    await login(page, { accountType: "municipal" });
+    await Login.login(page, { accountType: "municipal" });
     await formGrid.init();
     const columnValues = await formGrid.getArrayDataOfColumn(columnName);
 

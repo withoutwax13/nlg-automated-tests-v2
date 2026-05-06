@@ -2,6 +2,7 @@ import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToIncl
 import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessResetModal from "../../objects/BusinessResetModal";
 import BusinessAdd from "../../objects/BusinessAdd";
+import Login from "../../utils/Login";
 
 const addBusinessPage = new BusinessAdd({ userType: "ags" });
 const agsBusinessGrid = new BusinessGrid({
@@ -46,7 +47,7 @@ const addBusiness = async () => {
 
 test.describe("I should be able to reset all data of a specific municipality", () => {
   test("Initiating test", async () => {
-    await login({ accountType: "ags" });
+    await Login.login({ accountType: "ags" });
     await addBusiness();
     await agsBusinessGrid.init();
     await agsBusinessGrid.clickResetDataButton();

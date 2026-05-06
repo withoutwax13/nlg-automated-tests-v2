@@ -8,6 +8,7 @@ import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
 import Filing from "../../objects/Filing";
 import FilingGrid from "../../objects/FilingGrid";
 import AuditLog from "../../objects/AuditLog";
+import Login from "../../utils/Login";
 
 const form = new Form();
 const formPreview = new FormPreview();
@@ -35,7 +36,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As an AGS user, I should be able to navigate to the Audit Log page", () => {
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "ags", accountIndex: 6 });
+    await Login.login({ accountType: "ags", accountIndex: 6 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -61,7 +62,7 @@ test.describe("As an AGS user, I should be able to navigate to the Audit Log pag
     });
     await logout();
 
-    await login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -86,7 +87,7 @@ test.describe("As an AGS user, I should be able to navigate to the Audit Log pag
     await logout();
 
     legacy.get("").then(async (referenceId) => {
-      await login({ accountType: "ags", accountIndex: 6, notFirstLogin: true });
+      await Login.login({ accountType: "ags", accountIndex: 6, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.checkAuditLog("Reference ID", String(referenceId));
     });

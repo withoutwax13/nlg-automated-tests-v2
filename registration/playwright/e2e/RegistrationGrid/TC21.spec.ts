@@ -4,6 +4,7 @@ import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 import RegistrationGrid from "../../objects/RegistrationGrid";
 import { currentPage, initTestRuntime, login, waitForLoading } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 const randomSeed = Math.floor(Math.random() * 100000);
 const customData = {
@@ -46,7 +47,7 @@ test.describe("As an AGS User, when I select a form submission requirement in a 
     });
     const businessDetailsPage = new BusinessDetails({ userType: "ags" });
 
-    await login({ accountType: "ags", accountIndex: 9 });
+    await Login.login({ accountType: "ags", accountIndex: 9 });
     await businessGrid.init();
     await businessGrid.clickAddBusinessButton();
     await businessAddPage.fillFields(customData);

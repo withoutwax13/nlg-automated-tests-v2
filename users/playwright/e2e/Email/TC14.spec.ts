@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import InviteUserModal from "../../objects/InviteUserModal";
 import UserGrid from "../../objects/UserGrid";
 import { bindRuntime, fetchJson, getTestmail, login, waitForLoading } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 type TestmailResponse = {
   emails: Array<{
@@ -19,7 +20,7 @@ test.describe("As a superuser, when I invited any user type in user service, the
     const randomTag = Math.floor(Math.random() * 1000000);
     const ENDPOINT = `${testmailVars.endpoint}?apikey=${testmailVars.apiKey}&namespace=${testmailVars.namespace}&tag=${randomTag}`;
 
-    await login({ accountType: "ags" });
+    await Login.login({ accountType: "ags" });
     await user.init();
     await user.clickInviteUserButton();
     await inviteUserModal.typeEmail(
@@ -47,7 +48,7 @@ test.describe("As a superuser, when I invited any user type in user service, the
     const randomTag = Math.floor(Math.random() * 1000000);
     const ENDPOINT = `${testmailVars.endpoint}?apikey=${testmailVars.apiKey}&namespace=${testmailVars.namespace}&tag=${randomTag}`;
 
-    await login({ accountType: "ags" });
+    await Login.login({ accountType: "ags" });
     await user.init();
     await user.clickInviteUserButton();
     await inviteUserModal.typeEmail(

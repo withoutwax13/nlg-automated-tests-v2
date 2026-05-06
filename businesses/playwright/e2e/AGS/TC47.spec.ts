@@ -1,6 +1,7 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const agsBusinessGrid = new BusinessGrid({
   userType: "ags",
@@ -12,7 +13,7 @@ const randomDate = Math.floor(Math.random() * 28) + 1;
 
 test.describe("As a ags user, I should be able to update business close date date in the business details page", () => {
   test("Initiating test", async () => {
-    await login({ accountType: "ags", accountIndex: 2 });
+    await Login.login({ accountType: "ags", accountIndex: 2 });
     await agsBusinessGrid.init();
     await agsBusinessGrid.clickClearAllFiltersButton();
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13857");

@@ -1,6 +1,7 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
 const addBusinessPage = new BusinessAdd({ userType: "municipal" });
@@ -43,7 +44,7 @@ test.describe("As a municipal user, I should be able to add a business.", () => 
     });
   });
   test("Initiating test", async () => {
-    await login({
+    await Login.login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 8,

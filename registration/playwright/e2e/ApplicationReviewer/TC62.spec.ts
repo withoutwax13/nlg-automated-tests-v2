@@ -6,6 +6,7 @@ import {
   getTaxpayerRegistrationRecordId,
 } from "../helpers";
 import { initTestRuntime, login, logout } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 test.describe("As a reviewer user, I should be able to link/unlink an application record to a business/registration record.", () => {
   test("Initiating test", async ({ page, request }, testInfo) => {
@@ -20,7 +21,7 @@ test.describe("As a reviewer user, I should be able to link/unlink an applicatio
     const registrationRecordId = await getTaxpayerRegistrationRecordId(referenceId);
 
     await logout();
-    await login({ accountType: "municipal", notFirstLogin: true, accountIndex: 7 });
+    await Login.login({ accountType: "municipal", notFirstLogin: true, accountIndex: 7 });
     await municipalApplicationGrid.init();
     await municipalApplicationGrid.selectRowToReview({
       anchorColumnName: "Registration Record ID",

@@ -1,13 +1,14 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
 const taxpayerBusinessDetails = new BusinessDetails({ userType: "taxpayer" });
 
 test.describe("As a taxpayer, I should be able to see my business information in my business details page", () => {
   test("Initiating test", async () => {
-    await login({ accountType: "taxpayer", accountIndex: 1 });
+    await Login.login({ accountType: "taxpayer", accountIndex: 1 });
     await taxpayerBusinessList.init();
     await taxpayerBusinessList.viewBusinessDetails("Arrakis Spice Company 13685");
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");

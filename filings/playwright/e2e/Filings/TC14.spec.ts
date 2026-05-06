@@ -7,6 +7,7 @@ import Payment from "../../objects/Payment";
 import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
 import Filing from "../../objects/Filing";
 import FilingGrid from "../../objects/FilingGrid";
+import Login from "../../utils/Login";
 
 const form = new Form();
 const formPreview = new FormPreview();
@@ -33,7 +34,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As a AGS, I should be able to to view a specific filing by selecting the “View” icon", () => {
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "ags", accountIndex: 9 });
+    await Login.login({ accountType: "ags", accountIndex: 9 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -59,7 +60,7 @@ test.describe("As a AGS, I should be able to to view a specific filing by select
     });
     await logout();
 
-    await login({ accountType: "taxpayer", accountIndex: 4, notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", accountIndex: 4, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -84,7 +85,7 @@ test.describe("As a AGS, I should be able to to view a specific filing by select
     await logout();
 
     legacy.get("").then(async (referenceId) => {
-      await login({ accountType: "ags", accountIndex: 9, notFirstLogin: true });
+      await Login.login({ accountType: "ags", accountIndex: 9, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.toggleActionButton(
         "View",

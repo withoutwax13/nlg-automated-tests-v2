@@ -6,6 +6,7 @@ import Form from "../../../objects/Form";
 import FormPreview from "../../../objects/FormPreview";
 import Payment from "../../../objects/Payment";
 import { initTestRuntime, login, logout, textOf } from "../../../support/runtime";
+import Login from "../../../utils/Login";
 
 const form = new Form();
 const formPreview = new FormPreview();
@@ -33,7 +34,7 @@ const deleteMultipleFiling = async (
 test.describe("As a taxpayer, I should be able to submit a tax form for a listed business.", () => {
   test("Initiating test", async ({ page }, testInfo) => {
     await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
-    await login({ accountType: "ags", accountIndex: 8 });
+    await Login.login({ accountType: "ags", accountIndex: 8 });
     await agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -56,7 +57,7 @@ test.describe("As a taxpayer, I should be able to submit a tax form for a listed
     }
     await logout();
 
-    await login({ accountType: "taxpayer", notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", notFirstLogin: true });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Food and Beverage");

@@ -8,6 +8,7 @@ import {
   payApplicationAsTaxpayer,
 } from "../helpers";
 import { currentPage, initTestRuntime, logout, login } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 test.describe("As a Government User, if the business user's application does not meet a specific condition set in the Certificate builder, there should be no certificate under the Certificate Tab of the said record when it is APPROVED", () => {
   test("Initiating test", async ({ page, request }, testInfo) => {
@@ -37,7 +38,7 @@ test.describe("As a Government User, if the business user's application does not
     });
 
     await logout();
-    await login({ accountType: "municipal", notFirstLogin: true, accountIndex: 5 });
+    await Login.login({ accountType: "municipal", notFirstLogin: true, accountIndex: 5 });
     await municipalApplicationGrid.init();
     await municipalApplicationGrid.clickClearAllFiltersButton();
     await municipalApplicationGrid.selectRowToReview({

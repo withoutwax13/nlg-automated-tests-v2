@@ -1,11 +1,12 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
 
 test.describe("As a taxpayer, I should only have details and delete as options in my action button column", () => {
   test("Initiating test", async () => {
-    await login({ accountType: "taxpayer", accountIndex: 7 });
+    await Login.login({ accountType: "taxpayer", accountIndex: 7 });
     await taxpayerBusinessList.init();
     const actionButton = await taxpayerBusinessList.getElementOfColumn(
       "Actions",

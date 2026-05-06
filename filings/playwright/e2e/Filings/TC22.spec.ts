@@ -1,6 +1,7 @@
 import { test, expect } from '../../test';
 import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
 import FilingGrid from "../../objects/FilingGrid";
+import Login from "../../utils/Login";
 
 const municipalFilingGrid = new FilingGrid({
   userType: "municipal",
@@ -14,7 +15,7 @@ test.describe("As a municipal user, I should be able to see filings in 6 month a
     const today = new Date();
     today.toLocaleString("en-US", { timeZone: "America/Chicago" });
 
-    await login({ accountType: "municipal", accountIndex: 8 });
+    await Login.login({ accountType: "municipal", accountIndex: 8 });
     await municipalFilingGrid.init();
     await municipalFilingGrid.setStartDate({
       month: `${sixMonthsAgo.getMonth() + 1}`,

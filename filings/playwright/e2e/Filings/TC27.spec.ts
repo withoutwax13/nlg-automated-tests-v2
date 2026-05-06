@@ -7,6 +7,7 @@ import Payment from "../../objects/Payment";
 import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
 import Filing from "../../objects/Filing";
 import FilingGrid from "../../objects/FilingGrid";
+import Login from "../../utils/Login";
 
 const form = new Form();
 const formPreview = new FormPreview();
@@ -34,7 +35,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As a taxpayer, I should be able to reattempt a declined filing.", () => {
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "ags", accountIndex: 4 });
+    await Login.login({ accountType: "ags", accountIndex: 4 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -60,7 +61,7 @@ test.describe("As a taxpayer, I should be able to reattempt a declined filing.",
     });
     await logout();
 
-    await login({ accountType: "taxpayer", notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -85,7 +86,7 @@ test.describe("As a taxpayer, I should be able to reattempt a declined filing.",
     await logout();
 
     legacy.get("").then(async (referenceId) => {
-      await login({ accountType: "ags", accountIndex: 4, notFirstLogin: true });
+      await Login.login({ accountType: "ags", accountIndex: 4, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus(
         "Declined",
@@ -94,7 +95,7 @@ test.describe("As a taxpayer, I should be able to reattempt a declined filing.",
       );
       await logout();
 
-      await login({ accountType: "taxpayer", notFirstLogin: true });
+      await Login.login({ accountType: "taxpayer", notFirstLogin: true });
       taxpayerFilingGrid.init();
       taxpayerFilingGrid.toggleActionButton(
         "Reattempt Payment",

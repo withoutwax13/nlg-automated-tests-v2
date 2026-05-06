@@ -8,6 +8,7 @@ import Payment from "../../objects/Payment";
 import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
 import Filing from "../../objects/Filing";
 import FilingGrid from "../../objects/FilingGrid";
+import Login from "../../utils/Login";
 
 const agsApprovalGrid = new ApprovalGrid({ userType: "ags" });
 const form = new Form();
@@ -36,7 +37,7 @@ const deleteMultipleFiling = async (
 
 test.describe.skip("As an AGS user, I should be able to view approval list page of a Municipality.", () => {
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "ags", accountIndex: 8 });
+    await Login.login({ accountType: "ags", accountIndex: 8 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -61,7 +62,7 @@ test.describe.skip("As an AGS user, I should be able to view approval list page 
     });
     await logout();
 
-    await login({ accountType: "taxpayer", accountIndex: 8, notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", accountIndex: 8, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -89,7 +90,7 @@ test.describe.skip("As an AGS user, I should be able to view approval list page 
     taxpayerFilingGrid.init();
     legacy.get("").then(async (referenceId) => {
       await logout();
-      await login({ accountType: "ags", accountIndex: 8, notFirstLogin: true });
+      await Login.login({ accountType: "ags", accountIndex: 8, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus("Funded", "Reference ID", String(referenceId));
       agsApprovalGrid.init();

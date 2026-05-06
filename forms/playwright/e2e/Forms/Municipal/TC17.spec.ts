@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 import Form from "../../../objects/Form";
 import FormGrid from "../../../objects/FormGrid";
+import Login from "../../../utils/Login";
 import {
   currentPage,
   initTestRuntime,
-  login,
   waitForLoading,
   wasStubCalled,
   stubNewWindow,
@@ -23,7 +23,7 @@ const expectStepToBeCurrent = async (stepperName: string) => {
 test.describe("As an muinicipal user, I want to be able to navigate the form pages without validation", () => {
   test("Initiate test", async ({ page }, testInfo) => {
     await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
-    await login({ accountType: "municipal", accountIndex: 2 });
+    await Login.login({ accountType: "municipal", accountIndex: 2 });
     await municipalFormsGrid.init();
     await stubNewWindow("previewFormWindow");
     await municipalFormsGrid.toggleActionButton(

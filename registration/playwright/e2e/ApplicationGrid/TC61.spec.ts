@@ -3,6 +3,7 @@ import ApplicationGrid from "../../objects/ApplicationGrid";
 import FilingGrid from "../../objects/FilingGrid";
 import { createSubmittedApplication } from "../helpers";
 import { getStoredValue, initTestRuntime, login, logout } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 test.describe("As a user, pending application should be deleted if the corresponding filing is deleted.", () => {
   test("Initiating test", async ({ page, request }, testInfo) => {
@@ -23,7 +24,7 @@ test.describe("As a user, pending application should be deleted if the correspon
     const referenceId = getStoredValue<string>("referenceId");
 
     await logout();
-    await login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
+    await Login.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
     await agsApplicationGrid.init();
     expect(
       await agsApplicationGrid.getDataOfColumn("Application Status", "Reference ID", referenceId, "applicationStatus")

@@ -57,7 +57,7 @@ const assertCaseDetails = async (page: Page, data: RowData) => {
 
 test.describe("Case Detail Scenarios", () => {
   test("As a user, I should be able to see that the column data in /cases grid are similar to the data in the /cases/{id}/info page", async ({ page }) => {
-    await login(page);
+    await Login.login(page);
     await expectPathname(page, /\/cases/);
 
     const rowData = await saveRowData(page);

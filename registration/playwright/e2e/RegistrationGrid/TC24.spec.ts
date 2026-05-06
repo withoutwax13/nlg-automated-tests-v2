@@ -4,6 +4,7 @@ import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 import RegistrationGrid from "../../objects/RegistrationGrid";
 import { currentPage, initTestRuntime, login, logout, waitForLoading } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 const randomSeed = Math.floor(Math.random() * 100000);
 const customData = {
@@ -46,7 +47,7 @@ test.describe.skip("As an AGS User, If I delete a business record associated to 
     });
     const businessDetailsPage = new BusinessDetails({ userType: "ags" });
 
-    await login({ accountType: "ags", accountIndex: 2 });
+    await Login.login({ accountType: "ags", accountIndex: 2 });
     await businessGrid.init();
     await businessGrid.clickAddBusinessButton();
     await businessAddPage.fillFields(customData);
@@ -84,7 +85,7 @@ test.describe.skip("As an AGS User, If I delete a business record associated to 
     await businessGrid.deleteBusiness(customData.locationDba);
 
     await logout();
-    await login({ accountType: "ags", notFirstLogin: true, accountIndex: 2 });
+    await Login.login({ accountType: "ags", notFirstLogin: true, accountIndex: 2 });
     await registrationGrid.init();
     await registrationGrid.filterColumn("Location DBA", customData.locationDba);
     await expect(registrationGrid.getElement().noRecordFoundComponent()).toBeVisible();

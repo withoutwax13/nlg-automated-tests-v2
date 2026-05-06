@@ -1,6 +1,7 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const agsAddBusinessPage = new BusinessAdd({ userType: "ags" });
 const taxpayerAddBusinessPage = new BusinessAdd({ userType: "taxpayer" });
@@ -56,7 +57,7 @@ test.describe.skip("As a taxpayer, when a business has been added by an AGS user
   });
   test("Initiating test", async () => {
     // add business data
-    await login({ accountType: "ags", notFirstLogin: true, accountIndex: 7 });
+    await Login.login({ accountType: "ags", notFirstLogin: true, accountIndex: 7 });
     agsBusinessGrid.init();
     agsBusinessGrid.clickAddBusinessButton();
     agsAddBusinessPage.fillFields(newBusinessData);
@@ -68,7 +69,7 @@ test.describe.skip("As a taxpayer, when a business has been added by an AGS user
     await logout();
 
     // add business data to the taxpayer account
-    await login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 1 });
+    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 1 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);

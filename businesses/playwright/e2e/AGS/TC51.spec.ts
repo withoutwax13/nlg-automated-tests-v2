@@ -1,6 +1,7 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const agsBusinessGrid = new BusinessGrid({
   userType: "ags",
@@ -12,7 +13,7 @@ const randomDate = Math.floor(Math.random() * 28) + 1;
 
 test.describe("When I update the business close date, system should let the save button of the Set Business Status modal to be disabled until I select a business status", () => {
   test("Initiating test", async () => {
-    await login({ accountType: "ags", accountIndex: 4 });
+    await Login.login({ accountType: "ags", accountIndex: 4 });
     await agsBusinessGrid.init();
     await agsBusinessGrid.clickClearAllFiltersButton();
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13857");

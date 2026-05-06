@@ -3,6 +3,7 @@ import Filing from "../../../objects/Filing";
 import FormGrid from "../../../objects/FormGrid";
 import FormsSetting from "../../../objects/FormGrid/FormsSetting";
 import { collectTexts, getAlias, initTestRuntime, login, logout } from "../../../support/runtime";
+import Login from "../../../utils/Login";
 
 const agsFormGrid = new FormGrid({ userType: "ags" });
 const formSetting = new FormsSetting();
@@ -16,7 +17,7 @@ const normalizeFormOrder = (items: Array<string | null | undefined>) =>
 test.describe("As an AGS user, I should be able to configure the taxpayer form display arrangement", () => {
   test("Initiate test", async ({ page }, testInfo) => {
     await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
-    await login({ accountType: "ags", accountIndex: 8 });
+    await Login.login({ accountType: "ags", accountIndex: 8 });
     await agsFormGrid.init();
     await agsFormGrid.clickSettingsButton();
     await formSetting.selectMunicipality("City of Arrakis");
@@ -24,7 +25,7 @@ test.describe("As an AGS user, I should be able to configure the taxpayer form d
     await formSetting.clickCancelButton();
     await logout();
 
-    await login({ accountType: "taxpayer", notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", notFirstLogin: true });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     const taxpayerFormOrderBeforeMove = await collectTexts(
@@ -36,7 +37,7 @@ test.describe("As an AGS user, I should be able to configure the taxpayer form d
     );
     await logout();
 
-    await login({ accountType: "ags", accountIndex: 8, notFirstLogin: true });
+    await Login.login({ accountType: "ags", accountIndex: 8, notFirstLogin: true });
     await agsFormGrid.init();
     await agsFormGrid.clickSettingsButton();
     await formSetting.selectMunicipality("City of Arrakis");
@@ -49,7 +50,7 @@ test.describe("As an AGS user, I should be able to configure the taxpayer form d
     await formSetting.clickSaveButton();
     await logout();
 
-    await login({ accountType: "taxpayer", notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", notFirstLogin: true });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     const taxpayerFormOrderAfterMove = await collectTexts(

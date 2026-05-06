@@ -7,6 +7,7 @@ import FilingGrid from "../../objects/FilingGrid";
 import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
 import Profile from "../../objects/Profile";
 import { bindRuntime, login, logout } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 const form = new Form();
 const formPreview = new FormPreview();
@@ -36,7 +37,7 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete cred
   test("Initiating test", async ({ page, request }) => {
     bindRuntime(page, request);
 
-    await login({ accountType: "ags", accountIndex: 2 });
+    await Login.login({ accountType: "ags", accountIndex: 2 });
     await agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -59,7 +60,7 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete cred
     }
 
     await logout();
-    await login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Food and Beverage");

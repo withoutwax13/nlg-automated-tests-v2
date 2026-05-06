@@ -1,6 +1,7 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const randomSeed = Math.floor(Math.random() * 100000);
 const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
@@ -50,7 +51,7 @@ test.describe("As a taxpayer user, I should be able to delete a business.", () =
     });
   });
   test("Initiating test", async () => {
-    await login({
+    await Login.login({
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 3,
@@ -65,7 +66,7 @@ test.describe("As a taxpayer user, I should be able to delete a business.", () =
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     await logout();
-    await login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 5 });
+    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 5 });
     await taxpayerBusinessGrid.init();
     await taxpayerBusinessGrid.clickAddBusinessButton();
     await taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);

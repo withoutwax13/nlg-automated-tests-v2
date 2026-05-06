@@ -2,6 +2,7 @@ import { test, expect } from '../../test';
 import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
 import FilingGrid from "../../objects/FilingGrid";
 import RequestedExtracts from "../../objects/RequestedExtracts";
+import Login from "../../utils/Login";
 
 const municipalFilingGrid = new FilingGrid({
   userType: "municipal",
@@ -10,7 +11,7 @@ const requestedExtractPage = new RequestedExtracts();
 
 test.describe("As a municipal user, I should be able to export full filing data.", () => {
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "municipal", accountIndex: 2 });
+    await Login.login({ accountType: "municipal", accountIndex: 2 });
     await municipalFilingGrid.init();
     await municipalFilingGrid.clickViewRequestedExtractButton();
     const preClickItemTotal = await requestedExtractPage.getTotalItems(page);

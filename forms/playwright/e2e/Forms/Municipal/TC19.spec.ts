@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import FormGrid, { MUNICIPAL_FORM_GRID_COLUMNS as defaultColumns } from "../../../objects/FormGrid";
 import { getAlias, initTestRuntime, login } from "../../../support/runtime";
+import Login from "../../../utils/Login";
 
 test.describe("As a municipal user, I should be able to reorganize the order of the columns", () => {
   test("Initiating test", async ({ page }, testInfo) => {
@@ -9,7 +10,7 @@ test.describe("As a municipal user, I should be able to reorganize the order of 
     });
 
     await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
-    await login({ accountType: "municipal", accountIndex: 4 });
+    await Login.login({ accountType: "municipal", accountIndex: 4 });
 
     const columnPairs: Array<[string, string]> = [];
     const columnsToTest = defaultColumns.slice(1, 5);

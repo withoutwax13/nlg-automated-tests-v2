@@ -1,6 +1,7 @@
 import { test, expect } from '../../test';
 import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
 import FilingGrid from "../../objects/FilingGrid";
+import Login from "../../utils/Login";
 
 const agsFilingGrid = new FilingGrid({
   userType: "ags",
@@ -16,7 +17,7 @@ test.describe("As a AGS user, I should be able to see filings in 3 month ago.", 
     const today = new Date();
     today.toLocaleString("en-US", { timeZone: "America/Chicago" });
     
-    await login({ accountType: "ags", accountIndex: 9 });
+    await Login.login({ accountType: "ags", accountIndex: 9 });
     await agsFilingGrid.init();
     await agsFilingGrid.setStartDate({
       month:

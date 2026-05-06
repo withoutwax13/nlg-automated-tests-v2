@@ -5,6 +5,7 @@ import Form from "../../objects/Form";
 import FormPreview from "../../objects/FormPreview";
 import Payment from "../../objects/Payment";
 import { currentPage, getTestmail, getUniqueRegistrationData, initTestRuntime, login, requestJson, textOf } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 type TestmailResponse = {
   emails: Array<{
@@ -31,7 +32,7 @@ test.describe.skip("After submitting an application with fee, taxpayer user must
     const payment = new Payment();
     const customData = await getUniqueRegistrationData(randomSeed(), false);
 
-    await login({ accountType: "taxpayer", accountIndex: 10 });
+    await Login.login({ accountType: "taxpayer", accountIndex: 10 });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment(expectedGovernmentName);
     await filing.selectForm(expectedFormName);

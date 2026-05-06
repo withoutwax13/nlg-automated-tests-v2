@@ -1,13 +1,14 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessDetails from "../../objects/BusinessDetails";
+import Login from "../../utils/Login";
 
 const municipalBusinessList = new BusinessGrid({ userType: "municipal" });
 const municipalBusinessDetails = new BusinessDetails({ userType: "municipal" });
 
 test.describe("As a user, I should be able to reveal the full content of FEIN in business details page", () => {
   test("Initiating test", async () => {
-    await login({ accountType: "municipal", accountIndex: 6 });
+    await Login.login({ accountType: "municipal", accountIndex: 6 });
     await municipalBusinessList.init();
     await municipalBusinessList.clickClearAllFiltersButton();
     await municipalBusinessList.viewBusinessDetails("Arrakis Spice Company 13685");

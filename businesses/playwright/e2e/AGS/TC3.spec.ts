@@ -1,5 +1,6 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const agsBusinessGrid = new BusinessGrid({
   userType: "ags",
@@ -18,7 +19,7 @@ const cleanTestData = async (businessName: string, requiredForm: string) => {
 
 test.describe("As an AGS user, I should be able to add required forms from the grid", () => {
   test("Initiating test", async () => {
-    await login({ accountType: "ags", accountIndex: 2 });
+    await Login.login({ accountType: "ags", accountIndex: 2 });
     await cleanTestData("Arrakis Spice Company 17829", "Food and Beverage Tax Return (Monthly)");
     await agsBusinessGrid.clickClearAllFiltersButton();
     const beforeAddingRequiredForms = await agsBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");

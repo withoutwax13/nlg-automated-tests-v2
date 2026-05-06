@@ -2,6 +2,7 @@ import { test, expect } from '../../test';
 import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
 import FilingGrid from "../../objects/FilingGrid";
 import MunicipalityGrid from "../../objects/MunicipalityGrid";
+import Login from "../../utils/Login";
 
 const municipalFilingGrid = new FilingGrid({
   userType: "municipal",
@@ -13,7 +14,7 @@ const municipalityGrid = new MunicipalityGrid({
 
 test.describe("As an Municipal user, I should be able to see the custom field on the filing list", () => {
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "ags", accountIndex: 3 });
+    await Login.login({ accountType: "ags", accountIndex: 3 });
     await municipalityGrid.init();
     await municipalityGrid.selectMunicipality("City of Arrakis");
     await municipalityGrid.addCustomField(
@@ -21,11 +22,11 @@ test.describe("As an Municipal user, I should be able to see the custom field on
       `Custom Field Name ${randomSeed}`
     );
     await logout();
-    await login({ accountType: "municipal", notFirstLogin: true });
+    await Login.login({ accountType: "municipal", notFirstLogin: true });
     await municipalFilingGrid.init();
     await expect(await municipalFilingGrid.isColumnExist(`Custom Field Title ${randomSeed}`)).toBeTruthy();
     await logout();
-    await login({ accountType: "ags", accountIndex: 3, notFirstLogin: true });
+    await Login.login({ accountType: "ags", accountIndex: 3, notFirstLogin: true });
     await municipalityGrid.init();
     await municipalityGrid.selectMunicipality("City of Arrakis");
     await municipalityGrid.removeCustomField(`Custom Field Name ${randomSeed}`);

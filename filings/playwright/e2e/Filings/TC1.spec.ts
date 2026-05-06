@@ -1,6 +1,7 @@
 import { test, expect } from '../../test';
 import { login, logout, waitForLoading, checkAccessibility } from '../../utils/runtime';
 import MunicipalityGrid from "../../objects/MunicipalityGrid";
+import Login from "../../utils/Login";
 
 const randomSeed = Math.floor(Math.random() * 100000);
 const municipalityGrid = new MunicipalityGrid({
@@ -9,7 +10,7 @@ const municipalityGrid = new MunicipalityGrid({
 
 test.describe.skip("As an AGS user, I should be able to add a custom field on the filing list", () => {
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "ags" });
+    await Login.login({ accountType: "ags" });
     municipalityGrid.init();
     municipalityGrid.selectMunicipality("City of Arrakis");
     municipalityGrid.addCustomField(
@@ -17,7 +18,7 @@ test.describe.skip("As an AGS user, I should be able to add a custom field on th
       `Custom Field Name ${randomSeed}`
     );
     await logout();
-    await login({ accountType: "ags", notFirstLogin: true });
+    await Login.login({ accountType: "ags", notFirstLogin: true });
     municipalityGrid.init();
     municipalityGrid.selectMunicipality("City of Arrakis");
     municipalityGrid.removeCustomField(`Custom Field Name ${randomSeed}`);

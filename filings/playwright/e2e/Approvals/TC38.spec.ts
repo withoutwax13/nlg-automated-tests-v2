@@ -8,6 +8,7 @@ import Payment from "../../objects/Payment";
 import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
 import Filing from "../../objects/Filing";
 import FilingGrid from "../../objects/FilingGrid";
+import Login from "../../utils/Login";
 
 const govApprovalGrid = new ApprovalGrid({ userType: "municipal" });
 const form = new Form();
@@ -36,7 +37,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As a government user, I want to be able to see message of an rejected filing in approval list", () => {
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "ags", accountIndex: 4 });
+    await Login.login({ accountType: "ags", accountIndex: 4 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -61,7 +62,7 @@ test.describe("As a government user, I want to be able to see message of an reje
     });
     await logout();
 
-    await login({ accountType: "taxpayer", accountIndex: 6, notFirstLogin: true });
+    await Login.login({ accountType: "taxpayer", accountIndex: 6, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -89,11 +90,11 @@ test.describe("As a government user, I want to be able to see message of an reje
     taxpayerFilingGrid.init();
     legacy.get("").then(async (referenceId) => {
       await logout();
-      await login({ accountType: "ags", accountIndex: 4, notFirstLogin: true });
+      await Login.login({ accountType: "ags", accountIndex: 4, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus("Funded", "Reference ID", String(referenceId));
       await logout();
-      await login({ accountType: "municipal", accountIndex: 4, notFirstLogin: true });
+      await Login.login({ accountType: "municipal", accountIndex: 4, notFirstLogin: true });
       govApprovalGrid.init();
       govApprovalGrid.selectRowToReject("Reference ID", String(referenceId));
       govApprovalGrid.init();

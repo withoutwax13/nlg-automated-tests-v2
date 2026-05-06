@@ -1,5 +1,6 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const municipalBusinessGrid = new BusinessGrid({
   userType: "municipal"
@@ -11,7 +12,7 @@ const randomDate = {
 
 test.describe("As a municipal user, I should be able to set close date from the grid", () => {
   test("Initiating test", async () => {
-    await login({ accountType: "municipal", accountIndex: 1 });
+    await Login.login({ accountType: "municipal", accountIndex: 1 });
     await municipalBusinessGrid.init();
     await municipalBusinessGrid.clickClearAllFiltersButton();
     const beforeCloseDate = await municipalBusinessGrid.getDataOfColumn(

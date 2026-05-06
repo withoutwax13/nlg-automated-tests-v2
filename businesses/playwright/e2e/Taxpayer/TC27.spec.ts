@@ -1,11 +1,12 @@
 import { test, expect, login, logout, deleteBusinessData, expectCurrentUrlToInclude } from '../../support/test';
 import BusinessGrid from "../../objects/BusinessGrid";
+import Login from "../../utils/Login";
 
 const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
 
 test.describe("As a taxpayer user,  I should be able to reveal the full content of FEIN in business list.", () => {
   test("Initiating test", async () => {
-    await login({ accountType: "taxpayer", accountIndex: 6 });
+    await Login.login({ accountType: "taxpayer", accountIndex: 6 });
     await taxpayerBusinessList.init();
     const feinValueBeforeClick = await taxpayerBusinessList.getDataOfColumn(
       "FEIN",

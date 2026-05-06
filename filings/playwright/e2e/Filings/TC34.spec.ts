@@ -7,6 +7,7 @@ import Payment from "../../objects/Payment";
 import ApplicationConfirmation from "../../objects/ApplicationConfirmation";
 import Filing from "../../objects/Filing";
 import FilingGrid from "../../objects/FilingGrid";
+import Login from "../../utils/Login";
 
 const form = new Form();
 const formPreview = new FormPreview();
@@ -34,7 +35,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As a taxpayer, I should be able to submit a zero payment filing.", () => {
   test("Initiate test", async ({ page }) => {
-    await login({ accountType: "ags", accountIndex: 1 });
+    await Login.login({ accountType: "ags", accountIndex: 1 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -60,7 +61,7 @@ test.describe("As a taxpayer, I should be able to submit a zero payment filing."
     });
     await logout();
 
-    await login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
+    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("ZERO PAYMENT");

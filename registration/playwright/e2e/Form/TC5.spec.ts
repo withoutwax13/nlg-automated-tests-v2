@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import Filing from "../../objects/Filing";
 import Form from "../../objects/Form";
 import { getUniqueRegistrationData, initTestRuntime, login, waitForLoading } from "../../support/runtime";
+import Login from "../../utils/Login";
 
 const randomSeed = Math.floor(Math.random() * 1000);
 
@@ -14,7 +15,7 @@ test.describe("User should not be able to proceed to Preview step if the require
       "applicantInfo.signature",
     ]);
 
-    await login({ accountType: "taxpayer", accountIndex: 4 });
+    await Login.login({ accountType: "taxpayer", accountIndex: 4 });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Business License (Annual) - E2E #1");
