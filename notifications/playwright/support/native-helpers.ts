@@ -80,3 +80,9 @@ export const getPagerTotal = async (pagerInfo: Locator) => {
   const match = text.match(/of\s+([\d,]+)/i);
   return match ? Number(match[1].replace(/,/g, "")) : 0;
 };
+
+export const getEnvironment = () => process.env.environment || process.env.ENVIRONMENT || "dev";
+export const waitForLoading = async (page: Page, seconds = 5) => {
+  await page.waitForTimeout(seconds * 1000);
+};
+export const login = runtimeLogin;

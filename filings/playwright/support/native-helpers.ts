@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page, type Response } from "@playwright/test";
-import { login as runtimeLogin } from "../utils/runtime";
+import { login as runtimeLogin, waitForLoading as runtimeWaitForLoading } from "../utils/runtime";
 export * from "../utils/runtime";
 
 export const normalizeText = (value: string | null | undefined) =>
@@ -85,3 +85,6 @@ export const getPagerTotal = async (pagerInfo: Locator) => {
   const match = text.match(/of\s+([\d,]+)/i);
   return match ? Number(match[1].replace(/,/g, "")) : 0;
 };
+
+export const waitForLoading = runtimeWaitForLoading;
+export const login = runtimeLogin;
