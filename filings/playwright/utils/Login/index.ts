@@ -1,5 +1,5 @@
 import type { Page, Response } from "@playwright/test";
-import { login as nativeLogin } from "../../utils/runtime";
+import { login as nativeLogin } from "../../support/native-helpers";
 
 const isHubspotChat = (response: Response) =>
   response.request().method() === "GET" &&
