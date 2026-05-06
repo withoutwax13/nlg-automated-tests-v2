@@ -15,6 +15,10 @@ const COLUMNS = [
 ];
 
 class MunicipalityGrid {
+  private isPage(value: unknown): value is Page {
+    return !!value && typeof value === "object" && "locator" in (value as Record<string, unknown>);
+  }
+
   userType: string;
   sortType: string;
   defaultGridColumnsAlias: string;
@@ -134,12 +138,19 @@ class MunicipalityGrid {
     await this.getElement(page).anyList().filter({ hasText: action }).first().click();
   }
 
-  async selectMunicipality(page: Page = resolvePage(), municipality: string) {
+  async selectMunicipality(pageOrMunicipality: Page | string = resolvePage(), maybeMunicipality?: string) {
+    const page = this.isPage(pageOrMunicipality) ? pageOrMunicipality : resolvePage();
+    const municipality = this.isPage(pageOrMunicipality)
+      ? (maybeMunicipality as string)
+      : pageOrMunicipality;
     await this.toggleActionButton(page, "View Details", "Municipality Name", municipality);
     await waitForLoading(page);
   }
 
-  async addCustomField(page: Page = resolvePage(), customFieldTitle: string, customFieldName: string) {
+  async addCustomField(pageOrTitle: Page | string = resolvePage(), titleOrName?: string, maybeName?: string) {
+    const page = this.isPage(pageOrTitle) ? pageOrTitle : resolvePage();
+    const customFieldTitle = this.isPage(pageOrTitle) ? (titleOrName as string) : pageOrTitle;
+    const customFieldName = this.isPage(pageOrTitle) ? (maybeName as string) : (titleOrName as string);
     await this.getElement(page).section("Filing List Configuration").scrollIntoViewIfNeeded();
     await this.getElement(page).anyButton().filter({ hasText: "Add New Column" }).click();
     await this.getElement(page).customFieldTitleField(true).fill(customFieldTitle);
@@ -148,7 +159,9 @@ class MunicipalityGrid {
     await waitForLoading(page);
   }
 
-  async removeCustomField(page: Page = resolvePage(), customFieldName: string) {
+  async removeCustomField(pageOrName: Page | string = resolvePage(), maybeName?: string) {
+    const page = this.isPage(pageOrName) ? pageOrName : resolvePage();
+    const customFieldName = this.isPage(pageOrName) ? (maybeName as string) : pageOrName;
     await this.getElement(page).section("Filing List Configuration").scrollIntoViewIfNeeded();
     const inputs = this.getElement(page).anyInput();
     const count = await inputs.count();

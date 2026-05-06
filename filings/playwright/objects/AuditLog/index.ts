@@ -1,8 +1,12 @@
 import { Page } from "@playwright/test";
 import { resolvePage } from "../../pageContext";
 import { getRowByCellText } from "../../utils/Grid";
+import { legacy } from "../../utils/legacy";
 
 class AuditLog {
+  private isPage(value: unknown): value is Page {
+    return !!value && typeof value === "object" && "locator" in (value as Record<string, unknown>);
+  }
   private elements(page: Page = resolvePage()) {
     return {
       columns: () => page.locator("thead tr").nth(0).locator("th"),
@@ -15,8 +19,13 @@ class AuditLog {
     return this.elements(page);
   }
 
-  async findRowByAction(page: Page = resolvePage(), action: string) {
-    return getRowByCellText(this.getElement(page).rows(), 1, action);
+  async findRowByAction(pageOrAction: Page | string = resolvePage(), actionOrAlias?: string, maybeAlias?: string) {
+    const page = this.isPage(pageOrAction) ? pageOrAction : resolvePage();
+    const action = this.isPage(pageOrAction) ? (actionOrAlias as string) : pageOrAction;
+    const aliasName = this.isPage(pageOrAction) ? maybeAlias : actionOrAlias;
+    const row = await getRowByCellText(this.getElement(page).rows(), 1, action);
+    if (aliasName) legacy.wrap(row).as(aliasName);
+    return row;
   }
 
   async findRowByRole(page: Page = resolvePage(), role: string) {

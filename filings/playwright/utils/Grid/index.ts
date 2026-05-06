@@ -21,6 +21,11 @@ export const getOrderOfColumns = async (
   return map;
 };
 
+export const getColumnOrder = async (
+  columns: string[],
+  headerLocator: Locator
+): Promise<ColumnMap> => getOrderOfColumns(columns, headerLocator);
+
 export const validateFilterOperation = (
   filterType: keyof typeof validFilterOperations,
   filterOperation: string

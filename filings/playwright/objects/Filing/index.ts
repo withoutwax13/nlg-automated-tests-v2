@@ -33,6 +33,10 @@ class Filing {
     return this.elements(page);
   }
 
+  private isPage(value: unknown): value is Page {
+    return !!value && typeof value === "object" && "locator" in (value as Record<string, unknown>);
+  }
+
   async goToSubmitFormsTab(page: Page = resolvePage()) {
     await this.getElements(page).submitFormsTab().click();
     await waitForLoading(page);
@@ -53,18 +57,30 @@ class Filing {
     await waitForLoading(page, 5);
   }
 
-  async selectGovernment(page: Page = resolvePage(), government: string) {
+  async selectGovernment(pageOrGovernment: Page | string, maybeGovernment?: string) {
+    const page = this.isPage(pageOrGovernment) ? pageOrGovernment : resolvePage();
+    const government = this.isPage(pageOrGovernment)
+      ? (maybeGovernment as string)
+      : pageOrGovernment;
     await this.getElements(page).governmentSelection().click();
     await this.getElements(page).governmentSelection().fill(government);
     await this.getElements(page).anyList().filter({ hasText: government }).first().click();
     await waitForLoading(page);
   }
 
-  async selectForm(page: Page = resolvePage(), formName: string) {
+  async selectForm(pageOrFormName: Page | string, maybeFormName?: string) {
+    const page = this.isPage(pageOrFormName) ? pageOrFormName : resolvePage();
+    const formName = this.isPage(pageOrFormName)
+      ? (maybeFormName as string)
+      : pageOrFormName;
     await this.getElements(page).formLinkItem(formName).click();
   }
 
-  async selectBusinessToFile(page: Page = resolvePage(), businessDba: string) {
+  async selectBusinessToFile(pageOrBusinessDba: Page | string, maybeBusinessDba?: string) {
+    const page = this.isPage(pageOrBusinessDba) ? pageOrBusinessDba : resolvePage();
+    const businessDba = this.isPage(pageOrBusinessDba)
+      ? (maybeBusinessDba as string)
+      : pageOrBusinessDba;
     await this.getElements(page).businessSelectionDropdown().click();
     await this.getElements(page).businessSelectionDropdown().fill(businessDba);
     await this.getElements(page).anyList().filter({ hasText: businessDba }).first().click();

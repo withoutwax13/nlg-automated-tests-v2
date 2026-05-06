@@ -47,7 +47,8 @@ test.describe("As a taxpayer, I should be able to reattempt a declined filing.",
       "Food and Beverage",
       "multi-select"
     );
-    agsFilingGrid.getElement().rows().its("length").as("rowsLength");
+    agsFilingGrid.getElement();
+    legacy.wrap(await agsFilingGrid.getElement().rows().count()).as("rowsLength");
     legacy.get("").then(async (rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
@@ -78,11 +79,8 @@ test.describe("As a taxpayer, I should be able to reattempt a declined filing.",
     payment.clickFinishAndPayButton();
     applicationConfirmation
       .getElement()
-      .referenceIdData()
-      .invoke("text")
-      .then((referenceId) => {
-        legacy.wrap(referenceId).as("referenceId");
-      });
+      ;
+    legacy.wrap(await applicationConfirmation.getElement().referenceIdData().innerText()).as("referenceId");
     applicationConfirmation.clickCloseButton();
     await logout();
 
@@ -112,7 +110,7 @@ test.describe("As a taxpayer, I should be able to reattempt a declined filing.",
       taxpayerFilingGrid.init();
       taxpayerFilingGrid.getDataOfColumn("Filing Status", "Reference ID", String(referenceId), "newFilingStatus");
       legacy.get("").then(async (newFilingStatus) => {
-        expect(newFilingStatus).to.equal("Pending");
+        expect(newFilingStatus).toBe("Pending");
       });
     });
   });

@@ -2,6 +2,9 @@ import { Page } from "@playwright/test";
 import { resolvePage } from "../../pageContext";
 
 class ApplicationConfirmation {
+  private isPage(value: unknown): value is Page {
+    return !!value && typeof value === "object" && "locator" in (value as Record<string, unknown>);
+  }
   private elements(page: Page = resolvePage()) {
     return {
       pageTitle: () => page.locator("h1"),
@@ -20,7 +23,8 @@ class ApplicationConfirmation {
     return this.elements(page);
   }
 
-  async clickCloseButton(page: Page = resolvePage()) {
+  async clickCloseButton(pageOrIgnore: Page | boolean = resolvePage()) {
+    const page = this.isPage(pageOrIgnore) ? pageOrIgnore : resolvePage();
     await this.getElement(page).closeButton().click();
   }
 

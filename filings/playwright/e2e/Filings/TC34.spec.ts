@@ -47,7 +47,8 @@ test.describe("As a taxpayer, I should be able to submit a zero payment filing."
       "ZERO PAYMENT",
       "multi-select"
     );
-    agsFilingGrid.getElement().rows().its("length").as("rowsLength");
+    agsFilingGrid.getElement();
+    legacy.wrap(await agsFilingGrid.getElement().rows().count()).as("rowsLength");
     legacy.get("").then(async (rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
@@ -74,11 +75,8 @@ test.describe("As a taxpayer, I should be able to submit a zero payment filing."
     formPreview.clickSubmitButton();
     applicationConfirmation
       .getElement()
-      .referenceIdData()
-      .invoke("text")
-      .then((referenceId) => {
-        legacy.wrap(referenceId).as("referenceId");
-      });
+      ;
+    legacy.wrap(await applicationConfirmation.getElement().referenceIdData().innerText()).as("referenceId");
     applicationConfirmation.clickCloseButton(false);
 
     legacy.get("").then(async (referenceId) => {

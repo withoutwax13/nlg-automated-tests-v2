@@ -3,6 +3,10 @@ import { resolvePage } from "../../pageContext";
 import { waitForLoading } from "../../utils/runtime";
 
 class Form {
+  private isPage(value: unknown): value is Page {
+    return !!value && typeof value === "object" && "locator" in (value as Record<string, unknown>);
+  }
+
   private elements(page: Page = resolvePage()) {
     return {
       nextButton: () => page.getByRole("button", { name: "Next" }),
@@ -18,9 +22,11 @@ class Form {
     return this.elements(page);
   }
 
-  async clickNextbutton(page: Page = resolvePage(), isFromFormSteps = true) {
+  async clickNextbutton(pageOrIsFromFormSteps?: Page | boolean, isFromFormSteps = true) {
+    const page = this.isPage(pageOrIsFromFormSteps) ? pageOrIsFromFormSteps : resolvePage();
+    const shouldWait = typeof pageOrIsFromFormSteps === "boolean" ? pageOrIsFromFormSteps : isFromFormSteps;
     await this.elements(page).nextButton().click();
-    if (isFromFormSteps) {
+    if (shouldWait) {
       await waitForLoading(page, 1);
     }
   }

@@ -47,7 +47,8 @@ test.describe("As a taxpayer, I should be able to download the PDF of specific f
       "Food and Beverage",
       "multi-select"
     );
-    agsFilingGrid.getElement().rows().its("length").as("rowsLength");
+    agsFilingGrid.getElement();
+    legacy.wrap(await agsFilingGrid.getElement().rows().count()).as("rowsLength");
     legacy.get("").then(async (rowsLength) => {
       if (Number(rowsLength) > 0) {
         deleteMultipleFiling(
@@ -78,11 +79,8 @@ test.describe("As a taxpayer, I should be able to download the PDF of specific f
     payment.clickFinishAndPayButton();
     applicationConfirmation
       .getElement()
-      .referenceIdData()
-      .invoke("text")
-      .then((referenceId) => {
-        legacy.wrap(referenceId).as("referenceId");
-      });
+      ;
+    legacy.wrap(await applicationConfirmation.getElement().referenceIdData().innerText()).as("referenceId");
     applicationConfirmation.clickCloseButton();
 
     legacy.get("").then(async (referenceId) => {

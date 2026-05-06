@@ -2,6 +2,9 @@ import { Page } from "@playwright/test";
 import { resolvePage } from "../../pageContext";
 
 class Payment {
+  private isPage(value: unknown): value is Page {
+    return !!value && typeof value === "object" && "locator" in (value as Record<string, unknown>);
+  }
   private elements(page: Page = resolvePage()) {
     return {
       savedPaymentMethods: () => page.locator('label[for="savedPayment"]'),
@@ -34,7 +37,9 @@ class Payment {
     await page.waitForTimeout(2000);
   }
 
-  async selectSavedPaymentMethod(page: Page = resolvePage(), order: number) {
+  async selectSavedPaymentMethod(pageOrOrder: Page | number = resolvePage(), maybeOrder?: number) {
+    const page = this.isPage(pageOrOrder) ? pageOrOrder : resolvePage();
+    const order = this.isPage(pageOrOrder) ? (maybeOrder as number) : pageOrOrder;
     await this.getElements(page).savedPaymentMethodItems().nth(order).click();
     await page.waitForTimeout(2000);
   }

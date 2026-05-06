@@ -83,6 +83,10 @@ class FilingGrid {
     return this.elements(page);
   }
 
+  private isPage(value: unknown): value is Page {
+    return !!value && typeof value === "object" && "locator" in (value as Record<string, unknown>);
+  }
+
   private async loadColumnMap(page: Page = resolvePage()) {
     const columns =
       this.userType === "taxpayer" ? TAXPAYER_FILING_COLUMNS : AGS_FILING_COLUMNS;
@@ -100,7 +104,11 @@ class FilingGrid {
     await this.loadColumnMap(page);
   }
 
-  async selectMunicipality(page: Page = resolvePage(), municipality: string) {
+  async selectMunicipality(pageOrMunicipality: Page | string = resolvePage(), maybeMunicipality?: string) {
+    const page = this.isPage(pageOrMunicipality) ? pageOrMunicipality : resolvePage();
+    const municipality = this.isPage(pageOrMunicipality)
+      ? (maybeMunicipality as string)
+      : pageOrMunicipality;
     await this.getElement(page).searchMunicipalityDropdown().fill(municipality);
     await this.getElement(page).anyList().filter({ hasText: municipality }).first().click();
     await waitForLoading(page);
@@ -117,7 +125,10 @@ class FilingGrid {
     return index;
   }
 
-  async sortColumn(page: Page = resolvePage(), isAscending: boolean, columnName: string) {
+  async sortColumn(pageOrAscending: Page | boolean, ascendingOrColumn: boolean | string, maybeColumn?: string) {
+    const page = this.isPage(pageOrAscending) ? pageOrAscending : resolvePage();
+    const isAscending = this.isPage(pageOrAscending) ? (ascendingOrColumn as boolean) : pageOrAscending;
+    const columnName = this.isPage(pageOrAscending) ? (maybeColumn as string) : (ascendingOrColumn as string);
     const index = await this.getColumnIndex(page, columnName);
     const header = this.getElement(page).columns().nth(index);
     await header.click();
@@ -128,18 +139,25 @@ class FilingGrid {
   }
 
   async filterColumn(
-    page: Page,
-    columnName: string,
-    filterValue: string,
+    page: Page | string = resolvePage(),
+    columnName?: string,
+    filterValue?: string,
     filterType = "text",
     filterOperation = "Contains"
   ) {
-    const index = await this.getColumnIndex(page, columnName);
+    if (typeof page === "string") {
+      filterOperation = filterType;
+      filterType = filterValue || "text";
+      filterValue = columnName;
+      columnName = page;
+      page = resolvePage();
+    }
+    const index = await this.getColumnIndex(page, columnName!);
     await applyGridFilter({
       page,
       filterButton: this.getElement(page).specificColumnFilter(index),
       filterType,
-      filterValue,
+      filterValue: filterValue || "",
       filterOperation,
     });
     await waitForLoading(page);
@@ -163,11 +181,15 @@ class FilingGrid {
   }
 
   async getDataOfColumn(
-    page: Page,
-    targetColumnName: string,
-    anchorColumnName: string,
-    anchorValue: string
+    pageOrTarget: Page | string,
+    targetOrAnchor: string,
+    anchorOrValue: string,
+    maybeAnchorValue?: string
   ) {
+    const page = this.isPage(pageOrTarget) ? pageOrTarget : resolvePage();
+    const targetColumnName = this.isPage(pageOrTarget) ? targetOrAnchor : pageOrTarget;
+    const anchorColumnName = this.isPage(pageOrTarget) ? anchorOrValue : targetOrAnchor;
+    const anchorValue = this.isPage(pageOrTarget) ? (maybeAnchorValue as string) : anchorOrValue;
     await this.filterColumn(page, anchorColumnName, anchorValue, "text", "Contains");
     const targetColumnIndex = await this.getColumnIndex(page, targetColumnName);
     const anchorColumnIndex = await this.getColumnIndex(page, anchorColumnName);
@@ -176,11 +198,15 @@ class FilingGrid {
   }
 
   async getElementOfColumn(
-    page: Page,
-    targetColumnName: string,
-    anchorColumnName: string,
-    anchorValue: string
-  ) {
+    pageOrTarget: Page | string,
+    targetOrAnchor: string,
+    anchorOrValue: string,
+    maybeAnchorValue?: string
+  ): Promise<any> {
+    const page = this.isPage(pageOrTarget) ? pageOrTarget : resolvePage();
+    const targetColumnName = this.isPage(pageOrTarget) ? targetOrAnchor : pageOrTarget;
+    const anchorColumnName = this.isPage(pageOrTarget) ? anchorOrValue : targetOrAnchor;
+    const anchorValue = this.isPage(pageOrTarget) ? (maybeAnchorValue as string) : anchorOrValue;
     await this.filterColumn(page, anchorColumnName, anchorValue, "text", "Contains");
     const targetColumnIndex = await this.getColumnIndex(page, targetColumnName);
     const anchorColumnIndex = await this.getColumnIndex(page, anchorColumnName);
@@ -189,17 +215,24 @@ class FilingGrid {
   }
 
   async toggleActionButton(
-    page: Page,
-    action: string,
-    anchorColumnName: string,
-    anchorValue: string
+    pageOrAction: Page | string,
+    actionOrAnchor: string,
+    anchorOrValue: string,
+    maybeAnchorValue?: string
   ) {
+    const page = this.isPage(pageOrAction) ? pageOrAction : resolvePage();
+    const action = this.isPage(pageOrAction) ? actionOrAnchor : pageOrAction;
+    const anchorColumnName = this.isPage(pageOrAction) ? anchorOrValue : actionOrAnchor;
+    const anchorValue = this.isPage(pageOrAction) ? (maybeAnchorValue as string) : anchorOrValue;
     const actionCell = await this.getElementOfColumn(page, "Actions", anchorColumnName, anchorValue);
     await actionCell.click();
     await this.getElement(page).anyList().filter({ hasText: action }).first().click();
   }
 
-  async deleteFiling(page: Page = resolvePage(), anchorColumnName: string, anchorValue: string) {
+  async deleteFiling(pageOrAnchor: Page | string, anchorOrValue: string, maybeValue?: string) {
+    const page = this.isPage(pageOrAnchor) ? pageOrAnchor : resolvePage();
+    const anchorColumnName = this.isPage(pageOrAnchor) ? anchorOrValue : pageOrAnchor;
+    const anchorValue = this.isPage(pageOrAnchor) ? (maybeValue as string) : anchorOrValue;
     if (this.userType === "taxpayer") {
       await this.toggleActionButton(page, "Delete", anchorColumnName, anchorValue);
       await page.locator(".k-dialog-actions button").filter({ hasText: "Delete" }).click();
@@ -214,7 +247,11 @@ class FilingGrid {
     await waitForLoading(page);
   }
 
-  async updateStatus(page: Page = resolvePage(), newStatus: string, anchorColumnName: string, anchorValue: string) {
+  async updateStatus(pageOrNewStatus: Page | string, newStatusOrAnchor: string, anchorOrValue: string, maybeValue?: string) {
+    const page = this.isPage(pageOrNewStatus) ? pageOrNewStatus : resolvePage();
+    const newStatus = this.isPage(pageOrNewStatus) ? newStatusOrAnchor : pageOrNewStatus;
+    const anchorColumnName = this.isPage(pageOrNewStatus) ? anchorOrValue : newStatusOrAnchor;
+    const anchorValue = this.isPage(pageOrNewStatus) ? (maybeValue as string) : anchorOrValue;
     const cell = await this.getElementOfColumn(page, "Payment Status", anchorColumnName, anchorValue);
     await cell.locator('button[aria-haspopup="menu"]').click();
     await page.locator("li").filter({ hasText: "Update Status" }).first().click();
@@ -223,7 +260,10 @@ class FilingGrid {
     await waitForLoading(page);
   }
 
-  async checkAuditLog(page: Page = resolvePage(), anchorColumnName: string, anchorValue: string) {
+  async checkAuditLog(pageOrAnchor: Page | string, anchorOrValue: string, maybeValue?: string) {
+    const page = this.isPage(pageOrAnchor) ? pageOrAnchor : resolvePage();
+    const anchorColumnName = this.isPage(pageOrAnchor) ? anchorOrValue : pageOrAnchor;
+    const anchorValue = this.isPage(pageOrAnchor) ? (maybeValue as string) : anchorOrValue;
     const popup = page.waitForEvent("popup").catch(() => null);
     const cell = await this.getElementOfColumn(page, "Payment Status", anchorColumnName, anchorValue);
     await cell.locator('button[aria-haspopup="menu"]').first().click();
@@ -236,10 +276,12 @@ class FilingGrid {
   }
 
   async clickExportButton(
-    page: Page,
+    pageOrIsExportFullData: Page | boolean = resolvePage(),
     isExportFullData = true,
     fileType: "CSV" | "Excel" = "CSV"
   ) {
+    const page = this.isPage(pageOrIsExportFullData) ? pageOrIsExportFullData : resolvePage();
+    const exportFullData = this.isPage(pageOrIsExportFullData) ? isExportFullData : pageOrIsExportFullData;
     const filingExportModal = new ExportFiling();
     await this.getElement(page).exportButton().click();
     if (this.userType !== "taxpayer") {
@@ -248,7 +290,7 @@ class FilingGrid {
       } else {
         await filingExportModal.selectCSVFileType(page);
       }
-      if (isExportFullData) {
+      if (exportFullData) {
         await filingExportModal.clickExportFullDataButton(page);
       } else {
         await filingExportModal.clickExportViewButton(page);
@@ -261,27 +303,35 @@ class FilingGrid {
     await waitForLoading(page, 5);
   }
 
-  async searchFiling(page: Page = resolvePage(), searchValue: string) {
+  async searchFiling(pageOrSearchValue: Page | string, maybeSearchValue?: string) {
+    const page = this.isPage(pageOrSearchValue) ? pageOrSearchValue : resolvePage();
+    const searchValue = this.isPage(pageOrSearchValue) ? (maybeSearchValue as string) : pageOrSearchValue;
     await this.getElement(page).searchBox().fill(searchValue);
     await waitForLoading(page, 5);
   }
 
   async setStartDate(
-    page: Page,
-    { month, day, year }: { month: string; day: string; year: string }
+    pageOrDate: Page | { month: string; day: string; year: string },
+    maybeDate?: { month: string; day: string; year: string }
   ) {
+    const page = this.isPage(pageOrDate) ? pageOrDate : resolvePage();
+    const { month, day, year } = this.isPage(pageOrDate) ? (maybeDate as { month: string; day: string; year: string }) : pageOrDate;
     await page.locator(".fa-calendar-days").click();
     await page.locator(".k-animation-container input").first().fill(`${month}/${day}/${year}`);
     await page.locator(".k-animation-container button").filter({ hasText: "Filter" }).click();
     await waitForLoading(page);
   }
 
-  async getColumnCellsData(page: Page = resolvePage(), columnName: string) {
+  async getColumnCellsData(pageOrColumnName: Page | string, maybeColumnName?: string) {
+    const page = this.isPage(pageOrColumnName) ? pageOrColumnName : resolvePage();
+    const columnName = this.isPage(pageOrColumnName) ? (maybeColumnName as string) : pageOrColumnName;
     const columnIndex = await this.getColumnIndex(page, columnName);
     return getColumnTexts(this.getElement(page).rows(), columnIndex);
   }
 
-  async isColumnExist(page: Page = resolvePage(), columnName: string) {
+  async isColumnExist(pageOrColumnName: Page | string, maybeColumnName?: string) {
+    const page = this.isPage(pageOrColumnName) ? pageOrColumnName : resolvePage();
+    const columnName = this.isPage(pageOrColumnName) ? (maybeColumnName as string) : pageOrColumnName;
     const currentMap = await getColumnOrder(
       AGS_FILING_COLUMNS.includes(columnName)
         ? AGS_FILING_COLUMNS
