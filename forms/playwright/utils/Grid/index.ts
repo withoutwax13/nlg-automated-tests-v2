@@ -1,3 +1,4 @@
+import type { Page, Locator } from "@playwright/test";
 import { currentPage, hasAlias, setAlias, textOf } from "../../support/runtime";
 
 const normalizeHeaderText = (value: string) =>
@@ -84,4 +85,55 @@ export const getVisibilityStatusOfColumns = async (
   }
 
   setAlias(columnCollectionAlias, visibilityStatus);
+};
+
+
+export const applyGridFilter = async ({
+  page,
+  filterButton,
+  filterType,
+  filterValue,
+  filterOperation,
+}: {
+  page: Page;
+  filterButton: Locator;
+  filterType: string;
+  filterValue: string;
+  filterOperation: string;
+}) => {
+  await filterButton.click({ force: true });
+
+  if (filterType === "multi-select") {
+    const row = page
+      .locator(".k-multicheck-wrap li")
+      .filter({ hasText: filterValue })
+      .first();
+    await row.locator('input[type="checkbox"]').click({ force: true });
+  } else {
+    if (filterType === "text" || filterType === "date" || filterType === "number") {
+      validateFilterOperation(filterType as "text" | "date" | "number", filterOperation);
+    }
+
+    await page.locator(".k-filter-menu-container .k-dropdownlist").click({ force: true });
+    await page
+      .locator(".k-list-ul li .k-list-item-text")
+      .filter({ hasText: filterOperation })
+      .first()
+      .click({ force: true });
+
+    if (!["Is not null", "Is null"].includes(filterOperation)) {
+      if (filterType === "date") {
+        const dateInput = page.locator(".k-filter-menu-container .k-dateinput input").first();
+        await dateInput.fill("");
+        await dateInput.type(filterValue.split("/").join("ArrowRight"), { delay: 10 });
+      } else {
+        await page.locator(".k-filter-menu-container .k-input").fill(filterValue);
+      }
+    }
+  }
+
+  await page
+    .locator(".k-filter-menu-container .k-actions .k-button")
+    .filter({ hasText: "Filter" })
+    .click({ force: true });
 };
