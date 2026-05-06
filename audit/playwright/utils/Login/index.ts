@@ -1,4 +1,5 @@
 import { expect, Page, Response } from "@playwright/test";
+import { login as nativeLogin } from "../../support/native-helpers";
 
 type ResponseWaiter = Promise<Response>;
 
@@ -35,6 +36,7 @@ export const waitForSelectedDepartment = async (waiter: ResponseWaiter) => {
 };
 
 export default {
+  login: nativeLogin,
   interceptAuditAuthLogin,
   waitForAuditAuthLogin,
   interceptDepartments,

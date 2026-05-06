@@ -34,3 +34,18 @@ export const getCredentials = (accountType: AccountType = "taxpayer", accountInd
 
   throw new Error(`Missing credentials for account type: ${normalized}`);
 };
+
+export const login = async (
+  page: import("@playwright/test").Page,
+  params: { accountType?: AccountType; accountIndex?: number } = {}
+) => {
+  const creds = getCredentials(params.accountType || "taxpayer", params.accountIndex || 0);
+  await page.goto(`${getBaseUrl()}/login`);
+  const cookieButton = page.locator(".cookie-actions .NLGButtonPrimary").first();
+  if (await cookieButton.isVisible().catch(() => false)) {
+    await cookieButton.click({ force: true });
+  }
+  await page.locator('[data-cy="email-address"]').fill(creds.username);
+  await page.locator('[data-cy="password"]').fill(creds.password);
+  await page.locator('[data-cy="sign-in"]').filter({ hasText: "Sign In" }).first().click();
+};

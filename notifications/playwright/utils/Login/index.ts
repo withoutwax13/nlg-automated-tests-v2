@@ -1,4 +1,5 @@
 import { expect, type Page, type Response } from "@playwright/test";
+import { login as nativeLogin } from "../../support/native-helpers";
 
 type AccountType = "taxpayer" | "municipal" | "ags";
 
@@ -66,5 +67,5 @@ export default {
   interceptAwsCognito,
   interceptHubspotChat,
   interceptLeadFlowConfig,
-  login,
+  login: nativeLogin,
 };
