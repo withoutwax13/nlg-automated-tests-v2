@@ -63,9 +63,27 @@ export const login = async (page: Page, params: LoginParams = {}): Promise<void>
   await cognitoResponses;
 };
 
+
+const loginCompat = async (arg1: unknown, arg2?: unknown) => {
+  const looksLikePage =
+    !!arg1 && typeof arg1 === "object" && "goto" in (arg1 as Record<string, unknown>);
+
+  if (looksLikePage) {
+    return (nativeLogin as unknown as (page: unknown, params?: unknown) => Promise<unknown>)(
+      arg1,
+      arg2
+    );
+  }
+
+  return (nativeLogin as unknown as (params: unknown, page?: unknown) => Promise<unknown>)(
+    arg1,
+    arg2
+  );
+};
+
 export default {
   interceptAwsCognito,
   interceptHubspotChat,
   interceptLeadFlowConfig,
-  login: nativeLogin,
+  login: loginCompat,
 };
