@@ -128,7 +128,13 @@ export const login = async ({
   notFirstLogin = false,
 }: LoginParams) => {
   const page = currentPage();
-  const account = credentials[accountType][accountIndex];
+  const account =
+    credentials?.[accountType]?.[accountIndex] ||
+    credentials?.[accountType]?.[0] ||
+    {
+      username: process.env[`${accountType.toUpperCase()}_USERNAME`] || process.env.TEST_USERNAME || "",
+      password: process.env[`${accountType.toUpperCase()}_PASSWORD`] || process.env.TEST_PASSWORD || "",
+    };
   const leadFlowConfig = page
     .waitForResponse((response) => response.request().method() === "GET" && isHubspotConfig(response.url()))
     .catch(() => undefined);

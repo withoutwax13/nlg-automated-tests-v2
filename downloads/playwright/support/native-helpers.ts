@@ -15,7 +15,26 @@ const getEnvironment = (): string =>
 
 const getBaseUrl = (): string => `https://${getEnvironment()}.azavargovapps.com`;
 
+const parseValidCredentialsEnv = () => {
+  const raw =
+    process.env.validCredentials ||
+    process.env.VALIDCREDENTIALS ||
+    process.env.VALID_CREDENTIALS;
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw) as Record<AccountType, { username: string; password: string }[]>;
+  } catch {
+    return undefined;
+  }
+};
+
 const getCredentials = (accountType: AccountType) => {
+  const envMap = parseValidCredentialsEnv();
+  const fromMap = envMap?.[accountType]?.[0];
+  if (fromMap?.username && fromMap?.password) {
+    return fromMap;
+  }
+
   const prefix = accountType.toUpperCase();
 
   return {

@@ -55,6 +55,19 @@ const getFixtureData = (): FixtureData | undefined => {
   }
 };
 
+const parseValidCredentialsEnv = (): Partial<Record<AccountType, FixtureAccount[]>> | undefined => {
+  const raw =
+    process.env.validCredentials ||
+    process.env.VALIDCREDENTIALS ||
+    process.env.VALID_CREDENTIALS;
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw) as Partial<Record<AccountType, FixtureAccount[]>>;
+  } catch {
+    return undefined;
+  }
+};
+
 const getCredentials = (
   accountType: AccountType,
   accountIndex: number
@@ -63,6 +76,12 @@ const getCredentials = (
   const fixtureAccount = fixtureData?.accounts?.[accountType]?.[accountIndex];
   if (fixtureAccount) {
     return fixtureAccount;
+  }
+
+  const envMap = parseValidCredentialsEnv();
+  const envAccount = envMap?.[accountType]?.[accountIndex] || envMap?.[accountType]?.[0];
+  if (envAccount?.username && envAccount?.password) {
+    return envAccount;
   }
 
   const accountTypePrefix = accountType.toUpperCase();

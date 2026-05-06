@@ -10,6 +10,36 @@ type AuthFixture = {
   invalidCredentials: { email: string; password: string };
 };
 
+const parseValidCredentialsEnv = () => {
+  const raw =
+    process.env.validCredentials ||
+    process.env.VALIDCREDENTIALS ||
+    process.env.VALID_CREDENTIALS;
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw) as {
+      taxpayer?: Array<{ username?: string; email?: string; password: string }>;
+    };
+  } catch {
+    return undefined;
+  }
+};
+
+const resolveLoginCreds = (manualAuth: boolean, params: LoginParams, auth: AuthFixture) => {
+  if (manualAuth) {
+    return {
+      email: params.email || auth.invalidCredentials.email,
+      password: params.password || auth.invalidCredentials.password,
+    };
+  }
+
+  const envCred = parseValidCredentialsEnv()?.taxpayer?.[0];
+  return {
+    email: params.email || envCred?.email || envCred?.username || auth.validCredentials.email,
+    password: params.password || envCred?.password || auth.validCredentials.password,
+  };
+};
+
 const readAuthFixture = (): AuthFixture => {
   const fixturePath = path.resolve(__dirname, "..", "fixtures", "auth.json");
   return JSON.parse(fs.readFileSync(fixturePath, "utf-8")) as AuthFixture;
@@ -18,15 +48,7 @@ const readAuthFixture = (): AuthFixture => {
 export const login = async (page: Page, params: LoginParams = {}) => {
   const auth = readAuthFixture();
   const manualAuth = !!params.manualAuth;
-  const creds = manualAuth
-    ? {
-        email: params.email || auth.invalidCredentials.email,
-        password: params.password || auth.invalidCredentials.password,
-      }
-    : {
-        email: params.email || auth.validCredentials.email,
-        password: params.password || auth.validCredentials.password,
-      };
+  const creds = resolveLoginCreds(manualAuth, params, auth);
 
   const loginWaiter = !manualAuth
     ? LoginUtils.interceptAuditAuthLogin(page)
