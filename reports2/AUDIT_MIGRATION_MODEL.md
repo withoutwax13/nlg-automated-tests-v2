@@ -44,7 +44,7 @@ Goal: Assess whether `reports2` is a solid canonical model for Cypress -> Playwr
 ### CRITICAL-2: 22 compile errors in core spec login calls
 - After bypassing config issue (`--ignoreDeprecations 5.0`), compile reports 22 errors:
   - `TS2554 Expected 1-2 arguments, but got 3`
-- Pattern in specs: `Login.login(page, page, { accountType: "..." })`
+- Pattern in specs: `Login.login(page, { accountType: "..." })`
 - Actual `Login.login` currently maps to native helper with signature `(page, params?)`.
 - Impact: baseline specs are not API-consistent with baseline helper API.
 

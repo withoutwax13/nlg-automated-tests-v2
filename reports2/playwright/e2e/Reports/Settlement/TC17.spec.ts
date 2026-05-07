@@ -20,7 +20,7 @@ test.describe(
         userType: "municipal",
       });
 
-      await Login.login(page, page, { accountType: "municipal", accountIndex: 5 });
+      await Login.login(page, { accountType: "municipal", accountIndex: 5 });
       await settlementGrid.init();
       await expect(settlementGrid.getElement().noRecordFoundComponent()).toHaveCount(0);
       const defaultTotalItems = await settlementGrid.getTotalItems();

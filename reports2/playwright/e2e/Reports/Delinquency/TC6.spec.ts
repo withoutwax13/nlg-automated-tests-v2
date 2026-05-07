@@ -10,7 +10,7 @@ test.describe.skip(
         userType: "municipal",
       });
 
-      await Login.login(page, page, { accountType: "municipality", accountIndex: 2 });
+      await Login.login(page, { accountType: "municipality", accountIndex: 2 });
       await municipalityDelinquencyGrid.init();
       await expect(municipalityDelinquencyGrid.getElement().noRecordFoundComponent()).toHaveCount(0);
     });

@@ -11,7 +11,7 @@ test.describe(
         municipalitySelection: "City of Arrakis",
       });
 
-      await Login.login(page, page, { accountType: "ags", accountIndex: 6 });
+      await Login.login(page, { accountType: "ags", accountIndex: 6 });
       await transactionGrid.init();
       await expect(transactionGrid.getElement().exportButton()).toBeVisible();
       await expect(transactionGrid.getElement().exportButton()).toBeEnabled();

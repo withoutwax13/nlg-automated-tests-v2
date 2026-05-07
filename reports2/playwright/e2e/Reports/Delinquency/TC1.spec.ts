@@ -11,7 +11,7 @@ test.describe(
         municipalitySelection: "City of Arrakis",
       });
 
-      await Login.login(page, page, { accountType: "ags" });
+      await Login.login(page, { accountType: "ags" });
       await delinquencyGrid.init();
       await expect(delinquencyGrid.getElement().exportButton()).toBeVisible();
       await expect(delinquencyGrid.getElement().exportButton()).toBeEnabled();

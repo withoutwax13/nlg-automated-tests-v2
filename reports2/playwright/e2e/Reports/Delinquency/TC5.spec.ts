@@ -11,7 +11,7 @@ test.describe.skip(
         municipalitySelection: "City of Arrakis",
       });
 
-      await Login.login(page, page, { accountType: "ags", accountIndex: 2 });
+      await Login.login(page, { accountType: "ags", accountIndex: 2 });
       await agsDelinquencyGrid.init();
       await expect(agsDelinquencyGrid.getElement().searchMunicipalityDropdown()).toHaveValue(
         "City of Arrakis"

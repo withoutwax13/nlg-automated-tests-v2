@@ -13,7 +13,7 @@ test.describe(
       });
       const manageDelinquencyModal = new ManageDelinquencyModal(page);
 
-      await Login.login(page, page, { accountType: "ags", accountIndex: 1 });
+      await Login.login(page, { accountType: "ags", accountIndex: 1 });
       await agsDelinquencyGrid.init();
       await agsDelinquencyGrid.manageDelinquencyItemByOrder(0);
 

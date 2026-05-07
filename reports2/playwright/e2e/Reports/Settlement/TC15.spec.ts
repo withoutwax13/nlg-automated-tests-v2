@@ -10,7 +10,7 @@ test.describe(
         userType: "municipal",
       });
 
-      await Login.login(page, page, { accountType: "municipal", accountIndex: 4 });
+      await Login.login(page, { accountType: "municipal", accountIndex: 4 });
       await settlementGrid.init();
       await expect(settlementGrid.getElement().exportButton()).toBeVisible();
       await expect(settlementGrid.getElement().exportButton()).toBeEnabled();

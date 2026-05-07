@@ -10,7 +10,7 @@ test.describe(
         userType: "municipal",
       });
 
-      await Login.login(page, page, { accountType: "municipal" });
+      await Login.login(page, { accountType: "municipal" });
       await delinquencyGrid.init();
       await expect(delinquencyGrid.getElement().exportButton()).toBeVisible();
       await expect(delinquencyGrid.getElement().exportButton()).toBeEnabled();

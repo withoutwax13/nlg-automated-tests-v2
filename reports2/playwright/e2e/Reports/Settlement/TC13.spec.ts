@@ -13,7 +13,7 @@ test.describe(
         municipalitySelection: "City of Arrakis",
       });
 
-      await Login.login(page, page, { accountType: "ags", accountIndex: 9 });
+      await Login.login(page, { accountType: "ags", accountIndex: 9 });
 
       const columnPairs: Array<[string, string]> = [];
       const columnsToTest = defaultColumns.slice(1, 4);

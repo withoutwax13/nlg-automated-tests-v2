@@ -13,7 +13,7 @@ test.describe(
         municipalitySelection: "City of Arrakis",
       });
 
-      await Login.login(page, page, { accountType: "ags", accountIndex: 9 });
+      await Login.login(page, { accountType: "ags", accountIndex: 9 });
       for (const column of defaultColumns.slice(1, 4)) {
         await transactionGrid.init();
         await transactionGrid.clickCustomizeTableViewButton();

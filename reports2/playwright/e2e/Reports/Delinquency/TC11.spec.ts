@@ -56,7 +56,7 @@ test.describe.skip(
       });
       const manageDelinquencyModal = new ManageDelinquencyModal(page);
 
-      await Login.login(page, page, { accountType: "ags", accountIndex: 3 });
+      await Login.login(page, { accountType: "ags", accountIndex: 3 });
       await businessGrid.init();
       await businessGrid.clickAddBusinessButton();
       await businessAddPage.fillFields(newBusinessData);

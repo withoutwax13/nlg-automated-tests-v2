@@ -13,7 +13,7 @@ test.describe(
       });
       const manageDelinquencyModal = new ManageDelinquencyModal(page);
 
-      await Login.login(page, page, { accountType: "municipal", accountIndex: 1 });
+      await Login.login(page, { accountType: "municipal", accountIndex: 1 });
       await municipalDelinquencyGrid.init();
       await expect(municipalDelinquencyGrid.getElement().noRecordFoundComponent()).toHaveCount(0);
 

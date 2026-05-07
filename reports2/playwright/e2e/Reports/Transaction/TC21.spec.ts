@@ -10,7 +10,7 @@ test.describe(
         userType: "municipal",
       });
 
-      await Login.login(page, page, { accountType: "municipal", accountIndex: 6 });
+      await Login.login(page, { accountType: "municipal", accountIndex: 6 });
       await transactionGrid.init();
       await expect(transactionGrid.getElement().exportButton()).toBeVisible();
       await expect(transactionGrid.getElement().exportButton()).toBeEnabled();

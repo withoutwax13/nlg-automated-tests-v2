@@ -53,7 +53,7 @@ test.describe.skip(
       const businessGrid = new BusinessGrid(page, { userType: "municipal" });
       const manageDelinquencyModal = new ManageDelinquencyModal(page);
 
-      await Login.login(page, page, { accountType: "municipal", accountIndex: 3 });
+      await Login.login(page, { accountType: "municipal", accountIndex: 3 });
       await businessGrid.init();
       await businessGrid.clickAddBusinessButton();
       await businessAddPage.fillFields(newBusinessData);
