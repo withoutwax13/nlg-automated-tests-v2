@@ -15,7 +15,7 @@ test.describe("User should not be able to proceed to Applicant info step if the 
       "locationInfo.locations[0].locationDBA",
     ]);
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 3 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 3 });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Business License (Annual) - E2E #1");

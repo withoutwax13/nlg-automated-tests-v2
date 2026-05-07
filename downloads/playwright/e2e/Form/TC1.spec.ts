@@ -12,7 +12,7 @@ import Login from "../../utils/Login";
 test.describe("As municipal user, exported file should match the filtered grid's row items", () => {
   test("Initiate test", async ({ page }) => {
     const formGrid = new FormGrid(page, { userType: "municipal" });
-    await Login.login(page, { accountType: "municipal" });
+    await Login.login(page, page, { accountType: "municipal" });
     await formGrid.init();
     await formGrid.filterColumn("Form Title", "Annual");
     const rowLength = await formGrid.getTotalItems();

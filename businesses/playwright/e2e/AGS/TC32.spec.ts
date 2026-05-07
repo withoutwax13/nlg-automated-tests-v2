@@ -47,7 +47,7 @@ const addBusiness = async () => {
 
 test.describe("I should be able to reset all data of a specific municipality", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "ags" });
+    await Login.login(page, { accountType: "ags" });
     await addBusiness();
     await agsBusinessGrid.init();
     await agsBusinessGrid.clickResetDataButton();

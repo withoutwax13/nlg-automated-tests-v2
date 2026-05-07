@@ -20,7 +20,7 @@ test.describe("As a superuser, when I invited any user type in user service, the
     const randomTag = Math.floor(Math.random() * 1000000);
     const ENDPOINT = `${testmailVars.endpoint}?apikey=${testmailVars.apiKey}&namespace=${testmailVars.namespace}&tag=${randomTag}`;
 
-    await Login.login({ accountType: "ags" });
+    await Login.login(page, { accountType: "ags" });
     await user.init();
     await user.clickInviteUserButton();
     await inviteUserModal.typeEmail(

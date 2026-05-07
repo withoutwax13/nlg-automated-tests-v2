@@ -6,7 +6,7 @@ const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
 
 test.describe("As a municipal user,  I should be able to reveal the full content of FEIN in business list.", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "municipal", accountIndex: 6 });
+    await Login.login(page, { accountType: "municipal", accountIndex: 6 });
     await municipalBusinessGrid.init();
     const feinValueBeforeClick = await municipalBusinessGrid.getDataOfColumn(
       "FEIN",

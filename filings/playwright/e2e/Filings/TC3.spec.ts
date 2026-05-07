@@ -10,7 +10,7 @@ const municipalityGrid = new MunicipalityGrid({
 
 test.describe.skip("As an AGS user, I should be able to remove the custom field on the filing list", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "ags", accountIndex: 2 });
+    await Login.login(page, { accountType: "ags", accountIndex: 2 });
     municipalityGrid.init();
     municipalityGrid.selectMunicipality("City of Arrakis");
     municipalityGrid.addCustomField(
@@ -18,7 +18,7 @@ test.describe.skip("As an AGS user, I should be able to remove the custom field 
       `Custom Field Name ${randomSeed}`
     );
     await logout();
-    await Login.login({ accountType: "ags", accountIndex: 2, notFirstLogin: true });
+    await Login.login(page, { accountType: "ags", accountIndex: 2, notFirstLogin: true });
     municipalityGrid.init();
     municipalityGrid.selectMunicipality("City of Arrakis");
     municipalityGrid.removeCustomField(`Custom Field Name ${randomSeed}`);

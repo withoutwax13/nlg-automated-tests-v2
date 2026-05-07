@@ -35,7 +35,7 @@ const newBusinessData = {
 
 test.describe("As a municipal user, I should be able to add a business.", () => {
   test("Initiating test", async () => {
-    await Login.login({
+    await Login.login(page, {
       accountType: "municipal",
       accountIndex: 4,
     });

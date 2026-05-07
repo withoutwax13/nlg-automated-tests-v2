@@ -13,7 +13,7 @@ test.describe("If user opted for an agency registering in behalf of the customer
     const filing = new Filing();
     const customData = await getUniqueRegistrationData(randomSeed, false);
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 8 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 8 });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Business License (Annual) - E2E #1");

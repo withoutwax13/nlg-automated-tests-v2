@@ -31,7 +31,7 @@ test.describe("User must see the current date on the Applicant info step", () =>
       day: "2-digit",
     });
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 9 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 9 });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Business License (Annual) - E2E #1");

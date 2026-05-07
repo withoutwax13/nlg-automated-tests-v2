@@ -35,7 +35,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As a taxpayer, I should be able to download the PDF of specific filing by selecting 'Download' in the action button dropdown", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "ags", accountIndex: 4 });
+    await Login.login(page, { accountType: "ags", accountIndex: 4 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -61,7 +61,7 @@ test.describe("As a taxpayer, I should be able to download the PDF of specific f
     });
     await logout();
 
-    await Login.login({ accountType: "taxpayer", notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");

@@ -53,7 +53,7 @@ test.describe.skip("As a taxpayer user, I should be able to add a business.", ()
     });
   });
   test("Initiating test", async () => {
-    await Login.login({
+    await Login.login(page, {
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 2,
@@ -68,7 +68,7 @@ test.describe.skip("As a taxpayer user, I should be able to add a business.", ()
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     await logout();
-    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
+    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);

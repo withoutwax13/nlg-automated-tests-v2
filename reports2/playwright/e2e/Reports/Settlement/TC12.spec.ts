@@ -6,7 +6,6 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As a user, I should be able to hide/show columns on the settlement list",
-  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const settlementGrid = new SettlementGrid(page, {
@@ -14,7 +13,7 @@ test.describe(
         municipalitySelection: "City of Arrakis",
       });
 
-      await Login.login(page, { accountType: "ags", accountIndex: 9 });
+      await Login.login(page, page, { accountType: "ags", accountIndex: 9 });
       for (const column of defaultColumns.slice(1, 4)) {
         await settlementGrid.init();
         await settlementGrid.clickCustomizeTableViewButton();

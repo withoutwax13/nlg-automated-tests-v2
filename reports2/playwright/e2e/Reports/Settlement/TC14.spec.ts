@@ -4,7 +4,6 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As an AGS user, I should be able to export a settlement report of a government.",
-  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const settlementGrid = new SettlementGrid(page, {
@@ -12,7 +11,7 @@ test.describe(
         municipalitySelection: "City of Arrakis",
       });
 
-      await Login.login(page, { accountType: "ags", accountIndex: 4 });
+      await Login.login(page, page, { accountType: "ags", accountIndex: 4 });
       await settlementGrid.init();
       await expect(settlementGrid.getElement().exportButton()).toBeVisible();
       await expect(settlementGrid.getElement().exportButton()).toBeEnabled();

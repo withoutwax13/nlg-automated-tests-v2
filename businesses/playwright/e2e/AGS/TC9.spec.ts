@@ -46,7 +46,7 @@ test.describe("As an AGS user, I should be able to add a business.", () => {
     });
   });
   test("Initiating test", async () => {
-    await Login.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
+    await Login.login(page, { accountType: "ags", notFirstLogin: true, accountIndex: 4 });
     businessGrid.init();
     businessGrid.clickAddBusinessButton();
     addBusinessPage.fillFields(newBusinessData);

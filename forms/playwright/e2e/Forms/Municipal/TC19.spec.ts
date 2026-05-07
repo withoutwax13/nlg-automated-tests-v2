@@ -10,7 +10,7 @@ test.describe("As a municipal user, I should be able to reorganize the order of 
     });
 
     await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
-    await Login.login({ accountType: "municipal", accountIndex: 4 });
+    await Login.login(page, { accountType: "municipal", accountIndex: 4 });
 
     const columnPairs: Array<[string, string]> = [];
     const columnsToTest = defaultColumns.slice(1, 5);

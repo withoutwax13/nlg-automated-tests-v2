@@ -10,7 +10,7 @@ const randomDate = Math.floor(Math.random() * 28) + 1;
 
 test.describe("As a municipal user, I should be able to update start date for delinquency tracking in the business details page", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "municipal", accountIndex: 1 });
+    await Login.login(page, { accountType: "municipal", accountIndex: 1 });
     await municipalBusinessGrid.init();
     await municipalBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");

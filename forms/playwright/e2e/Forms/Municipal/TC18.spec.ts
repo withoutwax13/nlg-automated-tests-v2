@@ -10,7 +10,7 @@ test.describe("As a municipal user, I should be able to hide/show columns in the
     });
 
     await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
-    await Login.login({ accountType: "municipal", accountIndex: 3 });
+    await Login.login(page, { accountType: "municipal", accountIndex: 3 });
 
     for (const column of defaultColumns.slice(1, 3)) {
       const aliasBase = column.replace(/\s+/g, "");

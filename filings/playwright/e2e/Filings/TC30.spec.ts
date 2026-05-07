@@ -17,7 +17,7 @@ test.describe("As a AGS user, I should be able to see filings in 1 year ago.", (
     const today = new Date();
     today.toLocaleString("en-US", { timeZone: "America/Chicago" });
     
-    await Login.login({ accountType: "ags", accountIndex: 7 });
+    await Login.login(page, { accountType: "ags", accountIndex: 7 });
     await agsFilingGrid.init();
     await agsFilingGrid.setStartDate({
       month:

@@ -13,7 +13,7 @@ test.describe("User should be able to add locations if opted for registering mul
     const filing = new Filing();
     const customData = await getUniqueRegistrationData(randomSeed, true);
 
-    await Login.login({ accountType: "taxpayer" });
+    await Login.login(page, { accountType: "taxpayer" });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Business License (Annual) - E2E #1");

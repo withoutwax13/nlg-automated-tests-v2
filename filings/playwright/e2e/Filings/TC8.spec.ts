@@ -36,7 +36,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As an AGS user, I should be able to navigate to the Audit Log page", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "ags", accountIndex: 6 });
+    await Login.login(page, { accountType: "ags", accountIndex: 6 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -62,7 +62,7 @@ test.describe("As an AGS user, I should be able to navigate to the Audit Log pag
     });
     await logout();
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -87,7 +87,7 @@ test.describe("As an AGS user, I should be able to navigate to the Audit Log pag
     await logout();
 
     legacy.get("").then(async (referenceId) => {
-      await Login.login({ accountType: "ags", accountIndex: 6, notFirstLogin: true });
+      await Login.login(page, { accountType: "ags", accountIndex: 6, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.checkAuditLog("Reference ID", String(referenceId));
     });

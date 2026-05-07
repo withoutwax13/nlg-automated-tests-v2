@@ -17,7 +17,7 @@ const normalizeFormOrder = (items: Array<string | null | undefined>) =>
 test.describe("As an AGS user, I should be able to configure the taxpayer form display arrangement", () => {
   test("Initiate test", async ({ page }, testInfo) => {
     await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
-    await Login.login({ accountType: "ags", accountIndex: 8 });
+    await Login.login(page, { accountType: "ags", accountIndex: 8 });
     await agsFormGrid.init();
     await agsFormGrid.clickSettingsButton();
     await formSetting.selectMunicipality("City of Arrakis");
@@ -25,7 +25,7 @@ test.describe("As an AGS user, I should be able to configure the taxpayer form d
     await formSetting.clickCancelButton();
     await logout();
 
-    await Login.login({ accountType: "taxpayer", notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     const taxpayerFormOrderBeforeMove = await collectTexts(
@@ -37,7 +37,7 @@ test.describe("As an AGS user, I should be able to configure the taxpayer form d
     );
     await logout();
 
-    await Login.login({ accountType: "ags", accountIndex: 8, notFirstLogin: true });
+    await Login.login(page, { accountType: "ags", accountIndex: 8, notFirstLogin: true });
     await agsFormGrid.init();
     await agsFormGrid.clickSettingsButton();
     await formSetting.selectMunicipality("City of Arrakis");
@@ -50,7 +50,7 @@ test.describe("As an AGS user, I should be able to configure the taxpayer form d
     await formSetting.clickSaveButton();
     await logout();
 
-    await Login.login({ accountType: "taxpayer", notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     const taxpayerFormOrderAfterMove = await collectTexts(

@@ -4,7 +4,6 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As an AGS, I should be able to export the transaction report of a government",
-  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const transactionGrid = new TransactionGrid(page, {
@@ -12,7 +11,7 @@ test.describe(
         municipalitySelection: "City of Arrakis",
       });
 
-      await Login.login(page, { accountType: "ags", accountIndex: 6 });
+      await Login.login(page, page, { accountType: "ags", accountIndex: 6 });
       await transactionGrid.init();
       await expect(transactionGrid.getElement().exportButton()).toBeVisible();
       await expect(transactionGrid.getElement().exportButton()).toBeEnabled();

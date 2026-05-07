@@ -13,7 +13,7 @@ const randomDate = Math.floor(Math.random() * 28) + 1;
 
 test.describe("As a ags user, I should be able to update business close date date in the business details page", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "ags", accountIndex: 2 });
+    await Login.login(page, { accountType: "ags", accountIndex: 2 });
     await agsBusinessGrid.init();
     await agsBusinessGrid.clickClearAllFiltersButton();
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13857");

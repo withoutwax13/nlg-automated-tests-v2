@@ -5,6 +5,6 @@ import Login from "../../utils/Login";
 test.describe("As a taxpayer user, I should be able to log into the system using valid username and password.", () => {
   test("Initiating test", async ({ page, request }) => {
     bindRuntime(page, request);
-    await Login.login({ accountType: "taxpayer" });
+    await Login.login(page, { accountType: "taxpayer" });
   });
 });

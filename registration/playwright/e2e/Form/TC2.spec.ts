@@ -13,7 +13,7 @@ test.describe("User should not be able to add locations if opted for registering
     const filing = new Filing();
     const customData = await getUniqueRegistrationData(randomSeed, false);
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 1 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 1 });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Business License (Annual) - E2E #1");

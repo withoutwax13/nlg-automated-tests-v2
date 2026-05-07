@@ -5,7 +5,7 @@ import Login from "../../utils/Login";
 const searchInput = 'input[placeholder="Search..."]';
 
 const loginAndSearch = async (page: Page, searchTerm: string) => {
-  await Login.login(page);
+  await Login.login(page, page);
   await page.locator(searchInput).fill(searchTerm);
   await waitForSearchResults(page);
 
@@ -62,7 +62,7 @@ test.describe("Data Grid Scenarios", () => {
       "Last Updated",
     ];
 
-    await Login.login(page);
+    await Login.login(page, page);
 
     await expect(page.locator("table")).toBeVisible();
     await expect(page.locator("thead tr th")).toHaveCount(8);
@@ -86,7 +86,7 @@ test.describe("Data Grid Scenarios", () => {
       "2024-03-05",
     ];
 
-    await Login.login(page);
+    await Login.login(page, page);
 
     for (let index = 0; index < searchItems.length; index++) {
       const searchItem = searchItems[index];
@@ -134,7 +134,7 @@ test.describe("Data Grid Scenarios", () => {
       { name: "audit complete", color: "rgb(85, 153, 112)" },
     ];
 
-    await Login.login(page);
+    await Login.login(page, page);
 
     for (const item of status) {
       await page.locator(searchInput).clear();

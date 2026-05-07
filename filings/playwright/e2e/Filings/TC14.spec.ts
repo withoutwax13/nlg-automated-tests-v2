@@ -34,7 +34,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As a AGS, I should be able to to view a specific filing by selecting the “View” icon", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "ags", accountIndex: 9 });
+    await Login.login(page, { accountType: "ags", accountIndex: 9 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -60,7 +60,7 @@ test.describe("As a AGS, I should be able to to view a specific filing by select
     });
     await logout();
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 4, notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 4, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -85,7 +85,7 @@ test.describe("As a AGS, I should be able to to view a specific filing by select
     await logout();
 
     legacy.get("").then(async (referenceId) => {
-      await Login.login({ accountType: "ags", accountIndex: 9, notFirstLogin: true });
+      await Login.login(page, { accountType: "ags", accountIndex: 9, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.toggleActionButton(
         "View",

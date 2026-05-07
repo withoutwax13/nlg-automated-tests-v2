@@ -51,7 +51,7 @@ test.describe("As a taxpayer user, I should be able to delete a business.", () =
     });
   });
   test("Initiating test", async () => {
-    await Login.login({
+    await Login.login(page, {
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 3,
@@ -66,7 +66,7 @@ test.describe("As a taxpayer user, I should be able to delete a business.", () =
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     await logout();
-    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 5 });
+    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true, accountIndex: 5 });
     await taxpayerBusinessGrid.init();
     await taxpayerBusinessGrid.clickAddBusinessButton();
     await taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);

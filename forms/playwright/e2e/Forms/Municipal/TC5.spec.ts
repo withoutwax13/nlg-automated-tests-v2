@@ -8,7 +8,7 @@ const municipalFormGrid = new FormGrid({ userType: "municipal" });
 test.describe("As a municipal user, I should be able to export forms.", () => {
   test("Initiate test", async ({ page }, testInfo) => {
     await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
-    await Login.login({ accountType: "municipal", accountIndex: 1 });
+    await Login.login(page, { accountType: "municipal", accountIndex: 1 });
     await municipalFormGrid.init();
     await municipalFormGrid.toggleActionButton(
       "filter",

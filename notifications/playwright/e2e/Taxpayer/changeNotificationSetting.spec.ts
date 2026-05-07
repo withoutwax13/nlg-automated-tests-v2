@@ -3,7 +3,7 @@ import selector from "../../fixtures/selector.json";
 import Login, { login, waitForApiResponse } from "../../utils/Login";
 
 const changeNotificationSetting = async ({ page }: { page: Page }) => {
-  await Login.login(page, { accountType: "taxpayer" });
+  await Login.login(page, page, { accountType: "taxpayer" });
 
   const notificationResponse = page.waitForResponse(
     (response: Response) =>

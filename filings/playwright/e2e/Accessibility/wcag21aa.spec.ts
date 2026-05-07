@@ -44,34 +44,34 @@ test.describe.skip('Accessibility Tests', () => {
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("AGS Filing List Page", async ({ page }) => {
-        await Login.login({ accountType: "ags" });
+        await Login.login(page, { accountType: "ags" });
         agsFilingGrid.init();
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Municipal Filing List Page", async ({ page }) => {
-        await Login.login({ accountType: "municipal" });
+        await Login.login(page, { accountType: "municipal" });
         municipalFilingGrid.init();
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Taxpayer Filing List Page", async ({ page }) => {
-        await Login.login({ accountType: "taxpayer" });
+        await Login.login(page, { accountType: "taxpayer" });
         taxpayerFilingGrid.init();
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Municipal Edit Page", async ({ page }) => {
-        await Login.login({ accountType: "ags" });
+        await Login.login(page, { accountType: "ags" });
         municipalityGrid.init();
         municipalityGrid.selectMunicipality("City of Arrakis");
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Taxpayer Submit Form Page", async ({ page }) => {
-        await Login.login({ accountType: "taxpayer" });
+        await Login.login(page, { accountType: "taxpayer" });
         filing.goToSubmitFormsTab();
         filing.selectGovernment("City of Arrakis");
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Taxpayer Submit Form Modal Flow", async ({ page }) => {
-        await Login.login({ accountType: "taxpayer" });
+        await Login.login(page, { accountType: "taxpayer" });
         filing.goToSubmitFormsTab();
         filing.selectGovernment("City of Arrakis");
         filing.selectForm("Food and Beverage");
@@ -79,7 +79,7 @@ test.describe.skip('Accessibility Tests', () => {
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Taxpayer Submit Form Flow - Basic Information Step", async ({ page }) => {
-        await Login.login({ accountType: "taxpayer" });
+        await Login.login(page, { accountType: "taxpayer" });
         filing.goToSubmitFormsTab();
         filing.selectGovernment("City of Arrakis");
         filing.selectForm("Food and Beverage");
@@ -89,7 +89,7 @@ test.describe.skip('Accessibility Tests', () => {
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Taxpayer Submit Form Flow - Tax Information Step", async ({ page }) => {
-        await Login.login({ accountType: "taxpayer" });
+        await Login.login(page, { accountType: "taxpayer" });
         filing.goToSubmitFormsTab();
         filing.selectGovernment("City of Arrakis");
         filing.selectForm("Food and Beverage");
@@ -101,7 +101,7 @@ test.describe.skip('Accessibility Tests', () => {
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Taxpayer Submit Form Flow - Preparer Information Step", async ({ page }) => {
-        await Login.login({ accountType: "taxpayer" });
+        await Login.login(page, { accountType: "taxpayer" });
         filing.goToSubmitFormsTab();
         filing.selectGovernment("City of Arrakis");
         filing.selectForm("Food and Beverage");
@@ -115,7 +115,7 @@ test.describe.skip('Accessibility Tests', () => {
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Taxpayer Submit Form Flow - Payment Page", async ({ page }) => {
-        await Login.login({ accountType: "taxpayer" });
+        await Login.login(page, { accountType: "taxpayer" });
         filing.goToSubmitFormsTab();
         filing.selectGovernment("City of Arrakis");
         filing.selectForm("Food and Beverage");
@@ -132,7 +132,7 @@ test.describe.skip('Accessibility Tests', () => {
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Taxpayer Submit Form Flow - Application Confirmation Page", async ({ page }) => {
-        await Login.login({ accountType: "taxpayer" });
+        await Login.login(page, { accountType: "taxpayer" });
         filing.goToSubmitFormsTab();
         filing.selectGovernment("City of Arrakis");
         filing.selectForm("Food and Beverage");
@@ -152,20 +152,20 @@ test.describe.skip('Accessibility Tests', () => {
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("AGS Audit Log Page", async ({ page }) => {
-        await Login.login({ accountType: "ags", accountIndex: 5 });
+        await Login.login(page, { accountType: "ags", accountIndex: 5 });
         agsFilingGrid.init();
         agsFilingGrid.checkAuditLog("Reference ID", "AAAARKEC");
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("AGS Filing Requested Exports Page", async ({ page }) => {
-        await Login.login({ accountType: "ags", accountIndex: 8 });
+        await Login.login(page, { accountType: "ags", accountIndex: 8 });
         agsFilingGrid.init();
         agsFilingGrid.clickViewRequestedExtractButton();
         legacy.url().assert("include", "/filingsExtractRequests?");
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("AGS Specific Filing Page", async ({ page }) => {
-        await Login.login({ accountType: "ags", accountIndex: 9 });
+        await Login.login(page, { accountType: "ags", accountIndex: 9 });
         agsFilingGrid.init();
         agsFilingGrid.toggleActionButton(
             "View",
@@ -175,14 +175,14 @@ test.describe.skip('Accessibility Tests', () => {
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Municipal Export Full Filing Data Modal", async ({ page }) => {
-        await Login.login({ accountType: "municipal", accountIndex: 2 });
+        await Login.login(page, { accountType: "municipal", accountIndex: 2 });
         municipalFilingGrid.init();
         municipalFilingGrid.getElement().exportButton().click();
         filingExportModal.selectExcelFileType();
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Municipal Specific Filing Page", async ({ page }) => {
-        await Login.login({ accountType: "municipal", accountIndex: 2 });
+        await Login.login(page, { accountType: "municipal", accountIndex: 2 });
         municipalFilingGrid.init();
         municipalFilingGrid.toggleActionButton(
             "View",
@@ -192,12 +192,12 @@ test.describe.skip('Accessibility Tests', () => {
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Municipal Approval Page", async ({ page }) => {
-        await Login.login({ accountType: "municipal" });
+        await Login.login(page, { accountType: "municipal" });
         govApprovalGrid.init();
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Municipal Approval Page - Message Modal", async ({ page }) => {
-        await Login.login({ accountType: "municipal", accountIndex: 3 });
+        await Login.login(page, { accountType: "municipal", accountIndex: 3 });
         govApprovalGrid.init();
         govApprovalGrid.getElementOfColumn(
             "Message",
@@ -208,7 +208,7 @@ test.describe.skip('Accessibility Tests', () => {
         await checkAccessibility(undefined, customAccessibilityOptions);
     });
     test("Municipal Approval Review Page", async ({ page }) => {
-        await Login.login({ accountType: "municipal", accountIndex: 4 });
+        await Login.login(page, { accountType: "municipal", accountIndex: 4 });
         govApprovalGrid.init();
         govApprovalGrid.filterColumn("Reference ID", "AAAAUUKA", "text", "Contains");
         await waitForLoading();

@@ -50,7 +50,7 @@ const operatingStatus = ["Inactive", "Active/Seasonal", "Closed", "Sold"];
 
 test.describe("As a ags user, I should be able to update operating status in the business details page", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "ags" });
+    await Login.login(page, { accountType: "ags" });
     await agsBusinessGrid.init();
     await addBusiness();
     await agsBusinessGrid.init();

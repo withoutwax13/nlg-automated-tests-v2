@@ -35,7 +35,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As a taxpayer, I should be able to submit a zero payment filing.", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "ags", accountIndex: 1 });
+    await Login.login(page, { accountType: "ags", accountIndex: 1 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -61,7 +61,7 @@ test.describe("As a taxpayer, I should be able to submit a zero payment filing."
     });
     await logout();
 
-    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
+    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("ZERO PAYMENT");

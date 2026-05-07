@@ -10,7 +10,7 @@ const businessGrid = new BusinessGrid({
 
 test.describe("As a user, I should be able to hide/show columns", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "ags", accountIndex: 9 });
+    await Login.login(page, { accountType: "ags", accountIndex: 9 });
     for (const column of defaultColumns.slice(2, 4)) {
       await businessGrid.init();
       await businessGrid.clickCustomizeTableViewButton();

@@ -18,7 +18,7 @@ const cleanTestData = async (businessName: string, requiredForm: string) => {
 
 test.describe("As a municipal user, I should be able to remove required forms from the grid", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "municipal", accountIndex: 3 });
+    await Login.login(page, { accountType: "municipal", accountIndex: 3 });
     await cleanTestData("Arrakis Spice Company 17829", "Food and Beverage Tax Return (Monthly)");
     await municipalBusinessGrid.init();
     await municipalBusinessGrid.clickClearAllFiltersButton();

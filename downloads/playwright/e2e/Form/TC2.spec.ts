@@ -13,7 +13,7 @@ test.describe("As municipal user, exported file's form title data should match t
   test("Initiate test", async ({ page }) => {
     const columnName = "Form Title";
     const formGrid = new FormGrid(page, { userType: "municipal" });
-    await Login.login(page, { accountType: "municipal" });
+    await Login.login(page, page, { accountType: "municipal" });
     await formGrid.init();
     const columnValues = await formGrid.getArrayDataOfColumn(columnName);
 

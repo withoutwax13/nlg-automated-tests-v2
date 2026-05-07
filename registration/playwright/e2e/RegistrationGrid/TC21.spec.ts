@@ -47,7 +47,7 @@ test.describe("As an AGS User, when I select a form submission requirement in a 
     });
     const businessDetailsPage = new BusinessDetails({ userType: "ags" });
 
-    await Login.login({ accountType: "ags", accountIndex: 9 });
+    await Login.login(page, { accountType: "ags", accountIndex: 9 });
     await businessGrid.init();
     await businessGrid.clickAddBusinessButton();
     await businessAddPage.fillFields(customData);

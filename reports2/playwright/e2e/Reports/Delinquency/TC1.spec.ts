@@ -4,7 +4,6 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As an AGS user, I should be able to export delinquency report of a government.",
-  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const delinquencyGrid = new DelinquencyGrid(page, {
@@ -12,7 +11,7 @@ test.describe(
         municipalitySelection: "City of Arrakis",
       });
 
-      await Login.login(page, { accountType: "ags" });
+      await Login.login(page, page, { accountType: "ags" });
       await delinquencyGrid.init();
       await expect(delinquencyGrid.getElement().exportButton()).toBeVisible();
       await expect(delinquencyGrid.getElement().exportButton()).toBeEnabled();

@@ -43,7 +43,7 @@ test.describe("As a municipal user, I should be able to delete a business.", () 
     });
   });
   test("Initiating test", async () => {
-    await Login.login({
+    await Login.login(page, {
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 5,

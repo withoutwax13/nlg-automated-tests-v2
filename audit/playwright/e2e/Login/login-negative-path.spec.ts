@@ -4,7 +4,7 @@ import Login from "../../utils/Login";
 
 test.describe("Login Negative Path", () => {
   test("As a user, I should not be able to login with invalid credentials", async ({ page }) => {
-    await Login.login(page, { manualAuth: true });
+    await Login.login(page, page, { manualAuth: true });
 
     await expect(page.locator('input[name="email"]')).toHaveCSS(
       "border-color",

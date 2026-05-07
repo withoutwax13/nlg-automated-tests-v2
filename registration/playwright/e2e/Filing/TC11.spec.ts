@@ -41,7 +41,7 @@ test.describe("As a taxpayer, I want the system to prohibit me from sending dupl
       toStatus: "Fully Paid",
     });
 
-    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 9 });
+    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true, accountIndex: 9 });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Business License (Annual) - E2E #1");

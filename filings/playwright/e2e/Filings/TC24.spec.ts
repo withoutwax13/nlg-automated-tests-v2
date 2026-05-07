@@ -31,7 +31,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As a taxpayer, I should be able to delete a draft filing.", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "ags", accountIndex: 3 });
+    await Login.login(page, { accountType: "ags", accountIndex: 3 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -57,7 +57,7 @@ test.describe("As a taxpayer, I should be able to delete a draft filing.", () =>
     });
     await logout();
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 8, notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 8, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");

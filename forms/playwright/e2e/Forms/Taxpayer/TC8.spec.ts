@@ -34,7 +34,7 @@ const deleteMultipleFiling = async (
 test.describe("As a taxpayer, I should not be able to submit to a closed business when submitting a form.", () => {
   test("Initiating test", async ({ page }, testInfo) => {
     await initTestRuntime({ page, baseURL: testInfo.project.use.baseURL as string });
-    await Login.login({ accountType: "ags", accountIndex: 7 });
+    await Login.login(page, { accountType: "ags", accountIndex: 7 });
     await agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -57,7 +57,7 @@ test.describe("As a taxpayer, I should not be able to submit to a closed busines
     }
     await logout();
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 5, notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 5, notFirstLogin: true });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Food and Beverage");

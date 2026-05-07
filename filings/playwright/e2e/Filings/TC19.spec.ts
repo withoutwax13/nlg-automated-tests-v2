@@ -15,7 +15,7 @@ test.describe("As a municipal user, I should be able to see filings in 1 year ag
     const today = new Date();
     today.toLocaleString("en-US", { timeZone: "America/Chicago" });
 
-    await Login.login({ accountType: "municipal", accountIndex: 5 });
+    await Login.login(page, { accountType: "municipal", accountIndex: 5 });
     await municipalFilingGrid.init();
     await municipalFilingGrid.setStartDate({
       month: `${oneYearAgo.getMonth() + 1}`,

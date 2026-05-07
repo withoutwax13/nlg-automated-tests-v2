@@ -19,7 +19,7 @@ const cleanTestData = async (businessName: string, requiredForm: string) => {
 
 test.describe("As an AGS user, I should be able to remove required forms from the grid", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "ags", accountIndex: 3 });
+    await Login.login(page, { accountType: "ags", accountIndex: 3 });
     await cleanTestData("Arrakis Spice Company 17829", "Food and Beverage Tax Return (Monthly)");
     await agsBusinessGrid.clickClearAllFiltersButton();
     const beforeRemovingRequiredForms = await agsBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");

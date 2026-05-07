@@ -6,7 +6,7 @@ const taxpayerBusinessGrid = new BusinessGrid({ userType: "taxpayer" });
 
 test.describe("As a taxpayer user, there should not be any default filter in the business list", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "taxpayer", accountIndex: 2 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 2 });
     taxpayerBusinessGrid.init();
     const isFiltered = await taxpayerBusinessGrid.isGridFiltered();
     expect(isFiltered).toBeFalsy();

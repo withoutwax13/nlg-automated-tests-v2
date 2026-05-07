@@ -14,7 +14,6 @@ const nineMonthsFromToday = () => {
 
 test.describe(
   "As an AGS user, I should be able to generate a distribution details from a date range of a government.",
-  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const settlementGrid = new SettlementGrid(page, {
@@ -22,7 +21,7 @@ test.describe(
         municipalitySelection: "City of Arrakis",
       });
 
-      await Login.login(page, { accountType: "ags", accountIndex: 5 });
+      await Login.login(page, page, { accountType: "ags", accountIndex: 5 });
       await settlementGrid.init();
       await expect(settlementGrid.getElement().noRecordFoundComponent()).toHaveCount(0);
       const defaultTotalItems = await settlementGrid.getTotalItems();

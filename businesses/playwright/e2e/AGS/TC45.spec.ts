@@ -13,7 +13,7 @@ const randomDate = Math.floor(Math.random() * 28) + 1;
 
 test.describe("As a ags user, I should be able to update start date for delinquency tracking in the business details page", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "ags", accountIndex: 1 });
+    await Login.login(page, { accountType: "ags", accountIndex: 1 });
     await agsBusinessGrid.init();
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 74829");
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");

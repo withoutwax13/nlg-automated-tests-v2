@@ -6,7 +6,6 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As a user, I should be able to hide/show columns on the transaction list",
-  { tag: ["sanity", "regression"] },
   () => {
     test.skip("Initiating test", async ({ page }) => {
       const transactionGrid = new TransactionGrid(page, {
@@ -14,7 +13,7 @@ test.describe(
         municipalitySelection: "City of Arrakis",
       });
 
-      await Login.login(page, { accountType: "ags", accountIndex: 9 });
+      await Login.login(page, page, { accountType: "ags", accountIndex: 9 });
       for (const column of defaultColumns.slice(1, 4)) {
         await transactionGrid.init();
         await transactionGrid.clickCustomizeTableViewButton();

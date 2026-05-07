@@ -37,7 +37,7 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete cred
   test("Initiating test", async ({ page, request }) => {
     bindRuntime(page, request);
 
-    await Login.login({ accountType: "ags", accountIndex: 2 });
+    await Login.login(page, { accountType: "ags", accountIndex: 2 });
     await agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -60,7 +60,7 @@ test.describe.skip("As a Taxpayer user, I should be able to save and delete cred
     }
 
     await logout();
-    await Login.login({ accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 2, notFirstLogin: true });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Food and Beverage");

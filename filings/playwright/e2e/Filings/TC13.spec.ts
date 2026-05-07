@@ -10,7 +10,7 @@ const agsFilingGrid = new FilingGrid({
 
 test.describe("As an AGS user, I should be able to view requested extract.", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "ags", accountIndex: 8 });
+    await Login.login(page, { accountType: "ags", accountIndex: 8 });
     await agsFilingGrid.init();
     await agsFilingGrid.clickViewRequestedExtractButton();
     await expect(page).toHaveURL(/\/filingsExtractRequests\?/);

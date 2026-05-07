@@ -13,7 +13,7 @@ test.describe("If user clicks the 'Add Location' button on the location info ste
     const filing = new Filing();
     const customData = await getUniqueRegistrationData(randomSeed, true);
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 5 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 5 });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Business License (Annual) - E2E #1");

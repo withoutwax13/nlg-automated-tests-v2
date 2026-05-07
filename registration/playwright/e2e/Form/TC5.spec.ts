@@ -15,7 +15,7 @@ test.describe("User should not be able to proceed to Preview step if the require
       "applicantInfo.signature",
     ]);
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 4 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 4 });
     await filing.goToSubmitFormsTab();
     await filing.selectGovernment("City of Arrakis");
     await filing.selectForm("Business License (Annual) - E2E #1");

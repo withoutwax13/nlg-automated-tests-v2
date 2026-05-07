@@ -8,7 +8,7 @@ const municipalBusinessDetails = new BusinessDetails({ userType: "municipal" });
 
 test.describe("As a municipal user, I should be able to delete notes to a business via the business details page", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "municipal", accountIndex: 4 });
+    await Login.login(page, { accountType: "municipal", accountIndex: 4 });
     await municipalBusinessGrid.init();
     await municipalBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     await municipalBusinessDetails.clickNotesTab();

@@ -52,7 +52,7 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     });
   });
   test("Initiating test", async () => {
-    await Login.login({
+    await Login.login(page, {
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 1,
@@ -67,7 +67,7 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     await logout();
-    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
+    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
     await taxpayerBusinessGrid.init();
     await taxpayerBusinessGrid.clickAddBusinessButton();
     await taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
@@ -77,7 +77,7 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     await logout();
-    await Login.login({
+    await Login.login(page, {
       accountType: "municipal",
       notFirstLogin: true,
       accountIndex: 1,
@@ -88,7 +88,7 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
 
     await logout();
-    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
+    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
     await taxpayerBusinessGrid.init();
     await taxpayerBusinessGrid.filterColumn("DBA", newBusinessData.locationDba);
     await expect(taxpayerBusinessGrid.getElement().noRecordFoundComponent()).toBeVisible();

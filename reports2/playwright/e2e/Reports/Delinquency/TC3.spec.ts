@@ -5,7 +5,6 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As an AGS user, I should be able to dismiss and revert a delinquency report item of a government.",
-  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const agsDelinquencyGrid = new DelinquencyGrid(page, {
@@ -14,7 +13,7 @@ test.describe(
       });
       const manageDelinquencyModal = new ManageDelinquencyModal(page);
 
-      await Login.login(page, { accountType: "ags", accountIndex: 1 });
+      await Login.login(page, page, { accountType: "ags", accountIndex: 1 });
       await agsDelinquencyGrid.init();
       await agsDelinquencyGrid.manageDelinquencyItemByOrder(0);
 

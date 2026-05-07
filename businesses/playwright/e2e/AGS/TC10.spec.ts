@@ -46,7 +46,7 @@ test.describe("As an AGS user, I should be able to delete a business.", () => {
     });
   });
   test("Initiating test", async () => {
-    await Login.login({ accountType: "ags", notFirstLogin: true, accountIndex: 5 });
+    await Login.login(page, { accountType: "ags", notFirstLogin: true, accountIndex: 5 });
     await businessGrid.init();
     await businessGrid.clickAddBusinessButton();
     await addBusinessPage.fillFields(newBusinessData);

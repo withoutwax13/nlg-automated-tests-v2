@@ -54,7 +54,7 @@ const operatingStatus = [
 
 test.describe("As a municipal user, I should be able to update operating status in the business details page", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "municipal" });
+    await Login.login(page, { accountType: "municipal" });
     await municipalBusinessGrid.init();
     await addBusiness();
     await municipalBusinessGrid.init();

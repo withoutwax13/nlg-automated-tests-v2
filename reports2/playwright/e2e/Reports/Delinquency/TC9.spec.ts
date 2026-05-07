@@ -6,7 +6,6 @@ import Login from "../../../utils/Login";
 
 test.describe.skip(
   "As a user, I should be able to reorganize the order of columns on the delinquency list",
-  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const delinquencyGrid = new DelinquencyGrid(page, {
@@ -14,7 +13,7 @@ test.describe.skip(
         municipalitySelection: "City of Arrakis",
       });
 
-      await Login.login(page, { accountType: "ags", accountIndex: 9 });
+      await Login.login(page, page, { accountType: "ags", accountIndex: 9 });
 
       const columnPairs: Array<[string, string]> = [];
       const columnsToTest = defaultColumns.slice(1, 4);

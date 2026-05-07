@@ -15,7 +15,7 @@ const municipalityGrid = new MunicipalityGrid({
 
 test.describe("As an AGS user, I should be able to see the custom field on the filing list", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "ags", accountIndex: 1 });
+    await Login.login(page, { accountType: "ags", accountIndex: 1 });
     await municipalityGrid.init();
     await municipalityGrid.selectMunicipality("City of Arrakis");
     await municipalityGrid.addCustomField(
@@ -23,11 +23,11 @@ test.describe("As an AGS user, I should be able to see the custom field on the f
       `Custom Field Name ${randomSeed}`
     );
     await logout();
-    await Login.login({ accountType: "ags", notFirstLogin: true, accountIndex: 1 });
+    await Login.login(page, { accountType: "ags", notFirstLogin: true, accountIndex: 1 });
     await agsFilingGrid.init();
     await expect(await agsFilingGrid.isColumnExist(`Custom Field Title ${randomSeed}`)).toBeTruthy();
     await logout();
-    await Login.login({ accountType: "ags", notFirstLogin: true, accountIndex: 1 });
+    await Login.login(page, { accountType: "ags", notFirstLogin: true, accountIndex: 1 });
     await municipalityGrid.init();
     await municipalityGrid.selectMunicipality("City of Arrakis");
     await municipalityGrid.removeCustomField(`Custom Field Name ${randomSeed}`);

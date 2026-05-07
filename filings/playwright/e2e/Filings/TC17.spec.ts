@@ -9,7 +9,7 @@ const municipalFilingGrid = new FilingGrid({
 
 test.describe("As a municipal user, I should be able to export specific view of a filing data.", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "municipal", accountIndex: 3 });
+    await Login.login(page, { accountType: "municipal", accountIndex: 3 });
     municipalFilingGrid.init();
     municipalFilingGrid.clickExportButton(false);
   });

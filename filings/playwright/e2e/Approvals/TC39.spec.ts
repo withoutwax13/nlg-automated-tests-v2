@@ -38,7 +38,7 @@ const deleteMultipleFiling = async (
 test.describe.skip("As a government user, I want to be able to start approval workflow a specific item in Approvals", () => {
   // Skipped, assertions covered by TC37 and TC38
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "ags", accountIndex: 5 });
+    await Login.login(page, { accountType: "ags", accountIndex: 5 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -63,7 +63,7 @@ test.describe.skip("As a government user, I want to be able to start approval wo
     });
     await logout();
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -91,11 +91,11 @@ test.describe.skip("As a government user, I want to be able to start approval wo
     taxpayerFilingGrid.init();
     legacy.get("").then(async (referenceId) => {
       await logout();
-      await Login.login({ accountType: "ags", accountIndex: 5, notFirstLogin: true });
+      await Login.login(page, { accountType: "ags", accountIndex: 5, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus("Funded", "Reference ID", String(referenceId));
       await logout();
-      await Login.login({ accountType: "municipal", accountIndex: 3, notFirstLogin: true });
+      await Login.login(page, { accountType: "municipal", accountIndex: 3, notFirstLogin: true });
       govApprovalGrid.init();
       govApprovalGrid.selectRowToReject("Reference ID", String(referenceId));
     });

@@ -21,7 +21,7 @@ test.describe("As a reviewer user, I should be able to link/unlink an applicatio
     const registrationRecordId = await getTaxpayerRegistrationRecordId(referenceId);
 
     await logout();
-    await Login.login({ accountType: "municipal", notFirstLogin: true, accountIndex: 7 });
+    await Login.login(page, { accountType: "municipal", notFirstLogin: true, accountIndex: 7 });
     await municipalApplicationGrid.init();
     await municipalApplicationGrid.selectRowToReview({
       anchorColumnName: "Registration Record ID",

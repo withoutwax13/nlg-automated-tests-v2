@@ -38,7 +38,7 @@ test.describe("As a Government User, if the business user's application does not
     });
 
     await logout();
-    await Login.login({ accountType: "municipal", notFirstLogin: true, accountIndex: 5 });
+    await Login.login(page, { accountType: "municipal", notFirstLogin: true, accountIndex: 5 });
     await municipalApplicationGrid.init();
     await municipalApplicationGrid.clickClearAllFiltersButton();
     await municipalApplicationGrid.selectRowToReview({

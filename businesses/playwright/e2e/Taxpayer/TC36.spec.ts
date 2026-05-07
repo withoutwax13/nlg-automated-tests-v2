@@ -6,7 +6,7 @@ const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
 
 test.describe("As a taxpayer, I should only have details and delete as options in my action button column", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "taxpayer", accountIndex: 7 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 7 });
     await taxpayerBusinessList.init();
     const actionButton = await taxpayerBusinessList.getElementOfColumn(
       "Actions",

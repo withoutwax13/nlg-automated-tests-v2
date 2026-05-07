@@ -36,7 +36,7 @@ const deleteMultipleFiling = async (
 
 test.describe("As an AGS user, I should be able to see Payment Submitted logs on the audit log for Funded filings", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "ags", accountIndex: 5 });
+    await Login.login(page, { accountType: "ags", accountIndex: 5 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -62,7 +62,7 @@ test.describe("As an AGS user, I should be able to see Payment Submitted logs on
     });
     await logout();
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 1, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -87,7 +87,7 @@ test.describe("As an AGS user, I should be able to see Payment Submitted logs on
     await logout();
 
     legacy.get("").then(async (referenceId) => {
-      await Login.login({ accountType: "ags", accountIndex: 5, notFirstLogin: true });
+      await Login.login(page, { accountType: "ags", accountIndex: 5, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.checkAuditLog("Reference ID", String(referenceId));
       auditLog.findRowByAction("Payment Submitted", "paymentSubmittedRow");

@@ -4,14 +4,13 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As a Municipal user, I should be able to export the delinquency list",
-  { tag: ["sanity", "regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const delinquencyGrid = new DelinquencyGrid(page, {
         userType: "municipal",
       });
 
-      await Login.login(page, { accountType: "municipal" });
+      await Login.login(page, page, { accountType: "municipal" });
       await delinquencyGrid.init();
       await expect(delinquencyGrid.getElement().exportButton()).toBeVisible();
       await expect(delinquencyGrid.getElement().exportButton()).toBeEnabled();

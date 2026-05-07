@@ -12,7 +12,7 @@ const randomDate = {
 
 test.describe("As a municipal user, I should be able to set delinquency start date from the grid", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "municipal" });
+    await Login.login(page, { accountType: "municipal" });
     await municipalBusinessGrid.init();
     await municipalBusinessGrid.clickClearAllFiltersButton();
     const beforeDelinquencyStartDate = await municipalBusinessGrid.getDataOfColumn(

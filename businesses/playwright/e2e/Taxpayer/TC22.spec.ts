@@ -53,7 +53,7 @@ test.describe.skip("As a taxpayer, when a business has been added by a municipal
     });
   });
   test("Initiating test", async () => {
-    await Login.login({ accountType: "municipal", notFirstLogin: true });
+    await Login.login(page, { accountType: "municipal", notFirstLogin: true });
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickAddBusinessButton();
     addBusinessPage.fillFields(newBusinessData);
@@ -64,7 +64,7 @@ test.describe.skip("As a taxpayer, when a business has been added by a municipal
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     await logout();
-    await Login.login({ accountType: "taxpayer", notFirstLogin: true, accountIndex: 2 });
+    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true, accountIndex: 2 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);

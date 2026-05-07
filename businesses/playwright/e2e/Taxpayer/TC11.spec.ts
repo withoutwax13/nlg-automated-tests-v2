@@ -55,7 +55,7 @@ test.describe("As a taxpayer, when my business has been deleted by an AGS user, 
   });
   test("Initiating test", async () => {
     // add business data
-    await Login.login({ accountType: "ags", notFirstLogin: true, accountIndex: 6 });
+    await Login.login(page, { accountType: "ags", notFirstLogin: true, accountIndex: 6 });
     await agsBusinessGrid.init();
     await agsBusinessGrid.clickAddBusinessButton();
     await agsAddBusinessPage.fillFields(newBusinessData);
@@ -67,7 +67,7 @@ test.describe("As a taxpayer, when my business has been deleted by an AGS user, 
     await logout();
 
     // add business data to the taxpayer account
-    await Login.login({ accountType: "taxpayer", notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true });
     await taxpayerBusinessGrid.init();
     await taxpayerBusinessGrid.clickAddBusinessButton();
     await taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
@@ -76,14 +76,14 @@ test.describe("As a taxpayer, when my business has been deleted by an AGS user, 
     await logout();
 
     // delete business data
-    await Login.login({ accountType: "ags", notFirstLogin: true, accountIndex: 6 });
+    await Login.login(page, { accountType: "ags", notFirstLogin: true, accountIndex: 6 });
     await agsBusinessGrid.init();
     await agsBusinessGrid.deleteBusiness(newBusinessData.locationDba);
     await expect(agsBusinessGrid.getElement().toastComponent()).toBeVisible();
     await logout();
 
     // verify that the business does not exist in the taxpayer grid
-    await Login.login({ accountType: "taxpayer", notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true });
     await taxpayerBusinessGrid.init();
     await taxpayerBusinessGrid.filterColumn("DBA", newBusinessData.locationDba);
     await expect(taxpayerBusinessGrid.getElement().noRecordFoundComponent()).toBeVisible();

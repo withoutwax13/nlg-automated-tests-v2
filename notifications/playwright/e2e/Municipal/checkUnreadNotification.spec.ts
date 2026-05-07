@@ -3,7 +3,7 @@ import selector from "../../fixtures/selector.json";
 import Login, { login, waitForApiResponse } from "../../utils/Login";
 
 const checkUnreadNotification = async ({ page }: { page: Page }) => {
-  await Login.login(page, { accountType: "municipal" });
+  await Login.login(page, page, { accountType: "municipal" });
 
   const notificationResponse = waitForApiResponse(page, {
     method: "GET",

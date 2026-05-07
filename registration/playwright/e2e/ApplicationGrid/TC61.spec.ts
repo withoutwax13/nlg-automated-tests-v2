@@ -24,7 +24,7 @@ test.describe("As a user, pending application should be deleted if the correspon
     const referenceId = getStoredValue<string>("referenceId");
 
     await logout();
-    await Login.login({ accountType: "ags", notFirstLogin: true, accountIndex: 4 });
+    await Login.login(page, { accountType: "ags", notFirstLogin: true, accountIndex: 4 });
     await agsApplicationGrid.init();
     expect(
       await agsApplicationGrid.getDataOfColumn("Application Status", "Reference ID", referenceId, "applicationStatus")

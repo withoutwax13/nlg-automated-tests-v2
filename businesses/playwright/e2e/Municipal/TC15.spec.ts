@@ -8,7 +8,7 @@ const exportModal = new ExportModal();
 
 test.describe("As a municipal user, I should be able to export business list with Users info as excel", () => {
   test("Initiating test", async () => {
-    await Login.login({accountType: "municipal"});
+    await Login.login(page, {accountType: "municipal"});
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickExportButton();
     exportModal.clickExcelOption();

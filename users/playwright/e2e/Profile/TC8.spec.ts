@@ -9,7 +9,7 @@ const profile = new Profile();
 test.describe("As a user, I should be able to edit my account details", () => {
   test("Initiating test", async ({ page, request }) => {
     bindRuntime(page, request);
-    await Login.login({ accountType: "taxpayer", accountIndex: 3 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 3 });
     await profile.init();
     await profile.typeFirstName(`QA #${randomSeed}`);
     await expect(profile.getElement().firstNameInput()).toHaveValue(`QA #${randomSeed}`);

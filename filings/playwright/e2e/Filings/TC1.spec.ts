@@ -10,7 +10,7 @@ const municipalityGrid = new MunicipalityGrid({
 
 test.describe.skip("As an AGS user, I should be able to add a custom field on the filing list", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "ags" });
+    await Login.login(page, { accountType: "ags" });
     municipalityGrid.init();
     municipalityGrid.selectMunicipality("City of Arrakis");
     municipalityGrid.addCustomField(
@@ -18,7 +18,7 @@ test.describe.skip("As an AGS user, I should be able to add a custom field on th
       `Custom Field Name ${randomSeed}`
     );
     await logout();
-    await Login.login({ accountType: "ags", notFirstLogin: true });
+    await Login.login(page, { accountType: "ags", notFirstLogin: true });
     municipalityGrid.init();
     municipalityGrid.selectMunicipality("City of Arrakis");
     municipalityGrid.removeCustomField(`Custom Field Name ${randomSeed}`);

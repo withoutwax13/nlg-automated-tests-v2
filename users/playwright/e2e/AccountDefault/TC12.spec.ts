@@ -8,7 +8,7 @@ const profile = new Profile();
 test.describe("As a taxpayer user, I should be able to set my default home page", () => {
   test("Initiating test", async ({ page, request }) => {
     bindRuntime(page, request);
-    await Login.login({
+    await Login.login(page, {
       accountType: "taxpayer",
       accountIndex: 10,
       customRedirectionAfterLoginAssertion: async () => {
@@ -20,7 +20,7 @@ test.describe("As a taxpayer user, I should be able to set my default home page"
       await profile.init();
       await profile.selectDefaultHomePage(pageName);
       await logout();
-      await Login.login({
+      await Login.login(page, {
         accountType: "taxpayer",
         accountIndex: 10,
         notFirstLogin: true,

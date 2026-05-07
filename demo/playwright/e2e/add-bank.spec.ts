@@ -26,7 +26,7 @@ test.describe(
   () => {
     for (let i = 0; i < 10; i++) {
       test(`Initiating test for account ${i}`, async ({ page }) => {
-        await Login.login(page, { accountType: "ags" });
+        await Login.login(page, page, { accountType: "ags" });
         await openAgsFilingGrid(page, "City of Arrakis");
 
         await filterGridColumn(page, {
@@ -49,7 +49,7 @@ test.describe(
 
         await logout(page);
 
-        await Login.login(page, {
+        await Login.login(page, page, {
           accountType: "taxpayer",
           accountIndex: i,
           notFirstLogin: true,

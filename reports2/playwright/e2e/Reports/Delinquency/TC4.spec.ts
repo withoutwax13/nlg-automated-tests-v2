@@ -5,7 +5,6 @@ import Login from "../../../utils/Login";
 
 test.describe(
   "As a municipal user, I should be able to dismiss and revert a delinquency report item of a government",
-  { tag: ["regression"] },
   () => {
     test("Initiating test", async ({ page }) => {
       const municipalDelinquencyGrid = new DelinquencyGrid(page, {
@@ -14,7 +13,7 @@ test.describe(
       });
       const manageDelinquencyModal = new ManageDelinquencyModal(page);
 
-      await Login.login(page, { accountType: "municipal", accountIndex: 1 });
+      await Login.login(page, page, { accountType: "municipal", accountIndex: 1 });
       await municipalDelinquencyGrid.init();
       await expect(municipalDelinquencyGrid.getElement().noRecordFoundComponent()).toHaveCount(0);
 

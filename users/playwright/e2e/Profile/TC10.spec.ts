@@ -9,7 +9,7 @@ test.describe("As a municipal user, I should be able to reset my password.", () 
   test("Initiating test", async ({ page, request }) => {
     bindRuntime(page, request);
     const accountPassword = getValidCredentials().municipal[3].password;
-    await Login.login({ accountType: "municipal", accountIndex: 3 });
+    await Login.login(page, { accountType: "municipal", accountIndex: 3 });
     await profile.init();
     await profile.clickResetPassword();
     await profile.typeOldPassword(accountPassword);
@@ -18,6 +18,6 @@ test.describe("As a municipal user, I should be able to reset my password.", () 
     await profile.clickUpdatePasswordButton();
     await expect(profile.getElement().toastComponent()).toBeVisible();
     await logout();
-    await Login.login({ accountType: "municipal", accountIndex: 3, notFirstLogin: true });
+    await Login.login(page, { accountType: "municipal", accountIndex: 3, notFirstLogin: true });
   });
 });

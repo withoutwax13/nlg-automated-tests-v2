@@ -9,7 +9,7 @@ test.describe("As a taxpayer user, I should be able to reset my password.", () =
   test("Initiating test", async ({ page, request }) => {
     bindRuntime(page, request);
     const accountPassword = getValidCredentials().taxpayer[4].password;
-    await Login.login({ accountType: "taxpayer", accountIndex: 4 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 4 });
     await profile.init();
     await profile.clickResetPassword();
     await profile.typeOldPassword(accountPassword);
@@ -18,6 +18,6 @@ test.describe("As a taxpayer user, I should be able to reset my password.", () =
     await profile.clickUpdatePasswordButton();
     await expect(profile.getElement().toastComponent()).toBeVisible();
     await logout();
-    await Login.login({ accountType: "taxpayer", accountIndex: 4, notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 4, notFirstLogin: true });
   });
 });

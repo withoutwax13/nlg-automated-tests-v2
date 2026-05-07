@@ -37,7 +37,7 @@ const deleteMultipleFiling = async (
 
 test.describe.skip("As AGS user, I want to be able to start approval workflow a specific item in Approvals", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "ags", accountIndex: 7 });
+    await Login.login(page, { accountType: "ags", accountIndex: 7 });
     agsFilingGrid.init();
     await agsFilingGrid.filterColumn(
       "Location DBA",
@@ -62,7 +62,7 @@ test.describe.skip("As AGS user, I want to be able to start approval workflow a 
     });
     await logout();
 
-    await Login.login({ accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
     filing.goToSubmitFormsTab();
     filing.selectGovernment("City of Arrakis");
     filing.selectForm("Food and Beverage");
@@ -90,7 +90,7 @@ test.describe.skip("As AGS user, I want to be able to start approval workflow a 
     taxpayerFilingGrid.init();
     legacy.get("").then(async (referenceId) => {
       await logout();
-      await Login.login({ accountType: "ags", accountIndex: 7, notFirstLogin: true });
+      await Login.login(page, { accountType: "ags", accountIndex: 7, notFirstLogin: true });
       agsFilingGrid.init();
       agsFilingGrid.updateStatus("Funded", "Reference ID", String(referenceId));
       agsApprovalGrid.init();

@@ -13,7 +13,7 @@ const randomDate = {
 
 test.describe("As an AGS user, I should be able to set delinquency start date from the grid", () => {
   test("Initiating test", async () => {
-    await Login.login({ accountType: "ags" });
+    await Login.login(page, { accountType: "ags" });
     await agsBusinessGrid.init();
     await agsBusinessGrid.clickClearAllFiltersButton();
     const beforeDelinquencyStartDate = await agsBusinessGrid.getDataOfColumn(

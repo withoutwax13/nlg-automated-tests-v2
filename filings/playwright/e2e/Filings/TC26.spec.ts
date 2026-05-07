@@ -9,7 +9,7 @@ const taxpayerFilingGrid = new FilingGrid({
 
 test.describe("As a taxpayer, I should be able to export filings data.", () => {
   test("Initiate test", async ({ page }) => {
-    await Login.login({ accountType: "taxpayer", accountIndex: 8 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 8 });
     taxpayerFilingGrid.init();
     taxpayerFilingGrid.clickExportButton();
   });
