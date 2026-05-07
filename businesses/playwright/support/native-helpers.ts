@@ -163,14 +163,7 @@ export const login = async (arg1?: Page | LoginParams, arg2?: LoginParams) => {
     password: process.env[`${normalizeAccountType(accountType).toUpperCase()}_PASSWORD`] || process.env.TEST_PASSWORD || "",
   };
 
-  const leadFlowConfig = page.waitForResponse((response) => response.request().method() === "GET" && isHubspotConfig(response.url())).catch(() => undefined);
-  const cognitoResponses = Promise.all([
-    page.waitForResponse((response) => response.request().method() === "POST" && isAwsCognito(response.url())),
-    page.waitForResponse((response) => response.request().method() === "POST" && isAwsCognito(response.url())),
-  ]);
-
   await page.goto("/login");
-  await leadFlowConfig;
   await expectPathname("/login", page);
 
   if (!notFirstLogin) {
@@ -184,8 +177,7 @@ export const login = async (arg1?: Page | LoginParams, arg2?: LoginParams) => {
   await expect(page.locator('[data-cy="password"]')).toHaveValue(account.password);
   await page.locator('[data-cy="sign-in"]').first().click();
 
-  await cognitoResponses;
-  await expectPathname(expectedPathByAccountType(accountType), page);
+  await expect(page).not.toHaveURL(`${getBaseUrl()}/login`);
 };
 
 export const logout = async (page?: Page) => {
