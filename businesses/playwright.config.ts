@@ -7,7 +7,7 @@ export default defineConfig({
   retries: 2,
   fullyParallel: false,
   use: {
-    baseURL: 'https://dev.azavargovapps.com',
+    baseURL: 'https://dev.azavargovapps.com/',
     viewport: { width: 1920, height: 1080 },
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',

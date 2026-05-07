@@ -1,19 +1,19 @@
 {
   "compilerOptions": {
-    "target": "es2019",
+    "target": "es2015",
     "lib": [
-      "es2019",
-      "dom"
+      "es2016",
+      "dom",
+      "es2017"
     ],
     "types": [
       "node",
       "@playwright/test"
     ],
     "esModuleInterop": true,
+    "ignoreDeprecations": "5.0",
     "resolveJsonModule": true,
     "module": "commonjs",
-    "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
     "skipLibCheck": true,
     "noImplicitAny": false,
     "strict": false
