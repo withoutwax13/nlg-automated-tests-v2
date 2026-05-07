@@ -1,4 +1,4 @@
-import { buttonByText, currentPage } from "../../support/native-helpers";
+import { currentPage } from "../../support/native-helpers";
 
 class ExportModal {
   private page() {
