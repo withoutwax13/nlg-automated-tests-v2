@@ -14,7 +14,7 @@ type DateParts = {
   year: string | number;
 };
 
-const normalizeAccountType = (accountType: AccountType) =>
+const normalizeAccountType = (accountType: AccountType | string) =>
   accountType === "municipality" ? "municipal" : accountType;
 
 const pad = (value: string | number) => String(value).padStart(2, "0");

@@ -1,64 +1,31 @@
-import { expect, Page, Response } from "@playwright/test";
+import type { Page, Response } from "@playwright/test";
 import { login as nativeLogin } from "../../support/native-helpers";
 
-type ResponseWaiter = Promise<Response>;
+const isHubspotChat = (response: Response) =>
+  response.request().method() === "GET" &&
+  response.url().includes("hubspot.com/livechat-public/");
 
-const waitFor = (page: Page, method: string, pattern: RegExp): ResponseWaiter =>
-  page.waitForResponse(
-    (response) =>
-      response.request().method() === method && pattern.test(response.url())
-  );
+const isLeadFlowConfig = (response: Response) =>
+  response.request().method() === "GET" &&
+  response.url().includes("hubspot.com/lead-flows-config/");
 
-export const interceptAuditAuthLogin = (page: Page): ResponseWaiter =>
-  waitFor(page, "POST", /https:\/\/audit\.api\.localgov\.org\/v1\/auth\/login/);
+const isAwsCognito = (response: Response) =>
+  response.request().method() === "POST" &&
+  response.url().includes("cognito-idp.") &&
+  response.url().includes(".amazonaws.com/");
 
-export const waitForAuditAuthLogin = async (waiter: ResponseWaiter) => {
-  expect((await waiter).status()).toBe(201);
-};
+const interceptHubspotChat = (page: Page) =>
+  page.waitForResponse((response) => isHubspotChat(response));
 
-export const interceptDepartments = (page: Page): ResponseWaiter[] => [
-  waitFor(page, "GET", /https:\/\/audit\.api\.localgov\.org\/v1\/departments(?:\?.*)?$/),
-  waitFor(page, "GET", /https:\/\/audit\.api\.localgov\.org\/v1\/departments(?:\?.*)?$/),
-  waitFor(page, "GET", /https:\/\/audit\.api\.localgov\.org\/v1\/departments(?:\?.*)?$/),
-];
+const interceptLeadFlowConfig = (page: Page) =>
+  page.waitForResponse((response) => isLeadFlowConfig(response));
 
-export const waitForDepartments = async (waiters: ResponseWaiter[]) => {
-  for (const waiter of waiters) {
-    expect((await waiter).status()).toBe(200);
-  }
-};
-
-export const interceptSelectedDepartment = (page: Page): ResponseWaiter =>
-  waitFor(page, "GET", /https:\/\/audit\.api\.localgov\.org\/v1\/departments$/);
-
-export const waitForSelectedDepartment = async (waiter: ResponseWaiter) => {
-  expect((await waiter).status()).toBe(200);
-};
-
-
-const loginCompat = async (arg1: unknown, arg2?: unknown) => {
-  const looksLikePage =
-    !!arg1 && typeof arg1 === "object" && "goto" in (arg1 as Record<string, unknown>);
-
-  if (looksLikePage) {
-    return (nativeLogin as unknown as (page: unknown, params?: unknown) => Promise<unknown>)(
-      arg1,
-      arg2
-    );
-  }
-
-  return (nativeLogin as unknown as (params: unknown, page?: unknown) => Promise<unknown>)(
-    arg1,
-    arg2
-  );
-};
+const interceptAwsCognito = (page: Page) =>
+  page.waitForResponse((response) => isAwsCognito(response));
 
 export default {
-  login: loginCompat,
-  interceptAuditAuthLogin,
-  waitForAuditAuthLogin,
-  interceptDepartments,
-  waitForDepartments,
-  interceptSelectedDepartment,
-  waitForSelectedDepartment,
+  interceptAwsCognito,
+  interceptHubspotChat,
+  interceptLeadFlowConfig,
+  login: nativeLogin,
 };

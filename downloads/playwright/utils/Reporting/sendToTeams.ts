@@ -2,6 +2,7 @@ import axios from "axios";
 
 const webhookUrl =
   "https://prod-152.westus.logic.azure.com:443/workflows/5ecb6cccf42f48e6a240a92275af617d/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ib4Goq1lL_YAalMJ0H3US8NzyUlwrDIPAFtAYUHD-mk";
+
 const createTestItem = (test, spec) => ({
   type: "Container",
   spacing: "Medium",
@@ -73,7 +74,7 @@ export const sendToTeams = async (tests, spec) => {
           body: [
             {
               type: "TextBlock",
-              text: "Filing Service | E2E Regression | Bug Report",
+              text: "Reports2 Service | E2E Regression | Bug Report",
               weight: "Bolder",
               size: "Large",
               color: "Accent",

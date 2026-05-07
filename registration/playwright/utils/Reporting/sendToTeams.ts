@@ -74,7 +74,7 @@ export const sendToTeams = async (tests, spec) => {
           body: [
             {
               type: "TextBlock",
-              text: "Registration Service | E2E Regression | Bug Report",
+              text: "Reports2 Service | E2E Regression | Bug Report",
               weight: "Bolder",
               size: "Large",
               color: "Accent",

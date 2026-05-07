@@ -1,8 +1,23 @@
 import { expect, type Locator, type Page, type Response } from "@playwright/test";
-import { login as runtimeLogin, waitForLoading as runtimeWaitForLoading } from "./runtime";
-export * from "./runtime";
 
 type AccountType = "taxpayer" | "municipal" | "municipality" | "ags" | "municipalDel";
+
+type LoginParams = {
+  accountType?: AccountType;
+  accountIndex?: number;
+};
+
+type DateParts = {
+  month: string | number;
+  day?: string | number;
+  date?: string | number;
+  year: string | number;
+};
+
+const normalizeAccountType = (accountType: AccountType | string) =>
+  accountType === "municipality" ? "municipal" : accountType;
+
+const pad = (value: string | number) => String(value).padStart(2, "0");
 
 export const normalizeText = (value: string | null | undefined) =>
   (value || "").replace(/\s+/g, " ").trim();
@@ -10,15 +25,153 @@ export const normalizeText = (value: string | null | undefined) =>
 export const getEnvironment = () =>
   process.env.environment || process.env.ENVIRONMENT || "dev";
 
+export const getBaseUrl = () => `https://${getEnvironment()}.azavargovapps.com`;
 
-type LoginParams = {
-  accountType?: AccountType;
-  accountIndex?: number;
+const getCredentials = (accountType: AccountType, accountIndex = 0) => {
+  const normalizedType = normalizeAccountType(accountType);
+  const validCredentials = {
+      taxpayer: [
+        {
+          username: "valerasoftwares+taxpayer.1@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.2@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.3@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.4@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.5@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.6@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.7@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.8@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.9@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+taxpayer.10@gmail.com",
+          password: "Ohayoworld.13",
+        },
+      ],
+      municipal: [
+        {
+          username: "valerasoftwares+arrakis@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.2@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.3@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.4@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.5@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.6@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.7@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.8@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.9@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "valerasoftwares+arrakis.10@gmail.com",
+          password: "Ohayoworld.13",
+        },
+      ],
+      ags: [
+        {
+          username: "johnpatrickyusoresvalera+dev.super@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.2@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.3@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.4@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.5@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.6@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.7@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.8@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.9@gmail.com",
+          password: "Ohayoworld.13",
+        },
+        {
+          username: "johnpatrickyusoresvalera+dev.super.10@gmail.com",
+          password: "Ohayoworld.13",
+        },
+      ],
+      municipalDel: [
+        {
+          username: "valerasoftwares+remedios@gmail.com",
+          password: "Ohayoworld.13",
+        },
+      ],
+    }
+  return {
+    username: validCredentials[accountType][accountIndex]["username"],
+    password: validCredentials[accountType][accountIndex]["password"],
+  };
 };
 
-const normalizeAccountType = (accountType: AccountType | string) =>
-  accountType === "municipality" ? "municipal" : accountType;
-export const getBaseUrl = () => `https://${getEnvironment()}.azavargovapps.com`;
+export const waitForLoading = async (page: Page, seconds = 5) => {
+  await page.waitForTimeout(seconds * 1000);
+};
 
 export const waitForResponse = async (
   page: Page,
@@ -34,8 +187,11 @@ export const waitForResponse = async (
             : matcher.test(response.url());
 
   const responsePromise = page.waitForResponse(predicate);
-  if (action) await action();
-  return responsePromise;
+  if (action) {
+    await action();
+  }
+  const response = await responsePromise;
+  return response;
 };
 
 export const expectStatus = async (responsePromise: Promise<Response>, expectedStatus: number) => {
@@ -47,9 +203,6 @@ export const expectStatus = async (responsePromise: Promise<Response>, expectedS
 export const clickByText = async (locator: Locator, text: string) => {
   await locator.filter({ hasText: text }).first().click();
 };
-
-type DateParts = { month: string | number; day?: string | number; date?: string | number; year: string | number };
-const pad = (value: string | number) => String(value).padStart(2, "0");
 
 export const formatDate = ({ month, year, day, date }: DateParts) =>
   `${pad(month)}/${pad(day ?? date ?? "")}/${String(year)}`;
@@ -63,10 +216,14 @@ export const setMaskedDateInput = async (input: Locator, value: DateParts) => {
 export const getColumnOrder = async (headerLocator: Locator, columns: string[]) => {
   const result: Record<string, number> = {};
   const count = await headerLocator.count();
+
   for (let index = 0; index < count; index += 1) {
     const text = normalizeText(await headerLocator.nth(index).textContent());
-    if (columns.includes(text)) result[text] = index;
+    if (columns.includes(text)) {
+      result[text] = index;
+    }
   }
+
   return result;
 };
 
@@ -82,11 +239,15 @@ export const findRowByCellValue = async (
   exact = true
 ) => {
   const count = await rows.count();
+
   for (let index = 0; index < count; index += 1) {
     const row = rows.nth(index);
     const cellText = normalizeText(await getRowCells(row).nth(columnIndex).textContent());
-    if ((exact && cellText === value) || (!exact && cellText.includes(value))) return row;
+    if ((exact && cellText === value) || (!exact && cellText.includes(value))) {
+      return row;
+    }
   }
+
   return null;
 };
 
@@ -96,36 +257,21 @@ export const getPagerTotal = async (pagerInfo: Locator) => {
   return match ? Number(match[1].replace(/,/g, "")) : 0;
 };
 
-export const waitForLoading = runtimeWaitForLoading;
+export const login = async (page: Page, params: LoginParams = {}) => {
+  const accountType = params.accountType || "taxpayer";
+  const credentials = getCredentials(accountType, params.accountIndex ? 0 : params.accountIndex);
 
-const getCredentials = (accountType: AccountType, accountIndex = 0) => {
-  const normalizedType = normalizeAccountType(accountType);
-  const validCredentials = {
-    taxpayer: [{ username: "", password: "" }],
-    municipal: [{ username: "", password: "" }],
-    ags: [{ username: "", password: "" }],
-    municipalDel: [{ username: "", password: "" }],
-  } as const;
+  await page.goto(`${getBaseUrl()}/login`);
+  await expect(page).toHaveURL(/\/login$/);
 
-  const fromMap = validCredentials[normalizedType]?.[accountIndex] || validCredentials[normalizedType]?.[0];
-  if (fromMap?.username && fromMap?.password) return fromMap;
-
-  const raw = process.env.validCredentials || process.env.VALIDCREDENTIALS || process.env.VALID_CREDENTIALS;
-  if (raw) {
-    try {
-      const envMap = JSON.parse(raw) as Record<string, Array<{ username?: string; email?: string; password?: string }>>;
-      const envAccount = envMap?.[normalizedType]?.[accountIndex] || envMap?.[normalizedType]?.[0];
-      if (envAccount?.password && (envAccount?.username || envAccount?.email)) {
-        return { username: envAccount.username || envAccount.email || "", password: envAccount.password };
-      }
-    } catch {}
+  const cookieButton = page.locator(".cookie-actions .NLGButtonPrimary").first();
+  if (await cookieButton.isVisible().catch(() => false)) {
+    await cookieButton.click({ force: true });
   }
 
-  const prefix = normalizedType.toUpperCase();
-  return {
-    username: process.env[`${prefix}_USERNAME`] || process.env.TEST_USERNAME || "",
-    password: process.env[`${prefix}_PASSWORD`] || process.env.TEST_PASSWORD || "",
-  };
-};
+  await page.locator('[data-cy="email-address"]').fill(credentials.username);
+  await page.locator('[data-cy="password"]').fill(credentials.password);
+  await page.locator('[data-cy="sign-in"]').filter({ hasText: "Sign In" }).first().click();
 
-export const login = runtimeLogin;
+  await expect(page).not.toHaveURL(`${getBaseUrl()}/login`);
+};
