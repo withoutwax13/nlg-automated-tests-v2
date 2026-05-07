@@ -36,7 +36,7 @@ const newBusinessData = {
 };
 
 test.describe("As a municipal user, I should be able to delete a business.", () => {
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ page }) => {
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
@@ -44,7 +44,7 @@ test.describe("As a municipal user, I should be able to delete a business.", () 
       accountIndex: 9,
     });
   });
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, {
       accountType: "municipal",
       notFirstLogin: true,

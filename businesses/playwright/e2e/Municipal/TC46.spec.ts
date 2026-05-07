@@ -10,7 +10,7 @@ const randomMonth = Math.floor(Math.random() * 12) + 1;
 const randomDate = Math.floor(Math.random() * 28) + 1;
 
 test.describe("As a municipal user, I should be able to update business close date date in the business details page", () => {
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "municipal", accountIndex: 2 });
     await municipalBusinessGrid.init();
     await municipalBusinessGrid.clickClearAllFiltersButton();

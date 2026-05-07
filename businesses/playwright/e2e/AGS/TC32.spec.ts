@@ -39,7 +39,7 @@ const newBusinessData = {
   businessOwnerZipCode: "90210",
 };
 
-const addBusiness = async () => {
+const addBusiness = async ({ page }) => {
   await agsBusinessGrid.init(false, false);
   await agsBusinessGrid.clickAddBusinessButton();
   await addBusinessPage.fillFields(newBusinessData);
@@ -47,9 +47,9 @@ const addBusiness = async () => {
 };
 
 test.describe("I should be able to reset all data of a specific municipality", () => {
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags" });
-    await addBusiness();
+    await addBusiness({ page });
     await agsBusinessGrid.init();
     await agsBusinessGrid.clickResetDataButton();
     await businessResetModal.clickSureWantToDeleteDataCheckbox();

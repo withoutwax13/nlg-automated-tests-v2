@@ -12,7 +12,7 @@ const randomDate = {
 };
 
 test.describe("As a municipal user, I should be able to set close date from the grid", () => {
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "municipal", accountIndex: 1 });
     await municipalBusinessGrid.init();
     await municipalBusinessGrid.clickClearAllFiltersButton();

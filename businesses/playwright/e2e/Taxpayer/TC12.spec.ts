@@ -41,7 +41,7 @@ const newBusinessData = {
 
 // Skipped, assertions alrady covered in TC11
 test.describe.skip("As a taxpayer, when a business has been added by an AGS user, I should be able to add the business in my account", () => {
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ page }) => {
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
@@ -56,7 +56,7 @@ test.describe.skip("As a taxpayer, when a business has been added by an AGS user
       accountIndex: 7,
     });
   });
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     // add business data
     await Login.login(page, { accountType: "ags", notFirstLogin: true, accountIndex: 7 });
     agsBusinessGrid.init();

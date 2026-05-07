@@ -40,7 +40,7 @@ const newBusinessData = {
   businessOwnerZipCode: "90210",
 };
 
-const addBusiness = async () => {
+const addBusiness = async ({ page }) => {
   await agsBusinessGrid.init();
   await agsBusinessGrid.clickAddBusinessButton();
   await addBusinessPage.fillFields(newBusinessData);
@@ -50,10 +50,10 @@ const addBusiness = async () => {
 const operatingStatus = ["Inactive", "Active/Seasonal", "Closed", "Sold"];
 
 test.describe("As a ags user, I should be able to update operating status in the business details page", () => {
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags" });
     await agsBusinessGrid.init();
-    await addBusiness();
+    await addBusiness({ page });
     await agsBusinessGrid.init();
     await agsBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
     for (const status of operatingStatus) {

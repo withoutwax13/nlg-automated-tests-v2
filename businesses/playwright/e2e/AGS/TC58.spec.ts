@@ -9,7 +9,7 @@ const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 
 test.describe("As a ags user, I should be able to delete notes to a business via the business details page", () => {
   // Skipped, assertions moved to TC55
-  test.skip("Initiating test", async () => {
+  test.skip("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", accountIndex: 7 });
     await agsBusinessGrid.init();
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");

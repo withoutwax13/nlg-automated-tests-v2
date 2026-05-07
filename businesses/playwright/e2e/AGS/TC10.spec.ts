@@ -38,7 +38,7 @@ const newBusinessData = {
 };
 
 test.describe("As an AGS user, I should be able to delete a business.", () => {
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ page }) => {
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "ags",
@@ -46,7 +46,7 @@ test.describe("As an AGS user, I should be able to delete a business.", () => {
       accountIndex: 5,
     });
   });
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", notFirstLogin: true, accountIndex: 5 });
     await businessGrid.init();
     await businessGrid.clickAddBusinessButton();

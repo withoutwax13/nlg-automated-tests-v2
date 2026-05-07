@@ -40,7 +40,7 @@ const newBusinessData = {
 };
 
 test.describe("As a taxpayer, when my business has been deleted by an AGS user, I should be able to verify that the business does not exist in my grid.", () => {
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ page }) => {
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
@@ -54,7 +54,7 @@ test.describe("As a taxpayer, when my business has been deleted by an AGS user, 
       accountIndex: 6,
     });
   });
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     // add business data
     await Login.login(page, { accountType: "ags", notFirstLogin: true, accountIndex: 6 });
     await agsBusinessGrid.init();

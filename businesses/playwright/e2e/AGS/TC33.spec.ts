@@ -8,7 +8,7 @@ const agsBusinessGrid = new BusinessGrid({
 });
 
 test.describe("As an AGS, Gov user, I want the system to prevent deleting a business record with filings", () => {
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags" });
     await agsBusinessGrid.init();
     await agsBusinessGrid.deleteBusiness("Test Trade Name 50363 1");

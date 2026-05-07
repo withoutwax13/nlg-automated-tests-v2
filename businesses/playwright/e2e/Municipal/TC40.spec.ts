@@ -8,7 +8,7 @@ const municipalBusinessList = new BusinessGrid({ userType: "municipal" });
 const municipalBusinessDetails = new BusinessDetails({ userType: "municipal" });
 
 test.describe("As a user, I should be able to reveal the full content of FEIN in business details page", () => {
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "municipal", accountIndex: 6 });
     await municipalBusinessList.init();
     await municipalBusinessList.clickClearAllFiltersButton();

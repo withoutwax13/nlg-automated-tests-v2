@@ -14,7 +14,7 @@ const agsBusinessUpdatePage = new BusinessUpdate({ userType: "ags" });
 
 test.describe("As a user, if I clear the required fields in the update business page, the save button should remain disabled", () => {
   // Skipped, assertion moved to TC61
-  test.skip("Initiating test", async () => {
+  test.skip("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", accountIndex: 2 });
     await agsBusinessGrid.init();
     await agsBusinessGrid.clickClearAllFiltersButton();

@@ -10,7 +10,7 @@ const businessGrid = new BusinessGrid({
 });
 
 test.describe("As a user, I should be able to reorganize the order of the columns.", () => {
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", accountIndex: 9 });
     const columnPairs: [string, string][] = [];
     const columnsToTest = defaultColumns.slice(2, 4); // Limiting to 2 columns to save resource usage

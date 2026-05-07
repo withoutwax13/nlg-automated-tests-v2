@@ -8,7 +8,7 @@ const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
 const exportModal = new ExportModal();
 
 test.describe("As a municipal user, I should be able to export business list with Export View as Excel file", () => {
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, {accountType: "municipal"});
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickExportButton();

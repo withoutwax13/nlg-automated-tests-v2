@@ -39,7 +39,7 @@ const newBusinessData = {
   businessOwnerZipCode: "90210",
 };
 
-const addBusiness = async () => {
+const addBusiness = async ({ page }) => {
   await municipalBusinessGrid.init();
   await municipalBusinessGrid.clickAddBusinessButton();
   await addBusinessPage.fillFields(newBusinessData);
@@ -54,10 +54,10 @@ const operatingStatus = [
 ];
 
 test.describe("As a municipal user, I should be able to update operating status in the business details page", () => {
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "municipal" });
     await municipalBusinessGrid.init();
-    await addBusiness();
+    await addBusiness({ page });
     await municipalBusinessGrid.init();
     await municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
     for (const status of operatingStatus) {

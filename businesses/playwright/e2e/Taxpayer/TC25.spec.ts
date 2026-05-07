@@ -38,7 +38,7 @@ const newBusinessData = {
 
 // Skipped, assertions alrady covered in TC26
 test.describe.skip("As a taxpayer user, I should be able to add a business.", () => {
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ page }) => {
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
@@ -53,7 +53,7 @@ test.describe.skip("As a taxpayer user, I should be able to add a business.", ()
       accountIndex: 2,
     });
   });
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, {
       accountType: "municipal",
       notFirstLogin: true,

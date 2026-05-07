@@ -6,7 +6,7 @@ import Login from "../../utils/Login";
 const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
 
 test.describe("As a taxpayer user,  I should be able to reveal the full content of FEIN in business list.", () => {
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "taxpayer", accountIndex: 6 });
     await taxpayerBusinessList.init();
     const feinValueBeforeClick = await taxpayerBusinessList.getDataOfColumn(

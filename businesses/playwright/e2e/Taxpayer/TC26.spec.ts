@@ -37,7 +37,7 @@ const newBusinessData = {
 };
 
 test.describe("As a taxpayer user, I should be able to delete a business.", () => {
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ page }) => {
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
@@ -51,7 +51,7 @@ test.describe("As a taxpayer user, I should be able to delete a business.", () =
       accountIndex: 3,
     });
   });
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, {
       accountType: "municipal",
       notFirstLogin: true,
@@ -81,7 +81,7 @@ test.describe("As a taxpayer user, I should be able to delete a business.", () =
     await expect(taxpayerBusinessGrid.getElement().toastComponent()).toBeVisible();
     await logout();
   });
-  test.afterEach(async () => {
+  test.afterEach(async ({ page }) => {
     // delete business data
     await deleteBusinessData({
       dba: newBusinessData.locationDba,

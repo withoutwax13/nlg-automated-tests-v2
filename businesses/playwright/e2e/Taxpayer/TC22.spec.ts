@@ -38,7 +38,7 @@ const newBusinessData = {
 
 // Skipped, assertions alrady covered in TC24
 test.describe.skip("As a taxpayer, when a business has been added by a municipal user, I should be able to add the business in my account", () => {
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ page }) => {
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
@@ -53,7 +53,7 @@ test.describe.skip("As a taxpayer, when a business has been added by a municipal
       accountIndex: 8,
     });
   });
-  test("Initiating test", async () => {
+  test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "municipal", notFirstLogin: true });
     municipalBusinessGrid.init();
     municipalBusinessGrid.clickAddBusinessButton();
