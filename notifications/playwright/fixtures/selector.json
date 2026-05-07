@@ -1,6 +1,0 @@
-{
-    "notificationIcon": "i.fa-bell",
-    "settingButton": ".NLGButtonSecondary",
-    "updateButton": ".NLGButtonPrimary",
-    "switchUnreadNotif": ".k-switch-track"
-}
