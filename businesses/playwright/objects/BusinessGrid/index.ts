@@ -4,7 +4,7 @@ import {
   getVisibilityStatusOfColumns,
   validateFilterOperation,
 } from "../../utils/Grid";
-import { currentPage, fillDateInput, listItem, waitForLoading } from "../../support/runtime";
+import { currentPage, fillDateInput, listItem, waitForLoading } from "../../support/native-helpers";
 import BusinessDeleteModal from "../BusinessDeleteModal";
 import GridSetting from "../GridSetting";
 import SetBusinessStatusModal from "../SetBusinessStatusModal";

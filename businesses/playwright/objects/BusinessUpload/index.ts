@@ -1,4 +1,4 @@
-import { buttonByText, currentPage, listItem } from "../../support/runtime";
+import { buttonByText, currentPage, listItem } from "../../support/native-helpers";
 
 class BusinessUpload {
   userType: string;

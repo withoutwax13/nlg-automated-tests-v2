@@ -1,5 +1,5 @@
 import { expect, type Locator } from "@playwright/test";
-import { buttonByText, currentPage, expectPathname, fillDateInput, listItem, waitForLoading } from "../../support/runtime";
+import { buttonByText, currentPage, expectPathname, fillDateInput, listItem, waitForLoading } from "../../support/native-helpers";
 
 class BusinessAdd {
   userType: string;

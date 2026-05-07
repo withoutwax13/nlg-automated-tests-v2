@@ -1,4 +1,4 @@
-import { buttonByText, currentPage, fillDateInput, listItem, waitForLoading } from "../../support/runtime";
+import { buttonByText, currentPage, fillDateInput, listItem, waitForLoading } from "../../support/native-helpers";
 
 class SetBusinessStatusModal {
   private page() {

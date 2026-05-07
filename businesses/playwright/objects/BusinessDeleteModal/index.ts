@@ -1,4 +1,4 @@
-import { currentPage } from "../../support/runtime";
+import { currentPage } from "../../support/native-helpers";
 
 class BusinessDeleteModal {
   userType: string;

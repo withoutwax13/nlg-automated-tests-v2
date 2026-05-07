@@ -1,5 +1,5 @@
 import type { Page, Locator } from "@playwright/test";
-import { currentPage } from "../../support/runtime";
+import { currentPage } from "../../support/native-helpers";
 
 const normalize = (value: string) => value.replace(/["\s]+/g, " ").trim();
 
