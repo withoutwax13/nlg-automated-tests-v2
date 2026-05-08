@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { deleteBusinessData, expectCurrentUrlToInclude, logout } from "../../support/native-helpers";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -42,39 +41,26 @@ const newBusinessData = {
 // Skipped, assertions alrady covered in TC11
 test.describe.skip("As a taxpayer, when a business has been added by an AGS user, I should be able to add the business in my account", () => {
   test.beforeEach(async ({ page }) => {
-    await deleteBusinessData({
-      dba: newBusinessData.locationDba,
-      userType: "taxpayer",
-      accountIndex: 1,
-    });
-
-    await deleteBusinessData({
-      dba: newBusinessData.locationDba,
-      userType: "ags",
-      accountIndex: 7,
-    });
   });
   test("Initiating test", async ({ page }) => {
     // add business data
     await Login.login(page, { accountType: "ags", accountIndex: 7 });
-    agsBusinessGrid.init();
+    agsBusinessGrid.init(page);
     agsBusinessGrid.clickAddBusinessButton();
     agsAddBusinessPage.fillFields(newBusinessData);
     agsAddBusinessPage.clickSaveButton();
-    agsBusinessGrid.init();
+    agsBusinessGrid.init(page);
     agsBusinessGrid.clickClearAllFiltersButton();
     agsBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
-    await logout();
+    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
 
     // add business data to the taxpayer account
     await Login.login(page, { accountType: "taxpayer", accountIndex: 1 });
-    taxpayerBusinessGrid.init();
+    taxpayerBusinessGrid.init(page);
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
-    taxpayerBusinessGrid.init();
+    taxpayerBusinessGrid.init(page);
     taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
-    await logout();
+    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
   });
 });

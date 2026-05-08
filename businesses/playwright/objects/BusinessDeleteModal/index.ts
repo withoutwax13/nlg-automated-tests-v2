@@ -1,41 +1,52 @@
-import { currentPage } from "../../support/native-helpers";
+import type { Page } from "@playwright/test";
 
 class BusinessDeleteModal {
   userType: string;
+  page: Page;
 
-  constructor(props: { userType: string }) {
+  constructor(props: { userType: string; page?: Page }) {
     this.userType = props.userType;
+    if (props.page) this.page = props.page;
   }
-
-  private page() {
-    return currentPage();
-  }
-
   private elements() {
+    const modal = this.page.locator(".k-dialog");
     return {
-      modalTitle: () => this.page().locator(".k-dialog-title").first(),
-      modalContent: () => this.page().locator(".k-dialog-content").first(),
-      buttonGroup: () => this.page().locator(".k-dialog-actions").first(),
-      cancelButton: () => this.getElement().buttonGroup().locator("button").filter({ hasText: "Cancel" }).first(),
-      deleteButton: () => this.getElement().buttonGroup().locator("button").filter({ hasText: "Delete Business" }).first(),
-      closeModalButton: () => this.page().locator('button[aria-label="Close"]').first(),
+      modalTitle: () => modal.locator(".k-dialog-title"),
+      modalContent: () => modal.locator(".k-dialog-content"),
+      buttonGroup: () => modal.locator(".k-dialog-actions"),
+      cancelButton: () =>
+        this.getElement()
+          .buttonGroup()
+          .locator(".NLGButtonPrimary")
+          .filter({ hasText: "Cancel" })
+          .first(),
+      deleteButton: () =>
+        this.getElement()
+          .buttonGroup()
+          .locator(".NLGButtonSecondary")
+          .filter({ hasText: "Delete Business" })
+          .first(),
+      closeModalButton: () => modal.locator('button[aria-label="Close"]'),
     };
   }
-
   getElement() {
     return this.elements();
   }
 
-  async clickCancelButton() {
-    await this.getElement().cancelButton().click();
+  async init(page: Page) {
+    this.page = page;
   }
 
-  async clickDeleteButton() {
-    await this.getElement().deleteButton().click();
+  clickCancelButton(): Promise<void> {
+    return this.getElement().cancelButton().click();
   }
 
-  async clickCloseModalButton() {
-    await this.getElement().closeModalButton().click();
+  clickDeleteButton(): Promise<void> {
+    return this.getElement().deleteButton().click();
+  }
+
+  clickCloseModalButton(): Promise<void> {
+    return this.getElement().closeModalButton().click();
   }
 }
 

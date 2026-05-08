@@ -1,34 +1,42 @@
-import { currentPage } from "../../support/native-helpers";
+import type { Page } from "@playwright/test";
 
 class GridSetting {
-  columnOrderAlias: string;
-  visibilityStatusAlias: string;
-
-  constructor(props: { columnOrderAlias: string; visibilityStatusAlias: string }) {
+  constructor(
+    private readonly page: Page,
+    props: {
+      columnOrderAlias: string;
+      visibilityStatusAlias: string;
+    }
+  ) {
     this.columnOrderAlias = props.columnOrderAlias;
     this.visibilityStatusAlias = props.visibilityStatusAlias;
   }
 
-  private page() {
-    return currentPage();
-  }
+  columnOrderAlias: string;
+  visibilityStatusAlias: string;
 
   private elements() {
+    const modal = this.page.locator(".k-dialog");
+    const main = this.page.locator(".NLG-GridSettings");
+
     return {
-      modal: () => this.page().locator(".k-dialog").first(),
-      modalTitle: () => this.getElement().modal().locator(".k-dialog-title").first(),
-      closeButton: () => this.getElement().modal().locator('[aria-label="Close"]').first(),
-      buttonGroup: () => this.getElement().modal().locator(".k-dialog-actions").first(),
-      cancelButton: () => this.getElement().buttonGroup().locator("button").filter({ hasText: "Cancel" }).first(),
-      saveChangesButton: () => this.getElement().buttonGroup().locator("button").filter({ hasText: "Save Changes" }).first(),
-      gridSettingMainContainer: () => this.page().locator(".NLG-GridSettings").first(),
+      modal: () => modal,
+      modalTitle: () => modal.locator(".k-dialog-title"),
+      closeButton: () => modal.locator('[aria-label="Close"]'),
+      buttonGroup: () => modal.locator(".k-dialog-actions"),
+      cancelButton: () => modal.getByRole("button", { name: "Cancel" }),
+      saveChangesButton: () => modal.getByRole("button", { name: "Save Changes" }),
+      gridSettingMainContainer: () => main,
       restoreDefaulSettingsButton: () =>
-        this.getElement().gridSettingMainContainer().locator("button").filter({ hasText: "Restore Default Settings" }).first(),
+        main.getByRole("button", { name: "Restore Default Settings" }),
       columnRowSetting: (columnName: string) =>
-        this.getElement().gridSettingMainContainer().locator(".k-list-item").filter({ hasText: columnName }).first(),
-      columnRowVisibilityToggle: (columnName: string) => this.getElement().columnRowSetting(columnName).locator("[role='switch']").nth(0),
-      columnRowFreezeToggle: (columnName: string) => this.getElement().columnRowSetting(columnName).locator("[role='switch']").nth(1),
-      columnRowDragIcon: (columnName: string) => this.getElement().columnRowSetting(columnName).locator(".fa-grip-lines").first(),
+        main.locator(".k-list-item").filter({ hasText: columnName }).first(),
+      columnRowVisibilityToggle: (columnName: string) =>
+        this.getElement().columnRowSetting(columnName).locator("[role='switch']").nth(0),
+      columnRowFreezeToggle: (columnName: string) =>
+        this.getElement().columnRowSetting(columnName).locator("[role='switch']").nth(1),
+      columnRowDragIcon: (columnName: string) =>
+        this.getElement().columnRowSetting(columnName).locator(".fa-grip-lines"),
     };
   }
 
@@ -36,42 +44,47 @@ class GridSetting {
     return this.elements();
   }
 
-  async clickSaveChangesButton() {
-    await this.getElement().saveChangesButton().click();
+
+  clickSaveChangesButton(): Promise<void> {
+    return this.getElement().saveChangesButton().click();
   }
 
-  async clickCancelButton() {
-    await this.getElement().cancelButton().click();
+  clickCancelButton(): Promise<void> {
+    return this.getElement().cancelButton().click();
   }
 
-  async clickCloseButton() {
-    await this.getElement().closeButton().click();
+  clickCloseButton(): Promise<void> {
+    return this.getElement().closeButton().click();
   }
 
   async showColumn(columnName: string) {
-    if ((await this.getElement().columnRowVisibilityToggle(columnName).getAttribute("aria-checked")) === "false") {
-      await this.getElement().columnRowVisibilityToggle(columnName).click();
+    const toggle = this.getElement().columnRowVisibilityToggle(columnName);
+    if ((await toggle.getAttribute("aria-checked")) === "false") {
+      await toggle.click();
     }
     await this.clickSaveChangesButton();
   }
 
   async hideColumn(columnName: string) {
-    if ((await this.getElement().columnRowVisibilityToggle(columnName).getAttribute("aria-checked")) === "true") {
-      await this.getElement().columnRowVisibilityToggle(columnName).click();
+    const toggle = this.getElement().columnRowVisibilityToggle(columnName);
+    if ((await toggle.getAttribute("aria-checked")) === "true") {
+      await toggle.click();
     }
     await this.clickSaveChangesButton();
   }
 
   async freezeColumn(columnName: string) {
-    if ((await this.getElement().columnRowFreezeToggle(columnName).getAttribute("aria-checked")) === "false") {
-      await this.getElement().columnRowFreezeToggle(columnName).click();
+    const toggle = this.getElement().columnRowFreezeToggle(columnName);
+    if ((await toggle.getAttribute("aria-checked")) === "false") {
+      await toggle.click();
     }
     await this.clickSaveChangesButton();
   }
 
   async unfreezeColumn(columnName: string) {
-    if ((await this.getElement().columnRowFreezeToggle(columnName).getAttribute("aria-checked")) === "true") {
-      await this.getElement().columnRowFreezeToggle(columnName).click();
+    const toggle = this.getElement().columnRowFreezeToggle(columnName);
+    if ((await toggle.getAttribute("aria-checked")) === "true") {
+      await toggle.click();
     }
     await this.clickSaveChangesButton();
   }
@@ -83,7 +96,9 @@ class GridSetting {
   }
 
   async moveColumnToLocationOf(columnName: string, targetColumnName: string) {
-    await this.getElement().columnRowDragIcon(columnName).dragTo(this.getElement().columnRowSetting(targetColumnName));
+    await this.getElement().columnRowDragIcon(columnName).dragTo(
+      this.getElement().columnRowSetting(targetColumnName)
+    );
     await this.clickSaveChangesButton();
   }
 }

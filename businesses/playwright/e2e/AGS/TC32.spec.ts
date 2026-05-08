@@ -40,7 +40,7 @@ const newBusinessData = {
 };
 
 const addBusiness = async ({ page }) => {
-  await agsBusinessGrid.init(false, false);
+  await agsBusinessGrid.init(page, false, false);
   await agsBusinessGrid.clickAddBusinessButton();
   await addBusinessPage.fillFields(newBusinessData);
   await addBusinessPage.clickSaveButton();
@@ -50,7 +50,7 @@ test.describe("I should be able to reset all data of a specific municipality", (
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags" });
     await addBusiness({ page });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.clickResetDataButton();
     await businessResetModal.clickSureWantToDeleteDataCheckbox();
     await businessResetModal.clickDeleteDataButton();

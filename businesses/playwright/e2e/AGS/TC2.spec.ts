@@ -15,7 +15,7 @@ const randomDate = {
 test.describe("As an AGS user, I should be able to set close date from the grid", () => {
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", accountIndex: 1 });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.clickClearAllFiltersButton();
     const beforeCloseDate = await agsBusinessGrid.getDataOfColumn(
       "Close Date",

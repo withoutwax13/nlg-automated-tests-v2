@@ -1,18 +1,21 @@
 import { expect } from "@playwright/test";
-import { buttonByText, currentPage, fillDateInput, fixturePath, listItem } from "../../support/native-helpers";
+import type { Page } from "@playwright/test";
+import { clickByText, setMaskedDateInput } from "../../support/native-helpers";
 import SetBusinessStatusModal from "../SetBusinessStatusModal";
 
 class BusinessDetails {
   userType: string;
   setBusinessStatusModal: SetBusinessStatusModal;
+  private page!: Page;
 
   constructor(props: { userType: string }) {
     this.userType = props.userType;
     this.setBusinessStatusModal = new SetBusinessStatusModal();
   }
 
-  private page() {
-    return currentPage();
+  async init(page: Page) {
+    this.page = page;
+    await this.setBusinessStatusModal.init(page);
   }
 
   private normalize(value: string) {
@@ -21,31 +24,31 @@ class BusinessDetails {
 
   private elements() {
     return {
-      anyList: () => this.page().locator("li"),
-      pageTitle: () => this.page().locator("h1").first(),
-      toastComponent: () => this.page().locator(".Toastify").first(),
-      backToBusinessesButton: () => this.page().locator(".NLG-Hyperlink").filter({ hasText: "Back" }).first(),
-      saveButton: () => this.page().locator(".NLGButtonPrimary").filter({ hasText: "Save" }).first(),
-      discardChangesButton: () => this.page().locator(".NLGButtonSecondary").filter({ hasText: "Discard Changes" }).first(),
+      anyList: () => this.page.locator("li"),
+      pageTitle: () => this.page.locator("h1").first(),
+      toastComponent: () => this.page.locator(".Toastify").first(),
+      backToBusinessesButton: () => this.page.locator(".NLG-Hyperlink").filter({ hasText: "Back" }).first(),
+      saveButton: () => this.page.locator(".NLGButtonPrimary").filter({ hasText: "Save" }).first(),
+      discardChangesButton: () => this.page.locator(".NLGButtonSecondary").filter({ hasText: "Discard Changes" }).first(),
       businessStatusIndicator: () => this.getElement().pageTitle().locator("xpath=following-sibling::*[1]").first(),
-      aboutBusinessSection: () => this.page().locator("section").nth(0),
+      aboutBusinessSection: () => this.page.locator("section").nth(0),
       editBusinessInfoButton: () => this.getElement().aboutBusinessSection().locator(".NLGButtonSecondary").filter({ hasText: "Edit Business Info" }).first(),
       businessInfoList: () => this.getElement().editBusinessInfoButton().locator("xpath=following-sibling::*[1]").first(),
       sectionTabs: () => this.getElement().aboutBusinessSection().locator("xpath=following-sibling::*[1]").first(),
       sectionTabsItems: (tabName: string) => this.getElement().sectionTabs().locator("ul li").filter({ hasText: tabName }).first(),
-      formsSection: () => this.page().locator("section").nth(1).locator("h3").first().locator("xpath=../.."),
+      formsSection: () => this.page.locator("section").nth(1).locator("h3").first().locator("xpath=../.."),
       formsSectionTitle: () => this.getElement().formsSection().locator("h3").first(),
       formsSectionHelpText: () => this.getElement().formsSection().locator("p").first(),
       formsSectionFormList: () => this.getElement().formsSection().locator(".k-switch").locator("xpath=.."),
       taxpayerFormsSectionFormList: () => this.getElement().formsSection().locator("div").nth(1),
       formSectionFormListItem: (formName: string) => this.getElement().formsSectionFormList().filter({ hasText: formName }).first(),
-      businessStatusSection: () => this.page().locator("section").nth(1).locator("h3").filter({ hasText: "Business Status" }).first().locator("xpath=ancestor::section[1]"),
+      businessStatusSection: () => this.page.locator("section").nth(1).locator("h3").filter({ hasText: "Business Status" }).first().locator("xpath=ancestor::section[1]"),
       startDateDelinquencyTrackingInput: () =>
-        this.page().locator("label").filter({ hasText: "Start Date for Delinquency Tracking" }).first().locator("xpath=following-sibling::*[1]").locator("input").first(),
+        this.page.locator("label").filter({ hasText: "Start Date for Delinquency Tracking" }).first().locator("xpath=following-sibling::*[1]").locator("input").first(),
       businessCloseDateInput: () =>
-        this.page().locator("label").filter({ hasText: "Business Close Date" }).first().locator("xpath=following-sibling::*[1]").locator("input").first(),
+        this.page.locator("label").filter({ hasText: "Business Close Date" }).first().locator("xpath=following-sibling::*[1]").locator("input").first(),
       operatingStatusDropdown: () =>
-        this.page().locator("label").filter({ hasText: "Operating Status" }).first().locator("xpath=following-sibling::*[1]").locator("i").first(),
+        this.page.locator("label").filter({ hasText: "Operating Status" }).first().locator("xpath=following-sibling::*[1]").locator("i").first(),
       notesSection: () => this.getElement().sectionTabs().locator("div[class*='businessDetailsSectionContent']").first(),
       addNoteButton: () => this.getElement().notesSection().locator("button").filter({ hasText: "Add a Note" }).first(),
       noteItems: () => this.getElement().notesSection().locator(".k-expander"),
@@ -65,7 +68,7 @@ class BusinessDetails {
   }
 
   async clickSaveButton() {
-    const updateBusiness = this.page().waitForResponse(
+    const updateBusiness = this.page.waitForResponse(
       (response) => response.request().method() === "PUT" && response.url().includes("/businesses/") && response.url().includes("/update"),
     );
     await this.getElement().saveButton().click();
@@ -136,7 +139,7 @@ class BusinessDetails {
   }
 
   async setStartDateDelinquencyTracking(date: { month: number; date: number; year: number }) {
-    await fillDateInput(this.getElement().startDateDelinquencyTrackingInput(), date);
+    await setMaskedDateInput(this.getElement().startDateDelinquencyTrackingInput(), date);
   }
 
   async triggerSetBusinessStatusModal() {
@@ -166,7 +169,7 @@ class BusinessDetails {
       throw new Error("Invalid operating status");
     }
     await this.getElement().operatingStatusDropdown().click();
-    await listItem(status).click();
+    await clickByText(this.getElement().anyList(), status);
   }
 
   async clickAddNoteButton() {
@@ -175,19 +178,19 @@ class BusinessDetails {
   }
 
   async clickCancelNoteButton() {
-    const cancelButton = buttonByText("Cancel");
+    const cancelButton = this.page.getByRole("button", { name: "Cancel" });
     await cancelButton.scrollIntoViewIfNeeded();
     await cancelButton.click();
   }
 
   async addNote(note: string) {
-    const addNote = this.page().waitForResponse(
+    const addNote = this.page.waitForResponse(
       (response) =>
         response.request().method() === "PATCH" &&
         response.url().includes("/businesses/MunicipalBusiness/Note?businessHandle="),
     );
     await this.clickAddNoteButton();
-    await this.page().locator("textarea").fill(note);
+    await this.page.locator("textarea").fill(note);
     await this.getElement().saveButton().click();
     expect((await addNote).status()).toBe(200);
   }
@@ -197,7 +200,7 @@ class BusinessDetails {
   }
 
   async deleteNoteItem(pos: number) {
-    const deleteNote = this.page().waitForResponse(
+    const deleteNote = this.page.waitForResponse(
       (response) =>
         response.request().method() === "PUT" &&
         response.url().includes("/businesses/municipalityBusiness/update"),
@@ -207,18 +210,18 @@ class BusinessDetails {
   }
 
   async uploadDocument(fileName: string) {
-    const uploadDocumentPatch = this.page().waitForResponse(
+    const uploadDocumentPatch = this.page.waitForResponse(
       (response) =>
         response.request().method() === "PATCH" &&
         response.url().includes("/businesses/MunicipalBusiness/Document/upload?businessHandle="),
     );
-    const uploadDocumentPut = this.page().waitForResponse(
+    const uploadDocumentPut = this.page.waitForResponse(
       (response) => response.request().method() === "PUT" && response.url().includes("businessuploadeddocumentsbu"),
     );
     await this.getElement().uploadDocumentButton().click();
-    await this.page().locator('input[placeholder="Enter file name"]').fill(fileName);
-    await this.page().locator("#files").setInputFiles(fixturePath("example.json"));
-    await this.page().locator(".NLGButtonPrimary").filter({ hasText: "Upload" }).first().click();
+    await this.page.locator('input[placeholder="Enter file name"]').fill(fileName);
+    await this.page.locator("#files").setInputFiles("fixtures/example.json");
+    await this.page.locator(".NLGButtonPrimary").filter({ hasText: "Upload" }).first().click();
     expect((await uploadDocumentPatch).status()).toBe(200);
     expect((await uploadDocumentPut).status()).toBe(200);
   }

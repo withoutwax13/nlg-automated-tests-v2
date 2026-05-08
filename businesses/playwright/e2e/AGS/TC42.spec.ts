@@ -8,7 +8,7 @@ const agsBusinessGrid = new BusinessGrid({ userType: "ags", municipalitySelectio
 test.describe("As an AGS user, the default filter for the business list should be the Operating Status", () => {
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags" });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await expect(agsBusinessGrid.getElement().activeFilterChipsLabel()).toBeVisible();
     await expect(agsBusinessGrid.getElement().activeFilterChip("Operating Status")).toBeVisible();
   });

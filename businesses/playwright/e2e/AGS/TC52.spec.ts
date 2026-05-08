@@ -13,7 +13,7 @@ const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 test.describe("As a user, when the business is active, I should be able to update form submission requirements in the business details page", () => {
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags" });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     const forms = agsBusinessDetails.getElement().formsSectionFormList();
     const count = await forms.count();

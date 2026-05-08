@@ -10,7 +10,7 @@ const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 test.describe("As a ags user, I should be able to add notes to a business via the business details page", () => {
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", accountIndex: 5 });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     await agsBusinessDetails.clickNotesTab();
     await agsBusinessDetails.clickAddNoteButton();

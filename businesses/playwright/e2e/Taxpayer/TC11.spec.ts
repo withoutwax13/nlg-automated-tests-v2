@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { deleteBusinessData, expectCurrentUrlToInclude, logout } from "../../support/native-helpers";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -41,49 +40,36 @@ const newBusinessData = {
 
 test.describe("As a taxpayer, when my business has been deleted by an AGS user, I should be able to verify that the business does not exist in my grid.", () => {
   test.beforeEach(async ({ page }) => {
-    await deleteBusinessData({
-      dba: newBusinessData.locationDba,
-      userType: "taxpayer",
-    });
-
-    await deleteBusinessData({
-      dba: newBusinessData.locationDba,
-      userType: "ags",
-      accountIndex: 6,
-    });
   });
   test("Initiating test", async ({ page }) => {
     // add business data
     await Login.login(page, { accountType: "ags", accountIndex: 6 });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.clickAddBusinessButton();
     await agsAddBusinessPage.fillFields(newBusinessData);
     await agsAddBusinessPage.clickSaveButton();
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.clickClearAllFiltersButton();
     await agsBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
-    await logout();
+    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
 
     // add business data to the taxpayer account
     await Login.login(page, { accountType: "taxpayer" });
-    await taxpayerBusinessGrid.init();
+    await taxpayerBusinessGrid.init(page);
     await taxpayerBusinessGrid.clickAddBusinessButton();
     await taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
-    await taxpayerBusinessGrid.init();
+    await taxpayerBusinessGrid.init(page);
     await taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    await logout();
 
     // delete business data
     await Login.login(page, { accountType: "ags", accountIndex: 6 });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.deleteBusiness(newBusinessData.locationDba);
     await expect(agsBusinessGrid.getElement().toastComponent()).toBeVisible();
-    await logout();
 
     // verify that the business does not exist in the taxpayer grid
     await Login.login(page, { accountType: "taxpayer" });
-    await taxpayerBusinessGrid.init();
+    await taxpayerBusinessGrid.init(page);
     await taxpayerBusinessGrid.filterColumn("DBA", newBusinessData.locationDba);
     await expect(taxpayerBusinessGrid.getElement().noRecordFoundComponent()).toBeVisible();
   });

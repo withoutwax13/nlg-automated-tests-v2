@@ -16,7 +16,7 @@ test.describe("As a user, if I clear the required fields in the update business 
   // Skipped, assertion moved to TC61
   test.skip("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", accountIndex: 2 });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.clickClearAllFiltersButton();
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     await agsBusinessDetails.clickEditBusinessInfoButton();

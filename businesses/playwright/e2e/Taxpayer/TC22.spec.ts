@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { deleteBusinessData, expectCurrentUrlToInclude, logout } from "../../support/native-helpers";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -39,37 +38,24 @@ const newBusinessData = {
 // Skipped, assertions alrady covered in TC24
 test.describe.skip("As a taxpayer, when a business has been added by a municipal user, I should be able to add the business in my account", () => {
   test.beforeEach(async ({ page }) => {
-    await deleteBusinessData({
-      dba: newBusinessData.locationDba,
-      userType: "taxpayer",
-      accountIndex: 2,
-    });
-
-    await deleteBusinessData({
-      dba: newBusinessData.locationDba,
-      userType: "ags",
-      accountIndex: 8,
-    });
   });
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "municipal" });
-    municipalBusinessGrid.init();
+    municipalBusinessGrid.init(page);
     municipalBusinessGrid.clickAddBusinessButton();
     addBusinessPage.fillFields(newBusinessData);
     addBusinessPage.clickSaveButton();
-    municipalBusinessGrid.init();
+    municipalBusinessGrid.init(page);
     municipalBusinessGrid.clickClearAllFiltersButton();
     municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
-
-    await logout();
+    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
     await Login.login(page, { accountType: "taxpayer", accountIndex: 2 });
-    taxpayerBusinessGrid.init();
+    taxpayerBusinessGrid.init(page);
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
     taxpayerBusinessGrid.clickAddBusinessButton();
-    taxpayerBusinessGrid.init();
+    taxpayerBusinessGrid.init(page);
     taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
+    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
   });
 });

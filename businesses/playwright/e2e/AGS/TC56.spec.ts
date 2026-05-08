@@ -14,7 +14,7 @@ test.describe("As a user, I should not be able to add blank notes in the busines
   // Skipped, assertion moved to TC55
   test.skip("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", accountIndex: 6 });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     await agsBusinessDetails.clickNotesTab();
     await agsBusinessDetails.clickAddNoteButton();

@@ -41,7 +41,7 @@ const newBusinessData = {
 };
 
 const addBusiness = async ({ page }) => {
-  await agsBusinessGrid.init();
+  await agsBusinessGrid.init(page);
   await agsBusinessGrid.clickAddBusinessButton();
   await addBusinessPage.fillFields(newBusinessData);
   await addBusinessPage.clickSaveButton();
@@ -52,9 +52,9 @@ const operatingStatus = ["Inactive", "Active/Seasonal", "Closed", "Sold"];
 test.describe("As a ags user, I should be able to update operating status in the business details page", () => {
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags" });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await addBusiness({ page });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
     for (const status of operatingStatus) {
       if (status === "Active/Seasonal" || status === "Inactive") {

@@ -13,7 +13,7 @@ const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 test.describe("As a user, when the business is not active, I should not be able to update form submission requirements in the business details page", () => {
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags" });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.clickClearAllFiltersButton();
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13857");
     const forms = agsBusinessDetails.getElement().formsSectionFormList();

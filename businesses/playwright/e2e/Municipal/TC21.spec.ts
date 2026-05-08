@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { deleteBusinessData, expectCurrentUrlToInclude } from "../../support/native-helpers";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -37,25 +36,20 @@ const newBusinessData = {
 
 test.describe("As a municipal user, I should be able to add a business.", () => {
   test.beforeEach(async ({ page }) => {
-    await deleteBusinessData({
-      dba: newBusinessData.locationDba,
-      userType: "municipal",
-      accountIndex: 8,
-    });
   });
   test("Initiating test", async ({ page }) => {
     await Login.login(page, {
       accountType: "municipal",
       accountIndex: 8,
     });
-    municipalBusinessGrid.init();
+    municipalBusinessGrid.init(page);
     municipalBusinessGrid.clickAddBusinessButton();
     addBusinessPage.fillFields(newBusinessData);
     addBusinessPage.clickSaveButton();
-    municipalBusinessGrid.init();
+    municipalBusinessGrid.init(page);
     municipalBusinessGrid.clickClearAllFiltersButton();
     municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
 
-    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
+    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
   });
 });

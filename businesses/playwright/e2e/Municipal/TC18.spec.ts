@@ -10,7 +10,7 @@ const exportModal = new ExportModal();
 test.describe("As a municipal user, I should be able to export business list with Export view as CSV file", () => {
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "municipal", accountIndex: 1 });
-    municipalBusinessGrid.init();
+    municipalBusinessGrid.init(page);
     municipalBusinessGrid.clickExportButton();
     exportModal.clickCsvOption();
     exportModal.clickExportViewOption();

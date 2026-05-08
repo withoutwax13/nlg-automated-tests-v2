@@ -21,13 +21,13 @@ test.describe("As a user, I should be able to reorganize the order of the column
     }
 
     for (const [column, targetColumn] of columnPairs) {
-      await businessGrid.init();
+      await businessGrid.init(page);
       const beforeColumnMove = await businessGrid.verifyColumnOrder(column);
       const beforeTargetMove = await businessGrid.verifyColumnOrder(targetColumn);
       await businessGrid.clickCustomizeTableViewButton();
       await businessGrid.moveColumnToLocationOf(column, targetColumn);
 
-      await businessGrid.init(true);
+      await businessGrid.init(page, true);
       const afterTargetMove = await businessGrid.verifyColumnOrder(targetColumn);
       const afterColumnMove = await businessGrid.verifyColumnOrder(column);
       expect(beforeColumnMove).not.toEqual(afterColumnMove);

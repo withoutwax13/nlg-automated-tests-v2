@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { expectCurrentUrlToInclude } from "../../support/native-helpers";
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -15,9 +14,9 @@ const randomDate = Math.floor(Math.random() * 28) + 1;
 test.describe("As a ags user, I should be able to update start date for delinquency tracking in the business details page", () => {
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", accountIndex: 1 });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 74829");
-    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
+    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
     await agsBusinessDetails.clickBusinessStatusTab();
 
     await agsBusinessDetails.setStartDateDelinquencyTracking({

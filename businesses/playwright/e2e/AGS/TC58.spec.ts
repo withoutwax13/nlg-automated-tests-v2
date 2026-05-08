@@ -11,7 +11,7 @@ test.describe("As a ags user, I should be able to delete notes to a business via
   // Skipped, assertions moved to TC55
   test.skip("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", accountIndex: 7 });
-    await agsBusinessGrid.init();
+    await agsBusinessGrid.init(page);
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
     await agsBusinessDetails.clickNotesTab();
     await agsBusinessDetails.addNote(

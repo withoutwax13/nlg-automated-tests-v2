@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { deleteBusinessData, expectCurrentUrlToInclude } from "../../support/native-helpers";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -37,28 +36,23 @@ const newBusinessData = {
 
 test.describe("As a municipal user, I should be able to delete a business.", () => {
   test.beforeEach(async ({ page }) => {
-    await deleteBusinessData({
-      dba: newBusinessData.locationDba,
-      userType: "municipal",
-      accountIndex: 9,
-    });
   });
   test("Initiating test", async ({ page }) => {
     await Login.login(page, {
       accountType: "municipal",
       accountIndex: 9,
     });
-    await municipalBusinessGrid.init();
+    await municipalBusinessGrid.init(page);
     await municipalBusinessGrid.clickAddBusinessButton();
     await addBusinessPage.fillFields(newBusinessData);
     await addBusinessPage.clickSaveButton();
-    await municipalBusinessGrid.init(false, false);
+    await municipalBusinessGrid.init(page, false, false);
     await municipalBusinessGrid.clickClearAllFiltersButton();
     await municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
+    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
 
     // delete business data
-    await municipalBusinessGrid.init(false, false);
+    await municipalBusinessGrid.init(page, false, false);
     await municipalBusinessGrid.deleteBusiness(newBusinessData.locationDba);
     await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
   });

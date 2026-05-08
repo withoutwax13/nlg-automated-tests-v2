@@ -8,8 +8,8 @@ const agsBusinessGrid = new BusinessGrid({
   municipalitySelection: "City of Arrakis",
 });
 
-const cleanTestData = async (businessName: string, requiredForm: string) => {
-  await agsBusinessGrid.init();
+const cleanTestData = async (page: any, businessName: string, requiredForm: string) => {
+  await agsBusinessGrid.init(page);
   await agsBusinessGrid.clickClearAllFiltersButton();
   const requiredFormsBeforeCleaning = await agsBusinessGrid.checkEnabledRequiredForms(businessName);
   if (!requiredFormsBeforeCleaning.includes(requiredForm)) {
@@ -21,7 +21,7 @@ const cleanTestData = async (businessName: string, requiredForm: string) => {
 test.describe("As an AGS user, I should be able to remove required forms from the grid", () => {
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", accountIndex: 3 });
-    await cleanTestData("Arrakis Spice Company 17829", "Food and Beverage Tax Return (Monthly)");
+    await cleanTestData(page, "Arrakis Spice Company 17829", "Food and Beverage Tax Return (Monthly)");
     await agsBusinessGrid.clickClearAllFiltersButton();
     const beforeRemovingRequiredForms = await agsBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");
     expect(beforeRemovingRequiredForms).toContain("Food and Beverage Tax Return (Monthly)");
