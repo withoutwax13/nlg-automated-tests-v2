@@ -1,4 +1,4 @@
-import { buttonByText, currentPage } from "../../support/native-helpers";
+import { buttonByText, currentPage } from "../../helpers/legacy-helpers";
 
 class BusinessConfiguration {
   private page() {

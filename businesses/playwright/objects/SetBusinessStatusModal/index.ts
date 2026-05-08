@@ -1,4 +1,4 @@
-import { currentPage, fillDateInput, listItem, waitForLoading } from "../../support/native-helpers";
+import { currentPage, fillDateInput, listItem, waitForLoading } from "../../helpers/legacy-helpers";
 
 class SetBusinessStatusModal {
   private page() {

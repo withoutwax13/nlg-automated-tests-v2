@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { deleteBusinessData, expectCurrentUrlToInclude } from "../../support/native-helpers";
+import { deleteBusinessData, expectCurrentUrlToInclude } from "../../helpers/legacy-helpers";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -42,12 +42,11 @@ test.describe("As an AGS user, I should be able to delete a business.", () => {
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "ags",
-      notFirstLogin: false,
       accountIndex: 5,
     });
   });
   test("Initiating test", async ({ page }) => {
-    await Login.login(page, { accountType: "ags", notFirstLogin: true, accountIndex: 5 });
+    await Login.login(page, { accountType: "ags", accountIndex: 5 });
     await businessGrid.init();
     await businessGrid.clickAddBusinessButton();
     await addBusinessPage.fillFields(newBusinessData);

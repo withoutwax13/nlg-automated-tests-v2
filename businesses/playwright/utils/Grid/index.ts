@@ -1,5 +1,3 @@
-import { currentPage, getColumnOrder, getVisibilityStatus } from "../../support/native-helpers";
-
 const validFilterOperations = {
   text: [
     "Contains",
@@ -36,17 +34,4 @@ export const validateFilterOperation = (
       `Invalid ${String(filterType)} filter operation: ${filterOperation}`
     );
   }
-};
-
-export const getOrderOfColumns = async (
-  columnNames: string[],
-  headerLocator = currentPage().locator("th[role='columnheader']")
-) => getColumnOrder(headerLocator, columnNames);
-
-export const getVisibilityStatusOfColumns = async (
-  columnNames: string[],
-  order?: Record<string, number>
-) => {
-  const columnOrder = order ?? (await getOrderOfColumns(columnNames));
-  return getVisibilityStatus(columnNames, columnOrder);
 };

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { deleteBusinessData, expectCurrentUrlToInclude, logout } from "../../support/native-helpers";
+import { deleteBusinessData, expectCurrentUrlToInclude, logout } from "../../helpers/legacy-helpers";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -45,20 +45,18 @@ test.describe.skip("As a taxpayer, when a business has been added by an AGS user
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
-      notFirstLogin: false,
       accountIndex: 1,
     });
 
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "ags",
-      notFirstLogin: true,
       accountIndex: 7,
     });
   });
   test("Initiating test", async ({ page }) => {
     // add business data
-    await Login.login(page, { accountType: "ags", notFirstLogin: true, accountIndex: 7 });
+    await Login.login(page, { accountType: "ags", accountIndex: 7 });
     agsBusinessGrid.init();
     agsBusinessGrid.clickAddBusinessButton();
     agsAddBusinessPage.fillFields(newBusinessData);
@@ -70,7 +68,7 @@ test.describe.skip("As a taxpayer, when a business has been added by an AGS user
     await logout();
 
     // add business data to the taxpayer account
-    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true, accountIndex: 1 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 1 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);

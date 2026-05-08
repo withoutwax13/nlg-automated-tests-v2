@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { deleteBusinessData, expectCurrentUrlToInclude, logout } from "../../support/native-helpers";
+import { deleteBusinessData, expectCurrentUrlToInclude, logout } from "../../helpers/legacy-helpers";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -41,21 +41,18 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
-      notFirstLogin: false,
       accountIndex: 3,
     });
 
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
-      notFirstLogin: true,
       accountIndex: 1,
     });
   });
   test("Initiating test", async ({ page }) => {
     await Login.login(page, {
       accountType: "municipal",
-      notFirstLogin: true,
       accountIndex: 1,
     });
     await municipalBusinessGrid.init();
@@ -68,7 +65,7 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     await logout();
-    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 3 });
     await taxpayerBusinessGrid.init();
     await taxpayerBusinessGrid.clickAddBusinessButton();
     await taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
@@ -80,7 +77,6 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     await logout();
     await Login.login(page, {
       accountType: "municipal",
-      notFirstLogin: true,
       accountIndex: 1,
     });
     // delete business data
@@ -89,7 +85,7 @@ test.describe("As a taxpayer, when my business has been deleted by a municipal u
     await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
 
     await logout();
-    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true, accountIndex: 3 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 3 });
     await taxpayerBusinessGrid.init();
     await taxpayerBusinessGrid.filterColumn("DBA", newBusinessData.locationDba);
     await expect(taxpayerBusinessGrid.getElement().noRecordFoundComponent()).toBeVisible();

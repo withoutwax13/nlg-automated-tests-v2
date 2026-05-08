@@ -1,10 +1,9 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import {
-  getOrderOfColumns,
-  getVisibilityStatusOfColumns,
   validateFilterOperation,
 } from "../../utils/Grid";
-import { currentPage, fillDateInput, listItem, waitForLoading } from "../../support/native-helpers";
+import { getColumnOrder, getVisibilityStatus } from "../../helpers/legacy-helpers";
+import { currentPage, fillDateInput, listItem, waitForLoading } from "../../helpers/legacy-helpers";
 import BusinessDeleteModal from "../BusinessDeleteModal";
 import GridSetting from "../GridSetting";
 import SetBusinessStatusModal from "../SetBusinessStatusModal";
@@ -176,11 +175,11 @@ class BusinessGrid {
 
   private async refreshGridMetadata(resetSavedGridSettingsInMemory?: boolean) {
     if (!Object.keys(this.columnIndexes).length || resetSavedGridSettingsInMemory) {
-      this.columnIndexes = await getOrderOfColumns(this.expectedColumns());
+      this.columnIndexes = await getColumnOrder(this.page().locator("th[role='columnheader']"), this.expectedColumns());
     }
 
     if (!Object.keys(this.columnVisibility).length || resetSavedGridSettingsInMemory) {
-      this.columnVisibility = await getVisibilityStatusOfColumns(this.expectedColumns());
+      this.columnVisibility = getVisibilityStatus(this.expectedColumns(), this.columnIndexes);
     }
   }
 

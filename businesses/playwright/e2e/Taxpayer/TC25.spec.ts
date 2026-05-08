@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { deleteBusinessData, expectCurrentUrlToInclude, logout } from "../../support/native-helpers";
+import { deleteBusinessData, expectCurrentUrlToInclude, logout } from "../../helpers/legacy-helpers";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -42,21 +42,18 @@ test.describe.skip("As a taxpayer user, I should be able to add a business.", ()
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "taxpayer",
-      notFirstLogin: false,
       accountIndex: 4,
     });
 
     await deleteBusinessData({
       dba: newBusinessData.locationDba,
       userType: "municipal",
-      notFirstLogin: true,
       accountIndex: 2,
     });
   });
   test("Initiating test", async ({ page }) => {
     await Login.login(page, {
       accountType: "municipal",
-      notFirstLogin: true,
       accountIndex: 2,
     });
     municipalBusinessGrid.init();
@@ -69,7 +66,7 @@ test.describe.skip("As a taxpayer user, I should be able to add a business.", ()
     await expectCurrentUrlToInclude("/BusinessesApp/BusinessDetails/");
 
     await logout();
-    await Login.login(page, { accountType: "taxpayer", notFirstLogin: true, accountIndex: 4 });
+    await Login.login(page, { accountType: "taxpayer", accountIndex: 4 });
     taxpayerBusinessGrid.init();
     taxpayerBusinessGrid.clickAddBusinessButton();
     taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);

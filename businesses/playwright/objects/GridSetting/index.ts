@@ -1,4 +1,4 @@
-import { currentPage } from "../../support/native-helpers";
+import { currentPage } from "../../helpers/legacy-helpers";
 
 class GridSetting {
   columnOrderAlias: string;

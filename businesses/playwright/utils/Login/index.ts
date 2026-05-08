@@ -1,5 +1,6 @@
 import type { Page, Response } from "@playwright/test";
 import { login as nativeLogin } from "../../support/native-helpers";
+import { setCurrentPage, type LoginParams } from "../../helpers/legacy-helpers";
 
 const isHubspotChat = (response: Response) =>
   response.request().method() === "GET" &&
@@ -27,5 +28,8 @@ export default {
   interceptAwsCognito,
   interceptHubspotChat,
   interceptLeadFlowConfig,
-  login: nativeLogin,
+  login: (page: Page, params: LoginParams = {}) => {
+    setCurrentPage(page);
+    return nativeLogin(page, params);
+  },
 };
