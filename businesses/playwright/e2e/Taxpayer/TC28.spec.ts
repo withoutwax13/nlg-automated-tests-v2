@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { expectCurrentUrlToInclude } from "../../helpers/legacy-helpers";
+import { expectCurrentUrlToInclude } from "../../support/native-helpers";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 

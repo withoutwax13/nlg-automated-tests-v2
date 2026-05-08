@@ -1,4 +1,4 @@
-import { buttonByText, currentPage, listItem } from "../../helpers/legacy-helpers";
+import { buttonByText, currentPage, listItem } from "../../support/native-helpers";
 
 class BusinessUpload {
   userType: string;

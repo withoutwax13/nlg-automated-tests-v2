@@ -1,4 +1,4 @@
-import { currentPage } from "../../helpers/legacy-helpers";
+import { currentPage } from "../../support/native-helpers";
 
 class ExportModal {
   private page() {

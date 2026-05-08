@@ -2,8 +2,8 @@ import { expect, type Locator, type Page } from "@playwright/test";
 import {
   validateFilterOperation,
 } from "../../utils/Grid";
-import { getColumnOrder, getVisibilityStatus } from "../../helpers/legacy-helpers";
-import { currentPage, fillDateInput, listItem, waitForLoading } from "../../helpers/legacy-helpers";
+import { getColumnOrder, getVisibilityStatus } from "../../support/native-helpers";
+import { currentPage, fillDateInput, listItem, waitForLoading } from "../../support/native-helpers";
 import BusinessDeleteModal from "../BusinessDeleteModal";
 import GridSetting from "../GridSetting";
 import SetBusinessStatusModal from "../SetBusinessStatusModal";

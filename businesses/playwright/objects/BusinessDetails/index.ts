@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { buttonByText, currentPage, fillDateInput, fixturePath, listItem } from "../../helpers/legacy-helpers";
+import { buttonByText, currentPage, fillDateInput, fixturePath, listItem } from "../../support/native-helpers";
 import SetBusinessStatusModal from "../SetBusinessStatusModal";
 
 class BusinessDetails {
