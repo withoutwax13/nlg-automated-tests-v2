@@ -2,10 +2,9 @@ import { expect, type Locator, type Page, type Response } from "@playwright/test
 
 type AccountType = "taxpayer" | "municipal" | "municipality" | "ags" | "municipalDel";
 
-export type LoginParams = {
+type LoginParams = {
   accountType?: AccountType;
   accountIndex?: number;
-  notFirstLogin?: boolean;
 };
 
 type DateParts = {
@@ -165,30 +164,13 @@ const getCredentials = (accountType: AccountType, accountIndex = 0) => {
       ],
     }
   return {
-    username: validCredentials[normalizedType][accountIndex]["username"],
-    password: validCredentials[normalizedType][accountIndex]["password"],
+    username: validCredentials[accountType][accountIndex]["username"],
+    password: validCredentials[accountType][accountIndex]["password"],
   };
 };
 
-let activePage: Page | null = null;
-
-export const setCurrentPage = (page: Page) => {
-  activePage = page;
-};
-
-export const currentPage = () => {
-  if (!activePage) {
-    throw new Error("currentPage is not set. Call login(page, ...) first or setCurrentPage(page).");
-  }
-  return activePage;
-};
-
-export const waitForLoading = async (page?: Page, seconds = 5) => {
-  const targetPage = page ?? activePage;
-  if (!targetPage) {
-    throw new Error("waitForLoading requires a page when no currentPage is set.");
-  }
-  await targetPage.waitForTimeout(seconds * 1000);
+export const waitForLoading = async (page: Page, seconds = 5) => {
+  await page.waitForTimeout(seconds * 1000);
 };
 
 export const waitForResponse = async (
@@ -220,51 +202,6 @@ export const expectStatus = async (responsePromise: Promise<Response>, expectedS
 
 export const clickByText = async (locator: Locator, text: string) => {
   await locator.filter({ hasText: text }).first().click();
-};
-
-export const buttonByText = (text: string, page: Page = currentPage()) =>
-  page.locator("button").filter({ hasText: text }).first();
-
-export const listItem = (text: string, page: Page = currentPage()) =>
-  page.locator("li").filter({ hasText: text }).first();
-
-export const fillDateInput = async (input: Locator, value: DateParts) =>
-  setMaskedDateInput(input, value);
-
-export const fixturePath = (name: string) => `playwright/fixtures/${name}`;
-
-export const expectPathname = async (
-  pageOrPathname: Page | string | RegExp,
-  pathnameMaybe?: string | RegExp
-) => {
-  const page = typeof pageOrPathname === "string" || pageOrPathname instanceof RegExp
-    ? currentPage()
-    : pageOrPathname;
-  const pathname = (typeof pageOrPathname === "string" || pageOrPathname instanceof RegExp)
-    ? pageOrPathname
-    : pathnameMaybe;
-
-  if (!pathname) throw new Error("expectPathname requires a pathname.");
-
-  const regex = typeof pathname === "string"
-    ? new RegExp(`${pathname.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`)
-    : pathname;
-  await expect(page).toHaveURL(regex);
-};
-
-export const expectCurrentUrlToInclude = async (text: string, page: Page = currentPage()) => {
-  await expect(page).toHaveURL(new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-};
-
-export const logout = async (page: Page = currentPage()) => {
-  await page.goto(`${getBaseUrl()}/logout`);
-};
-
-export const deleteBusinessData = async (
-  _input?: string | { dba?: string; userType?: AccountType; notFirstLogin?: boolean; accountIndex?: number },
-  _page: Page = currentPage()
-) => {
-  // Compatibility shim for legacy specs.
 };
 
 export const formatDate = ({ month, year, day, date }: DateParts) =>
@@ -321,9 +258,8 @@ export const getPagerTotal = async (pagerInfo: Locator) => {
 };
 
 export const login = async (page: Page, params: LoginParams = {}) => {
-  setCurrentPage(page);
   const accountType = params.accountType || "taxpayer";
-  const credentials = getCredentials(accountType, params.accountIndex ?? 0);
+  const credentials = getCredentials(accountType, params.accountIndex ? 0 : params.accountIndex);
 
   await page.goto(`${getBaseUrl()}/login`);
   await expect(page).toHaveURL(/\/login$/);
