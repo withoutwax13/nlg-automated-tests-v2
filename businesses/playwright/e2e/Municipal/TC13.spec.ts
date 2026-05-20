@@ -3,7 +3,6 @@ import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
-const addBusinessPage = new BusinessAdd({ userType: "municipal" });
 const businessGrid = new BusinessGrid({ userType: "municipal" });
 const randomSeed = Math.floor(Math.random() * 100000);
 
@@ -35,17 +34,18 @@ const newBusinessData = {
 
 test.describe("As a municipal user, I should be able to add a business.", () => {
   test("Initiating test", async ({ page }) => {
+    const addBusinessPage = new BusinessAdd(page, { userType: "municipal" });
     await Login.login(page, {
       accountType: "municipal",
       accountIndex: 4,
     });
-    businessGrid.init(page);
-    businessGrid.clickAddBusinessButton();
-    addBusinessPage.fillFields(newBusinessData);
-    addBusinessPage.clickSaveButton();
-    businessGrid.init(page);
-    businessGrid.clickClearAllFiltersButton();
-    businessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
+    await businessGrid.init(page);
+    await businessGrid.clickAddBusinessButton();
+    await addBusinessPage.fillFields(newBusinessData, page);
+    await addBusinessPage.clickSaveButton();
+    await businessGrid.init(page);
+    await businessGrid.clickClearAllFiltersButton();
+    await businessGrid.viewBusinessDetails(newBusinessData.locationDba);
+    await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
   });
 });

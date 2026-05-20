@@ -5,10 +5,10 @@ import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
 const agsBusinessGrid = new BusinessGrid({ userType: "ags", municipalitySelection: "Arrakis" });
-const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 
 test.describe("As a ags user, I should be able to add notes to a business via the business details page", () => {
   test("Initiating test", async ({ page }) => {
+    const agsBusinessDetails = new BusinessDetails(page, { userType: "ags" });
     await Login.login(page, { accountType: "ags", accountIndex: 5 });
     await agsBusinessGrid.init(page);
     await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");

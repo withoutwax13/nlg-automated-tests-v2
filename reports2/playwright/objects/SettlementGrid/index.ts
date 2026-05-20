@@ -2,6 +2,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
 import { clickByText, findRowByCellValue, getColumnOrder, getPagerTotal, getVisibilityStatus, setMaskedDateInput, waitForLoading } from "../../support/native-helpers";
 import { validateFilterOperation } from "../../utils/Grid";
 import GridSetting from "../GridSetting";
+import DatePicker from "../DatePicker";
 
 const VALID_ITEMS_PER_PAGE = [5, 10, 20, 50];
 export const AGS_SETTLEMENT_GRID_COLUMNS = [
@@ -74,7 +75,7 @@ class SettlementGrid {
       filterValueDateInput: () => this.page.locator(".k-dateinput input").first(),
       filterMultiSelectItem: () => this.page.locator(".k-multicheck-wrap li"),
       filterFilterButton: () => this.page.locator(".k-filter-menu-container .k-actions .k-button").filter({ hasText: "Filter" }).first(),
-      searchMunicipalityDropdown: () => this.page.locator('input[placeholder="Select government..."]'),
+      searchMunicipalityDropdown: () => this.page.locator('input[placeholder="Search government"]'),
       anyList: () => this.page.locator("li"),
       clearAllFiltersButton: () => this.page.getByText("Clear All").first(),
       exportButton: () => this.page.getByRole("button", { name: "Export" }),
@@ -87,7 +88,7 @@ class SettlementGrid {
     return this.elements();
   }
 
-  private async refreshGridState() {
+  async refreshGridState() {
     this.columnOrder = await getColumnOrder(this.getElement().columns(), this.defaultColumns);
     this.visibilityStatus = getVisibilityStatus(this.defaultColumns, this.columnOrder);
   }
@@ -235,16 +236,14 @@ class SettlementGrid {
     day,
     year,
   }: {
-    month: string | number;
-    day: string | number;
-    year: string | number;
+    month: number;
+    day: number;
+    year: number;
   }) {
+    const datePicker = new DatePicker(this.page);
     await this.page.locator(".fa-calendar-days").first().click();
-    await setMaskedDateInput(this.page.locator(".k-animation-container input").first(), {
-      month,
-      day,
-      year,
-    });
+    await this.page.locator('button[aria-label="Toggle calendar"]').first().click();
+    await datePicker.selectDate(month, day, year);
     await this.page.locator(".k-animation-container button").filter({ hasText: "Filter" }).first().click();
     await waitForLoading(this.page);
   }

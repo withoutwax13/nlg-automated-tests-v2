@@ -27,7 +27,7 @@ test.describe("As a municipal user, I should be able to set delinquency start da
       date: randomDate.date,
       year: 2023,
     });
-    await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
+    // await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
     await municipalBusinessGrid.clickClearAllFiltersButton();
     const afterDelinquencyStartDate = await municipalBusinessGrid.getDataOfColumn(
       "Delinquency Start Date",

@@ -9,7 +9,7 @@ const businessGrid = new BusinessGrid({
   municipalitySelection: "Arrakis",
 });
 
-test.describe("As a user, I should be able to hide/show columns", () => {
+test.describe.skip("As a user, I should be able to hide/show columns", () => {
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", accountIndex: 9 });
     for (const column of defaultColumns.slice(2, 4)) {

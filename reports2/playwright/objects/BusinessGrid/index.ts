@@ -177,7 +177,7 @@ class BusinessGrid {
       searchBox: () => this.page.locator("span").filter({ has: this.page.locator(".fa-magnifying-glass") }).first(),
       columns: () => this.page.locator("thead tr th"),
       rows: () => this.page.locator("tbody tr"),
-      customizeTableViewButton: () => this.page.getByText("Customize Table View"),
+      customizeTableViewButton: () => this.page.getByText("Customize"),
       specificColumnFilter: (columnOrder: number) => this.page.locator("thead tr th").nth(columnOrder).locator("span a"),
       itemsPerPageDropdown: () => this.page.locator(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) => this.page.locator("li").filter({ hasText: String(itemNumber) }).first(),

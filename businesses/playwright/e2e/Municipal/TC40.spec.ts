@@ -5,10 +5,10 @@ import BusinessDetails from "../../objects/BusinessDetails";
 import Login from "../../utils/Login";
 
 const municipalBusinessList = new BusinessGrid({ userType: "municipal" });
-const municipalBusinessDetails = new BusinessDetails({ userType: "municipal" });
 
 test.describe("As a user, I should be able to reveal the full content of FEIN in business details page", () => {
   test("Initiating test", async ({ page }) => {
+    const municipalBusinessDetails = new BusinessDetails(page, { userType: "municipal" });
     await Login.login(page, { accountType: "municipal", accountIndex: 6 });
     await municipalBusinessList.init(page);
     await municipalBusinessList.clickClearAllFiltersButton();

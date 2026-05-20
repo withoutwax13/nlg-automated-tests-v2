@@ -4,7 +4,7 @@ import DelinquencyGrid, {
 } from "../../../objects/DelinquencyGrid";
 import Login from "../../../utils/Login";
 
-test.describe.skip(
+test.describe(
   "As a user, I should be able to reorganize the order of columns on the delinquency list",
   () => {
     test("Initiating test", async ({ page }) => {
@@ -25,9 +25,11 @@ test.describe.skip(
 
       for (const [column, targetColumn] of columnPairs) {
         await delinquencyGrid.init();
+        await delinquencyGrid.clickCustomizeTableViewButton();
+        await delinquencyGrid.restoreDefaultGridSettings();
+        await delinquencyGrid.clickCustomizeTableViewButton();
         const columnIndexBeforeMove = await delinquencyGrid.verifyColumnOrder(column);
         const targetColumnIndexBeforeMove = await delinquencyGrid.verifyColumnOrder(targetColumn);
-        await delinquencyGrid.clickCustomizeTableViewButton();
         await delinquencyGrid.moveColumnToLocationOf(column, targetColumn);
 
         await delinquencyGrid.init();

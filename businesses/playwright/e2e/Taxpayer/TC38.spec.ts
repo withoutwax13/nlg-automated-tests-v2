@@ -8,10 +8,11 @@ const taxpayerBusinessDetails = new BusinessDetails({ userType: "taxpayer" });
 
 test.describe("As a taxpayer, I should be able to see required forms in my business details page", () => {
   test("Initiating test", async ({ page }) => {
+    const taxpayerBusinessDetails = new BusinessDetails(page, { userType: "taxpayer" });
     await Login.login(page, { accountType: "taxpayer" });
     await taxpayerBusinessList.init(page);
     await taxpayerBusinessList.viewBusinessDetails("Arrakis Spice Company 13685");
-    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
+    await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
     const formRequirements = await taxpayerBusinessDetails.getFormRequirements();
     expect(formRequirements.length).toBeGreaterThan(0);
     expect(formRequirements).toContain("Food and Beverage Tax Return (Monthly)");

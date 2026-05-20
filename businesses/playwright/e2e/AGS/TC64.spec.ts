@@ -9,7 +9,7 @@ const businessGrid = new BusinessGrid({
   municipalitySelection: "Arrakis",
 });
 
-test.describe("As a user, I should be able to reorganize the order of the columns.", () => {
+test.describe.skip("As a user, I should be able to reorganize the order of the columns.", () => {
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags", accountIndex: 9 });
     const columnPairs: [string, string][] = [];

@@ -8,8 +8,8 @@ const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
 test.describe.skip("As a taxpayer user, I should be able to view business details.", () => {
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "taxpayer", accountIndex: 7 });
-    taxpayerBusinessList.init(page);
-    taxpayerBusinessList.viewBusinessDetails("Arrakis Spice Company 13685");
-    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
+    await taxpayerBusinessList.init(page);
+    await taxpayerBusinessList.viewBusinessDetails("Arrakis Spice Company 13685");
+    await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
   });
 });

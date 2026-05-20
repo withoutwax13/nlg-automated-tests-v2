@@ -5,16 +5,16 @@ import ExportModal from "../../objects/ExportModal";
 import Login from "../../utils/Login";
 
 const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
-const exportModal = new ExportModal();
 
 test.describe("As a municipal user, I should be able to export business list with Users info as excel", () => {
   test("Initiating test", async ({ page }) => {
+    const exportModal = new ExportModal(page);
     await Login.login(page, {accountType: "municipal"});
-    municipalBusinessGrid.init(page);
-    municipalBusinessGrid.clickExportButton();
-    exportModal.clickExcelOption();
-    exportModal.clickExportWithUsersInfoOption();
-    exportModal.clickExportFullOption();
-    exportModal.clickExportButton();
+    await municipalBusinessGrid.init(page);
+    await municipalBusinessGrid.clickExportButton();
+    await exportModal.clickExcelOption();
+    await exportModal.clickExportWithUsersInfoOption();
+    await exportModal.clickExportFullOption();
+    await exportModal.clickExportButton();
   });
 });

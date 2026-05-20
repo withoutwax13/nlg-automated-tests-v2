@@ -2,9 +2,8 @@ import { test, expect } from "@playwright/test";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
+import { logout } from "../../support/native-helpers";
 
-const agsAddBusinessPage = new BusinessAdd({ userType: "ags" });
-const taxpayerAddBusinessPage = new BusinessAdd({ userType: "taxpayer" });
 const agsBusinessGrid = new BusinessGrid({
   userType: "ags",
   municipalitySelection: "Arrakis",
@@ -40,27 +39,29 @@ const newBusinessData = {
 
 // Skipped, assertions alrady covered in TC11
 test.describe.skip("As a taxpayer, when a business has been added by an AGS user, I should be able to add the business in my account", () => {
-  test.beforeEach(async ({ page }) => {
-  });
+  
   test("Initiating test", async ({ page }) => {
+    const agsAddBusinessPage = new BusinessAdd(page, { userType: "ags" });
+    const taxpayerAddBusinessPage = new BusinessAdd(page, { userType: "taxpayer" });
     // add business data
     await Login.login(page, { accountType: "ags", accountIndex: 7 });
-    agsBusinessGrid.init(page);
-    agsBusinessGrid.clickAddBusinessButton();
-    agsAddBusinessPage.fillFields(newBusinessData);
-    agsAddBusinessPage.clickSaveButton();
-    agsBusinessGrid.init(page);
-    agsBusinessGrid.clickClearAllFiltersButton();
-    agsBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
+    await agsBusinessGrid.init(page);
+    await agsBusinessGrid.clickAddBusinessButton();
+    await agsAddBusinessPage.fillFields(newBusinessData, page);
+    await agsAddBusinessPage.clickSaveButton();
+    await agsBusinessGrid.init(page);
+    await agsBusinessGrid.clickClearAllFiltersButton();
+    await agsBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
+    await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
+    await logout(page);
 
     // add business data to the taxpayer account
     await Login.login(page, { accountType: "taxpayer", accountIndex: 1 });
-    taxpayerBusinessGrid.init(page);
-    taxpayerBusinessGrid.clickAddBusinessButton();
-    taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
-    taxpayerBusinessGrid.init(page);
-    taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
-    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
+    await taxpayerBusinessGrid.init(page);
+    await taxpayerBusinessGrid.clickAddBusinessButton();
+    await taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
+    await taxpayerBusinessGrid.init(page);
+    await taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
+    await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
   });
 });

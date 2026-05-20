@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 
 class BusinessResetModal {
   private page!: Page;
+  constructor(page: Page) { this.page = page; }
   async init(page: Page) { this.page = page; }
   private elements() {
     return {

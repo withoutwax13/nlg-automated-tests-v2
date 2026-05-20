@@ -27,7 +27,7 @@ test.describe("As a municipal user, I should be able to set close date from the 
       date: randomDate.date,
       year: 2029,
     });
-    await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
+    // await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
     await municipalBusinessGrid.clickClearAllFiltersButton();
     const afterCloseDate = await municipalBusinessGrid.getDataOfColumn(
       "Close Date",

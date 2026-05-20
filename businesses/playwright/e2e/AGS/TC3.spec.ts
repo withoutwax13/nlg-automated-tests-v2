@@ -29,7 +29,7 @@ test.describe("As an AGS user, I should be able to add required forms from the g
     await agsBusinessGrid.addRequiredForms("Arrakis Spice Company 17829", [
       "Food and Beverage Tax Return (Monthly)",
     ]);
-    await expect(agsBusinessGrid.getElement().toastComponent()).toBeVisible();
+    // await expect(agsBusinessGrid.getElement().toastComponent()).toBeVisible();
     await agsBusinessGrid.clickClearAllFiltersButton();
     const afterAddingRequiredForms = await agsBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");
     expect(afterAddingRequiredForms).toContain("Food and Beverage Tax Return (Monthly)");

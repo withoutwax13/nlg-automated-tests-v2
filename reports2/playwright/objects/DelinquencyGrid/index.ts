@@ -78,7 +78,7 @@ class DelinquencyGrid {
       filterValueDateInput: () => this.page.locator(".k-dateinput input").first(),
       filterMultiSelectItem: () => this.page.locator(".k-multicheck-wrap li .k-checkbox-label"),
       filterFilterButton: () => this.page.locator(".k-filter-menu-container .k-actions .k-button").filter({ hasText: "Filter" }).first(),
-      searchMunicipalityDropdown: () => this.page.locator('input[placeholder="Select government..."]'),
+      searchMunicipalityDropdown: () => this.page.locator('input[placeholder="Search government"]'),
       anyList: () => this.page.locator("li"),
       clearAllFiltersButton: () => this.page.getByText("Clear All").first(),
       exportButton: () => this.page.getByRole("button", { name: "Export" }),
@@ -91,7 +91,7 @@ class DelinquencyGrid {
     return this.elements();
   }
 
-  private async refreshGridState() {
+  async refreshGridState() {
     this.columnOrder = await getColumnOrder(this.getElement().columns(), this.defaultColumns);
     this.visibilityStatus = getVisibilityStatus(this.defaultColumns, this.columnOrder);
   }
@@ -405,6 +405,14 @@ class DelinquencyGrid {
     });
     await gridSetting.restoreDefaultSettings();
     await waitForLoading(this.page);
+  }
+
+  async closeGridSettings(){
+    const gridSetting = new GridSetting(this.page, {
+      columnOrderAlias: `${this.userType}_${this.defaultGridColumnsAlias}`,
+      visibilityStatusAlias: `${this.userType}_${this.defaultGridColumnsAlias}_visibility`,
+    });
+    await gridSetting.clickCancelButton();
   }
 
   async moveColumnToLocationOf(columnName: string, targetColumnName: string) {

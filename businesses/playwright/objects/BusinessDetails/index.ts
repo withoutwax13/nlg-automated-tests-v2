@@ -2,15 +2,19 @@ import { expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { clickByText, setMaskedDateInput } from "../../support/native-helpers";
 import SetBusinessStatusModal from "../SetBusinessStatusModal";
+import DatePicker from "../DatePicker";
 
 class BusinessDetails {
   userType: string;
   setBusinessStatusModal: SetBusinessStatusModal;
   private page!: Page;
 
-  constructor(props: { userType: string }) {
+  constructor(pageOrProps: Page | { userType: string }, maybeProps?: { userType: string }) {
+    const hasPage = typeof (pageOrProps as Page).locator === "function";
+    const props = (hasPage ? maybeProps : pageOrProps) as { userType: string };
+    if (hasPage) this.page = pageOrProps as Page;
     this.userType = props.userType;
-    this.setBusinessStatusModal = new SetBusinessStatusModal();
+    this.setBusinessStatusModal = new SetBusinessStatusModal(this.page);
   }
 
   async init(page: Page) {
@@ -42,13 +46,19 @@ class BusinessDetails {
       formsSectionFormList: () => this.getElement().formsSection().locator(".k-switch").locator("xpath=.."),
       taxpayerFormsSectionFormList: () => this.getElement().formsSection().locator("div").nth(1),
       formSectionFormListItem: (formName: string) => this.getElement().formsSectionFormList().filter({ hasText: formName }).first(),
-      businessStatusSection: () => this.page.locator("section").nth(1).locator("h3").filter({ hasText: "Business Status" }).first().locator("xpath=ancestor::section[1]"),
+      businessStatusSection: () =>
+        this.page.locator('section').filter({
+          has: this.page.getByRole('heading', { name: 'Business Status' }),
+        }),
       startDateDelinquencyTrackingInput: () =>
         this.page.locator("label").filter({ hasText: "Start Date for Delinquency Tracking" }).first().locator("xpath=following-sibling::*[1]").locator("input").first(),
       businessCloseDateInput: () =>
-        this.page.locator("label").filter({ hasText: "Business Close Date" }).first().locator("xpath=following-sibling::*[1]").locator("input").first(),
+        this.page.locator("label").filter({ hasText: "Business Close Date" }).first().locator("xpath=../following-sibling::*[1]").locator("input").first(),
       operatingStatusDropdown: () =>
-        this.page.locator("label").filter({ hasText: "Operating Status" }).first().locator("xpath=following-sibling::*[1]").locator("i").first(),
+        this.getElement().businessStatusSection()
+          .locator('label.gray2')
+          .filter({ hasText: /^Operating Status\s*$/ })
+          .locator('xpath=../following-sibling::div[1]//button'),
       notesSection: () => this.getElement().sectionTabs().locator("div[class*='businessDetailsSectionContent']").first(),
       addNoteButton: () => this.getElement().notesSection().locator("button").filter({ hasText: "Add a Note" }).first(),
       noteItems: () => this.getElement().notesSection().locator(".k-expander"),
@@ -139,7 +149,9 @@ class BusinessDetails {
   }
 
   async setStartDateDelinquencyTracking(date: { month: number; date: number; year: number }) {
-    await setMaskedDateInput(this.getElement().startDateDelinquencyTrackingInput(), date);
+    const datePicker = new DatePicker(this.page);
+    await this.page.locator('button[aria-label="Toggle calendar"]').first().click();
+    await datePicker.selectDate(date.month, date.date, date.year);
   }
 
   async triggerSetBusinessStatusModal() {
@@ -155,9 +167,9 @@ class BusinessDetails {
     await this.setBusinessStatusModal.setBusinessCloseDate(date);
     if (changeLastAcceptFilingDate) {
       await this.setBusinessStatusModal.setLastAcceptFilingDate({
-        month: date.month,
+        month: date.month + 1,
         date: date.date > 28 ? 28 : date.date + 1,
-        year: date.year,
+        year: date.year + 1,
       });
     }
     await this.setBusinessStatusModal.setBusinessStatus("Closed");
@@ -220,7 +232,7 @@ class BusinessDetails {
     );
     await this.getElement().uploadDocumentButton().click();
     await this.page.locator('input[placeholder="Enter file name"]').fill(fileName);
-    await this.page.locator("#files").setInputFiles("fixtures/example.json");
+    await this.page.locator("#files").setInputFiles("playwright/fixtures/example.json");
     await this.page.locator(".NLGButtonPrimary").filter({ hasText: "Upload" }).first().click();
     expect((await uploadDocumentPatch).status()).toBe(200);
     expect((await uploadDocumentPut).status()).toBe(200);

@@ -30,7 +30,7 @@ test.describe(
         await settlementGrid.clickCustomizeTableViewButton();
         await settlementGrid.moveColumnToLocationOf(column, targetColumn);
 
-        await settlementGrid.init();
+        await settlementGrid.refreshGridState();
         const targetColumnIndexAfterMove = await settlementGrid.verifyColumnOrder(targetColumn);
         const columnIndexAfterMove = await settlementGrid.verifyColumnOrder(column);
         expect(columnIndexBeforeMove).not.toBe(columnIndexAfterMove);

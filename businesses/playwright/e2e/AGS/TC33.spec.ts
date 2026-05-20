@@ -11,7 +11,7 @@ test.describe("As an AGS, Gov user, I want the system to prevent deleting a busi
   test("Initiating test", async ({ page }) => {
     await Login.login(page, { accountType: "ags" });
     await agsBusinessGrid.init(page);
-    await agsBusinessGrid.deleteBusiness("Test Trade Name 50363 1");
+    await agsBusinessGrid.deleteBusiness("Test Trade Name 61083692 1", 400);
     await expect(agsBusinessGrid.getElement().noRecordFoundComponent()).not.toBeVisible();
   });
 });

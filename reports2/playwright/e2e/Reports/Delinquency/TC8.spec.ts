@@ -4,7 +4,7 @@ import DelinquencyGrid, {
 } from "../../../objects/DelinquencyGrid";
 import Login from "../../../utils/Login";
 
-test.describe.skip(
+test.describe(
   "As a user, I should be able to hide/show columns on the delinquency list",
   () => {
     test("Initiating test", async ({ page }) => {
@@ -17,16 +17,18 @@ test.describe.skip(
       for (const column of defaultColumns.slice(1, 4)) {
         await delinquencyGrid.init();
         await delinquencyGrid.clickCustomizeTableViewButton();
+        await delinquencyGrid.restoreDefaultGridSettings();
+        await delinquencyGrid.clickCustomizeTableViewButton();
         const beforeHide = await delinquencyGrid.verifyColumnVisibility(column);
         await delinquencyGrid.hideColumn(column);
-        await delinquencyGrid.init();
+        await delinquencyGrid.refreshGridState();
         const afterHide = await delinquencyGrid.verifyColumnVisibility(column);
         expect(beforeHide).not.toBe(afterHide);
 
         await delinquencyGrid.clickCustomizeTableViewButton();
         const beforeShow = await delinquencyGrid.verifyColumnVisibility(column);
         await delinquencyGrid.showColumn(column);
-        await delinquencyGrid.init();
+        await delinquencyGrid.refreshGridState();
         const afterShow = await delinquencyGrid.verifyColumnVisibility(column);
         expect(beforeShow).not.toBe(afterShow);
       }

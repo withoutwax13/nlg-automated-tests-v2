@@ -2,6 +2,9 @@ import type { Page } from "@playwright/test";
 
 class ExportModal {
   private page!: Page;
+  constructor(pageOrProps: Page) {
+    this.page = pageOrProps as Page;
+  }
   async init(page: Page) { this.page = page; }
   private elements() {
     return {

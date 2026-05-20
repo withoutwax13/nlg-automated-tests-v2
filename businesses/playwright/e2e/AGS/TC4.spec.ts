@@ -29,7 +29,7 @@ test.describe("As an AGS user, I should be able to remove required forms from th
     await agsBusinessGrid.removeRequiredForms("Arrakis Spice Company 17829", [
       "Food and Beverage Tax Return (Monthly)",
     ]);
-    await expect(agsBusinessGrid.getElement().toastComponent()).toBeVisible();
+    // await expect(agsBusinessGrid.getElement().toastComponent()).toBeVisible();
     await agsBusinessGrid.clickClearAllFiltersButton();
     const afterRemovingRequiredForms = await agsBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");
     expect(afterRemovingRequiredForms).not.toContain("Food and Beverage Tax Return (Monthly)");

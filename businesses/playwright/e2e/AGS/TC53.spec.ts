@@ -8,10 +8,10 @@ const agsBusinessGrid = new BusinessGrid({
   userType: "ags",
   municipalitySelection: "City of Arrakis",
 });
-const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 
 test.describe("As a user, when the business is not active, I should not be able to update form submission requirements in the business details page", () => {
   test("Initiating test", async ({ page }) => {
+    const agsBusinessDetails = new BusinessDetails(page, { userType: "ags" });
     await Login.login(page, { accountType: "ags" });
     await agsBusinessGrid.init(page);
     await agsBusinessGrid.clickClearAllFiltersButton();

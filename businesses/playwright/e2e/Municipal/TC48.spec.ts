@@ -6,12 +6,9 @@ import BusinessAdd from "../../objects/BusinessAdd";
 import SetBusinessStatusModal from "../../objects/SetBusinessStatusModal";
 import Login from "../../utils/Login";
 
-const addBusinessPage = new BusinessAdd({ userType: "municipal" });
-const setBusinessStatusModal = new SetBusinessStatusModal();
 const municipalBusinessGrid = new BusinessGrid({
   userType: "municipal",
 });
-const municipalBusinessDetails = new BusinessDetails({ userType: "municipal" });
 const randomSeed = Math.floor(Math.random() * 100000);
 const newBusinessData = {
   legalBusinessName: `Arrakis Sand Company ${randomSeed}`,
@@ -39,10 +36,14 @@ const newBusinessData = {
   businessOwnerZipCode: "90210",
 };
 
+const randomMonth = Math.floor(Math.random() * 12) + 1;
+const randomDate = Math.floor(Math.random() * 28) + 1;
+
 const addBusiness = async ({ page }) => {
+  const addBusinessPage = new BusinessAdd(page, { userType: "municipal" });
   await municipalBusinessGrid.init(page);
   await municipalBusinessGrid.clickAddBusinessButton();
-  await addBusinessPage.fillFields(newBusinessData);
+  await addBusinessPage.fillFields(newBusinessData, page);
   await addBusinessPage.clickSaveButton();
 };
 
@@ -55,6 +56,8 @@ const operatingStatus = [
 
 test.describe("As a municipal user, I should be able to update operating status in the business details page", () => {
   test("Initiating test", async ({ page }) => {
+    const municipalBusinessDetails = new BusinessDetails(page, { userType: "municipal" });
+    const setBusinessStatusModal = new SetBusinessStatusModal(page);
     await Login.login(page, { accountType: "municipal" });
     await municipalBusinessGrid.init(page);
     await addBusiness({ page });
@@ -72,6 +75,11 @@ test.describe("As a municipal user, I should be able to update operating status 
         await municipalBusinessDetails.getElement().operatingStatusDropdown().click();
         await municipalBusinessDetails.getElement().anyList().filter({ hasText: status }).first().click();
         await expect(setBusinessStatusModal.getElement().modal()).toBeVisible();
+        await setBusinessStatusModal.setBusinessCloseDate({
+          month: randomMonth,
+          date: randomDate,
+          year: 2029
+        });
         await setBusinessStatusModal.clickCloseButton();
       }
     }

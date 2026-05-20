@@ -1,13 +1,13 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
-import { getColumnOrder, clickByText, findRowByCellValue, normalizeText, setMaskedDateInput, waitForLoading } from "../../support/native-helpers";
+import { getColumnOrder, clickByText, findRowByCellValue, normalizeText, setMaskedDateInput, waitForLoading, getVisibilityStatus, expectStatus } from "../../support/native-helpers";
 import { validateFilterOperation } from "../../utils/Grid";
 import BusinessDeleteModal from "../BusinessDeleteModal";
+import DatePicker from "../DatePicker";
 
 const VALID_ITEMS_PER_PAGE = [5, 10, 20, 50];
 export const AGS_COLUMNS = [
-  "Delete",
-  "Details",
+  "Actions",
   "Business Name",
   "DBA",
   "Operating Status",
@@ -47,11 +47,11 @@ export const AGS_COLUMNS = [
   "Emergency Phone Number",
 ];
 const TAXPAYER_COLUMNS = [
-  "Delete",
-  "Details",
+  "Actions",
+  "Government Name",
   "Business Name",
   "DBA",
-  "State Tax ID",
+  "Operating Status",
   "FEIN",
   "Location Address 1",
   "Location Address 2",
@@ -79,11 +79,9 @@ const TAXPAYER_COLUMNS = [
   "Manager Title",
   "Manager Email Address",
   "Manager Phone Number",
-  "Emergency Phone Number",
 ];
 const MUNICIPAL_COLUMNS = [
-  "Delete",
-  "Details",
+  "Actions",
   "Business Name",
   "DBA",
   "Operating Status",
@@ -136,9 +134,9 @@ class BusinessGrid {
   userType: string;
   sortType: string;
   municipalitySelection?: string;
-  businessDeleteModal: BusinessDeleteModal;
   private columnOrder: Record<string, number> = {};
   private page!: Page;
+  private visibilityStatus: Record<string, boolean> = {};
 
   constructor(pageOrProps: Page | { userType: string; municipalitySelection?: string }, maybeProps?: { userType: string; municipalitySelection?: string }) {
     const hasPage = typeof (pageOrProps as Page).locator === "function";
@@ -148,10 +146,6 @@ class BusinessGrid {
     this.defaultGridColumnAlias = `${this.userType}_taxpayerBusinessGrid`;
     this.sortType = "default";
     this.municipalitySelection = props.municipalitySelection;
-    this.businessDeleteModal = new BusinessDeleteModal({
-      userType: this.userType,
-      page: this.page,
-    });
   }
 
   private get columnsForUser() {
@@ -174,12 +168,12 @@ class BusinessGrid {
       addBusinessButton: () => this.page.getByRole("button", { name: "Add a Business" }),
       uploadBusinessButton: () => this.page.getByRole("button", { name: "Upload Businesses" }),
       exportButton: () => this.page.getByRole("button", { name: "Export" }),
-      resetDataButton: () => this.page.getByRole("button", { name: "Reset All Data" }),
+      resetDataButton: () => this.page.locator("button").filter({ hasText: "Reset All Data" }),
       businessConfigurationButton: () => this.page.locator(".NLGButtonSecondary .a-magnifying-glass-plus"),
       searchBox: () => this.page.locator("span").filter({ has: this.page.locator(".fa-magnifying-glass") }).first(),
       columns: () => this.page.locator("thead tr th"),
       rows: () => this.page.locator("tbody tr"),
-      customizeTableViewButton: () => this.page.getByText("Customize Table View"),
+      customizeTableViewButton: () => this.page.getByText("Customize"),
       specificColumnFilter: (columnOrder: number) => this.page.locator("thead tr th").nth(columnOrder).locator("span a"),
       itemsPerPageDropdown: () => this.page.locator(".k-dropdownlist"),
       itemsPerPageDropdownItem: (itemNumber: number) => this.page.locator("li").filter({ hasText: String(itemNumber) }).first(),
@@ -190,37 +184,223 @@ class BusinessGrid {
       filterValueDateInput: () => this.page.locator(".k-dateinput input").first(),
       filterMultiSelectItem: () => this.page.locator(".k-multicheck-wrap li"),
       filterFilterButton: () => this.page.locator(".k-filter-menu-container .k-actions .k-button").filter({ hasText: "Filter" }).first(),
-      searchMunicipalityDropdown: () => this.page.locator('input[placeholder="Search government ..."]'),
+      searchMunicipalityDropdown: () => this.page.locator('input[placeholder="Search government"]'),
       clearAllFiltersButton: () => this.page.getByText("Clear All").first(),
       toastComponent: () => this.page.locator(".Toastify"),
       gridPopup: () => this.page.locator(".k-popup"),
       gridPopupTitle: () => this.page.locator(".k-popup > div > div > div"),
       gridPopupContent: () => this.page.locator(".k-popup").locator("div").nth(1),
       gridPopupSelectionItem: (labelName: string) =>
-        this.page.locator(".k-popup .k-checkbox-wrap").filter({ hasText: labelName }).first(),
+        this.page.locator(".k-popup .k-label").filter({ hasText: labelName }).first(),
       gridPopupDateInput: () => this.page.locator(".k-popup .k-dateinput input").first(),
       gridPopupSaveButton: () => this.page.locator(".k-popup button").filter({ hasText: "Save" }).first(),
       gridPopupCancelButton: () => this.page.locator(".k-popup button").filter({ hasText: "Cancel" }).first(),
-      activeFilterChipsLabel: () => this.page.getByText("Filters:"),
-      activeFilterChip: (name: string) => this.page.locator(".k-chip").filter({ hasText: name }).first(),
+      activeFilterChipsLabel: () => this.page.getByText("Filtered By:"),
+      activeFilterChip: (name: string) => this.page.locator("[class*='FilterTags-filterTags-module__filter-tag']").filter({ hasText: name }).first(),
     };
   }
 
   getElement() {
     return this.elements();
   }
-  async init(page?: Page, _resetSavedGridSettingsInMemory?: boolean, _isFirstTimeGridSettingsLoading = true) {
+
+  async init(
+    page?: Page,
+    _resetSavedGridSettingsInMemory?: boolean,
+    _isFirstTimeGridSettingsLoading = true
+  ) {
     if (page) this.page = page;
 
+    const createAlias = (
+      alias: string,
+      matcher: (response: Response) => boolean
+    ) => {
+      const responses: Response[] = [];
+      const waiters: Array<(response: Response) => void> = [];
+
+      const handler = (response: Response) => {
+        if (!matcher(response)) return;
+
+        responses.push(response);
+
+        const waiter = waiters.shift();
+        if (waiter) waiter(response);
+      };
+
+      this.page.on("response", handler);
+
+      const wait = async (timeout = 30000) => {
+        if (responses.length > 0) {
+          return responses.shift()!;
+        }
+
+        return await new Promise<Response>((resolve, reject) => {
+          const timer = setTimeout(() => {
+            reject(new Error(`Timed out waiting for @${alias}`));
+          }, timeout);
+
+          waiters.push((response) => {
+            clearTimeout(timer);
+            resolve(response);
+          });
+        });
+      };
+
+      const waitAndAssert200 = async () => {
+        const response = await wait();
+
+        expect(
+          response.status(),
+          `@${alias} expected 200 but got ${response.status()} - ${response.url()}`
+        ).toBe(200);
+
+        return response;
+      };
+
+      const dispose = () => {
+        this.page.off("response", handler);
+      };
+
+      return {
+        waitAndAssert200,
+        dispose,
+      };
+    };
+
+    const isGet = (response: Response) =>
+      response.request().method().toUpperCase() === "GET";
+
+    const hasAzavarHost = (url: URL) =>
+      url.hostname.includes("azavargovapps.com");
+
+    const aliases = {
+      govBusinessConfig: createAlias("govBusinessConfig", (response) => {
+        const url = new URL(response.url());
+
+        return (
+          isGet(response) &&
+          hasAzavarHost(url) &&
+          url.pathname.includes("/businesses/municipalityBusinessConfig/")
+        );
+      }),
+
+      lambdaRequestMunicipalityId: createAlias(
+        "lambdaRequestMunicipalityId",
+        (response) => {
+          const url = new URL(response.url());
+
+          return (
+            isGet(response) &&
+            url.hostname.includes("lambda-url.us-east-1.on.aws") &&
+            url.searchParams.has("municipalityId")
+          );
+        }
+      ),
+
+      activeTaxAndFeesSubscriptions: createAlias(
+        "activeTaxAndFeesSubscriptions",
+        (response) => {
+          const url = new URL(response.url());
+
+          return (
+            isGet(response) &&
+            hasAzavarHost(url) &&
+            url.pathname.includes(
+              "/municipalities/ActiveTaxAndFeesSubscriptions"
+            )
+          );
+        }
+      ),
+
+      userGridSettings: createAlias("userGridSettings", (response) => {
+        const url = new URL(response.url());
+
+        return (
+          isGet(response) &&
+          hasAzavarHost(url) &&
+          url.pathname.includes("/users/usersGridSettings/")
+        );
+      }),
+
+      userDetailsRequest: createAlias("userDetailsRequest", (response) => {
+        const url = new URL(response.url());
+
+        return (
+          isGet(response) &&
+          hasAzavarHost(url) &&
+          url.pathname.includes("/users/")
+        );
+      }),
+    };
+
     await this.page.goto("/BusinessesApp/BusinessesList");
-    await waitForLoading(this.page, 10);
 
-    if (this.userType === "ags" && this.municipalitySelection) {
-      await this.searchMunicipality(this.municipalitySelection);
-      await waitForLoading(this.page, 10);
+    try {
+
+      if (this.userType === "ags") {
+        await aliases.activeTaxAndFeesSubscriptions.waitAndAssert200();
+      }
+
+      const isArrakisMunicipality = String(this.municipalitySelection).includes(
+        "Arrakis"
+      );
+
+      switch (this.userType) {
+        case "taxpayer": {
+          await aliases.userDetailsRequest.waitAndAssert200();
+
+          if (_isFirstTimeGridSettingsLoading) {
+            await aliases.userGridSettings.waitAndAssert200();
+          }
+
+          await expect(this.getElement().noRecordFoundComponent()).not.toBeVisible();
+
+          break;
+        }
+
+        case "municipal": {
+          await aliases.govBusinessConfig.waitAndAssert200();
+          await aliases.lambdaRequestMunicipalityId.waitAndAssert200();
+
+          if (_isFirstTimeGridSettingsLoading) {
+            await aliases.userGridSettings.waitAndAssert200();
+          }
+
+          await expect(this.getElement().noRecordFoundComponent()).not.toBeVisible();
+
+          break;
+        }
+
+        case "ags": {
+          if (this.municipalitySelection) {
+            await this.searchMunicipality(this.municipalitySelection);
+          }
+
+          await aliases.govBusinessConfig.waitAndAssert200();
+          await aliases.lambdaRequestMunicipalityId.waitAndAssert200();
+
+          if (_isFirstTimeGridSettingsLoading) {
+            await aliases.userGridSettings.waitAndAssert200();
+          }
+
+          if (isArrakisMunicipality) {
+            await expect(this.getElement().noRecordFoundComponent()).not.toBeVisible();
+          }
+
+          break;
+        }
+
+        default:
+          break;
+      }
+
+      this.columnOrder = await getColumnOrder(
+        this.getElement().columns(),
+        this.columnsForUser
+      );
+    } finally {
+      Object.values(aliases).forEach((alias) => alias.dispose());
     }
-
-    this.columnOrder = await getColumnOrder(this.getElement().columns(), this.columnsForUser);
   }
 
   async searchMunicipality(municipalityName: string) {
@@ -364,37 +544,100 @@ class BusinessGrid {
     return this.getElement().businessConfigurationButton().click();
   }
 
-  async deleteBusiness(businessDba: string) {
-    const deleteButton = await this.getElementOfColumn("Delete", "DBA", businessDba);
-    await deleteButton.click();
-    await this.businessDeleteModal.clickDeleteButton();
-    await expect(this.getElement().toastComponent()).toBeVisible();
-    await waitForLoading(this.page);
+  private async getRowByFilters(filterParams: { anchorColumnName: string; anchorValue: string }[]) {
+    for (const filterParam of filterParams) {
+      const filterType =
+        ["Filing Period", "Form Name", "Form Title", "Is Dismissed"].includes(filterParam.anchorColumnName)
+          ? "multi-select"
+          : "text";
+      const operation = filterType === "text" ? "Contains" : "Contains";
+      await this.filterColumn(filterParam.anchorColumnName, filterParam.anchorValue, filterType, operation);
+    }
+
+    return this.getElement().rows().first();
+  }
+
+  private get defaultColumns() {
+    if (this.userType === "ags") return AGS_COLUMNS;
+    if (this.userType === "municipal") return MUNICIPAL_COLUMNS;
+    return TAXPAYER_COLUMNS;
+  }
+
+  async refreshGridState() {
+    this.columnOrder = await getColumnOrder(this.getElement().columns(), this.defaultColumns);
+    this.visibilityStatus = getVisibilityStatus(this.defaultColumns, this.columnOrder);
+  }
+
+  private async getColumnIndex(columnName: string) {
+    if (this.columnOrder[columnName] === undefined) {
+      await this.refreshGridState();
+    }
+    return this.columnOrder[columnName];
+  }
+
+
+  private async toggleActionButton(
+    action: string,
+    filterParams: { anchorColumnName: string; anchorValue: string }[]
+  ) {
+    const row = await this.getRowByFilters(filterParams);
+    const actionIndex = await this.getColumnIndex("Actions");
+    await row.locator("td").nth(actionIndex).click();
+    await clickByText(this.getElement().anyList(), action);
+  }
+
+  async deleteBusiness(businessDba: string, expectedStatus = 200) {
+    const deleteBusiness = this.page.waitForResponse((response) => {
+      const method = response.request().method().toUpperCase();
+      const url = response.url();
+
+      return (
+        method === "DELETE" &&
+        url.includes("azavargovapps.com/businesses") &&
+        url.includes("municipalityBusiness")
+      );
+    });
+    const businessDeleteModal = new BusinessDeleteModal({
+      userType: this.userType,
+      page: this.page,
+    });
+    this.toggleActionButton("Delete", [{ anchorColumnName: "DBA", anchorValue: businessDba }])
+    await businessDeleteModal.clickDeleteButton();
+    await expectStatus(deleteBusiness, expectedStatus);
+    await waitForLoading(this.page, 15);
   }
 
   async viewBusinessDetails(businessDba: string) {
-    const detailsButton = await this.getElementOfColumn("Details", "DBA", businessDba);
-    await detailsButton.click();
+    await this.toggleActionButton("View Details", [{ anchorColumnName: "DBA", anchorValue: businessDba }]);
+    await expect(this.page.locator("h2", { hasText: "Business Details" })).toBeVisible();
   }
 
   async setDelinquencyStartDate(
     businessDba: string,
     date: { month: number; date: number; year: number }
   ) {
+    const datePicker = new DatePicker(this.page);
     const inputCell = await this.getElementOfColumn("Delinquency Start Date", "DBA", businessDba);
     await inputCell.click();
-    await setMaskedDateInput(this.getElement().gridPopupDateInput(), { month: date.month, day: date.date, year: date.year });
+    // await setMaskedDateInput(this.getElement().gridPopupDateInput(), { month: date.month, day: date.date, year: date.year });
+    await this.page.locator('button[aria-label="Toggle calendar"]').first().click();
+    await datePicker.selectDate(date.month, date.date, date.year);
+    await this.page.locator(".NLG-caption").first().click();
     await expect(this.getElement().gridPopupSaveButton()).toBeEnabled();
     await this.getElement().gridPopupSaveButton().click();
     await waitForLoading(this.page);
   }
 
   async setCloseDate(businessDba: string, date: { month: number; date: number; year: number }) {
+    const datePicker = new DatePicker(this.page);
     const inputCell = await this.getElementOfColumn("Close Date", "DBA", businessDba);
     await inputCell.click();
-    await setMaskedDateInput(this.getElement().gridPopupDateInput(), { month: date.month, day: date.date, year: date.year });
-    await expect(this.getElement().gridPopupSaveButton()).toBeEnabled();
-    await this.getElement().gridPopupSaveButton().click();
+    // await setMaskedDateInput(this.getElement().gridPopupDateInput(), { month: date.month, day: date.date, year: date.year });
+    await this.page.locator('button[aria-label="Toggle calendar"]').first().click();
+    await datePicker.selectDate(date.month, date.date, date.year);
+    await this.page.locator(".k-dialog .k-dropdownlist").click();
+    await this.page.locator("li").filter({ hasText: "Closed " }).click();
+    await this.page.locator(".k-dialog .NLGButtonPrimary").click();
     await waitForLoading(this.page);
   }
 
@@ -403,13 +646,15 @@ class BusinessGrid {
     await targetCell.click();
     for (const form of forms) {
       const item = this.getElement().gridPopupSelectionItem(form);
-      const checkbox = item.locator("input");
-      if ((await checkbox.getAttribute("aria-checked")) === "false") {
+      const checkbox = item.locator('xpath=preceding-sibling::span[@role="switch"]');
+      const isChecked = await checkbox.getAttribute('aria-checked');
+      if (isChecked !== 'true') {
         await checkbox.click();
+        await expect(checkbox).toHaveAttribute('aria-checked', 'true');
       }
     }
-    await expect(this.getElement().gridPopupSaveButton()).toBeEnabled();
-    await this.getElement().gridPopupSaveButton().click();
+    // await expect(this.getElement().gridPopupSaveButton()).toBeEnabled();
+    // await this.getElement().gridPopupSaveButton().click();
     await waitForLoading(this.page);
   }
 
@@ -418,27 +663,29 @@ class BusinessGrid {
     await targetCell.click();
     for (const form of forms) {
       const item = this.getElement().gridPopupSelectionItem(form);
-      const checkbox = item.locator("input");
-      if ((await checkbox.getAttribute("aria-checked")) === "true") {
+      const checkbox = item.locator('xpath=preceding-sibling::span[@role="switch"]');
+      const isChecked = await checkbox.getAttribute('aria-checked');
+      if (isChecked !== 'false') {
         await checkbox.click();
+        await expect(checkbox).toHaveAttribute('aria-checked', 'false');
       }
     }
-    await expect(this.getElement().gridPopupSaveButton()).toBeEnabled();
-    await this.getElement().gridPopupSaveButton().click();
+    // await expect(this.getElement().gridPopupSaveButton()).toBeEnabled();
+    // await this.getElement().gridPopupSaveButton().click();
     await waitForLoading(this.page);
   }
 
   async checkEnabledRequiredForms(businessDba: string, _aliasVariable?: string) {
     const targetCell = await this.getElementOfColumn("Required Forms", "DBA", businessDba);
     await targetCell.click();
-    const items = this.page.locator(".k-popup .k-checkbox-wrap");
+    const items = this.page.locator(".k-popup .k-switch");
     const count = await items.count();
     const forms: string[] = [];
 
     for (let index = 0; index < count; index += 1) {
       const item = items.nth(index);
-      if ((await item.locator("input").getAttribute("aria-checked")) === "true") {
-        forms.push(normalizeText(await item.locator("span").textContent()));
+      if ((await item.getAttribute("aria-checked") === "true")) {
+        forms.push(normalizeText(await item.locator("xpath=..//label").textContent()));
       }
     }
 
@@ -446,7 +693,7 @@ class BusinessGrid {
   }
 
   async isGridFiltered() {
-    return (await this.page.locator(".k-chip").count()) > 0;
+    return (await this.page.locator("[class*='FilterTags-filterTags-module__filter-tag']").count()) > 0;
   }
 
   async verifyColumnVisibility(_c: string, _v?: boolean) {

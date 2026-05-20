@@ -9,12 +9,12 @@ const agsBusinessGrid = new BusinessGrid({
   userType: "ags",
   municipalitySelection: "City of Arrakis",
 });
-const agsBusinessDetails = new BusinessDetails({ userType: "ags" });
 const agsBusinessUpdatePage = new BusinessUpdate({ userType: "ags" });
 
 test.describe("As a user, if I clear the required fields in the update business page, the save button should remain disabled", () => {
   // Skipped, assertion moved to TC61
   test.skip("Initiating test", async ({ page }) => {
+    const agsBusinessDetails = new BusinessDetails(page, { userType: "ags" });
     await Login.login(page, { accountType: "ags", accountIndex: 2 });
     await agsBusinessGrid.init(page);
     await agsBusinessGrid.clickClearAllFiltersButton();

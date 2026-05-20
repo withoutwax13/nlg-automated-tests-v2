@@ -1,5 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
-import { clickByText, findRowByCellValue, getColumnOrder, getPagerTotal, getVisibilityStatus, setMaskedDateInput, waitForLoading } from "../../support/native-helpers";
+import { clickByText, findRowByCellValue, getColumnOrder, getPagerTotal, getVisibilityStatus, setMaskedDateInput, waitForLoading, expectStatus } from "../../support/native-helpers";
 import { validateFilterOperation } from "../../utils/Grid";
 import GridSetting from "../GridSetting";
 
@@ -83,7 +83,7 @@ class TransactionGrid {
       filterValueDateInput: () => this.page.locator(".k-dateinput input").first(),
       filterMultiSelectItem: () => this.page.locator(".k-multicheck-wrap li"),
       filterFilterButton: () => this.page.locator(".k-filter-menu-container .k-actions .k-button").filter({ hasText: "Filter" }).first(),
-      searchMunicipalityDropdown: () => this.page.locator('input[placeholder="Select government..."]'),
+      searchMunicipalityDropdown: () => this.page.locator('input[placeholder="Search government"]'),
       anyList: () => this.page.locator("li"),
       clearAllFiltersButton: () => this.page.getByText("Clear All").first(),
       exportButton: () => this.page.getByRole("button", { name: "Export" }),
@@ -96,14 +96,14 @@ class TransactionGrid {
     return this.elements();
   }
 
-  private async refreshGridState() {
+  async refreshGridState() {
     this.columnOrder = await getColumnOrder(this.getElement().columns(), this.defaultColumns);
     this.visibilityStatus = getVisibilityStatus(this.defaultColumns, this.columnOrder);
   }
 
   async init() {
     await this.page.goto("/reports/transactionsReport");
-    await waitForLoading(this.page, 10);
+    // await waitForLoading(this.page, 10);
     if (!["ags", "municipal"].includes(this.userType)) {
       throw new Error("Invalid user type");
     }
@@ -115,9 +115,12 @@ class TransactionGrid {
   }
 
   async selectMunicipality(municipality: string) {
+    const subscribedPromise = this.page.waitForResponse((response) =>
+      response.url().includes("/municipalities/ActiveTaxAndFeesSubscriptions")
+    );
     await this.getElement().searchMunicipalityDropdown().fill(municipality);
     await clickByText(this.getElement().anyList(), municipality);
-    await waitForLoading(this.page);
+    await expectStatus(subscribedPromise, 200);
   }
 
   private async getColumnIndex(columnName: string) {

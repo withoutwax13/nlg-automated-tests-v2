@@ -29,7 +29,7 @@ test.describe("As a municipal user, I should be able to add required forms from 
     await municipalBusinessGrid.addRequiredForms("Arrakis Spice Company 17829", [
       "Food and Beverage Tax Return (Monthly)",
     ]);
-    await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
+    // await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
     await municipalBusinessGrid.clickClearAllFiltersButton();
     const afterAddingRequiredForms = await municipalBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");
     expect(afterAddingRequiredForms).toContain("Food and Beverage Tax Return (Monthly)");

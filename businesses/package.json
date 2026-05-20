@@ -21,5 +21,8 @@
     "cypress-split": "^1.17.1",
     "typescript": "^5.3.3",
     "@playwright/test": "^1.59.1"
+  },
+  "dependencies": {
+    "playwright-msteams-reporter": "^0.0.13"
   }
 }

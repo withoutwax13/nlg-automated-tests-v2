@@ -5,12 +5,10 @@ import BusinessResetModal from "../../objects/BusinessResetModal";
 import BusinessAdd from "../../objects/BusinessAdd";
 import Login from "../../utils/Login";
 
-const addBusinessPage = new BusinessAdd({ userType: "ags" });
 const agsBusinessGrid = new BusinessGrid({
   userType: "ags",
   municipalitySelection: "City of Pili",
 });
-const businessResetModal = new BusinessResetModal();
 
 const randomSeed = Math.floor(Math.random() * 100000);
 const newBusinessData = {
@@ -40,14 +38,16 @@ const newBusinessData = {
 };
 
 const addBusiness = async ({ page }) => {
+  const addBusinessPage = new BusinessAdd(page, { userType: "ags" });
   await agsBusinessGrid.init(page, false, false);
   await agsBusinessGrid.clickAddBusinessButton();
-  await addBusinessPage.fillFields(newBusinessData);
+  await addBusinessPage.fillFields(newBusinessData, page);
   await addBusinessPage.clickSaveButton();
 };
 
 test.describe("I should be able to reset all data of a specific municipality", () => {
   test("Initiating test", async ({ page }) => {
+    const businessResetModal = new BusinessResetModal(page);
     await Login.login(page, { accountType: "ags" });
     await addBusiness({ page });
     await agsBusinessGrid.init(page);

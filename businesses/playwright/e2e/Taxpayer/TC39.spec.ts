@@ -4,14 +4,14 @@ import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
 const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
-const taxpayerBusinessDetails = new BusinessDetails({ userType: "taxpayer" });
 
 test.describe("As a taxpayer, I should be able to see my business information in my business details page", () => {
   test("Initiating test", async ({ page }) => {
+    const taxpayerBusinessDetails = new BusinessDetails(page, { userType: "taxpayer" });
     await Login.login(page, { accountType: "taxpayer", accountIndex: 1 });
     await taxpayerBusinessList.init(page);
     await taxpayerBusinessList.viewBusinessDetails("Arrakis Spice Company 13685");
-    await expect(page).toHaveURL(new RegExp(String("/BusinessesApp/BusinessDetails/")));
+    await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
 
     const businessFields = {
       "Business Name": "Arrakis Spice Company 13685",

@@ -17,16 +17,18 @@ test.describe(
       for (const column of defaultColumns.slice(1, 4)) {
         await settlementGrid.init();
         await settlementGrid.clickCustomizeTableViewButton();
+        await settlementGrid.restoreDefaultGridSettings();
+        await settlementGrid.clickCustomizeTableViewButton();
         const beforeHide = await settlementGrid.verifyColumnVisibility(column);
         await settlementGrid.hideColumn(column);
-        await settlementGrid.init();
+        await settlementGrid.refreshGridState();
         const afterHide = await settlementGrid.verifyColumnVisibility(column);
         expect(beforeHide).not.toBe(afterHide);
 
         await settlementGrid.clickCustomizeTableViewButton();
         const beforeShow = await settlementGrid.verifyColumnVisibility(column);
         await settlementGrid.showColumn(column);
-        await settlementGrid.init();
+        await settlementGrid.refreshGridState();
         const afterShow = await settlementGrid.verifyColumnVisibility(column);
         expect(beforeShow).not.toBe(afterShow);
       }

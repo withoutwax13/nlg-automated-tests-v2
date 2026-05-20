@@ -4,10 +4,10 @@ import TransactionGrid, {
 } from "../../../objects/TransactionGrid";
 import Login from "../../../utils/Login";
 
-test.describe(
+test.describe.skip(
   "As a user, I should be able to reorganize the order of columns on the transaction list",
   () => {
-    test.skip("Initiating test", async ({ page }) => {
+    test("Initiating test", async ({ page }) => {
       const transactionGrid = new TransactionGrid(page, {
         userType: "ags",
         municipalitySelection: "City of Arrakis",
@@ -25,9 +25,11 @@ test.describe(
 
       for (const [column, targetColumn] of columnPairs) {
         await transactionGrid.init();
+        await transactionGrid.clickCustomizeTableViewButton();
+        await transactionGrid.restoreDefaultGridSettings();
+        await transactionGrid.clickCustomizeTableViewButton();
         const columnIndexBeforeMove = await transactionGrid.verifyColumnOrder(column);
         const targetColumnIndexBeforeMove = await transactionGrid.verifyColumnOrder(targetColumn);
-        await transactionGrid.clickCustomizeTableViewButton();
         await transactionGrid.moveColumnToLocationOf(column, targetColumn);
 
         await transactionGrid.init();

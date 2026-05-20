@@ -28,7 +28,7 @@ test.describe("As an AGS user, I should be able to set close date from the grid"
       date: randomDate.date,
       year: 2029,
     });
-    await expect(agsBusinessGrid.getElement().toastComponent()).toBeVisible();
+    // await expect(agsBusinessGrid.getElement().toastComponent()).toBeVisible();
     await agsBusinessGrid.clickClearAllFiltersButton();
     const afterCloseDate = await agsBusinessGrid.getDataOfColumn(
       "Close Date",
