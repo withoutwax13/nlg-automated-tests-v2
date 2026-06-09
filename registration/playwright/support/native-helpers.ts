@@ -5,6 +5,7 @@ type AccountType = "taxpayer" | "municipal" | "municipality" | "ags" | "municipa
 type LoginParams = {
   accountType?: AccountType;
   accountIndex?: number;
+  notFirstLogin?: boolean;
 };
 
 type DateParts = {
@@ -162,14 +163,14 @@ const getCredentials = (accountType: AccountType, accountIndex = 0) => {
           password: "Ohayoworld.13",
         },
       ],
-    }
+  }
   return {
-    username: validCredentials[accountType][accountIndex]["username"],
-    password: validCredentials[accountType][accountIndex]["password"],
+    username: validCredentials[normalizedType][accountIndex]["username"],
+    password: validCredentials[normalizedType][accountIndex]["password"],
   };
 };
 
-export const waitForLoading = async (page: Page, seconds = 5) => {
+export const waitForLoading = async (page: Page, seconds = 10) => {
   await page.waitForTimeout(seconds * 1000);
 };
 
@@ -202,6 +203,39 @@ export const expectStatus = async (responsePromise: Promise<Response>, expectedS
 
 export const clickByText = async (locator: Locator, text: string) => {
   await locator.filter({ hasText: text }).first().click();
+};
+
+export const selectFilterOperation = async (page: Page, dropdown: Locator, operation: string) => {
+  await dropdown.waitFor({ state: "visible" });
+  const currentOperation = normalizeText(await dropdown.locator(".k-input-value-text").textContent().catch(() => ""));
+  if (currentOperation === operation) return;
+
+  const selectButton = dropdown.locator('button[aria-label="select"]').first();
+  if (await selectButton.count()) {
+    await selectButton.click({ force: true });
+  } else {
+    await dropdown.click({ force: true });
+  }
+
+  await page
+    .locator(".k-animation-container:visible .k-list-item-text, .k-popup:visible .k-list-item-text")
+    .filter({ hasText: operation })
+    .first()
+    .click({ force: true });
+};
+
+export const selectMultiCheckFilterItem = async (page: Page, filterValue: string) => {
+  const popup = page.locator(".k-column-menu-popup:visible, .k-filter-menu-container:visible").last();
+  await popup.waitFor({ state: "visible", timeout: 10000 });
+  const target = popup.locator(".k-multicheck-wrap li").filter({ hasText: filterValue }).first();
+  await target.waitFor({ state: "visible", timeout: 10000 });
+  const checkbox = target.locator("input").first();
+  if (await checkbox.count()) {
+    await checkbox.click({ force: true });
+  } else {
+    await target.click({ force: true });
+  }
+  await popup.locator(".k-actions .k-button, button").filter({ hasText: "Filter" }).first().click({ force: true });
 };
 
 export const formatDate = ({ month, year, day, date }: DateParts) =>
@@ -259,7 +293,7 @@ export const getPagerTotal = async (pagerInfo: Locator) => {
 
 export const login = async (page: Page, params: LoginParams = {}) => {
   const accountType = params.accountType || "taxpayer";
-  const credentials = getCredentials(accountType, params.accountIndex ? 0 : params.accountIndex);
+  const credentials = getCredentials(accountType, params.accountIndex ?? 0);
 
   await page.goto(`${getBaseUrl()}/login`);
   await expect(page).toHaveURL(/\/login$/);
@@ -274,4 +308,133 @@ export const login = async (page: Page, params: LoginParams = {}) => {
   await page.locator('[data-cy="sign-in"]').filter({ hasText: "Sign In" }).first().click();
 
   await expect(page).not.toHaveURL(`${getBaseUrl()}/login`);
+};
+
+export const logout = async (page: Page) => {
+  await page.locator(".profileDropDownButton").last().click({ force: true });
+  await page.locator(".k-menu-link, span").filter({ hasText: "Log out" }).first().click({ force: true });
+  await expect(page).toHaveURL(`${getBaseUrl()}/login`);
+};
+
+type RegistrationData = {
+  basicInfo: Record<string, any>;
+  locationInfo: { locations: Record<string, any>[] };
+  applicantInfo: Record<string, any>;
+};
+
+const deletePath = (target: Record<string, any>, path: string) => {
+  const parts = path.split(".").map((key) => {
+    const arrayMatch = key.match(/(\w+)\[(\d+)\]/);
+    return arrayMatch ? { key: arrayMatch[1], index: Number(arrayMatch[2]) } : { key };
+  });
+
+  let current: any = target;
+  for (let index = 0; index < parts.length - 1; index += 1) {
+    const part = parts[index];
+    if (!current || !(part.key in current)) return;
+    current = current[part.key];
+    if (part.index !== undefined) {
+      if (!Array.isArray(current) || current[part.index] === undefined) return;
+      current = current[part.index];
+    }
+  }
+
+  const finalPart = parts[parts.length - 1];
+  if (!current || !(finalPart.key in current)) return;
+  if (finalPart.index !== undefined) {
+    if (Array.isArray(current[finalPart.key])) {
+      delete current[finalPart.key][finalPart.index];
+    }
+    return;
+  }
+  delete current[finalPart.key];
+};
+
+export const getUniqueRegistrationData = (
+  randomSeed: number,
+  isMultilocation: boolean,
+  missingData?: string[],
+  customValues?: Record<string, any>
+): RegistrationData => {
+  const evaluateCustomValue = (propertyName: string, defaultValue: any) =>
+    customValues && Object.prototype.hasOwnProperty.call(customValues, propertyName)
+      ? `${defaultValue} ${customValues[propertyName]}`
+      : defaultValue;
+
+  const customData: RegistrationData = {
+    basicInfo: {
+      businessOwnerEmail: evaluateCustomValue("businessOwnerEmail", `testdata${randomSeed}@test.com`),
+      businessOwnerFullName: evaluateCustomValue("businessOwnerFullName", `test data owner ${randomSeed}`),
+      businessOwnerPhoneNumber: evaluateCustomValue("businessOwnerPhoneNumber", "11111111111"),
+      legalBusinessName: evaluateCustomValue("legalBusinessName", `test data business ${randomSeed}`),
+      federalIdentificationNumber: evaluateCustomValue("federalIdentificationNumber", "11111111111"),
+      legalBusinessAddress1: evaluateCustomValue("legalBusinessAddress1", `test data add1 ${randomSeed}`),
+      legalBusinessAddress2: evaluateCustomValue("legalBusinessAddress2", `Suite add2 ${randomSeed}`),
+      legalBusinessCity: evaluateCustomValue("legalBusinessCity", `test city data ${randomSeed}`),
+      legalBusinessState: evaluateCustomValue("legalBusinessState", "AL"),
+      legalBusinessZipCode: evaluateCustomValue("legalBusinessZipCode", "11111111111"),
+      isNotManagedByPropertyManagementFirm: evaluateCustomValue("isNotManagedByPropertyManagementFirm", true),
+      operatorName: evaluateCustomValue("operatorName", `test data operator ${randomSeed}`),
+      operatorTitle: evaluateCustomValue("operatorTitle", `test data title ${randomSeed}`),
+      operatorPhoneNumber: evaluateCustomValue("operatorPhoneNumber", "11111111111"),
+      operatorEmail: evaluateCustomValue("operatorEmail", `test${randomSeed}@test.com`),
+      emergencyPhoneNumber: evaluateCustomValue("emergencyPhoneNumber", "11111111111"),
+    },
+    locationInfo: {
+      locations: [
+        {
+          locationOpenDate: evaluateCustomValue("locationOpenDate", { day: 1, month: 1, year: 2025 }),
+          locationDBA: evaluateCustomValue("locationDBA", `Test Trade Name ${randomSeed} 1`),
+          locationAddress1: evaluateCustomValue("locationAddress1", `${randomSeed} Test Address ${randomSeed} #1`),
+          locationAddress2: evaluateCustomValue("locationAddress2", `Suite ${randomSeed} #1`),
+          locationCity: evaluateCustomValue("locationCity", "Test City"),
+          locationState: evaluateCustomValue("locationState", "AL"),
+          locationZip: evaluateCustomValue("locationZip", "12341"),
+          locationMailingAddress1: evaluateCustomValue("locationMailingAddress1", `${randomSeed} Test Mailing Address ${randomSeed} #1`),
+          locationMailingAddress2: evaluateCustomValue("locationMailingAddress2", `Suite ${randomSeed} #1`),
+          locationMailingCity: evaluateCustomValue("locationMailingCity", "Test City"),
+          locationMailingState: evaluateCustomValue("locationMailingState", "AL"),
+          locationMailingZip: evaluateCustomValue("locationMailingZip", "12341"),
+          managerOperatorFullName: evaluateCustomValue("managerOperatorFullName", `Test Manager ${randomSeed} 1`),
+          managerOperatorPhoneNumber: evaluateCustomValue("managerOperatorPhoneNumber", "11111111111"),
+          managerOperatorEmail: evaluateCustomValue("managerOperatorEmail", `manager1dot${randomSeed}@test.com`),
+          managerOperatorTitle: evaluateCustomValue("managerOperatorTitle", `Test Manager Title ${randomSeed} 1`),
+          emergencyPhoneNumber: evaluateCustomValue("emergencyPhoneNumber", "11111111111"),
+        },
+        {
+          locationOpenDate: evaluateCustomValue("locationOpenDate", { day: 2, month: 2, year: 2025 }),
+          locationDBA: evaluateCustomValue("locationDBA", `Test Trade Name ${randomSeed} 2`),
+          locationAddress1: evaluateCustomValue("locationAddress1", `${randomSeed} Test Address ${randomSeed} #2`),
+          locationAddress2: evaluateCustomValue("locationAddress2", `Suite ${randomSeed} #2`),
+          locationCity: evaluateCustomValue("locationCity", "Test City"),
+          locationState: evaluateCustomValue("locationState", "AL"),
+          locationZip: evaluateCustomValue("locationZip", "12341"),
+          locationMailingAddress1: evaluateCustomValue("locationMailingAddress1", `${randomSeed} Test Mailing Address ${randomSeed} #2`),
+          locationMailingAddress2: evaluateCustomValue("locationMailingAddress2", `Suite ${randomSeed} #2`),
+          locationMailingCity: evaluateCustomValue("locationMailingCity", "Test City"),
+          locationMailingState: evaluateCustomValue("locationMailingState", "AL"),
+          locationMailingZip: evaluateCustomValue("locationMailingZip", "12341"),
+          managerOperatorFullName: evaluateCustomValue("managerOperatorFullName", `Test Manager ${randomSeed} 2`),
+          managerOperatorPhoneNumber: evaluateCustomValue("managerOperatorPhoneNumber", "11111111111"),
+          managerOperatorEmail: evaluateCustomValue("managerOperatorEmail", `manager2dot${randomSeed}@test.com`),
+          managerOperatorTitle: evaluateCustomValue("managerOperatorTitle", `Test Manager Title ${randomSeed} 2`),
+          emergencyPhoneNumber: evaluateCustomValue("emergencyPhoneNumber", "11111111111"),
+        },
+      ],
+    },
+    applicantInfo: {
+      agencyName: evaluateCustomValue("agencyName", `Test Agency ${randomSeed}`),
+      agencyType: evaluateCustomValue("agencyType", "Accounting Firm"),
+      applicantPhoneNumber: evaluateCustomValue("applicantPhoneNumber", "11111111111"),
+      applicantEmail: evaluateCustomValue("applicantEmail", `test${randomSeed}@test.com`),
+      signature: evaluateCustomValue("signature", `Test Signature ${randomSeed}`),
+    },
+  };
+
+  if (!isMultilocation) {
+    customData.locationInfo.locations = [customData.locationInfo.locations[0]];
+  }
+
+  missingData?.forEach((path) => deletePath(customData, path));
+  return customData;
 };

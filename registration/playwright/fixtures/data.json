@@ -1,0 +1,14 @@
+{
+  "general": {
+    "municipality": "Arrakis"
+  },
+  "forms": {
+    "annual": {
+      "multilocation": [
+        {
+          "name": "Business License (Annual) - E2E #1"
+        }
+      ]
+    }
+  }
+}
