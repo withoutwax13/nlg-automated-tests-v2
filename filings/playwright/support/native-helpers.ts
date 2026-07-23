@@ -5,6 +5,7 @@ type AccountType = "taxpayer" | "municipal" | "municipality" | "ags" | "municipa
 type LoginParams = {
   accountType?: AccountType;
   accountIndex?: number;
+  notFirstLogin?: boolean;
 };
 
 type DateParts = {
@@ -162,10 +163,10 @@ const getCredentials = (accountType: AccountType, accountIndex = 0) => {
           password: "Ohayoworld.13",
         },
       ],
-    }
+  }
   return {
-    username: validCredentials[accountType][accountIndex]["username"],
-    password: validCredentials[accountType][accountIndex]["password"],
+    username: validCredentials[normalizedType][accountIndex]["username"],
+    password: validCredentials[normalizedType][accountIndex]["password"],
   };
 };
 
@@ -202,6 +203,39 @@ export const expectStatus = async (responsePromise: Promise<Response>, expectedS
 
 export const clickByText = async (locator: Locator, text: string) => {
   await locator.filter({ hasText: text }).first().click();
+};
+
+export const selectFilterOperation = async (page: Page, dropdown: Locator, operation: string) => {
+  await dropdown.waitFor({ state: "visible" });
+  const currentOperation = normalizeText(await dropdown.locator(".k-input-value-text").textContent().catch(() => ""));
+  if (currentOperation === operation) return;
+
+  const selectButton = dropdown.locator('button[aria-label="select"]').first();
+  if (await selectButton.count()) {
+    await selectButton.click({ force: true });
+  } else {
+    await dropdown.click({ force: true });
+  }
+
+  await page
+    .locator(".k-animation-container:visible .k-list-item-text, .k-popup:visible .k-list-item-text")
+    .filter({ hasText: operation })
+    .first()
+    .click({ force: true });
+};
+
+export const selectMultiCheckFilterItem = async (page: Page, filterValue: string) => {
+  const popup = page.locator(".k-column-menu-popup:visible, .k-filter-menu-container:visible").last();
+  await popup.waitFor({ state: "visible", timeout: 10000 });
+  const target = popup.locator(".k-multicheck-wrap li").filter({ hasText: filterValue }).first();
+  await target.waitFor({ state: "visible", timeout: 10000 });
+  const checkbox = target.locator("input").first();
+  if (await checkbox.count()) {
+    await checkbox.click({ force: true });
+  } else {
+    await target.click({ force: true });
+  }
+  await popup.locator(".k-actions .k-button, button").filter({ hasText: "Filter" }).first().click({ force: true });
 };
 
 export const formatDate = ({ month, year, day, date }: DateParts) =>
@@ -259,7 +293,7 @@ export const getPagerTotal = async (pagerInfo: Locator) => {
 
 export const login = async (page: Page, params: LoginParams = {}) => {
   const accountType = params.accountType || "taxpayer";
-  const credentials = getCredentials(accountType, params.accountIndex ? 0 : params.accountIndex);
+  const credentials = getCredentials(accountType, params.accountIndex ?? 0);
 
   await page.goto(`${getBaseUrl()}/login`);
   await expect(page).toHaveURL(/\/login$/);
@@ -274,4 +308,10 @@ export const login = async (page: Page, params: LoginParams = {}) => {
   await page.locator('[data-cy="sign-in"]').filter({ hasText: "Sign In" }).first().click();
 
   await expect(page).not.toHaveURL(`${getBaseUrl()}/login`);
+};
+
+export const logout = async (page: Page) => {
+  await page.locator(".profileDropDownButton").last().click({ force: true });
+  await page.locator(".k-menu-link, span").filter({ hasText: "Log out" }).first().click({ force: true });
+  await expect(page).toHaveURL(`${getBaseUrl()}/login`);
 };
