@@ -13,14 +13,16 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@currents/playwright": "^2.5.0",
+    "@playwright/test": "^1.59.1",
     "@types/cypress": "^1.1.3",
     "axios": "^1.7.2",
+    "checkly": "^8.20.0",
     "cypress": "^13.6.1",
-    "cypress-on-fix": "^1.0.3",
     "cypress-file-upload": "^5.0.8",
+    "cypress-on-fix": "^1.0.3",
     "cypress-split": "^1.17.1",
-    "typescript": "^5.3.3",
-    "@playwright/test": "^1.59.1"
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "playwright-msteams-reporter": "^0.0.13"

@@ -16,6 +16,6 @@ test.describe("As a taxpayer, I should only have details and delete as options i
     );
     await actionButton.click();
     await expect(taxpayerBusinessList.getElement().anyList().filter({ hasText: "View Details" }).first()).toBeVisible();
-    await expect(taxpayerBusinessList.getElement().anyList().filter({ hasText: "Delete" }).first()).toBeVisible();
+    await expect(taxpayerBusinessList.getElement().anyList().filter({ hasText: "Remove" }).first()).toBeVisible();
   });
 });

@@ -601,7 +601,7 @@ class BusinessGrid {
       userType: this.userType,
       page: this.page,
     });
-    this.toggleActionButton("Delete", [{ anchorColumnName: "DBA", anchorValue: businessDba }])
+    this.toggleActionButton("Remove", [{ anchorColumnName: "DBA", anchorValue: businessDba }])
     await businessDeleteModal.clickDeleteButton();
     await expectStatus(deleteBusiness, expectedStatus);
     await waitForLoading(this.page, 15);
