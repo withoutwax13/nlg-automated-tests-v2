@@ -16,6 +16,12 @@ export default defineConfig({
   //   ]
   // ],
   // reporter: [currentsReporter()], // 👈🏻 add Currents reporter
+  reporter: [
+    // ...
+    ['@testomatio/reporter/playwright', {
+      apiKey: process.env.TESTOMATIO,
+    }]
+  ],
   testDir: './playwright/e2e',
   timeout: 120000,
   expect: { timeout: 120000 },
