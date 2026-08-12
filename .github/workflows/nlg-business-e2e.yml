@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   schedule:
-    # Runs once every 24 hours at 12:00 AM UTC
+    # Every 24 hours at 12:00 AM UTC / 8:00 AM Manila
     - cron: "0 0 * * *"
 
 permissions:
@@ -18,10 +18,11 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./business
+        working-directory: ./businesses
 
     env:
       CI: true
+      PLAYWRIGHT_HTML_OPEN: never
 
     steps:
       - name: Checkout repository
@@ -32,7 +33,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: business/package-lock.json
+          cache-dependency-path: businesses/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -41,7 +42,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: npx playwright test
+        run: npx playwright test --reporter=html
 
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
@@ -49,7 +50,7 @@ jobs:
         with:
           name: nlg-business-playwright-report-${{ github.run_number }}
           path: |
-            business/playwright-report/
-            business/test-results/
+            businesses/playwright-report/
+            businesses/test-results/
           if-no-files-found: warn
           retention-days: 30
