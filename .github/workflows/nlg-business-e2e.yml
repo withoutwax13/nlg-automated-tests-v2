@@ -2,6 +2,15 @@ name: NLG Business E2E Tests
 
 on:
   workflow_dispatch:
+    inputs:
+      grep:
+        description: "Tests to grep"
+        required: false
+        default: ""
+      run:
+        required: false
+      testomatio:
+        required: false
   repository_dispatch:
     types: [my-event-jp]
 
@@ -44,7 +53,7 @@ jobs:
       - name: Run Playwright E2E Tests
         env:
           TESTOMATIO: ${{ secrets.TESTOMATIO }}
-        run: npx playwright test --workers=8
+        run: npx playwright test --workers=8 --grep "${{ github.event.inputs.grep }}"
 
       - name: Upload Playwright test results
         if: ${{ !cancelled() }}
