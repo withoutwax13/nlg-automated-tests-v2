@@ -23,8 +23,8 @@ export default defineConfig({
     }]
   ],
   testDir: './playwright/e2e',
-  timeout: 120000,
-  expect: { timeout: 120000 },
+  timeout: 36000,
+  expect: { timeout: 36000 },
   // retries: 2,
   fullyParallel: false,
   use: {
