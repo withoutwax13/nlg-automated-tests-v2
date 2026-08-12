@@ -2,6 +2,8 @@ name: NLG Business E2E Tests
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [my-event-jp]
 
   schedule:
     - cron: "0 0 * * *"
