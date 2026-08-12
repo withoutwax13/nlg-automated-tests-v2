@@ -11,10 +11,12 @@ import {
 import { validateFilterOperation } from "../../utils/Grid";
 
 const MUNICIPALITY_COLUMNS = [
-  "Name",
+  "Municipality Name",
   "State",
-  "Custom Fields",
-  "Enable/Disable",
+  "Government Type",
+  "Subscriptions",
+  "Alias",
+  "HubSpot Link",
   "Actions",
 ];
 
@@ -32,16 +34,18 @@ class MunicipalityGrid {
       anyList: () => this.page.locator("li"),
       specificColumnFilter: (columnOrder: number) =>
         this.page.locator("thead tr th").nth(columnOrder).locator("span a").first(),
-      filterOperationsDropdown: () => this.page.locator(".k-filter-menu-container .k-dropdownlist").first(),
-      filterValueInput: () => this.page.locator(".k-filter-menu-container .k-input").first(),
-      filterFilterButton: () =>
-        this.page.locator(".k-filter-menu-container .k-actions .k-button").filter({ hasText: "Filter" }).first(),
+      filterOperationsDropdown: () => this.page.locator('[role="dialog"] .k-dropdownlist').first(),
+      filterValueInput: () => this.page.locator("[role='dialog'] .k-input").first(),
+      filterFilterButton: () => this.page.locator("[role='dialog'] button").filter({ hasText: "Filter" }).first(),
       customFieldInput: () =>
         this.page.locator('.k-dialog input, .k-window input, input[name*="custom"], input[placeholder*="field" i]').first(),
       customFieldAddButton: () =>
         this.page.locator(".k-dialog button, .k-window button, button").filter({ hasText: /^Add$/ }).first(),
       customFieldSaveButton: () =>
         this.page.locator(".k-dialog button, .k-window button, button").filter({ hasText: /save|done|close/i }).first(),
+      easyFilterMenuButton: () => this.page.locator(".filterButton"),
+      easyFilterModalContainer: () => this.page.locator('[role="dialog"]'),
+      easyFilterColumnsLink: () => this.page.locator('[role="dialog"] div div div div span'),
     };
   }
 
@@ -50,7 +54,7 @@ class MunicipalityGrid {
   }
 
   async init() {
-    await this.page.goto("/admin/municipalities");
+    await this.page.goto("/municipalityApp/list/");
     await waitForLoading(this.page, 5);
     await this.refreshGridState();
   }
@@ -63,10 +67,11 @@ class MunicipalityGrid {
     const search = this.getElement().municipalitySearch();
     if (await search.count()) {
       await search.fill(municipality);
-      await clickByText(this.getElement().anyList(), municipality);
+      await this.toggleActionButton("View Details", "Municipality Name", municipality);
       await waitForLoading(this.page, 5);
     } else {
-      await this.filterColumn("Name", municipality, "text", "Contains");
+      // await this.filterColumn("Name", municipality, "text", "Contains");
+      await this.toggleActionButton("View Details", "Municipality Name", municipality);
     }
   }
 
@@ -75,22 +80,52 @@ class MunicipalityGrid {
     return this.columnOrder[columnName];
   }
 
+  async toggleActionButton(action: string, anchorColumnName: string, anchorValue: string) {
+    const actionCell = await this.getElementOfColumn("Actions", anchorColumnName, anchorValue);
+    const popupPromise = action === "View Details" || action === "View Users" ? Promise.resolve(null) : Promise.resolve(null);
+    await actionCell.locator("button, i, a").first().click({ force: true });
+    await clickByText(this.getElement().anyList(), action);
+    await popupPromise;
+    await waitForLoading(this.page, 2);
+  }
+
+  private async handleTextFilter(columnName: string, filterValue: string, filterOperation: string) {
+    validateFilterOperation("text", filterOperation);
+    // await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await this.getElement().easyFilterMenuButton().click({ force: true });
+    await this.getElement().easyFilterColumnsLink().filter({ hasText: columnName }).click({ force: true })
+    await selectFilterOperation(this.page, this.getElement().filterOperationsDropdown(), filterOperation);
+    if (!["Is not null", "Is null"].includes(filterOperation)) {
+      await this.getElement().filterValueInput().fill(filterValue);
+    }
+    await this.getElement().filterFilterButton().click({ force: true });
+  }
+
+  private async handleNumberFilter(columnName: string, filterValue: string, filterOperation: string) {
+    validateFilterOperation("number", filterOperation);
+    // await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await this.getElement().easyFilterMenuButton().click({ force: true });
+    await this.getElement().easyFilterColumnsLink().filter({ hasText: columnName }).click({ force: true })
+    await selectFilterOperation(this.page, this.getElement().filterOperationsDropdown(), filterOperation);
+    await this.getElement().filterValueInput().fill(filterValue);
+    await this.getElement().filterFilterButton().click({ force: true });
+  }
+
   async filterColumn(columnName: string, filterValue: string, filterType = "text", filterOperation = "Contains") {
     const columnIndex = await this.getColumnIndex(columnName);
     switch (filterType) {
+      case "text":
+        await this.handleTextFilter(columnName, filterValue, filterOperation);
+        break;
+      case "number":
+        await this.handleNumberFilter(columnName, filterValue, filterOperation);
+        break;
       case "multi-select":
-        await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+        await this.getElement().easyFilterMenuButton().click({ force: true });
+        await this.getElement().easyFilterColumnsLink().filter({ hasText: columnName }).click({ force: true })
         await selectMultiCheckFilterItem(this.page, filterValue);
         break;
-      case "text":
       default:
-        validateFilterOperation("text", filterOperation);
-        await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
-        await selectFilterOperation(this.page, this.getElement().filterOperationsDropdown(), filterOperation);
-        if (!["Is not null", "Is null"].includes(filterOperation)) {
-          await this.getElement().filterValueInput().fill(filterValue);
-        }
-        await this.getElement().filterFilterButton().click({ force: true });
         break;
     }
     await waitForLoading(this.page, 3);

@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page, type Response } from "@playwright/test";
+// import { setTimeout } from "node:timers/promises";
 
 type AccountType = "taxpayer" | "municipal" | "municipality" | "ags" | "municipalDel";
 
@@ -31,138 +32,138 @@ export const getBaseUrl = () => `https://${getEnvironment()}.azavargovapps.com`;
 const getCredentials = (accountType: AccountType, accountIndex = 0) => {
   const normalizedType = normalizeAccountType(accountType);
   const validCredentials = {
-      taxpayer: [
-        {
-          username: "valerasoftwares+taxpayer.1@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+taxpayer.2@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+taxpayer.3@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+taxpayer.4@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+taxpayer.5@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+taxpayer.6@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+taxpayer.7@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+taxpayer.8@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+taxpayer.9@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+taxpayer.10@gmail.com",
-          password: "Ohayoworld.13",
-        },
-      ],
-      municipal: [
-        {
-          username: "valerasoftwares+arrakis@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+arrakis.2@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+arrakis.3@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+arrakis.4@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+arrakis.5@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+arrakis.6@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+arrakis.7@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+arrakis.8@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+arrakis.9@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "valerasoftwares+arrakis.10@gmail.com",
-          password: "Ohayoworld.13",
-        },
-      ],
-      ags: [
-        {
-          username: "johnpatrickyusoresvalera+dev.super@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "johnpatrickyusoresvalera+dev.super.2@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "johnpatrickyusoresvalera+dev.super.3@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "johnpatrickyusoresvalera+dev.super.4@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "johnpatrickyusoresvalera+dev.super.5@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "johnpatrickyusoresvalera+dev.super.6@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "johnpatrickyusoresvalera+dev.super.7@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "johnpatrickyusoresvalera+dev.super.8@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "johnpatrickyusoresvalera+dev.super.9@gmail.com",
-          password: "Ohayoworld.13",
-        },
-        {
-          username: "johnpatrickyusoresvalera+dev.super.10@gmail.com",
-          password: "Ohayoworld.13",
-        },
-      ],
-      municipalDel: [
-        {
-          username: "valerasoftwares+remedios@gmail.com",
-          password: "Ohayoworld.13",
-        },
-      ],
+    taxpayer: [
+      {
+        username: "valerasoftwares+taxpayer.1@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+taxpayer.2@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+taxpayer.3@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+taxpayer.4@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+taxpayer.5@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+taxpayer.6@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+taxpayer.7@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+taxpayer.8@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+taxpayer.9@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+taxpayer.10@gmail.com",
+        password: "Ohayoworld.13",
+      },
+    ],
+    municipal: [
+      {
+        username: "valerasoftwares+arrakis@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+arrakis.2@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+arrakis.3@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+arrakis.4@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+arrakis.5@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+arrakis.6@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+arrakis.7@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+arrakis.8@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+arrakis.9@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "valerasoftwares+arrakis.10@gmail.com",
+        password: "Ohayoworld.13",
+      },
+    ],
+    ags: [
+      {
+        username: "johnpatrickyusoresvalera+dev.super@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "johnpatrickyusoresvalera+dev.super.2@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "johnpatrickyusoresvalera+dev.super.3@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "johnpatrickyusoresvalera+dev.super.4@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "johnpatrickyusoresvalera+dev.super.5@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "johnpatrickyusoresvalera+dev.super.6@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "johnpatrickyusoresvalera+dev.super.7@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "johnpatrickyusoresvalera+dev.super.8@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "johnpatrickyusoresvalera+dev.super.9@gmail.com",
+        password: "Ohayoworld.13",
+      },
+      {
+        username: "johnpatrickyusoresvalera+dev.super.10@gmail.com",
+        password: "Ohayoworld.13",
+      },
+    ],
+    municipalDel: [
+      {
+        username: "valerasoftwares+remedios@gmail.com",
+        password: "Ohayoworld.13",
+      },
+    ],
   }
   return {
     username: validCredentials[normalizedType][accountIndex]["username"],
@@ -171,7 +172,8 @@ const getCredentials = (accountType: AccountType, accountIndex = 0) => {
 };
 
 export const waitForLoading = async (page: Page, seconds = 5) => {
-  await page.waitForTimeout(seconds * 1000);
+  // await setTimeout(seconds * 1000);
+  await new Promise(resolve => setTimeout(resolve, seconds * 1000));
 };
 
 export const waitForResponse = async (
@@ -183,9 +185,9 @@ export const waitForResponse = async (
     typeof matcher === "function"
       ? matcher
       : (response: Response) =>
-          typeof matcher === "string"
-            ? response.url().includes(matcher)
-            : matcher.test(response.url());
+        typeof matcher === "string"
+          ? response.url().includes(matcher)
+          : matcher.test(response.url());
 
   const responsePromise = page.waitForResponse(predicate);
   if (action) {
@@ -207,7 +209,7 @@ export const clickByText = async (locator: Locator, text: string) => {
 
 export const selectFilterOperation = async (page: Page, dropdown: Locator, operation: string) => {
   await dropdown.waitFor({ state: "visible" });
-  const currentOperation = normalizeText(await dropdown.locator(".k-input-value-text").textContent().catch(() => ""));
+  const currentOperation = normalizeText(await dropdown.locator(".k-input-value-text").first().textContent().catch(() => ""));
   if (currentOperation === operation) return;
 
   const selectButton = dropdown.locator('button[aria-label="select"]').first();
@@ -225,17 +227,17 @@ export const selectFilterOperation = async (page: Page, dropdown: Locator, opera
 };
 
 export const selectMultiCheckFilterItem = async (page: Page, filterValue: string) => {
-  const popup = page.locator(".k-column-menu-popup:visible, .k-filter-menu-container:visible").last();
-  await popup.waitFor({ state: "visible", timeout: 10000 });
-  const target = popup.locator(".k-multicheck-wrap li").filter({ hasText: filterValue }).first();
-  await target.waitFor({ state: "visible", timeout: 10000 });
-  const checkbox = target.locator("input").first();
+  // const popup = page.locator(".k-column-menu-popup:visible, .k-filter-menu-container:visible").last();
+  // await popup.waitFor({ state: "visible", timeout: 10000 });
+  const target = page.locator(".k-checkbox-label").filter({ hasText: filterValue }).first();
+  // await target.waitFor({ state: "visible", timeout: 10000 });
+  const checkbox = target.locator("xpath=..").locator("input").first();
   if (await checkbox.count()) {
     await checkbox.click({ force: true });
   } else {
     await target.click({ force: true });
   }
-  await popup.locator(".k-actions .k-button, button").filter({ hasText: "Filter" }).first().click({ force: true });
+  await page.locator('[role="dialog"] .NLGButtonPrimary').filter({ hasText: "Filter" }).first().click({ force: true });
 };
 
 export const formatDate = ({ month, year, day, date }: DateParts) =>
@@ -312,6 +314,8 @@ export const login = async (page: Page, params: LoginParams = {}) => {
 
 export const logout = async (page: Page) => {
   await page.locator(".profileDropDownButton").last().click({ force: true });
-  await page.locator(".k-menu-link, span").filter({ hasText: "Log out" }).first().click({ force: true });
+  await page.waitForTimeout(5000);
+  await page.locator(".k-menu-link, span .dropdownItemsText").filter({ hasText: "Log out" }).first().click({ force: true });
+  await page.waitForTimeout(5000);
   await expect(page).toHaveURL(`${getBaseUrl()}/login`);
 };

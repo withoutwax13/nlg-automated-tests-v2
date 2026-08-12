@@ -4,13 +4,13 @@ import { waitForLoading } from "../../support/native-helpers";
 const methodIs = (response: Response, method: string) => response.request().method().toUpperCase() === method;
 
 class Payment {
-  constructor(private readonly page: Page) {}
+  constructor(private readonly page: Page) { }
 
   private elements() {
     return {
       savedPaymentMethods: () => this.page.locator('label[for="savedPayment"]'),
       savedPaymentMethodItems: () => this.page.locator(".form-section").first().locator(".radio .form-check input, .radio .form-check"),
-      termsAndConditionsCheckbox: () => this.page.locator('input[data-cy="I have read and agree to the Terms and Conditions of this online payment system.-checkbox"]'),
+      termsAndConditionsCheckbox: () => this.page.locator('#Terms-check-box'),
       finishAndPayButton: () => this.page.locator("button").filter({ hasText: "Finish and Pay" }).first(),
       payNowButton: () => this.page.locator("button").filter({ hasText: "Pay Now" }).first(),
       payLaterButton: () => this.page.locator("button").filter({ hasText: "Pay Later" }).first(),
@@ -31,14 +31,15 @@ class Payment {
 
   async clickSavedPaymentMethods() {
     await this.getElements().savedPaymentMethods().click({ force: true });
-    await waitForLoading(this.page, 2);
+    await waitForLoading(this.page, 10);
   }
 
   async selectSavedPaymentMethod(order: number) {
     const responsePromise = this.page
       .waitForResponse((response) => methodIs(response, "PATCH") && response.url().includes("/reeval-for-payment"), { timeout: 15000 })
       .catch(() => null);
-    await this.getElements().savedPaymentMethodItems().nth(order).click({ force: true });
+    // await this.getElements().savedPaymentMethodItems().nth(order).click({ force: true });
+    await this.page.locator("#savedPaymentMethod0").click();
     const response = await responsePromise;
     if (response) expect([200, 201]).toContain(response.status());
   }

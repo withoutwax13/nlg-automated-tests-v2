@@ -1,4 +1,4 @@
-import { type Locator, type Page, type Response } from "@playwright/test";
+import { type Locator, type Page, type Response, expect } from "@playwright/test";
 import { waitForLoading } from "../../support/native-helpers";
 
 type EntryMethod = "type" | "select" | "click";
@@ -29,7 +29,7 @@ class Form {
     return this.elements();
   }
 
-  private waitForFormPatch() {
+  private async waitForFormPatch() {
     return this.page
       .waitForResponse(
         (response: Response) =>
@@ -38,16 +38,20 @@ class Form {
           response.url().includes("/input?form-id="),
         { timeout: 120000 }
       )
-      .catch(() => null);
   }
 
   async clickNextbutton(isFromFormSteps = true) {
-    const patchPromise = isFromFormSteps ? this.waitForFormPatch() : this.page.waitForTimeout(120000);
-    const disabledNextButton = await this.getElement().nextButton().getAttribute("disabled");
-    if (!disabledNextButton) {
-      await this.getElement().nextButton().click({ force: true });
-      await patchPromise;
-      await waitForLoading(this.page, 2);
+    const nextButton = this.getElement().nextButton();
+    await expect(nextButton).not.toHaveAttribute("disabled", { timeout: 120_000 });
+    if (isFromFormSteps) {
+      await expect(nextButton).toHaveAttribute("aria-busy", "false", {
+        timeout: 120_000,
+      });
+    }
+    await nextButton.click();
+
+    if (isFromFormSteps) {
+      await waitForLoading(this.page, 20);
     }
   }
 
@@ -77,8 +81,6 @@ class Form {
       throw new Error(`Data is required for ${method} method`);
     }
 
-    // await this.page.waitForTimeout(5000);
-
     const matched = this.page.locator(selector);
     const element = selectorCountOnMultiple === undefined ? matched.first() : matched.nth(selectorCountOnMultiple);
 
@@ -96,9 +98,8 @@ class Form {
       default:
         throw new Error(`Unsupported method: ${method}`);
     }
-
+    await waitForLoading(this.page, 10);
     // await this.waitForFormPatch();
-    // await this.page.waitForTimeout(5000);
   }
 
   async handleSelectingUnavailableFilingPeriod(counter: number): Promise<void> {
@@ -107,7 +108,7 @@ class Form {
     const filingPeriod = date.toLocaleDateString("en-US", { year: "numeric", month: "long" });
 
     await this.enterData('*[data-cy="Filing Period-dropdown"]', "select", filingPeriod);
-    await waitForLoading(this.page, 1);
+    await waitForLoading(this.page, 20);
     const bodyText = await this.page.locator("body").textContent();
     if (bodyText?.includes("You have already filed for this period")) {
       await this.handleSelectingUnavailableFilingPeriod(counter + 1);
@@ -115,35 +116,35 @@ class Form {
   }
 
   async enterBasicInformation(data?: any) {
-    await this.handleSelectingUnavailableFilingPeriod(1);
-    await this.enterData("#FEIN", "type", data ?? "123456789");
-    await this.enterData("#IllinoisBusinessTax", "type", data ?? "12345678");
+    await this.handleSelectingUnavailableFilingPeriod(5);
+    await this.enterData('[data-cy="Federal Employer Identification Number (FEIN)-masked-input"]', "type", data ?? "123456789");
+    await this.enterData('[data-cy="Illinois Business Tax (IBT) Number (ST-1)-masked-input"]', "type", data ?? "12345678");
     await this.enterData('*[data-cy="No, I did not file a State ST-1-X form for this filing period-radio-button"]', "click");
     await this.enterData('*[data-cy="No, I remit taxes for only ONE location on my ST-1 form-radio-button"]', "click");
   }
 
   async enterTaxInformation(data?: any) {
-    await this.enterData("#TotalSales", "type", data ?? "123456");
+    await this.enterData('[data-cy="Gross Sales of Prepared Food and Beverages-numeric-input"]', "type", data ?? "123456");
   }
 
   async enterPreparerInformation(data?: any) {
-    await this.enterData("#TaxPreparerFullName", "type", data ?? "John Doe");
-    await this.enterData("#Title", "type", data ?? "Tax Preparer");
-    await this.enterData("#Signature", "type", data ?? "John Doe");
-    await this.enterData("#TaxPreparerPhoneNumber", "type", data ?? "1234567890");
-    await this.enterData("#PreparerEmail", "type", data ?? "test1@test.com");
+    await this.enterData('[data-cy="Preparer Full Name-masked-input"]', "type", data ?? "John Doe");
+    await this.enterData('[data-cy="Title-masked-input"]', "type", data ?? "Tax Preparer");
+    await this.enterData('[data-cy="Signature-masked-input"]', "type", data ?? "John Doe");
+    await this.enterData('[data-cy="Preparer Phone Number-masked-input"]', "type", data ?? "1234567890");
+    await this.enterData('[data-cy="Preparer Email Address-masked-input"]', "type", data ?? "test1@test.com");
   }
 
   async saveAndCloseFiling() {
     await this.getElement().saveAndCloseButton().click({ force: true });
     await this.page.locator(".k-actions button, .k-dialog button").filter({ hasText: "Save and Close" }).first().click({ force: true });
-    await waitForLoading(this.page, 3);
+    await waitForLoading(this.page, 10);
   }
 
   async deleteAndCloseFiling() {
     await this.getElement().saveAndCloseButton().click({ force: true });
     await this.page.locator(".k-actions button, .k-dialog button").filter({ hasText: "Delete And Close" }).first().click({ force: true });
-    await waitForLoading(this.page, 3);
+    await waitForLoading(this.page, 10);
   }
 }
 

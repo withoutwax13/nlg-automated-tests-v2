@@ -1,13 +1,19 @@
 import { expect, test } from "@playwright/test";
 import FilingGrid from "../../objects/FilingGrid";
-import { DRAFT_BUSINESS, createDraftFiling } from "../helpers/filing-workflows";
+import Form from "../../objects/Form";
+import {
+  DRAFT_BUSINESS,
+  createDraftFiling
+} from "../helpers/filing-workflows";
 
 test.describe("As a taxpayer, I should be able to resume a draft filing.", () => {
   test("Initiate test", async ({ page }) => {
-    const referenceId = await createDraftFiling(page, 8);
+    await createDraftFiling(page, 8);
     const taxpayerFilingGrid = new FilingGrid(page, { userType: "taxpayer" });
+    const form = new Form(page);
     await taxpayerFilingGrid.init();
-    await taxpayerFilingGrid.toggleActionButton("Resume", "Reference ID", referenceId);
-    await expect(page.locator("body")).toContainText(DRAFT_BUSINESS);
+    await taxpayerFilingGrid.toggleActionButton("Resume", "Location DBA", DRAFT_BUSINESS);
+    await form.clickBackButton();
+    await expect(page.locator(`input[value='${DRAFT_BUSINESS}']`).first()).toBeVisible();
   });
 });

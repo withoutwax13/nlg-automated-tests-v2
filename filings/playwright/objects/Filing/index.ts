@@ -27,6 +27,7 @@ class Filing {
       nextButton: () => this.page.locator(".NLGButtonPrimary").filter({ hasText: "Next" }).first(),
       cancelButton: () => this.page.locator(".NLGButtonSecondary").filter({ hasText: "Cancel" }).first(),
       anyList: () => this.page.locator("li"),
+      anySpan: () => this.page.locator("span")
     };
   }
 
@@ -45,7 +46,7 @@ class Filing {
     await this.getElements().submitFormsTab().click({ force: true });
     const response = await loadPromise;
     if (response) expect(response.status()).toBe(200);
-    await waitForLoading(this.page, 2);
+    await waitForLoading(this.page, 10);
   }
 
   private async startFiling() {
@@ -59,19 +60,19 @@ class Filing {
     } else {
       await this.getElements().createNewFilingButton().click({ force: true });
     }
-    await waitForLoading(this.page, 3);
+    await waitForLoading(this.page, 10);
   }
 
   async selectGovernment(government: string) {
     await this.getElements().governmentSelection().click({ force: true });
     await this.getElements().governmentSelection().fill(government);
-    await clickByText(this.getElements().anyList(), government);
-    await waitForLoading(this.page, 3);
+    await clickByText(this.getElements().anySpan(), government);
+    await waitForLoading(this.page, 10);
   }
 
   async selectForm(formName: string) {
     await this.getElements().formLinkItem(formName).click({ force: true });
-    await waitForLoading(this.page, 2);
+    await waitForLoading(this.page, 10);
   }
 
   async selectBusinessToFile(businessDba: string) {
@@ -89,7 +90,7 @@ class Filing {
 
   async clickNextButton() {
     await this.getElements().nextButton().click({ force: true });
-    await waitForLoading(this.page, 2);
+    await waitForLoading(this.page, 10);
   }
 
   async clickCancelButton() {

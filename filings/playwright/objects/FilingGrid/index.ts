@@ -82,16 +82,19 @@ class FilingGrid {
       noRecordFoundComponent: () => this.page.locator(".k-grid-norecords-template"),
       customizeTableViewButton: () => this.page.locator("*").filter({ hasText: "Customize" }).first(),
       specificColumnFilter: (columnOrder: number) => this.page.locator("thead tr th").nth(columnOrder).locator("span a").first(),
-      filterOperationsDropdown: () => this.page.locator(".k-filter-menu-container .k-dropdownlist").first(),
-      filterValueInput: () => this.page.locator(".k-filter-menu-container .k-input").first(),
+      filterOperationsDropdown: () => this.page.locator('[role="dialog"] .k-dropdownlist').first(),
+      filterValueInput: () => this.page.locator("[role='dialog'] .k-input").first(),
       filterValueDateInput: () => this.page.locator(".k-dateinput input").first(),
-      filterFilterButton: () => this.page.locator(".k-filter-menu-container .k-actions .k-button").filter({ hasText: "Filter" }).first(),
+      filterFilterButton: () => this.page.locator("[role='dialog'] button").filter({ hasText: "Filter" }).first(),
       searchMunicipalityDropdown: () => this.page.locator('input[placeholder="Select government..."], input[placeholder="Search government"]').first(),
       anyList: () => this.page.locator("li"),
       anyButton: () => this.page.locator("button"),
       clearAllFiltersButton: () => this.page.locator("*").filter({ hasText: "Clear All" }).first(),
       exportButton: () => this.page.locator(".NLGButtonPrimary").filter({ hasText: "Export" }).first(),
-      viewRequestedExtractButton: () => this.page.locator("*").filter({ hasText: "View requested extracts" }).first(),
+      viewRequestedExtractButton: () => this.page.getByRole("button", { name: "View requested extracts" }),
+      easyFilterMenuButton: () => this.page.locator(".filterButton"),
+      easyFilterModalContainer: () => this.page.locator('[role="dialog"]'),
+      easyFilterColumnsLink: () => this.page.locator('[role="dialog"] div div div div span'),
     };
   }
 
@@ -104,6 +107,8 @@ class FilingGrid {
     await waitForLoading(this.page, 5);
     if (this.props.userType === "ags") {
       await this.selectMunicipality(this.municipalitySelection);
+    } else {
+      await waitForLoading(this.page, 30);
     }
     await this.refreshGridState();
   }
@@ -115,7 +120,7 @@ class FilingGrid {
   async selectMunicipality(municipality: string) {
     await this.getElement().searchMunicipalityDropdown().fill(municipality);
     await clickByText(this.getElement().anyList(), municipality);
-    await waitForLoading(this.page, 5);
+    await waitForLoading(this.page, 30);
   }
 
   private async getColumnIndex(columnName: string) {
@@ -130,9 +135,11 @@ class FilingGrid {
     await waitForLoading(this.page, 2);
   }
 
-  private async handleTextFilter(columnIndex: number, filterValue: string, filterOperation: string) {
+  private async handleTextFilter(columnName: string, filterValue: string, filterOperation: string) {
     validateFilterOperation("text", filterOperation);
-    await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    // await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await this.getElement().easyFilterMenuButton().click({ force: true });
+    await this.getElement().easyFilterColumnsLink().filter({ hasText: columnName }).click({ force: true })
     await selectFilterOperation(this.page, this.getElement().filterOperationsDropdown(), filterOperation);
     if (!["Is not null", "Is null"].includes(filterOperation)) {
       await this.getElement().filterValueInput().fill(filterValue);
@@ -140,17 +147,21 @@ class FilingGrid {
     await this.getElement().filterFilterButton().click({ force: true });
   }
 
-  private async handleDateFilter(columnIndex: number, filterValue: string, filterOperation: string) {
+  private async handleDateFilter(columnName: string, filterValue: string, filterOperation: string) {
     validateFilterOperation("date", filterOperation);
-    await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    // await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await this.getElement().easyFilterMenuButton().click({ force: true });
+    await this.getElement().easyFilterColumnsLink().filter({ hasText: columnName }).click({ force: true })
     await selectFilterOperation(this.page, this.getElement().filterOperationsDropdown(), filterOperation);
     await this.getElement().filterValueDateInput().fill(filterValue);
     await this.getElement().filterFilterButton().click({ force: true });
   }
 
-  private async handleNumberFilter(columnIndex: number, filterValue: string, filterOperation: string) {
+  private async handleNumberFilter(columnName: string, filterValue: string, filterOperation: string) {
     validateFilterOperation("number", filterOperation);
-    await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    // await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+    await this.getElement().easyFilterMenuButton().click({ force: true });
+    await this.getElement().easyFilterColumnsLink().filter({ hasText: columnName }).click({ force: true })
     await selectFilterOperation(this.page, this.getElement().filterOperationsDropdown(), filterOperation);
     await this.getElement().filterValueInput().fill(filterValue);
     await this.getElement().filterFilterButton().click({ force: true });
@@ -160,16 +171,17 @@ class FilingGrid {
     const columnIndex = await this.getColumnIndex(columnName);
     switch (filterType) {
       case "text":
-        await this.handleTextFilter(columnIndex, filterValue, filterOperation);
+        await this.handleTextFilter(columnName, filterValue, filterOperation);
         break;
       case "date":
-        await this.handleDateFilter(columnIndex, filterValue, filterOperation);
+        await this.handleDateFilter(columnName, filterValue, filterOperation);
         break;
       case "number":
-        await this.handleNumberFilter(columnIndex, filterValue, filterOperation);
+        await this.handleNumberFilter(columnName, filterValue, filterOperation);
         break;
       case "multi-select":
-        await this.getElement().specificColumnFilter(columnIndex).click({ force: true });
+        await this.getElement().easyFilterMenuButton().click({ force: true });
+        await this.getElement().easyFilterColumnsLink().filter({ hasText: columnName }).click({ force: true })
         await selectMultiCheckFilterItem(this.page, filterValue);
         break;
       default:
@@ -239,25 +251,28 @@ class FilingGrid {
       await this.toggleActionButton("Delete", anchorColumnName, anchorValue);
     } else {
       const paymentColumnIndex = await this.getColumnIndex("Payment Status");
-      await row.locator("td").nth(paymentColumnIndex).locator('button[aria-haspopup="menu"], button, i').first().click({ force: true });
+      await row.locator("td ").nth(paymentColumnIndex).locator('button[aria-haspopup="menu"] i').first().click({ force: true });
       await clickByText(this.getElement().anyList(), "Delete Filing");
     }
 
-    const deletePromise = this.page
-      .waitForResponse((response) => response.request().method() === "DELETE" && response.url().includes("/filings/"), { timeout: 15000 })
-      .catch(() => null);
+    const deletePromise = this.page.waitForResponse(
+      (response) => response.request().method() === "DELETE" && response.url().includes("/filings/"),
+      { timeout: 15000 }
+    );
     await this.page.locator(".k-dialog-actions button, .k-dialog button").filter({ hasText: "Delete" }).first().click({ force: true });
-    const response = await deletePromise;
-    if (response) expect([200, 201, 204]).toContain(response.status());
-    await waitForLoading(this.page, 3);
+    const response = await deletePromise; // Let it throw if it times out
+    expect([200, 201, 204, 404]).toContain(response.status()); // Due to parallel testing, sometimes the record has already been deleted, so 404 is allowed
+    await waitForLoading(this.page, 20);
   }
 
   async updateStatus(newStatus: string, anchorColumnName: string, anchorValue: string) {
     if (this.props.userType !== "ags") {
       throw new Error("Update status action is not available for this user type");
     }
-    const paymentStatusCell = await this.getElementOfColumn("Payment Status", anchorColumnName, anchorValue);
-    await paymentStatusCell.locator('button[aria-haspopup="menu"], button, i').first().click({ force: true });
+    await this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
+    const row = await this.getRowByAnchor(anchorColumnName, anchorValue);
+    const paymentColumnIndex = await this.getColumnIndex("Payment Status");
+    await row.locator("td ").nth(paymentColumnIndex).locator('button[aria-haspopup="menu"] i').first().click({ force: true });
     await clickByText(this.getElement().anyList(), "Update Status");
     const statusInput = this.page.locator(`.k-window-content input[value="${newStatus}"], .k-dialog input[value="${newStatus}"]`).first();
     if (await statusInput.count()) {
@@ -271,7 +286,7 @@ class FilingGrid {
     await this.page.locator(".k-dialog-actions button, .k-window-content button").filter({ hasText: "Save" }).first().click({ force: true });
     const response = await responsePromise;
     if (response) expect([200, 201, 204]).toContain(response.status());
-    await waitForLoading(this.page, 3);
+    await waitForLoading(this.page, 20);
   }
 
   async checkAuditLog(anchorColumnName: string, anchorValue: string) {

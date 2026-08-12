@@ -57,7 +57,7 @@ class ApprovalGrid {
       anyList: () => this.page.locator("li"),
       startAllApprovalsButton: () => this.page.locator(".NLGButtonPrimary").first(),
       exportButton: () => this.page.locator(".NLGNewLayoutSecondaryButton, button").filter({ hasText: "Export" }).first(),
-      startApprovalForSelectedButton: () => this.page.locator("*").filter({ hasText: "Enroll in workflow" }).first(),
+      startApprovalForSelectedButton: () => this.page.getByRole('button', { name: 'Enroll in workflow' }),
       anyModal: () => this.page.locator(".k-window, .k-dialog").last(),
     };
   }
@@ -165,6 +165,7 @@ class ApprovalGrid {
 
   async clickStartApprovalForSelectedButton() {
     await this.getElement().startApprovalForSelectedButton().click({ force: true });
+    expect(this.page.url()).toContain("/filingApp/ReviewApproval");
   }
 
   private async selectRow(anchorColumnName: string, anchorValue: string) {
@@ -176,12 +177,13 @@ class ApprovalGrid {
   async selectRowToApprove(anchorColumnName: string, anchorValue: string) {
     await this.selectRow(anchorColumnName, anchorValue);
     await this.clickStartApprovalForSelectedButton();
-    await this.page.locator(".NLGButtonPrimary").filter({ hasText: "Approve" }).first().click({ force: true });
-    await this.page.locator(".k-dialog-content textarea").first().fill("Approved");
+    await this.page.getByRole("button", { name: 'Approve' }).click();
+    await this.page.getByRole('textbox', { name: 'Leave an optional message for' }).click();
+    await this.page.getByRole('textbox', { name: 'Leave an optional message for' }).fill('Approved');
     const responsePromise = this.page
       .waitForResponse((response) => response.request().method() === "PATCH" && response.url().includes("/approval-status/"), { timeout: 15000 })
       .catch(() => null);
-    await this.page.locator(".k-dialog button").filter({ hasText: "Approve" }).first().click({ force: true });
+    await this.page.getByLabel('Are you sure you want to').getByRole('button', { name: 'Approve' }).click();
     const response = await responsePromise;
     if (response) expect(response.status()).toBe(200);
   }
@@ -189,8 +191,9 @@ class ApprovalGrid {
   async selectRowToReject(anchorColumnName: string, anchorValue: string) {
     await this.selectRow(anchorColumnName, anchorValue);
     await this.clickStartApprovalForSelectedButton();
-    await this.page.locator(".NLGButtonSecondary").filter({ hasText: "Reject" }).first().click({ force: true });
-    await this.page.locator(".k-dialog-content textarea").first().fill("Rejected");
+    await this.page.getByRole("button", { name: "Reject" }).click();
+    await this.page.getByRole('textbox', { name: 'Leave an optional message for' }).click();
+    await this.page.getByRole('textbox', { name: 'Leave an optional message for' }).fill('Rejected');
     const responsePromise = this.page
       .waitForResponse((response) => response.request().method() === "PATCH" && response.url().includes("/approval-status/"), { timeout: 15000 })
       .catch(() => null);

@@ -1,16 +1,19 @@
 import { test } from "@playwright/test";
 import FilingGrid from "../../objects/FilingGrid";
 import {
-  DEFAULT_BUSINESS,
+  FUNDED_BUSINESS,
+  MONTHLY_FORM,
   createTaxpayerFiling,
   loginFresh,
+  deleteMatchingFilingsAsAgs
 } from "../helpers/filing-workflows";
 
 test.describe("As a municipal, I should be able to download the PDF of specific filing by selecting the PDF image icon", () => {
   test("Initiate test", async ({ page }) => {
+    await deleteMatchingFilingsAsAgs(page, { accountIndex: 0, businessName: FUNDED_BUSINESS, formName: MONTHLY_FORM });
     const referenceId = await createTaxpayerFiling(page, {
       accountIndex: 5,
-      businessName: DEFAULT_BUSINESS,
+      businessName: FUNDED_BUSINESS,
     });
 
     await loginFresh(page, { accountType: "municipal", notFirstLogin: true });

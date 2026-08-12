@@ -1,12 +1,15 @@
 import { test } from "@playwright/test";
 import {
   DEFAULT_BUSINESS,
+  MONTHLY_FORM,
   createTaxpayerFiling,
   openFilingFromGrid,
+  deleteMatchingFilingsAsAgs
 } from "../helpers/filing-workflows";
 
 test.describe("As a taxpayer, I should be able to to view a specific filing by selecting the View in the action dropdown button", () => {
   test("Initiate test", async ({ page }) => {
+    await deleteMatchingFilingsAsAgs(page, { accountIndex: 9, businessName: DEFAULT_BUSINESS, formName: MONTHLY_FORM });
     const referenceId = await createTaxpayerFiling(page, {
       accountIndex: 9,
       businessName: DEFAULT_BUSINESS,

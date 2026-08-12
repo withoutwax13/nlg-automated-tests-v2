@@ -28,9 +28,7 @@ type SubmitFilingOptions = {
 
 export const loginFresh = async (page: Page, params: Parameters<typeof login>[1]) => {
   if (!page.url().includes("/login") && page.url() !== "about:blank") {
-    await logout(page).catch(async () => {
-      await page.context().clearCookies();
-    });
+    await logout(page);
   }
   await login(page, params);
 };
@@ -95,11 +93,23 @@ export const createDraftFiling = async (page: Page, accountIndex = 0) => {
   await form.clickNextbutton(false);
   await form.enterBasicInformation();
   await form.saveAndCloseFiling();
-
-  const filingGrid = new FilingGrid(page, { userType: "taxpayer" });
-  await filingGrid.init();
-  return filingGrid.getDataOfColumn("Reference ID", "Location DBA", DRAFT_BUSINESS);
 };
+
+export const deleteMatchingFilingAsTaxpayer = async (
+  page: Page,
+  options: {
+    accountIndex?: number;
+    draftBusiness?: string;
+  }
+) => {
+  const { accountIndex, draftBusiness } = options;
+  await loginFresh(page, { accountType: "taxpayer", accountIndex, notFirstLogin: true });
+  const grid = new FilingGrid(page, { userType: "taxpayer", municipalitySelection: GOVERNMENT });
+  await grid.init();
+  await grid.clickClearAllFiltersButton();
+  await grid.filterColumn("Location DBA", draftBusiness, "text", "Contains");
+  await grid.deleteFiling("Location DBA", draftBusiness);
+}
 
 export const deleteMatchingFilingsAsAgs = async (
   page: Page,
