@@ -4,7 +4,7 @@ import { GOVERNMENT, loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As an AGS user, I should be able to view requested extract.", () => {
   test("Initiate test", async ({ page }) => {
-    await loginFresh(page, { accountType: "ags", accountIndex: 8 });
+    await loginFresh(page, { accountType: "ags", accountIndex: 7 });
     const filingGrid = new FilingGrid(page, {
       userType: "ags",
       municipalitySelection: GOVERNMENT,

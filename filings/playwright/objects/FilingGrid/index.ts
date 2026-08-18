@@ -290,16 +290,17 @@ class FilingGrid {
   }
 
   async checkAuditLog(anchorColumnName: string, anchorValue: string) {
-    const paymentStatusCell = await this.getElementOfColumn("Payment Status", anchorColumnName, anchorValue);
-    await paymentStatusCell.locator('button[aria-haspopup="menu"], button, i').first().click({ force: true });
-    const popupPromise = this.page.waitForEvent("popup", { timeout: 10000 }).catch(() => null);
+    await this.filterColumn(anchorColumnName, anchorValue, "text", "Contains");
+    const row = await this.getRowByAnchor(anchorColumnName, anchorValue);
+    const paymentColumnIndex = await this.getColumnIndex("Payment Status");
+    await row.locator("td ").nth(paymentColumnIndex).locator('button[aria-haspopup="menu"] i').first().click({ force: true });
+    const popupPromise = this.page.waitForEvent('popup');
     await clickByText(this.getElement().anyList(), "Audit Log");
-    const popup = await popupPromise;
-    if (popup) {
-      await popup.waitForLoadState("domcontentloaded");
-      return popup;
-    }
-    await waitForLoading(this.page, 3);
+    const newPage = await popupPromise;
+    await waitForLoading(this.page, 15);
+    const url = newPage.url();
+    this.page.goto(url);
+    await waitForLoading(this.page, 15);
     return this.page;
   }
 

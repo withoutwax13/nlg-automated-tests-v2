@@ -10,7 +10,7 @@ import {
 
 test.describe("As a municipal, I should be able to download the PDF of specific filing by selecting the PDF image icon", () => {
   test("Initiate test", async ({ page }) => {
-    await deleteMatchingFilingsAsAgs(page, { accountIndex: 0, businessName: FUNDED_BUSINESS, formName: MONTHLY_FORM });
+    await deleteMatchingFilingsAsAgs(page, { accountIndex: 5, businessName: FUNDED_BUSINESS, formName: MONTHLY_FORM });
     const referenceId = await createTaxpayerFiling(page, {
       accountIndex: 5,
       businessName: FUNDED_BUSINESS,

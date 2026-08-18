@@ -6,7 +6,7 @@ class AuditLog {
 
   private elements() {
     return {
-      rows: () => this.page.locator("tbody tr").filter({ has: this.page.locator("td") }),
+      rows: () => this.page.locator("tbody tr"),
       cells: (row: Locator) => row.locator("td"),
       expandCollapseButton: (row: Locator) =>
         row.locator("button, a, i").filter({ hasText: /expand|collapse/i }).first(),

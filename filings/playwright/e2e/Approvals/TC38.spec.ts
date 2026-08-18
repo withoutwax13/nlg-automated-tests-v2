@@ -10,7 +10,7 @@ import {
 
 test.describe("As a government user, I want to be able to see message of an rejected filing in approval list", () => {
   test("Initiate test", async ({ page }) => {
-    await deleteMatchingFilingsAsAgs(page, { accountIndex: 0, businessName: DEFAULT_BUSINESS, formName: MONTHLY_FORM });
+    await deleteMatchingFilingsAsAgs(page, { accountIndex: 1, businessName: DEFAULT_BUSINESS, formName: MONTHLY_FORM });
     const referenceId = await createTaxpayerFiling(page, {
       accountIndex: 8,
       businessName: DEFAULT_BUSINESS,

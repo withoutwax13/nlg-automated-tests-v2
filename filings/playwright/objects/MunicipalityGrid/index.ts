@@ -37,12 +37,6 @@ class MunicipalityGrid {
       filterOperationsDropdown: () => this.page.locator('[role="dialog"] .k-dropdownlist').first(),
       filterValueInput: () => this.page.locator("[role='dialog'] .k-input").first(),
       filterFilterButton: () => this.page.locator("[role='dialog'] button").filter({ hasText: "Filter" }).first(),
-      customFieldInput: () =>
-        this.page.locator('.k-dialog input, .k-window input, input[name*="custom"], input[placeholder*="field" i]').first(),
-      customFieldAddButton: () =>
-        this.page.locator(".k-dialog button, .k-window button, button").filter({ hasText: /^Add$/ }).first(),
-      customFieldSaveButton: () =>
-        this.page.locator(".k-dialog button, .k-window button, button").filter({ hasText: /save|done|close/i }).first(),
       easyFilterMenuButton: () => this.page.locator(".filterButton"),
       easyFilterModalContainer: () => this.page.locator('[role="dialog"]'),
       easyFilterColumnsLink: () => this.page.locator('[role="dialog"] div div div div span'),
@@ -144,29 +138,6 @@ class MunicipalityGrid {
       this.getElement().rows().filter({ hasText: anchorValue }).first();
     const targetColumnIndex = await this.getColumnIndex(targetColumnName);
     return row.locator("td").nth(targetColumnIndex);
-  }
-
-  async addCustomField(municipality: string, customFieldName: string) {
-    const customFieldCell = await this.getElementOfColumn("Custom Fields", "Name", municipality);
-    await customFieldCell.locator("button, a, i").first().click({ force: true });
-    const input = this.getElement().customFieldInput();
-    await input.fill(customFieldName);
-    if (await this.getElement().customFieldAddButton().isVisible().catch(() => false)) {
-      await this.getElement().customFieldAddButton().click({ force: true });
-    }
-    await this.getElement().customFieldSaveButton().click({ force: true });
-    await waitForLoading(this.page, 3);
-  }
-
-  async removeCustomField(municipality: string, customFieldName: string) {
-    const customFieldCell = await this.getElementOfColumn("Custom Fields", "Name", municipality);
-    await customFieldCell.locator("button, a, i").first().click({ force: true });
-    const fieldRow = this.page.locator(".k-dialog, .k-window").last().locator("*").filter({ hasText: customFieldName }).first();
-    if (await fieldRow.count()) {
-      await fieldRow.locator("button, a, i").last().click({ force: true });
-    }
-    await this.getElement().customFieldSaveButton().click({ force: true });
-    await waitForLoading(this.page, 3);
   }
 }
 

@@ -4,7 +4,7 @@ import { loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As a government user, I want to be able to start all the pending Approvals", () => {
   test("Initiate test", async ({ page }) => {
-    await loginFresh(page, { accountType: "municipal" });
+    await loginFresh(page, { accountType: "municipal", accountIndex: 1 });
     const approvalGrid = new ApprovalGrid(page, { userType: "municipal" });
     await approvalGrid.init();
     await approvalGrid.clickStartAllApprovals();

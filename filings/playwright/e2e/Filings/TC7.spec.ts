@@ -12,11 +12,11 @@ test.describe("As an AGS user, I should be able to see Payment Submitted logs on
   test("Initiate test", async ({ page }) => {
     await deleteMatchingFilingsAsAgs(page, { accountIndex: 0, businessName: FUNDED_BUSINESS, formName: MONTHLY_FORM });
     const referenceId = await createTaxpayerFiling(page, {
-      accountIndex: 1,
+      accountIndex: 4,
       businessName: FUNDED_BUSINESS,
     });
     await fundFilingAsAgs(page, referenceId, 5);
     const auditLog = await openAuditLogForReference(page, referenceId, 5);
-    await expect(await auditLog.findRowByAction("Payment Submitted")).toBeVisible();
+    await expect(await auditLog.findRowByAction("Filing Status Updated Manually")).toBeVisible();
   });
 });

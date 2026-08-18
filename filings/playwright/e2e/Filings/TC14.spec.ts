@@ -10,12 +10,12 @@ import {
 
 test.describe("As a AGS, I should be able to to view a specific filing by selecting the View icon", () => {
   test("Initiate test", async ({ page }) => {
-    await deleteMatchingFilingsAsAgs(page, { accountIndex: 0, businessName: FUNDED_BUSINESS, formName: MONTHLY_FORM });
+    await deleteMatchingFilingsAsAgs(page, { accountIndex: 9, businessName: FUNDED_BUSINESS, formName: MONTHLY_FORM });
     const referenceId = await createTaxpayerFiling(page, {
-      accountIndex: 4,
+      accountIndex: 9,
       businessName: FUNDED_BUSINESS,
     });
-    await loginFresh(page, { accountType: "ags", accountIndex: 8, notFirstLogin: true });
+    await loginFresh(page, { accountType: "ags", accountIndex: 9, notFirstLogin: true });
     await openFilingFromGrid(page, referenceId, "ags");
   });
 });
