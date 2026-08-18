@@ -5,7 +5,7 @@ import { loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As a municipal user, I should be able to export full filing data.", () => {
   test("Initiate test", async ({ page }) => {
-    await loginFresh(page, { accountType: "municipal" });
+    await loginFresh(page, { accountType: "municipal", accountIndex: 3 });
     const requestedExtracts = new RequestedExtracts(page);
     await requestedExtracts.init();
     const beforeTotal = await requestedExtracts.getTotalItems();

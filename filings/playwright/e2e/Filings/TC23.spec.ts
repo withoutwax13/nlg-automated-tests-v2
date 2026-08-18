@@ -15,7 +15,7 @@ test.describe("As a municipal, I should be able to to view a specific filing by 
       accountIndex: 6,
       businessName: DEFAULT_BUSINESS,
     });
-    await loginFresh(page, { accountType: "municipal", notFirstLogin: true });
+    await loginFresh(page, { accountType: "municipal", accountIndex: 9, notFirstLogin: true });
     await openFilingFromGrid(page, referenceId, "municipal");
   });
 });

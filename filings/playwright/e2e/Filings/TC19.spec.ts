@@ -4,7 +4,7 @@ import { expectDatesFromLastMonths, loginFresh } from "../helpers/filing-workflo
 
 test.describe("As a municipal user, I should be able to see filings in 1 year ago.", () => {
   test("Initiate test", async ({ page }) => {
-    await loginFresh(page, { accountType: "municipal" });
+    await loginFresh(page, { accountType: "municipal", accountIndex: 5 });
     const filingGrid = new FilingGrid(page, { userType: "municipal" });
     await filingGrid.init();
     await expectDatesFromLastMonths(filingGrid, 12);

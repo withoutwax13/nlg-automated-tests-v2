@@ -15,7 +15,7 @@ test.describe("As a government user, I want to be able to see message of an reje
       accountIndex: 8,
       businessName: DEFAULT_BUSINESS,
     });
-    await rejectReference(page, referenceId);
+    await rejectReference(page, referenceId, 1);
 
     const approvalGrid = new ApprovalGrid(page, { userType: "municipal" });
     await approvalGrid.init();

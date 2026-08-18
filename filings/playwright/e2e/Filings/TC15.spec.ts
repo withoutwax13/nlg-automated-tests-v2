@@ -16,7 +16,7 @@ test.describe("As a municipal, I should be able to download the PDF of specific 
       businessName: FUNDED_BUSINESS,
     });
 
-    await loginFresh(page, { accountType: "municipal", notFirstLogin: true });
+    await loginFresh(page, { accountType: "municipal", accountIndex: 2, notFirstLogin: true });
     const municipalFilingGrid = new FilingGrid(page, { userType: "municipal" });
     await municipalFilingGrid.init();
     const actionCell = await municipalFilingGrid.getElementOfColumn("Actions", "Reference ID", referenceId);

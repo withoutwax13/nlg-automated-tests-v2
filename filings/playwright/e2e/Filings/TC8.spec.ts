@@ -10,9 +10,9 @@ import {
 test.describe("As an AGS user, I should be able to navigate to the Audit Log page", () => {
   test.skip("Initiate test", async ({ page }) => {
     // skipped, covered already by TC7
-    await deleteMatchingFilingsAsAgs(page, { accountIndex: 0, businessName: FUNDED_BUSINESS, formName: MONTHLY_FORM });
+    await deleteMatchingFilingsAsAgs(page, { accountIndex: 6, businessName: FUNDED_BUSINESS, formName: MONTHLY_FORM });
     const referenceId = await createTaxpayerFiling(page, {
-      accountIndex: 6,
+      accountIndex: 0,
       businessName: FUNDED_BUSINESS,
     });
     const auditLog = await openAuditLogForReference(page, referenceId, 6);

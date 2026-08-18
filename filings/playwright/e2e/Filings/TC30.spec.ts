@@ -8,7 +8,7 @@ import {
 
 test.describe("As a AGS user, I should be able to see filings in 1 year ago.", () => {
   test("Initiate test", async ({ page }) => {
-    await loginFresh(page, { accountType: "ags", accountIndex: 8 });
+    await loginFresh(page, { accountType: "ags", accountIndex: 2 });
     const filingGrid = new FilingGrid(page, {
       userType: "ags",
       municipalitySelection: GOVERNMENT,

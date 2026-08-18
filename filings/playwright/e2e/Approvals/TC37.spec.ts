@@ -10,12 +10,12 @@ import {
 
 test.describe("As a government user, I want to be able to see message of an approved filing in approval list", () => {
   test("Initiate test", async ({ page }) => {
-    await deleteMatchingFilingsAsAgs(page, { accountIndex: 0, businessName: DEFAULT_BUSINESS, formName: MONTHLY_FORM });
+    await deleteMatchingFilingsAsAgs(page, { accountIndex: 2, businessName: DEFAULT_BUSINESS, formName: MONTHLY_FORM });
     const referenceId = await createTaxpayerFiling(page, {
       accountIndex: 7,
       businessName: DEFAULT_BUSINESS,
     });
-    await approveReference(page, referenceId);
+    await approveReference(page, referenceId, 0);
 
     const approvalGrid = new ApprovalGrid(page, { userType: "municipal" });
     await approvalGrid.init();

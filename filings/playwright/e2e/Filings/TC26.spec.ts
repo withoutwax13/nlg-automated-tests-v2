@@ -4,7 +4,7 @@ import { loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As a taxpayer, I should be able to export filings data.", () => {
   test("Initiate test", async ({ page }) => {
-    await loginFresh(page, { accountType: "taxpayer" });
+    await loginFresh(page, { accountType: "taxpayer", accountIndex: 1 });
     const filingGrid = new FilingGrid(page, { userType: "taxpayer" });
     await filingGrid.init();
     await filingGrid.clickExportButton();

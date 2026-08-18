@@ -4,7 +4,7 @@ import { loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As a municipal, I should be able to search filing list with data from its columns", () => {
   test("Initiate test", async ({ page }) => {
-    await loginFresh(page, { accountType: "municipal" });
+    await loginFresh(page, { accountType: "municipal", accountIndex: 4 });
     const filingGrid = new FilingGrid(page, { userType: "municipal" });
     await filingGrid.init();
     const locationDba = (await filingGrid.getColumnCellsData("Location DBA"))[0];
