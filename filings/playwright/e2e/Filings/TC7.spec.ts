@@ -10,7 +10,7 @@ import {
 
 test.describe("As an AGS user, I should be able to see Payment Submitted logs on the audit log for Funded filings", () => {
   test("Initiate test", async ({ page }) => {
-    await deleteMatchingFilingsAsAgs(page, { accountIndex: 0, businessName: FUNDED_BUSINESS, formName: MONTHLY_FORM });
+    await deleteMatchingFilingsAsAgs(page, { accountIndex: 5, businessName: FUNDED_BUSINESS, formName: MONTHLY_FORM });
     const referenceId = await createTaxpayerFiling(page, {
       accountIndex: 4,
       businessName: FUNDED_BUSINESS,

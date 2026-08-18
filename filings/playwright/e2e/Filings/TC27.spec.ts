@@ -10,7 +10,7 @@ import {
 
 test.describe("As a taxpayer, I should be able to reattempt a declined filing.", () => {
   test("Initiate test", async ({ page }) => {
-    await deleteMatchingFilingsAsAgs(page, { accountIndex: 0, businessName: DEFAULT_BUSINESS, formName: MONTHLY_FORM });
+    await deleteMatchingFilingsAsAgs(page, { accountIndex: 7, businessName: DEFAULT_BUSINESS, formName: MONTHLY_FORM });
     const referenceId = await createTaxpayerFiling(page, {
       accountIndex: 7,
       businessName: DEFAULT_BUSINESS,
