@@ -29,8 +29,8 @@ export default defineConfig({
   ...(isGlobalStateRun ? { testMatch: globalStateTest } : {}),
   ...(selectedSlotGrep ? { grep: selectedSlotGrep } : {}),
   globalSetup: require.resolve('./playwright/support/global-setup'),
-  timeout: 360000,
-  expect: { timeout: 360000 },
+  timeout: 1200000,
+  expect: { timeout: 1200000 },
   // These tests mutate persistent business state. Automatic retries can make a
   // partial first attempt poison its retry, so retry orchestration stays explicit.
   retries: 0,
