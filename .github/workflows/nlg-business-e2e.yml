@@ -1,7 +1,20 @@
-name: NLG Businesses E2E Tests
+name: NLG Business E2E Tests
 
 on:
   workflow_dispatch:
+    inputs:
+      grep:
+        description: "Tests to grep"
+        required: false
+        default: ""
+      run:
+        required: false
+      testomatio:
+        description: "Legacy Testomat.io input; the TESTOMATIO Actions secret is used"
+        required: false
+  repository_dispatch:
+    types: [my-event-jp]
+
   schedule:
     - cron: "0 0 * * *"
 
@@ -41,10 +54,11 @@ jobs:
           persist-credentials: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
-          package-manager-cache: false
+          cache: npm
+          cache-dependency-path: businesses/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -57,6 +71,17 @@ jobs:
 
       - name: Validate balanced slot, account, and business allocation
         run: npm run slots:validate
+
+      - name: Validate optional test grep
+        env:
+          REQUESTED_GREP: ${{ github.event.inputs.grep || github.event.client_payload.grep || github.event.client_payload.inputs.grep || '' }}
+        shell: bash
+        run: |
+          if [[ -z "$REQUESTED_GREP" ]]; then
+            exit 0
+          fi
+
+          npm run test:playwright:list -- --grep="$REQUESTED_GREP"
 
   playwright-tests:
     needs: preflight
@@ -104,10 +129,11 @@ jobs:
           persist-credentials: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
-          package-manager-cache: false
+          cache: npm
+          cache-dependency-path: businesses/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -125,7 +151,35 @@ jobs:
         env:
           BUSINESSES_RESOURCE_SLOT_JSON: ${{ secrets[matrix.secret_name] }}
           BUSINESSES_EXPECTED_SLOT_ID: ${{ matrix.slot_id }}
-        run: npm run test:playwright -- --grep="@${{ matrix.slot_id }}" --workers=1
+          REQUESTED_GREP: ${{ github.event.inputs.grep || github.event.client_payload.grep || github.event.client_payload.inputs.grep || '' }}
+          TESTOMATIO: ${{ secrets.TESTOMATIO }}
+          TESTOMATIO_RUN: ${{ github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run || '' }}
+          TESTOMATIO_PROCEED: ${{ (github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run) && 'true' || '' }}
+          TESTOMATIO_SHARED_RUN: "true"
+          TESTOMATIO_SHARED_RUN_TIMEOUT: "300"
+          TESTOMATIO_TITLE: NLG Business E2E ${{ github.run_id }} attempt ${{ github.run_attempt }}
+        shell: bash
+        run: |
+          playwright_args=(--workers=1 --pass-with-no-tests)
+
+          if [[ -n "$TESTOMATIO" ]]; then
+            echo "::add-mask::$TESTOMATIO"
+          fi
+
+          if [[ -n "$REQUESTED_GREP" ]]; then
+            playwright_args+=(--grep "$REQUESTED_GREP")
+          fi
+
+          npm run test:playwright -- "${playwright_args[@]}"
+
+      - name: Upload Playwright test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: nlg-business-test-results-${{ github.run_number }}-${{ github.run_attempt }}-${{ matrix.slot_id }}
+          path: businesses/test-results/
+          if-no-files-found: warn
+          retention-days: 30
 
   reset-municipality-test:
     needs: playwright-tests
@@ -147,10 +201,11 @@ jobs:
           persist-credentials: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
-          package-manager-cache: false
+          cache: npm
+          cache-dependency-path: businesses/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -169,4 +224,75 @@ jobs:
           BUSINESSES_RESOURCE_SLOT_JSON: ${{ secrets.BUSINESSES_SLOT_00 }}
           BUSINESSES_EXPECTED_SLOT_ID: slot-00
           E2E_RUN_GLOBAL_STATE: "true"
-        run: npm run test:playwright -- --workers=1
+          REQUESTED_GREP: ${{ github.event.inputs.grep || github.event.client_payload.grep || github.event.client_payload.inputs.grep || '' }}
+          TESTOMATIO: ${{ secrets.TESTOMATIO }}
+          TESTOMATIO_RUN: ${{ github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run || '' }}
+          TESTOMATIO_PROCEED: ${{ (github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run) && 'true' || '' }}
+          TESTOMATIO_SHARED_RUN: "true"
+          TESTOMATIO_SHARED_RUN_TIMEOUT: "300"
+          TESTOMATIO_TITLE: NLG Business E2E ${{ github.run_id }} attempt ${{ github.run_attempt }}
+        shell: bash
+        run: |
+          playwright_args=(--workers=1 --pass-with-no-tests)
+
+          if [[ -n "$TESTOMATIO" ]]; then
+            echo "::add-mask::$TESTOMATIO"
+          fi
+
+          if [[ -n "$REQUESTED_GREP" ]]; then
+            playwright_args+=(--grep "$REQUESTED_GREP")
+          fi
+
+          npm run test:playwright -- "${playwright_args[@]}"
+
+      - name: Upload TC32 Playwright test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: nlg-business-test-results-${{ github.run_number }}-${{ github.run_attempt }}-tc32
+          path: businesses/test-results/
+          if-no-files-found: warn
+          retention-days: 30
+
+  finalize-testomatio:
+    needs: [playwright-tests, reset-municipality-test]
+    if: ${{ always() && !cancelled() && (github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run) }}
+    name: Finalize Testomat.io run
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: ./businesses
+
+    env:
+      CI: true
+      TESTOMATIO: ${{ secrets.TESTOMATIO }}
+      TESTOMATIO_FINISH_SHARED_RUN: "true"
+      TESTOMATIO_RUN: ${{ github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run || '' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: businesses/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Finalize the shared Testomat.io run
+        shell: bash
+        run: |
+          if [[ -z "$TESTOMATIO" ]]; then
+            echo "::error title=Missing Actions secret::TESTOMATIO is required to finalize the requested Testomat.io run."
+            exit 1
+          fi
+
+          npx --no-install @testomatio/reporter finish
