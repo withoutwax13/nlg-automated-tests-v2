@@ -1,22 +1,23 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
+import { createBusinessTestIdentity } from "../../support/business-test-identity";
 import Login from "../../utils/Login";
 
 const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
 
-const randomSeed = Math.floor(Math.random() * 100000);
-
-const newBusinessData = {
-  legalBusinessName: `Arrakis Spice Company ${randomSeed}`,
-  fein: "12-3456789",
+const createNewBusinessData = (
+  identity: ReturnType<typeof createBusinessTestIdentity>,
+) => ({
+  legalBusinessName: `Arrakis Spice Company ${identity.suffix}`,
+  fein: identity.fein,
   legalBusinessAddress1: "123 Desert Road",
   legalBusinessAddress2: "Suite 100",
   legalBusinessCity: "Dune",
   legalBusinessState: "Alaska",
   legalBusinessZipCode: "90210",
-  locationDba: `Arrakis Spice Company ${randomSeed}`,
-  stateTaxId: "ST-9876543",
+  locationDba: `Arrakis Spice Company ${identity.suffix}`,
+  stateTaxId: identity.stateTaxId,
   locationOpenDate: {
     month: "01",
     day: "15",
@@ -31,24 +32,46 @@ const newBusinessData = {
   businessOwnerCity: "Dune",
   businessOwnerState: "Alaska",
   businessOwnerZipCode: "90210",
-};
+});
 
 test.describe("As a municipal user, I should be able to add a business.", () => {
   
-  test("Initiating test", async ({ page }) => {
+  test("Initiating test", { tag: ["@slot-03", "@municipal", "@business-generated"] }, async ({ page, resourceSlot }, testInfo) => {
     const addBusinessPage = new BusinessAdd(page, { userType: "municipal" });
-    await Login.login(page, {
-      accountType: "municipal",
-      accountIndex: 8,
-    });
-    await municipalBusinessGrid.init(page);
-    await municipalBusinessGrid.clickAddBusinessButton();
-    await addBusinessPage.fillFields(newBusinessData, page);
-    await addBusinessPage.clickSaveButton();
-    await municipalBusinessGrid.init(page);
-    await municipalBusinessGrid.clickClearAllFiltersButton();
-    await municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
+    const identity = createBusinessTestIdentity(resourceSlot.id, testInfo);
+    const newBusinessData = createNewBusinessData(identity);
+    let businessCreated = false;
+    let primaryTestFailed = false;
 
-    await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
+    try {
+      await Login.login(page, resourceSlot, { accountType: "municipal" });
+      await municipalBusinessGrid.init(page);
+      await municipalBusinessGrid.clickAddBusinessButton();
+      await addBusinessPage.fillFields(newBusinessData, page);
+      await addBusinessPage.clickSaveButton();
+      businessCreated = true;
+      await municipalBusinessGrid.init(page);
+      await municipalBusinessGrid.clickClearAllFiltersButton();
+      await municipalBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
+
+      await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
+    } catch (error) {
+      primaryTestFailed = true;
+      throw error;
+    } finally {
+      if (businessCreated) {
+        try {
+          await municipalBusinessGrid.init(page);
+          await municipalBusinessGrid.clickClearAllFiltersButton();
+          await municipalBusinessGrid.deleteBusiness(newBusinessData.locationDba);
+          businessCreated = false;
+        } catch (cleanupError) {
+          if (!primaryTestFailed) {
+            throw cleanupError;
+          }
+          console.error("Generated business cleanup also failed after the primary test failure.");
+        }
+      }
+    }
   });
 });

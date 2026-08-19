@@ -5,9 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "cypress:record": "npx cypress run --record --key c5440669-587d-4098-89dc-2b849e210ca5 --parallel --ci-build-id id_here",
     "test:playwright": "playwright test -c playwright.config.ts",
-    "test:playwright:list": "playwright test -c playwright.config.ts --list"
+    "test:playwright:list": "playwright test -c playwright.config.ts --list",
+    "slots:validate": "playwright test -c playwright.config.ts --list --reporter=./playwright/support/slot-allocation-reporter.ts",
+    "resources:test": "ts-node playwright/support/resource-pool.test.ts",
+    "resources:validate": "ts-node playwright/support/validate-resource-pool.ts",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
@@ -16,16 +19,9 @@
     "@currents/playwright": "^2.5.0",
     "@playwright/test": "^1.59.1",
     "@testomatio/reporter": "^2.13.0",
-    "@types/cypress": "^1.1.3",
     "axios": "^1.7.2",
     "checkly": "^8.20.0",
-    "cypress": "^13.6.1",
-    "cypress-file-upload": "^5.0.8",
-    "cypress-on-fix": "^1.0.3",
-    "cypress-split": "^1.17.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
-  },
-  "dependencies": {
-    "playwright-msteams-reporter": "^0.0.13"
   }
 }

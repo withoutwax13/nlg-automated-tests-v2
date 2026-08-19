@@ -1,26 +1,17 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 
 import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessResetModal from "../../objects/BusinessResetModal";
 import BusinessAdd from "../../objects/BusinessAdd";
+import { createBusinessTestIdentity } from "../../support/business-test-identity";
 import Login from "../../utils/Login";
 
-const agsBusinessGrid = new BusinessGrid({
-  userType: "ags",
-  municipalitySelection: "City of Pili",
-});
-
-const randomSeed = Math.floor(Math.random() * 100000);
-const newBusinessData = {
-  legalBusinessName: `Arrakis Spice Company ${randomSeed}`,
-  fein: "12-3456789",
+const baseBusinessData = {
   legalBusinessAddress1: "123 Desert Road",
   legalBusinessAddress2: "Suite 100",
   legalBusinessCity: "Dune",
   legalBusinessState: "Alaska",
   legalBusinessZipCode: "90210",
-  locationDba: `Arrakis Spice Company ${randomSeed}`,
-  stateTaxId: "ST-9876543",
   locationOpenDate: {
     month: "01",
     day: "15",
@@ -37,19 +28,36 @@ const newBusinessData = {
   businessOwnerZipCode: "90210",
 };
 
-const addBusiness = async ({ page }) => {
-  const addBusinessPage = new BusinessAdd(page, { userType: "ags" });
-  await agsBusinessGrid.init(page, false, false);
-  await agsBusinessGrid.clickAddBusinessButton();
-  await addBusinessPage.fillFields(newBusinessData, page);
-  await addBusinessPage.clickSaveButton();
-};
-
 test.describe("I should be able to reset all data of a specific municipality", () => {
-  test("Initiating test", async ({ page }) => {
+  test.skip(
+    process.env.E2E_RUN_GLOBAL_STATE !== "true",
+    "This test resets an entire municipality and must run explicitly in a one-worker, unsharded lane."
+  );
+
+  test("Initiating test", async ({ page, resourceSlot }, testInfo) => {
+    if (testInfo.config.workers !== 1 || (testInfo.config.shard?.total ?? 1) > 1) {
+      throw new Error("Businesses TC32 requires --workers=1 and an unsharded Playwright run.");
+    }
+
+    const identity = createBusinessTestIdentity(resourceSlot.id, testInfo);
+    const newBusinessData = {
+      ...baseBusinessData,
+      legalBusinessName: `E2E Reset Business ${identity.suffix}`,
+      fein: identity.fein,
+      locationDba: `E2E Reset Business ${identity.suffix}`,
+      stateTaxId: identity.stateTaxId,
+    };
+    const agsBusinessGrid = new BusinessGrid({
+      userType: "ags",
+      municipalitySelection: resourceSlot.resetMunicipality,
+    });
+    const addBusinessPage = new BusinessAdd(page, { userType: "ags" });
     const businessResetModal = new BusinessResetModal(page);
-    await Login.login(page, { accountType: "ags" });
-    await addBusiness({ page });
+    await Login.login(page, resourceSlot, { accountType: "ags" });
+    await agsBusinessGrid.init(page, false, false, false);
+    await agsBusinessGrid.clickAddBusinessButton();
+    await addBusinessPage.fillFields(newBusinessData, page);
+    await addBusinessPage.clickSaveButton();
     await agsBusinessGrid.init(page);
     await agsBusinessGrid.clickResetDataButton();
     await businessResetModal.clickSureWantToDeleteDataCheckbox();

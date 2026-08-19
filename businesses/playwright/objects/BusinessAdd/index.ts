@@ -265,13 +265,13 @@ class BusinessAdd {
     return this.getElement().backButton().click();
   }
 
-  async addBusinessOnAccount(businessDba: string) {
+  async addBusinessOnAccount(municipalityName: string, businessDba: string) {
     if (this.userType !== "taxpayer") {
       throw new Error("Only taxpayer can proceed with this user flow.");
     }
 
-    await this.getElement().governmentSearchBox().fill("Arrakis");
-    await clickByText(this.getElement().anyList(), "Arrakis");
+    await this.getElement().governmentSearchBox().fill(municipalityName);
+    await clickByText(this.getElement().anyList(), municipalityName);
     await this.getElement().businessDetailsDropdown().fill(businessDba);
     await clickByText(this.getElement().anyList(), businessDba);
     await this.page.waitForTimeout(10000);

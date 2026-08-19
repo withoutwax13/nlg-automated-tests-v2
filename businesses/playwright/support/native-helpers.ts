@@ -1,10 +1,12 @@
 import { expect, type Locator, type Page, type Response } from "@playwright/test";
+import {
+  getCredentialsForAccountType,
+  type AccountType,
+  type ResourceSlot,
+} from "./resource-pool";
 
-type AccountType = "taxpayer" | "municipal" | "municipality" | "ags" | "municipalDel";
-
-type LoginParams = {
+export type LoginParams = {
   accountType?: AccountType;
-  accountIndex?: number;
 };
 
 type DateParts = {
@@ -13,9 +15,6 @@ type DateParts = {
   date?: string | number;
   year: string | number;
 };
-
-const normalizeAccountType = (accountType: AccountType) =>
-  accountType === "municipality" ? "municipal" : accountType;
 
 const pad = (value: string | number) => String(value).padStart(2, "0");
 
@@ -26,148 +25,6 @@ export const getEnvironment = () =>
   process.env.environment || process.env.ENVIRONMENT || "dev";
 
 export const getBaseUrl = () => `https://${getEnvironment()}.azavargovapps.com`;
-
-const getCredentials = (accountType: AccountType, accountIndex = 0) => {
-  const normalizedType = normalizeAccountType(accountType);
-  const validCredentials = {
-    taxpayer: [
-      {
-        username: "valerasoftwares+taxpayer.1@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+taxpayer.2@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+taxpayer.3@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+taxpayer.4@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+taxpayer.5@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+taxpayer.6@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+taxpayer.7@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+taxpayer.8@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+taxpayer.9@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+taxpayer.10@gmail.com",
-        password: "Ohayoworld.13",
-      },
-    ],
-    municipal: [
-      {
-        username: "valerasoftwares+arrakis@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+arrakis.2@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+arrakis.3@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+arrakis.4@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+arrakis.5@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+arrakis.6@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+arrakis.7@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+arrakis.8@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+arrakis.9@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "valerasoftwares+arrakis.10@gmail.com",
-        password: "Ohayoworld.13",
-      },
-    ],
-    ags: [
-      {
-        username: "johnpatrickyusoresvalera+dev.super@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "johnpatrickyusoresvalera+dev.super.2@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "johnpatrickyusoresvalera+dev.super.3@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "johnpatrickyusoresvalera+dev.super.4@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "johnpatrickyusoresvalera+dev.super.5@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "johnpatrickyusoresvalera+dev.super.6@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "johnpatrickyusoresvalera+dev.super.7@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "johnpatrickyusoresvalera+dev.super.8@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "johnpatrickyusoresvalera+dev.super.9@gmail.com",
-        password: "Ohayoworld.13",
-      },
-      {
-        username: "johnpatrickyusoresvalera+dev.super.10@gmail.com",
-        password: "Ohayoworld.13",
-      },
-    ],
-    municipalDel: [
-      {
-        username: "valerasoftwares+remedios@gmail.com",
-        password: "Ohayoworld.13",
-      },
-    ],
-  }
-  return {
-    username: validCredentials[accountType][accountIndex]["username"],
-    password: validCredentials[accountType][accountIndex]["password"],
-  };
-};
 
 export const waitForLoading = async (page: Page, seconds = 5) => {
   await page.waitForTimeout(seconds * 1000);
@@ -257,9 +114,13 @@ export const getPagerTotal = async (pagerInfo: Locator) => {
   return match ? Number(match[1].replace(/,/g, "")) : 0;
 };
 
-export const login = async (page: Page, params: LoginParams = {}) => {
+export const login = async (
+  page: Page,
+  resourceSlot: ResourceSlot,
+  params: LoginParams = {},
+) => {
   const accountType = params.accountType || "taxpayer";
-  const credentials = getCredentials(accountType, params.accountIndex ? 0 : params.accountIndex);
+  const credentials = getCredentialsForAccountType(resourceSlot, accountType);
 
   await page.goto(`${getBaseUrl()}/login`);
   await expect(page).toHaveURL(/\/login$/);

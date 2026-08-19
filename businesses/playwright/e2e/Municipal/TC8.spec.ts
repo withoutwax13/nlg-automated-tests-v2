@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -18,20 +18,20 @@ const cleanTestData = async (page: any, businessName: string, requiredForm: stri
 };
 
 test.describe.skip("As a municipal user, I should be able to remove required forms from the grid", () => {
-  test("Initiating test", async ({ page }) => {
-    await Login.login(page, { accountType: "municipal", accountIndex: 3 });
-    await cleanTestData(page, "Arrakis Spice Company 17829", "Food and Beverage Tax Return (Monthly)");
+  test("Initiating test", async ({ page, resourceSlot }) => {
+    await Login.login(page, resourceSlot, { accountType: "municipal" });
+    await cleanTestData(page, resourceSlot.businesses.requiredForms, "Food and Beverage Tax Return (Monthly)");
     await municipalBusinessGrid.init(page);
     await municipalBusinessGrid.clickClearAllFiltersButton();
-    const beforeRemovingRequiredForms = await municipalBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");
+    const beforeRemovingRequiredForms = await municipalBusinessGrid.checkEnabledRequiredForms(resourceSlot.businesses.requiredForms);
     expect(beforeRemovingRequiredForms).toContain("Food and Beverage Tax Return (Monthly)");
     await municipalBusinessGrid.clickClearAllFiltersButton();
-    await municipalBusinessGrid.removeRequiredForms("Arrakis Spice Company 17829", [
+    await municipalBusinessGrid.removeRequiredForms(resourceSlot.businesses.requiredForms, [
       "Food and Beverage Tax Return (Monthly)",
     ]);
     // await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
     await municipalBusinessGrid.clickClearAllFiltersButton();
-    const afterRemovingRequiredForms = await municipalBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");
+    const afterRemovingRequiredForms = await municipalBusinessGrid.checkEnabledRequiredForms(resourceSlot.businesses.requiredForms);
     expect(afterRemovingRequiredForms).not.toContain("Food and Beverage Tax Return (Monthly)");
   });
 });

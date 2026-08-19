@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -6,13 +6,13 @@ import Login from "../../utils/Login";
 const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
 
 test.describe("As a taxpayer, I should only have details and delete as options in my action button column", () => {
-  test("Initiating test", async ({ page }) => {
-    await Login.login(page, { accountType: "taxpayer", accountIndex: 7 });
+  test("Initiating test", { tag: ["@slot-01", "@taxpayer", "@business-active"] }, async ({ page, resourceSlot }) => {
+    await Login.login(page, resourceSlot, { accountType: "taxpayer" });
     await taxpayerBusinessList.init(page);
     const actionButton = await taxpayerBusinessList.getElementOfColumn(
       "Actions",
       "DBA",
-      "Arrakis Spice Company 13685"
+      resourceSlot.businesses.active
     );
     await actionButton.click();
     await expect(taxpayerBusinessList.getElement().anyList().filter({ hasText: "View Details" }).first()).toBeVisible();

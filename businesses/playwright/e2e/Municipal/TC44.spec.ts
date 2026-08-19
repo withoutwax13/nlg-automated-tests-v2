@@ -1,27 +1,29 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
 const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
-const randomMonth = Math.floor(Math.random() * 12) + 1;
-const randomDate = Math.floor(Math.random() * 28) + 1;
 
 test.describe("As a municipal user, I should be able to update start date for delinquency tracking in the business details page", () => {
-  test("Initiating test", async ({ page }) => {
+  test("Initiating test", { tag: ["@slot-04", "@municipal", "@business-active"] }, async ({ page, resourceSlot }) => {
     const municipalBusinessDetails = new BusinessDetails(page, { userType: "municipal" });
-    await Login.login(page, { accountType: "municipal", accountIndex: 1 });
+    await Login.login(page, resourceSlot, { accountType: "municipal" });
     await municipalBusinessGrid.init(page);
-    await municipalBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
+    await municipalBusinessGrid.viewBusinessDetails(resourceSlot.businesses.active);
     await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
     await municipalBusinessDetails.clickBusinessStatusTab();
+    const delinquencyInput = municipalBusinessDetails.getElement().startDateDelinquencyTrackingInput();
+    const currentValue = await delinquencyInput.inputValue();
+    const targetYear = currentValue.includes("2024") ? 2025 : 2024;
 
     await municipalBusinessDetails.setStartDateDelinquencyTracking({
-      month: randomMonth,
-      date: randomDate,
-      year: 2024,
+      month: 1,
+      date: 15,
+      year: targetYear,
     });
     await municipalBusinessDetails.clickSaveButton();
+    await expect(delinquencyInput).toHaveValue(new RegExp(String(targetYear)));
     // await expect(municipalBusinessDetails.getElement().toastComponent()).toBeVisible();
   });
 });

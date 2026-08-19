@@ -1,14 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
-const agsBusinessGrid = new BusinessGrid({
-  userType: "ags",
-  municipalitySelection: "City of Arrakis",
-});
-
-const cleanTestData = async (page: any, businessName: string, requiredForm: string) => {
+const cleanTestData = async (agsBusinessGrid: BusinessGrid, page: any, businessName: string, requiredForm: string) => {
   await agsBusinessGrid.init(page);
   await agsBusinessGrid.clickClearAllFiltersButton();
   const requiredFormsBeforeCleaning = await agsBusinessGrid.checkEnabledRequiredForms(businessName);
@@ -19,19 +14,23 @@ const cleanTestData = async (page: any, businessName: string, requiredForm: stri
 };
 
 test.describe("As an AGS user, I should be able to add required forms from the grid", () => {
-  test("Initiating test", async ({ page }) => {
-    await Login.login(page, { accountType: "ags", accountIndex: 2 });
-    await cleanTestData(page, "Arrakis Spice Company 17829", "Food and Beverage Tax Return (Monthly)");
+  test("Initiating test", { tag: ["@slot-02", "@ags", "@business-required-forms"] }, async ({ page, resourceSlot }) => {
+    const agsBusinessGrid = new BusinessGrid({
+      userType: "ags",
+      municipalitySelection: resourceSlot.municipality,
+    });
+    await Login.login(page, resourceSlot, { accountType: "ags" });
+    await cleanTestData(agsBusinessGrid, page, resourceSlot.businesses.requiredForms, "Food and Beverage Tax Return (Monthly)");
     await agsBusinessGrid.clickClearAllFiltersButton();
-    const beforeAddingRequiredForms = await agsBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");
+    const beforeAddingRequiredForms = await agsBusinessGrid.checkEnabledRequiredForms(resourceSlot.businesses.requiredForms);
     expect(beforeAddingRequiredForms).not.toContain("Food and Beverage Tax Return (Monthly)");
     await agsBusinessGrid.clickClearAllFiltersButton();
-    await agsBusinessGrid.addRequiredForms("Arrakis Spice Company 17829", [
+    await agsBusinessGrid.addRequiredForms(resourceSlot.businesses.requiredForms, [
       "Food and Beverage Tax Return (Monthly)",
     ]);
     // await expect(agsBusinessGrid.getElement().toastComponent()).toBeVisible();
     await agsBusinessGrid.clickClearAllFiltersButton();
-    const afterAddingRequiredForms = await agsBusinessGrid.checkEnabledRequiredForms("Arrakis Spice Company 17829");
+    const afterAddingRequiredForms = await agsBusinessGrid.checkEnabledRequiredForms(resourceSlot.businesses.requiredForms);
     expect(afterAddingRequiredForms).toContain("Food and Beverage Tax Return (Monthly)");
   });
 });

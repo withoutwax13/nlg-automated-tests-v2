@@ -1,17 +1,16 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 
 import BusinessGrid from "../../objects/BusinessGrid";
 import { AGS_COLUMNS as defaultColumns } from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
-const businessGrid = new BusinessGrid({
-  userType: "ags",
-  municipalitySelection: "Arrakis",
-});
-
 test.describe.skip("As a user, I should be able to reorganize the order of the columns.", () => {
-  test("Initiating test", async ({ page }) => {
-    await Login.login(page, { accountType: "ags", accountIndex: 9 });
+  test("Initiating test", async ({ page, resourceSlot }) => {
+    const businessGrid = new BusinessGrid({
+      userType: "ags",
+      municipalitySelection: resourceSlot.municipality,
+    });
+    await Login.login(page, resourceSlot, { accountType: "ags" });
     const columnPairs: [string, string][] = [];
     const columnsToTest = defaultColumns.slice(2, 4); // Limiting to 2 columns to save resource usage
     for (let i = 0; i < columnsToTest.length; i++) {

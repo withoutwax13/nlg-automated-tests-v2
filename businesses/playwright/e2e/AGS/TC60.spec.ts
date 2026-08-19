@@ -1,22 +1,22 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
+import { createBusinessTestIdentity } from "../../support/business-test-identity";
 import Login from "../../utils/Login";
 
-const agsBusinessGrid = new BusinessGrid({
-  userType: "ags",
-  municipalitySelection: "City of Arrakis",
-});
-const randomSeed = Math.floor(Math.random() * 100000);
-
 test.describe("As a ags user, I should be able to upload documents to a business via the business details page", () => {
-  test("Initiating test", async ({ page }) => {
+  test("Initiating test", { tag: ["@slot-08", "@ags", "@business-active"] }, async ({ page, resourceSlot }, testInfo) => {
+    const identity = createBusinessTestIdentity(resourceSlot.id, testInfo);
+    const agsBusinessGrid = new BusinessGrid({
+      userType: "ags",
+      municipalitySelection: resourceSlot.municipality,
+    });
     const agsBusinessDetails = new BusinessDetails(page, { userType: "ags" });
-    await Login.login(page, { accountType: "ags", accountIndex: 8 });
+    await Login.login(page, resourceSlot, { accountType: "ags" });
     await agsBusinessGrid.init(page);
-    await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
+    await agsBusinessGrid.viewBusinessDetails(resourceSlot.businesses.active);
     await agsBusinessDetails.clickDocumentsTab();
-    await agsBusinessDetails.uploadDocument(`${randomSeed}example.json`);
+    await agsBusinessDetails.uploadDocument(`${identity.suffix}-example.json`);
   });
 });

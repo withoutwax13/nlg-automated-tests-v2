@@ -1,10 +1,10 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../../fixtures/test";
 import FilingGrid from "../../objects/FilingGrid";
 import { loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As a taxpayer, I should be able to search filing list with data from its columns", () => {
-  test("Initiate test", async ({ page }) => {
-    await loginFresh(page, { accountType: "taxpayer", accountIndex: 0 });
+  test("Initiate test", { tag: ["@slot-05", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+    await loginFresh(page, resourceSlot, { accountType: "taxpayer" });
     const filingGrid = new FilingGrid(page, { userType: "taxpayer" });
     await filingGrid.init();
     const locationDba = (await filingGrid.getColumnCellsData("Location DBA"))[0];

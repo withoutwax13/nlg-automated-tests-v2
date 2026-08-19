@@ -1,10 +1,19 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../../fixtures/test";
 import ApprovalGrid from "../../objects/ApprovalGrid";
 import { loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As a government user, I want to be able to start all the pending Approvals", () => {
-  test("Initiate test", async ({ page }) => {
-    await loginFresh(page, { accountType: "municipal", accountIndex: 1 });
+  test.skip(
+    process.env.E2E_RUN_GLOBAL_STATE !== "true",
+    "This test mutates all pending approvals and must run explicitly in a one-worker, unsharded lane."
+  );
+
+  test("Initiate test", async ({ page, resourceSlot }, testInfo) => {
+    if (testInfo.config.workers !== 1 || (testInfo.config.shard?.total ?? 1) > 1) {
+      throw new Error("TC40 requires --workers=1 and an unsharded Playwright run.");
+    }
+
+    await loginFresh(page, resourceSlot, { accountType: "municipal" });
     const approvalGrid = new ApprovalGrid(page, { userType: "municipal" });
     await approvalGrid.init();
     await approvalGrid.clickStartAllApprovals();

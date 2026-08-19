@@ -1,6 +1,5 @@
-import { test } from "@playwright/test";
+import { test } from "../../fixtures/test";
 import {
-  DEFAULT_BUSINESS,
   MONTHLY_FORM,
   createTaxpayerFiling,
   openFilingFromGrid,
@@ -8,11 +7,13 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As a taxpayer, I should be able to to view a specific filing by selecting the View in the action dropdown button", () => {
-  test("Initiate test", async ({ page }) => {
-    await deleteMatchingFilingsAsAgs(page, { accountIndex: 9, businessName: DEFAULT_BUSINESS, formName: MONTHLY_FORM });
-    const referenceId = await createTaxpayerFiling(page, {
-      accountIndex: 9,
-      businessName: DEFAULT_BUSINESS,
+  test("Initiate test", { tag: ["@slot-05", "@ags", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+    await deleteMatchingFilingsAsAgs(page, resourceSlot, {
+      businessName: resourceSlot.businesses.default,
+      formName: MONTHLY_FORM,
+    });
+    const referenceId = await createTaxpayerFiling(page, resourceSlot, {
+      businessName: resourceSlot.businesses.default,
     });
     await openFilingFromGrid(page, referenceId, "taxpayer");
   });
