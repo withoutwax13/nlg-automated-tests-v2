@@ -8,17 +8,17 @@ import Form from "../../objects/Form";
 import FormPreview from "../../objects/FormPreview";
 import Payment from "../../objects/Payment";
 import { login, logout, waitForLoading } from "../../support/native-helpers";
+import {
+  getCredentialsForAccountType,
+  type AccountType,
+  type ResourceSlot,
+} from "../../support/resource-pool";
 
 export const GOVERNMENT = "City of Arrakis";
 export const MONTHLY_FORM = "Food and Beverage Tax Return (Monthly)";
 export const ZERO_PAYMENT_FORM = "ZERO PAYMENT";
-export const DEFAULT_BUSINESS = "Arrakis Spice Company 24510";
-export const FUNDED_BUSINESS = "Arrakis Spice Company 40056";
-export const ZERO_PAYMENT_BUSINESS = "Arrakis Spice Company 34754";
-export const DRAFT_BUSINESS = "Arrakis Spice Company 13685";
 
 type SubmitFilingOptions = {
-  accountIndex?: number;
   businessName?: string;
   formName?: string;
   government?: string;
@@ -26,24 +26,38 @@ type SubmitFilingOptions = {
   hasPayment?: boolean;
 };
 
-export const loginFresh = async (page: Page, params: Parameters<typeof login>[1]) => {
+type FreshLoginParams = {
+  accountType?: AccountType;
+  notFirstLogin?: boolean;
+};
+
+export const loginFresh = async (
+  page: Page,
+  resourceSlot: ResourceSlot,
+  params: FreshLoginParams = {}
+) => {
   if (!page.url().includes("/login") && page.url() !== "about:blank") {
     await logout(page);
   }
-  await login(page, params);
+  await login(page, {
+    credentials: getCredentialsForAccountType(resourceSlot, params.accountType ?? "taxpayer"),
+  });
 };
 
-export const createTaxpayerFiling = async (page: Page, options: SubmitFilingOptions = {}) => {
+export const createTaxpayerFiling = async (
+  page: Page,
+  resourceSlot: ResourceSlot,
+  options: SubmitFilingOptions = {}
+) => {
   const {
-    accountIndex = 0,
-    businessName = DEFAULT_BUSINESS,
+    businessName = resourceSlot.businesses.default,
     formName = MONTHLY_FORM,
     government = GOVERNMENT,
     paymentMethodIndex = 0,
     hasPayment = true,
   } = options;
 
-  await loginFresh(page, { accountType: "taxpayer", accountIndex, notFirstLogin: true });
+  await loginFresh(page, resourceSlot, { accountType: "taxpayer", notFirstLogin: true });
 
   const filing = new Filing(page, { isResumingDraftApplication: false });
   const form = new Form(page);
@@ -73,23 +87,22 @@ export const createTaxpayerFiling = async (page: Page, options: SubmitFilingOpti
   return referenceId;
 };
 
-export const createZeroPaymentFiling = async (page: Page, accountIndex = 3) =>
-  createTaxpayerFiling(page, {
-    accountIndex,
-    businessName: ZERO_PAYMENT_BUSINESS,
+export const createZeroPaymentFiling = async (page: Page, resourceSlot: ResourceSlot) =>
+  createTaxpayerFiling(page, resourceSlot, {
+    businessName: resourceSlot.businesses.zeroPayment,
     formName: ZERO_PAYMENT_FORM,
     hasPayment: false,
   });
 
-export const createDraftFiling = async (page: Page, accountIndex = 0) => {
-  await loginFresh(page, { accountType: "taxpayer", accountIndex, notFirstLogin: true });
+export const createDraftFiling = async (page: Page, resourceSlot: ResourceSlot) => {
+  await loginFresh(page, resourceSlot, { accountType: "taxpayer", notFirstLogin: true });
 
   const filing = new Filing(page, { isResumingDraftApplication: false });
   const form = new Form(page);
   await filing.goToSubmitFormsTab();
   await filing.selectGovernment(GOVERNMENT);
   await filing.selectForm(MONTHLY_FORM);
-  await filing.selectBusinessToFile(DRAFT_BUSINESS);
+  await filing.selectBusinessToFile(resourceSlot.businesses.draft);
   await form.clickNextbutton(false);
   await form.enterBasicInformation();
   await form.saveAndCloseFiling();
@@ -97,31 +110,29 @@ export const createDraftFiling = async (page: Page, accountIndex = 0) => {
 
 export const deleteMatchingFilingAsTaxpayer = async (
   page: Page,
-  options: {
-    accountIndex?: number;
-    draftBusiness?: string;
-  }
+  resourceSlot: ResourceSlot,
+  options: { draftBusiness?: string } = {}
 ) => {
-  const { accountIndex, draftBusiness } = options;
-  await loginFresh(page, { accountType: "taxpayer", accountIndex, notFirstLogin: true });
+  const draftBusiness = options.draftBusiness ?? resourceSlot.businesses.draft;
+  await loginFresh(page, resourceSlot, { accountType: "taxpayer", notFirstLogin: true });
   const grid = new FilingGrid(page, { userType: "taxpayer", municipalitySelection: GOVERNMENT });
   await grid.init();
   await grid.clickClearAllFiltersButton();
   await grid.filterColumn("Location DBA", draftBusiness, "text", "Contains");
   await grid.deleteFiling("Location DBA", draftBusiness);
-}
+};
 
 export const deleteMatchingFilingsAsAgs = async (
   page: Page,
+  resourceSlot: ResourceSlot,
   options: {
-    accountIndex?: number;
     businessName: string;
     formName?: string;
     maxDeletes?: number;
   }
 ) => {
-  const { accountIndex = 0, businessName, formName = MONTHLY_FORM, maxDeletes = 3 } = options;
-  await loginFresh(page, { accountType: "ags", accountIndex, notFirstLogin: true });
+  const { businessName, formName = MONTHLY_FORM, maxDeletes = 3 } = options;
+  await loginFresh(page, resourceSlot, { accountType: "ags", notFirstLogin: true });
   const grid = new FilingGrid(page, { userType: "ags", municipalitySelection: GOVERNMENT });
   await grid.init();
   await grid.filterColumn("Location DBA", businessName, "text", "Contains");
@@ -137,31 +148,47 @@ export const deleteMatchingFilingsAsAgs = async (
   }
 };
 
-export const fundFilingAsAgs = async (page: Page, referenceId: string, accountIndex = 0) => {
-  await loginFresh(page, { accountType: "ags", accountIndex, notFirstLogin: true });
+export const fundFilingAsAgs = async (
+  page: Page,
+  resourceSlot: ResourceSlot,
+  referenceId: string
+) => {
+  await loginFresh(page, resourceSlot, { accountType: "ags", notFirstLogin: true });
   const grid = new FilingGrid(page, { userType: "ags", municipalitySelection: GOVERNMENT });
   await grid.init();
   await grid.updateStatus("Funded", "Reference ID", referenceId);
   return grid;
 };
 
-export const openAuditLogForReference = async (page: Page, referenceId: string, accountIndex = 0) => {
-  await loginFresh(page, { accountType: "ags", accountIndex, notFirstLogin: true });
+export const openAuditLogForReference = async (
+  page: Page,
+  resourceSlot: ResourceSlot,
+  referenceId: string
+) => {
+  await loginFresh(page, resourceSlot, { accountType: "ags", notFirstLogin: true });
   const grid = new FilingGrid(page, { userType: "ags", municipalitySelection: GOVERNMENT });
   await grid.init();
   const auditPage = await grid.checkAuditLog("Reference ID", referenceId);
   return new AuditLog(auditPage);
 };
 
-export const approveReference = async (page: Page, referenceId: string, accountIndex = 0) => {
-  await loginFresh(page, { accountType: "municipal", accountIndex, notFirstLogin: true });
+export const approveReference = async (
+  page: Page,
+  resourceSlot: ResourceSlot,
+  referenceId: string
+) => {
+  await loginFresh(page, resourceSlot, { accountType: "municipal", notFirstLogin: true });
   const approvalGrid = new ApprovalGrid(page, { userType: "municipal" });
   await approvalGrid.init();
   await approvalGrid.selectRowToApprove("Reference ID", referenceId);
 };
 
-export const rejectReference = async (page: Page, referenceId: string, accountIndex = 0) => {
-  await loginFresh(page, { accountType: "municipal", accountIndex, notFirstLogin: true });
+export const rejectReference = async (
+  page: Page,
+  resourceSlot: ResourceSlot,
+  referenceId: string
+) => {
+  await loginFresh(page, resourceSlot, { accountType: "municipal", notFirstLogin: true });
   const approvalGrid = new ApprovalGrid(page, { userType: "municipal" });
   await approvalGrid.init();
   await approvalGrid.selectRowToReject("Reference ID", referenceId);
@@ -169,13 +196,14 @@ export const rejectReference = async (page: Page, referenceId: string, accountIn
 
 export const runInFreshLogin = async (
   page: Page,
+  resourceSlot: ResourceSlot,
   firstAction: () => Promise<void>,
-  secondAccount: Parameters<typeof login>[1],
+  secondAccount: FreshLoginParams,
   secondAction: () => Promise<void>
 ) => {
   await firstAction();
   await logout(page);
-  await login(page, { ...secondAccount, notFirstLogin: true });
+  await loginFresh(page, resourceSlot, { ...secondAccount, notFirstLogin: true });
   await secondAction();
 };
 
@@ -199,7 +227,11 @@ export const expectDatesFromLastMonths = async (grid: FilingGrid, monthsAgo: num
   expect(values.length).toBeGreaterThan(0);
 };
 
-export const openFilingFromGrid = async (page: Page, referenceId: string, userType: "ags" | "municipal" | "taxpayer") => {
+export const openFilingFromGrid = async (
+  page: Page,
+  referenceId: string,
+  userType: "ags" | "municipal" | "taxpayer"
+) => {
   const grid = new FilingGrid(page, { userType, municipalitySelection: GOVERNMENT });
   await grid.init();
   await grid.toggleActionButton("View", "Reference ID", referenceId);

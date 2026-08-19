@@ -1,6 +1,5 @@
-import { test } from "@playwright/test";
+import { test } from "../../fixtures/test";
 import {
-  FUNDED_BUSINESS,
   MONTHLY_FORM,
   createTaxpayerFiling,
   loginFresh,
@@ -9,13 +8,15 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As a AGS, I should be able to to view a specific filing by selecting the View icon", () => {
-  test("Initiate test", async ({ page }) => {
-    await deleteMatchingFilingsAsAgs(page, { accountIndex: 9, businessName: FUNDED_BUSINESS, formName: MONTHLY_FORM });
-    const referenceId = await createTaxpayerFiling(page, {
-      accountIndex: 9,
-      businessName: FUNDED_BUSINESS,
+  test("Initiate test", { tag: ["@slot-07", "@ags", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+    await deleteMatchingFilingsAsAgs(page, resourceSlot, {
+      businessName: resourceSlot.businesses.funded,
+      formName: MONTHLY_FORM,
     });
-    await loginFresh(page, { accountType: "ags", accountIndex: 9, notFirstLogin: true });
+    const referenceId = await createTaxpayerFiling(page, resourceSlot, {
+      businessName: resourceSlot.businesses.funded,
+    });
+    await loginFresh(page, resourceSlot, { accountType: "ags", notFirstLogin: true });
     await openFilingFromGrid(page, referenceId, "ags");
   });
 });

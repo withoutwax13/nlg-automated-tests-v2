@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -37,12 +37,11 @@ const newBusinessData = {
 // Skipped, assertions alrady covered in TC26
 test.describe.skip("As a taxpayer user, I should be able to add a business.", () => {
   
-  test("Initiating test", async ({ page }) => {
+  test("Initiating test", async ({ page, resourceSlot }) => {
     const taxpayerAddBusinessPage = new BusinessAdd(page, { userType: "taxpayer" });
     const addBusinessPage = new BusinessAdd(page, { userType: "municipal" });
-    await Login.login(page, {
+    await Login.login(page, resourceSlot, {
       accountType: "municipal",
-      accountIndex: 2,
     });
     await municipalBusinessGrid.init(page);
     await municipalBusinessGrid.clickAddBusinessButton();
@@ -54,10 +53,13 @@ test.describe.skip("As a taxpayer user, I should be able to add a business.", ()
     await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
     await logout(page);
     
-    await Login.login(page, { accountType: "taxpayer", accountIndex: 4 });
+    await Login.login(page, resourceSlot, { accountType: "taxpayer" });
     await taxpayerBusinessGrid.init(page);
     await taxpayerBusinessGrid.clickAddBusinessButton();
-    await taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
+    await taxpayerAddBusinessPage.addBusinessOnAccount(
+      resourceSlot.municipality,
+      newBusinessData.locationDba
+    );
     await taxpayerBusinessGrid.clickAddBusinessButton();
     await taxpayerBusinessGrid.init(page);
     await taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);

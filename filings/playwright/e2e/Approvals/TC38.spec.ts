@@ -1,7 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../../fixtures/test";
 import ApprovalGrid from "../../objects/ApprovalGrid";
 import {
-  DEFAULT_BUSINESS,
   MONTHLY_FORM,
   createTaxpayerFiling,
   rejectReference,
@@ -9,19 +8,21 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As a government user, I want to be able to see message of an rejected filing in approval list", () => {
-  test("Initiate test", async ({ page }) => {
-    await deleteMatchingFilingsAsAgs(page, { accountIndex: 1, businessName: DEFAULT_BUSINESS, formName: MONTHLY_FORM });
-    const referenceId = await createTaxpayerFiling(page, {
-      accountIndex: 8,
-      businessName: DEFAULT_BUSINESS,
+  test("Initiate test", { tag: ["@slot-04", "@ags", "@municipal", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+    await deleteMatchingFilingsAsAgs(page, resourceSlot, {
+      businessName: resourceSlot.businesses.default,
+      formName: MONTHLY_FORM,
     });
-    await rejectReference(page, referenceId, 1);
+    const referenceId = await createTaxpayerFiling(page, resourceSlot, {
+      businessName: resourceSlot.businesses.default,
+    });
+    await rejectReference(page, resourceSlot, referenceId);
 
     const approvalGrid = new ApprovalGrid(page, { userType: "municipal" });
     await approvalGrid.init();
     const messageIcon = await approvalGrid.getElementOfColumn("Message", "Reference ID", referenceId);
     await messageIcon.click();
     const messageModalContent = page.locator(".k-dialog-content").filter({ hasText: "Rejected" });
-    expect(messageModalContent).toBeVisible();
+    await expect(messageModalContent).toBeVisible();
   });
 });

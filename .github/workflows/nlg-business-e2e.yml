@@ -1,30 +1,137 @@
-name: NLG Business E2E Tests
+name: NLG Businesses E2E Tests
 
 on:
   workflow_dispatch:
-    inputs:
-      grep:
-        description: "Tests to grep"
-        required: false
-        default: ""
-      run:
-        required: false
-      testomatio:
-        required: false
-  repository_dispatch:
-    types: [my-event-jp]
-
   schedule:
     - cron: "0 0 * * *"
 
 permissions:
   contents: read
 
+concurrency:
+  group: businesses-e2e-dev
+  cancel-in-progress: false
+
 jobs:
-  playwright-tests:
-    name: Run Playwright E2E Tests
+  preflight:
+    name: Businesses non-secret preflight
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
+
+    defaults:
+      run:
+        working-directory: ./businesses
+
+    env:
+      CI: true
+
+    steps:
+      - name: Require main for manual runs
+        shell: bash
+        working-directory: .
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "::error title=Unsupported ref::Manual Businesses E2E runs must use refs/heads/main."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check Businesses tests
+        run: npm run typecheck
+
+      - name: Test resource slot parser and guards
+        run: npm run resources:test
+
+      - name: Validate balanced slot, account, and business allocation
+        run: npm run slots:validate
+
+  playwright-tests:
+    needs: preflight
+    name: Businesses ${{ matrix.slot_id }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    defaults:
+      run:
+        working-directory: ./businesses
+
+    env:
+      CI: true
+
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        include:
+          - slot_id: slot-00
+            secret_name: BUSINESSES_SLOT_00
+          - slot_id: slot-01
+            secret_name: BUSINESSES_SLOT_01
+          - slot_id: slot-02
+            secret_name: BUSINESSES_SLOT_02
+          - slot_id: slot-03
+            secret_name: BUSINESSES_SLOT_03
+          - slot_id: slot-04
+            secret_name: BUSINESSES_SLOT_04
+          - slot_id: slot-05
+            secret_name: BUSINESSES_SLOT_05
+          - slot_id: slot-06
+            secret_name: BUSINESSES_SLOT_06
+          - slot_id: slot-07
+            secret_name: BUSINESSES_SLOT_07
+          - slot_id: slot-08
+            secret_name: BUSINESSES_SLOT_08
+          - slot_id: slot-09
+            secret_name: BUSINESSES_SLOT_09
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate and mask selected slot
+        env:
+          BUSINESSES_RESOURCE_SLOT_JSON: ${{ secrets[matrix.secret_name] }}
+          BUSINESSES_EXPECTED_SLOT_ID: ${{ matrix.slot_id }}
+        run: npm run resources:validate
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run selected Playwright slot
+        env:
+          BUSINESSES_RESOURCE_SLOT_JSON: ${{ secrets[matrix.secret_name] }}
+          BUSINESSES_EXPECTED_SLOT_ID: ${{ matrix.slot_id }}
+        run: npm run test:playwright -- --grep="@${{ matrix.slot_id }}" --workers=1
+
+  reset-municipality-test:
+    needs: playwright-tests
+    name: Businesses TC32 municipality reset
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
 
     defaults:
       run:
@@ -35,31 +142,31 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: 24
-          cache: npm
-          cache-dependency-path: businesses/package-lock.json
+          package-manager-cache: false
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate and mask reset-lane slot
+        env:
+          BUSINESSES_RESOURCE_SLOT_JSON: ${{ secrets.BUSINESSES_SLOT_00 }}
+          BUSINESSES_EXPECTED_SLOT_ID: slot-00
+        run: npm run resources:validate
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Run Playwright E2E Tests
+      - name: Run TC32 after the parallel matrix
         env:
-          TESTOMATIO: ${{ secrets.TESTOMATIO }}
-        run: npx playwright test --workers=8
-
-      - name: Upload Playwright test results
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: nlg-business-test-results-${{ github.run_number }}
-          path: businesses/test-results/
-          if-no-files-found: warn
-          retention-days: 30
+          BUSINESSES_RESOURCE_SLOT_JSON: ${{ secrets.BUSINESSES_SLOT_00 }}
+          BUSINESSES_EXPECTED_SLOT_ID: slot-00
+          E2E_RUN_GLOBAL_STATE: "true"
+        run: npm run test:playwright -- --workers=1

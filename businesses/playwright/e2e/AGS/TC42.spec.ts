@@ -1,13 +1,15 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
-const agsBusinessGrid = new BusinessGrid({ userType: "ags", municipalitySelection: "Arrakis" });
-
 test.describe("As an AGS user, the default filter for the business list should be the Operating Status", () => {
-  test("Initiating test", async ({ page }) => {
-    await Login.login(page, { accountType: "ags" });
+  test("Initiating test", { tag: ["@slot-09", "@ags"] }, async ({ page, resourceSlot }) => {
+    const agsBusinessGrid = new BusinessGrid({
+      userType: "ags",
+      municipalitySelection: resourceSlot.municipality,
+    });
+    await Login.login(page, resourceSlot, { accountType: "ags" });
     await agsBusinessGrid.init(page);
     await expect(agsBusinessGrid.getElement().activeFilterChipsLabel()).toBeVisible();
     await expect(agsBusinessGrid.getElement().activeFilterChip("Operating Status")).toBeVisible();

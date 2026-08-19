@@ -1,17 +1,19 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
-const agsBusinessGrid = new BusinessGrid({ userType: "ags", municipalitySelection: "Arrakis" });
-
 test.describe("As a ags user, I should be able to add notes to a business via the business details page", () => {
-  test("Initiating test", async ({ page }) => {
+  test("Initiating test", { tag: ["@slot-05", "@ags", "@business-active"] }, async ({ page, resourceSlot }) => {
+    const agsBusinessGrid = new BusinessGrid({
+      userType: "ags",
+      municipalitySelection: resourceSlot.municipality,
+    });
     const agsBusinessDetails = new BusinessDetails(page, { userType: "ags" });
-    await Login.login(page, { accountType: "ags", accountIndex: 5 });
+    await Login.login(page, resourceSlot, { accountType: "ags" });
     await agsBusinessGrid.init(page);
-    await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
+    await agsBusinessGrid.viewBusinessDetails(resourceSlot.businesses.active);
     await agsBusinessDetails.clickNotesTab();
     await agsBusinessDetails.clickAddNoteButton();
     await expect(agsBusinessDetails.getElement().saveButton()).toBeDisabled();

@@ -1,7 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../../fixtures/test";
 import FilingGrid from "../../objects/FilingGrid";
 import {
-  DEFAULT_BUSINESS,
   MONTHLY_FORM,
   createTaxpayerFiling,
   loginFresh,
@@ -9,14 +8,16 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As a taxpayer, I should be able to reattempt a declined filing.", () => {
-  test("Initiate test", async ({ page }) => {
-    await deleteMatchingFilingsAsAgs(page, { accountIndex: 7, businessName: DEFAULT_BUSINESS, formName: MONTHLY_FORM });
-    const referenceId = await createTaxpayerFiling(page, {
-      accountIndex: 7,
-      businessName: DEFAULT_BUSINESS,
+  test("Initiate test", { tag: ["@slot-08", "@ags", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+    await deleteMatchingFilingsAsAgs(page, resourceSlot, {
+      businessName: resourceSlot.businesses.default,
+      formName: MONTHLY_FORM,
+    });
+    const referenceId = await createTaxpayerFiling(page, resourceSlot, {
+      businessName: resourceSlot.businesses.default,
     });
 
-    await loginFresh(page, { accountType: "ags", accountIndex: 7, notFirstLogin: true });
+    await loginFresh(page, resourceSlot, { accountType: "ags", notFirstLogin: true });
     const agsFilingGrid = new FilingGrid(page, {
       userType: "ags",
       municipalitySelection: "City of Arrakis",
@@ -24,7 +25,7 @@ test.describe("As a taxpayer, I should be able to reattempt a declined filing.",
     await agsFilingGrid.init();
     await agsFilingGrid.updateStatus("Declined", "Reference ID", referenceId);
 
-    await loginFresh(page, { accountType: "taxpayer", accountIndex: 7, notFirstLogin: true });
+    await loginFresh(page, resourceSlot, { accountType: "taxpayer", notFirstLogin: true });
     const taxpayerFilingGrid = new FilingGrid(page, { userType: "taxpayer" });
     await taxpayerFilingGrid.init();
     await taxpayerFilingGrid.toggleActionButton("Reattempt", "Reference ID", referenceId);

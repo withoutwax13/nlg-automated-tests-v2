@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import type { Locator, Page, Response } from "@playwright/test";
 import { expect } from "@playwright/test";
 import { getColumnOrder, clickByText, findRowByCellValue, normalizeText, setMaskedDateInput, waitForLoading, getVisibilityStatus, expectStatus } from "../../support/native-helpers";
 import { validateFilterOperation } from "../../utils/Grid";
@@ -207,7 +207,8 @@ class BusinessGrid {
   async init(
     page?: Page,
     _resetSavedGridSettingsInMemory?: boolean,
-    _isFirstTimeGridSettingsLoading = true
+    _isFirstTimeGridSettingsLoading = true,
+    expectRecords = true
   ) {
     if (page) this.page = page;
 
@@ -341,10 +342,6 @@ class BusinessGrid {
         await aliases.activeTaxAndFeesSubscriptions.waitAndAssert200();
       }
 
-      const isArrakisMunicipality = String(this.municipalitySelection).includes(
-        "Arrakis"
-      );
-
       switch (this.userType) {
         case "taxpayer": {
           await aliases.userDetailsRequest.waitAndAssert200();
@@ -383,7 +380,7 @@ class BusinessGrid {
             await aliases.userGridSettings.waitAndAssert200();
           }
 
-          if (isArrakisMunicipality) {
+          if (expectRecords) {
             await expect(this.getElement().noRecordFoundComponent()).not.toBeVisible();
           }
 
@@ -601,7 +598,7 @@ class BusinessGrid {
       userType: this.userType,
       page: this.page,
     });
-    this.toggleActionButton("Remove", [{ anchorColumnName: "DBA", anchorValue: businessDba }])
+    await this.toggleActionButton("Remove", [{ anchorColumnName: "DBA", anchorValue: businessDba }])
     await businessDeleteModal.clickDeleteButton();
     await expectStatus(deleteBusiness, expectedStatus);
     await waitForLoading(this.page, 15);

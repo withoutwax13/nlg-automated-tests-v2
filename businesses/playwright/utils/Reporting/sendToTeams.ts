@@ -1,7 +1,13 @@
 import axios from "axios";
 
-const webhookUrl =
-  "https://prod-152.westus.logic.azure.com:443/workflows/5ecb6cccf42f48e6a240a92275af617d/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ib4Goq1lL_YAalMJ0H3US8NzyUlwrDIPAFtAYUHD-mk";
+const getWebhookUrl = () => {
+  const webhookUrl = process.env.BUSINESSES_TEAMS_WEBHOOK_URL;
+  if (!webhookUrl) {
+    throw new Error("BUSINESSES_TEAMS_WEBHOOK_URL is required to send a Teams report.");
+  }
+
+  return webhookUrl;
+};
 
 const createTestItem = (test, spec) => ({
   type: "Container",
@@ -89,5 +95,5 @@ export const sendToTeams = async (tests, spec) => {
       },
     ],
   };
-  return axios.post(webhookUrl, adaptiveCard);
+  return axios.post(getWebhookUrl(), adaptiveCard);
 };

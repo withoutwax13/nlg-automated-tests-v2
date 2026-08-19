@@ -1,10 +1,10 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../../fixtures/test";
 import FilingGrid from "../../objects/FilingGrid";
 import { GOVERNMENT, loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As a ags, I should be able to search filing list with data from its columns", () => {
-  test("Initiate test", async ({ page }) => {
-    await loginFresh(page, { accountType: "ags", accountIndex: 8, notFirstLogin: true });
+  test("Initiate test", { tag: ["@slot-08", "@ags"] }, async ({ page, resourceSlot }) => {
+    await loginFresh(page, resourceSlot, { accountType: "ags", notFirstLogin: true });
     const filingGrid = new FilingGrid(page, {
       userType: "ags",
       municipalitySelection: GOVERNMENT,

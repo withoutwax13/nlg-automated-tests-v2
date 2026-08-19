@@ -1,10 +1,10 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../../fixtures/test";
 import FilingGrid from "../../objects/FilingGrid";
 import { GOVERNMENT, loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As an AGS user, I should be able to view filings data of a specific government.", () => {
-  test("Initiate test", async ({ page }) => {
-    await loginFresh(page, { accountType: "ags", accountIndex: 6 });
+  test("Initiate test", { tag: ["@slot-02", "@ags"] }, async ({ page, resourceSlot }) => {
+    await loginFresh(page, resourceSlot, { accountType: "ags" });
     const filingGrid = new FilingGrid(page, {
       userType: "ags",
       municipalitySelection: GOVERNMENT,

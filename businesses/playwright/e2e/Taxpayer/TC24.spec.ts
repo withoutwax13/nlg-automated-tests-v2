@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
@@ -36,12 +36,11 @@ const newBusinessData = {
 
 test.describe.skip("As a taxpayer, when my business has been deleted by a municipal user, I should be able to verify that the business does not exist in my grid", () => {
   
-  test("Initiating test", async ({ page }) => {
+  test("Initiating test", async ({ page, resourceSlot }) => {
     const taxpayerAddBusinessPage = new BusinessAdd(page, { userType: "taxpayer" });
     const addBusinessPage = new BusinessAdd(page, { userType: "municipal" });
-    await Login.login(page, {
+    await Login.login(page, resourceSlot, {
       accountType: "municipal",
-      accountIndex: 1,
     });
     await municipalBusinessGrid.init(page);
     await municipalBusinessGrid.clickAddBusinessButton();
@@ -53,19 +52,21 @@ test.describe.skip("As a taxpayer, when my business has been deleted by a munici
     await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
     await logout(page);
 
-    await Login.login(page, { accountType: "taxpayer", accountIndex: 3 });
+    await Login.login(page, resourceSlot, { accountType: "taxpayer" });
     await taxpayerBusinessGrid.init(page);
     await taxpayerBusinessGrid.clickAddBusinessButton();
-    await taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
+    await taxpayerAddBusinessPage.addBusinessOnAccount(
+      resourceSlot.municipality,
+      newBusinessData.locationDba
+    );
     await taxpayerBusinessGrid.clickAddBusinessButton();
     await taxpayerBusinessGrid.init(page);
     await taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
     await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);
     await logout(page);
 
-    await Login.login(page, {
+    await Login.login(page, resourceSlot, {
       accountType: "municipal",
-      accountIndex: 1,
     });
     // delete business data
     await municipalBusinessGrid.init(page);
@@ -73,7 +74,7 @@ test.describe.skip("As a taxpayer, when my business has been deleted by a munici
     // await expect(municipalBusinessGrid.getElement().toastComponent()).toBeVisible();
     await logout(page);
     
-    await Login.login(page, { accountType: "taxpayer", accountIndex: 3 });
+    await Login.login(page, resourceSlot, { accountType: "taxpayer" });
     await taxpayerBusinessGrid.init(page);
     await taxpayerBusinessGrid.filterColumn("DBA", newBusinessData.locationDba);
     await expect(taxpayerBusinessGrid.getElement().noRecordFoundComponent()).toBeVisible();

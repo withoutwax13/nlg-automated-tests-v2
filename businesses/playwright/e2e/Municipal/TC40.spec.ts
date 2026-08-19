@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 
 import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessDetails from "../../objects/BusinessDetails";
@@ -7,12 +7,12 @@ import Login from "../../utils/Login";
 const municipalBusinessList = new BusinessGrid({ userType: "municipal" });
 
 test.describe("As a user, I should be able to reveal the full content of FEIN in business details page", () => {
-  test("Initiating test", async ({ page }) => {
+  test("Initiating test", { tag: ["@slot-02", "@municipal", "@business-active"] }, async ({ page, resourceSlot }) => {
     const municipalBusinessDetails = new BusinessDetails(page, { userType: "municipal" });
-    await Login.login(page, { accountType: "municipal", accountIndex: 6 });
+    await Login.login(page, resourceSlot, { accountType: "municipal" });
     await municipalBusinessList.init(page);
     await municipalBusinessList.clickClearAllFiltersButton();
-    await municipalBusinessList.viewBusinessDetails("Arrakis Spice Company 13685");
+    await municipalBusinessList.viewBusinessDetails(resourceSlot.businesses.active);
     const feinBeforeClick = await municipalBusinessDetails.getBusinessData("FEIN/SSN");
     await municipalBusinessDetails.getElement().aboutBusinessSection().locator(".fa-eye-slash").first().click();
     const feinAfterClick = await municipalBusinessDetails.getBusinessData("FEIN/SSN");

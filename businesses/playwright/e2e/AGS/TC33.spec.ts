@@ -1,17 +1,17 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
-const agsBusinessGrid = new BusinessGrid({
-  userType: "ags",
-  municipalitySelection: "City of Arrakis",
-});
 
 test.describe("As an AGS, Gov user, I want the system to prevent deleting a business record with filings", () => {
-  test("Initiating test", async ({ page }) => {
-    await Login.login(page, { accountType: "ags" });
+  test("Initiating test", { tag: ["@slot-04", "@ags", "@business-filings"] }, async ({ page, resourceSlot }) => {
+    const agsBusinessGrid = new BusinessGrid({
+      userType: "ags",
+      municipalitySelection: resourceSlot.municipality,
+    });
+    await Login.login(page, resourceSlot, { accountType: "ags" });
     await agsBusinessGrid.init(page);
-    await agsBusinessGrid.deleteBusiness("Test Trade Name 61083692 1", 400);
+    await agsBusinessGrid.deleteBusiness(resourceSlot.businesses.filings, 400);
     await expect(agsBusinessGrid.getElement().noRecordFoundComponent()).not.toBeVisible();
   });
 });

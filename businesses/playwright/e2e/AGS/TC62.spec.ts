@@ -1,24 +1,24 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 
 import BusinessDetails from "../../objects/BusinessDetails";
 import BusinessGrid from "../../objects/BusinessGrid";
 import BusinessUpdate from "../../objects/BusinessUpdate";
 import Login from "../../utils/Login";
 
-const agsBusinessGrid = new BusinessGrid({
-  userType: "ags",
-  municipalitySelection: "City of Arrakis",
-});
 const agsBusinessUpdatePage = new BusinessUpdate({ userType: "ags" });
 
 test.describe("As a user, if I clear the required fields in the update business page, the save button should remain disabled", () => {
   // Skipped, assertion moved to TC61
-  test.skip("Initiating test", async ({ page }) => {
+  test.skip("Initiating test", async ({ page, resourceSlot }) => {
+    const agsBusinessGrid = new BusinessGrid({
+      userType: "ags",
+      municipalitySelection: resourceSlot.municipality,
+    });
     const agsBusinessDetails = new BusinessDetails(page, { userType: "ags" });
-    await Login.login(page, { accountType: "ags", accountIndex: 2 });
+    await Login.login(page, resourceSlot, { accountType: "ags" });
     await agsBusinessGrid.init(page);
     await agsBusinessGrid.clickClearAllFiltersButton();
-    await agsBusinessGrid.viewBusinessDetails("Arrakis Spice Company 13685");
+    await agsBusinessGrid.viewBusinessDetails(resourceSlot.businesses.active);
     await agsBusinessDetails.clickEditBusinessInfoButton();
     await agsBusinessUpdatePage.getElement().locationDbaField().clear();
     await agsBusinessUpdatePage.getElement().stateTaxIdField().clear();

@@ -1,10 +1,10 @@
-import { test } from "@playwright/test";
+import { test } from "../../fixtures/test";
 import FilingGrid from "../../objects/FilingGrid";
 import { loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As a taxpayer, I should be able to export filings data.", () => {
-  test("Initiate test", async ({ page }) => {
-    await loginFresh(page, { accountType: "taxpayer", accountIndex: 1 });
+  test("Initiate test", { tag: ["@slot-00", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+    await loginFresh(page, resourceSlot, { accountType: "taxpayer" });
     const filingGrid = new FilingGrid(page, { userType: "taxpayer" });
     await filingGrid.init();
     await filingGrid.clickExportButton();

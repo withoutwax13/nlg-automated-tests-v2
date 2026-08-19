@@ -1,13 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/test";
 import BusinessAdd from "../../objects/BusinessAdd";
 import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 import { logout } from "../../support/native-helpers";
 
-const agsBusinessGrid = new BusinessGrid({
-  userType: "ags",
-  municipalitySelection: "Arrakis",
-});
 const taxpayerBusinessGrid = new BusinessGrid({ userType: "taxpayer" });
 const randomSeed = Math.floor(Math.random() * 100000);
 
@@ -40,11 +36,15 @@ const newBusinessData = {
 // Skipped, assertions alrady covered in TC11
 test.describe.skip("As a taxpayer, when a business has been added by an AGS user, I should be able to add the business in my account", () => {
   
-  test("Initiating test", async ({ page }) => {
+  test("Initiating test", async ({ page, resourceSlot }) => {
+    const agsBusinessGrid = new BusinessGrid({
+      userType: "ags",
+      municipalitySelection: resourceSlot.municipality,
+    });
     const agsAddBusinessPage = new BusinessAdd(page, { userType: "ags" });
     const taxpayerAddBusinessPage = new BusinessAdd(page, { userType: "taxpayer" });
     // add business data
-    await Login.login(page, { accountType: "ags", accountIndex: 7 });
+    await Login.login(page, resourceSlot, { accountType: "ags" });
     await agsBusinessGrid.init(page);
     await agsBusinessGrid.clickAddBusinessButton();
     await agsAddBusinessPage.fillFields(newBusinessData, page);
@@ -56,10 +56,13 @@ test.describe.skip("As a taxpayer, when a business has been added by an AGS user
     await logout(page);
 
     // add business data to the taxpayer account
-    await Login.login(page, { accountType: "taxpayer", accountIndex: 1 });
+    await Login.login(page, resourceSlot, { accountType: "taxpayer" });
     await taxpayerBusinessGrid.init(page);
     await taxpayerBusinessGrid.clickAddBusinessButton();
-    await taxpayerAddBusinessPage.addBusinessOnAccount(newBusinessData.locationDba);
+    await taxpayerAddBusinessPage.addBusinessOnAccount(
+      resourceSlot.municipality,
+      newBusinessData.locationDba
+    );
     await taxpayerBusinessGrid.init(page);
     await taxpayerBusinessGrid.viewBusinessDetails(newBusinessData.locationDba);
     await expect(page).toHaveURL(/\/BusinessesApp\/BusinessDetails\//);

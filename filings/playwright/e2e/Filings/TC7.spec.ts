@@ -1,6 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../../fixtures/test";
 import {
-  FUNDED_BUSINESS,
   MONTHLY_FORM,
   createTaxpayerFiling,
   fundFilingAsAgs,
@@ -9,14 +8,16 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As an AGS user, I should be able to see Payment Submitted logs on the audit log for Funded filings", () => {
-  test("Initiate test", async ({ page }) => {
-    await deleteMatchingFilingsAsAgs(page, { accountIndex: 5, businessName: FUNDED_BUSINESS, formName: MONTHLY_FORM });
-    const referenceId = await createTaxpayerFiling(page, {
-      accountIndex: 4,
-      businessName: FUNDED_BUSINESS,
+  test("Initiate test", { tag: ["@slot-06", "@ags", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+    await deleteMatchingFilingsAsAgs(page, resourceSlot, {
+      businessName: resourceSlot.businesses.funded,
+      formName: MONTHLY_FORM,
     });
-    await fundFilingAsAgs(page, referenceId, 5);
-    const auditLog = await openAuditLogForReference(page, referenceId, 5);
+    const referenceId = await createTaxpayerFiling(page, resourceSlot, {
+      businessName: resourceSlot.businesses.funded,
+    });
+    await fundFilingAsAgs(page, resourceSlot, referenceId);
+    const auditLog = await openAuditLogForReference(page, resourceSlot, referenceId);
     await expect(await auditLog.findRowByAction("Filing Status Updated Manually")).toBeVisible();
   });
 });
