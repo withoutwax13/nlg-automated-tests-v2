@@ -5,8 +5,8 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
-  rmdirSync,
   symlinkSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -449,7 +449,7 @@ try {
     /must be an ordinary directory/,
   );
   assert.equal(readFileSync(linkedTargetSentinel, 'utf8'), 'do not delete through a link');
-  rmdirSync(fakeLocalResultsDirectory);
+  unlinkSync(fakeLocalResultsDirectory);
 
   const lockDirectory = path.join(
     fakeBusinessesDirectory,
