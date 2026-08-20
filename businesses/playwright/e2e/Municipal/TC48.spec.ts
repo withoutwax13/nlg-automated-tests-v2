@@ -86,7 +86,7 @@ test.describe("As a municipal user, I should be able to update operating status 
           await setBusinessStatusModal.setBusinessCloseDate({
             month: randomMonth,
             date: randomDate,
-            year: 2029
+            year: 2030
           });
           await setBusinessStatusModal.clickCloseButton();
         }

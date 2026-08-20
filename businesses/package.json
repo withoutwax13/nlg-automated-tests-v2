@@ -6,9 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:playwright": "playwright test -c playwright.config.ts",
+    "test:playwright:local": "node --require ts-node/register playwright/support/local-businesses-launcher.ts",
+    "test:playwright:local:parallel": "node --require ts-node/register playwright/support/local-businesses-parallel-launcher.ts",
     "test:playwright:list": "playwright test -c playwright.config.ts --list",
     "slots:validate": "playwright test -c playwright.config.ts --list --reporter=./playwright/support/slot-allocation-reporter.ts",
-    "resources:test": "ts-node playwright/support/resource-pool.test.ts",
+    "resources:test": "ts-node playwright/support/resource-pool.test.ts && ts-node playwright/support/local-businesses-launcher.test.ts && ts-node playwright/support/local-businesses-result-reporter.test.ts && ts-node playwright/support/local-businesses-parallel-launcher.test.ts",
     "resources:validate": "ts-node playwright/support/validate-resource-pool.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -17,7 +19,7 @@
   "license": "ISC",
   "devDependencies": {
     "@currents/playwright": "^2.5.0",
-    "@playwright/test": "^1.59.1",
+    "@playwright/test": "1.62.1",
     "@testomatio/reporter": "^2.13.0",
     "axios": "^1.7.2",
     "checkly": "^8.20.0",

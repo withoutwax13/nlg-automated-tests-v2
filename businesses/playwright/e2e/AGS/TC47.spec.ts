@@ -18,7 +18,7 @@ test.describe("As a ags user, I should be able to update business close date dat
     await agsBusinessDetails.clickBusinessStatusTab();
     const closeDateInput = agsBusinessDetails.getElement().businessCloseDateInput();
     const currentValue = await closeDateInput.inputValue();
-    const targetYear = currentValue.includes("2029") ? 2030 : 2029;
+    const targetYear = currentValue.includes("2030") ? 2031 : 2030;
     await agsBusinessDetails.setBusinessCloseDate({
       month: 2,
       date: 15,

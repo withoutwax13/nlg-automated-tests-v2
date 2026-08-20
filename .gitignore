@@ -6,3 +6,10 @@ test-results/
 **/test-results/
 *.log
 .DS_Store
+
+# Local Businesses E2E resource slots (contains credentials and seeded data).
+/businesses/.env.businesses.local*
+!/businesses/.env.businesses.local.example
+
+# Serializes local Businesses launchers while they reset shared local results.
+/businesses/.local-businesses-results.lock/

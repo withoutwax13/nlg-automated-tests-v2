@@ -78,7 +78,7 @@ test.describe("As a ags user, I should be able to update operating status in the
           await setBusinessStatusModal.setBusinessCloseDate({
             month: randomMonth,
             date: randomDate,
-            year: 2029
+            year: 2030
           });
           await setBusinessStatusModal.clickCloseButton();
         }

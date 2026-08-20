@@ -17,7 +17,7 @@ test.describe("As a municipal user, I should be able to set close date from the 
       "DBA",
       resourceSlot.businesses.inactive
     );
-    const targetYear = beforeCloseDate.includes("2029") ? 2030 : 2029;
+    const targetYear = beforeCloseDate.includes("2030") ? 2031 : 2030;
     await municipalBusinessGrid.clickClearAllFiltersButton();
     await municipalBusinessGrid.setCloseDate(resourceSlot.businesses.inactive, {
       month: 1,

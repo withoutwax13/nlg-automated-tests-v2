@@ -16,7 +16,7 @@ test.describe("As a municipal user, I should be able to update business close da
     await municipalBusinessDetails.clickBusinessStatusTab();
     const closeDateInput = municipalBusinessDetails.getElement().businessCloseDateInput();
     const currentValue = await closeDateInput.inputValue();
-    const targetYear = currentValue.includes("2029") ? 2030 : 2029;
+    const targetYear = currentValue.includes("2030") ? 2031 : 2030;
     await municipalBusinessDetails.setBusinessCloseDate({
       month: 2,
       date: 15,

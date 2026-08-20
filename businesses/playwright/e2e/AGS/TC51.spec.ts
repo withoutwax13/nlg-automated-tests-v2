@@ -24,7 +24,7 @@ test.describe("When I update the business close date, system should let the save
     await agsBusinessDetails.setBusinessStatusModal.setBusinessCloseDate({
       month: randomMonth,
       date: randomDate,
-      year: 2029,
+      year: 2030,
     });
     await expect(agsBusinessDetails.setBusinessStatusModal.getElement().saveButton()).toBeDisabled();
   });

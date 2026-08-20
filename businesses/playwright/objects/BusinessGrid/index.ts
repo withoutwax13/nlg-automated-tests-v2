@@ -6,6 +6,7 @@ import BusinessDeleteModal from "../BusinessDeleteModal";
 import DatePicker from "../DatePicker";
 
 const VALID_ITEMS_PER_PAGE = [5, 10, 20, 50];
+const NETWORK_RESPONSE_TIMEOUT_MS = 30_000;
 export const AGS_COLUMNS = [
   "Actions",
   "Business Name",
@@ -584,16 +585,19 @@ class BusinessGrid {
   }
 
   async deleteBusiness(businessDba: string, expectedStatus = 200) {
-    const deleteBusiness = this.page.waitForResponse((response) => {
-      const method = response.request().method().toUpperCase();
-      const url = response.url();
+    const deleteBusiness = this.page.waitForResponse(
+      (response) => {
+        const method = response.request().method().toUpperCase();
+        const url = response.url();
 
-      return (
-        method === "DELETE" &&
-        url.includes("azavargovapps.com/businesses") &&
-        url.includes("municipalityBusiness")
-      );
-    });
+        return (
+          method === "DELETE" &&
+          url.includes("azavargovapps.com/businesses") &&
+          url.includes("municipalityBusiness")
+        );
+      },
+      { timeout: NETWORK_RESPONSE_TIMEOUT_MS },
+    );
     const businessDeleteModal = new BusinessDeleteModal({
       userType: this.userType,
       page: this.page,
