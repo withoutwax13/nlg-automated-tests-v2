@@ -83,8 +83,67 @@ jobs:
 
           npm run test:playwright:list -- --grep="$REQUESTED_GREP"
 
-  playwright-tests:
+  prepare-testomatio:
     needs: preflight
+    name: Prepare Testomat.io run
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    outputs:
+      run_id: ${{ steps.resolve-run.outputs.run_id }}
+
+    defaults:
+      run:
+        working-directory: ./businesses
+
+    env:
+      CI: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: businesses/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create or reuse one Testomat.io run
+        id: resolve-run
+        env:
+          REQUESTED_RUN_ID: ${{ github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run || '' }}
+          TESTOMATIO: ${{ secrets.TESTOMATIO }}
+          TESTOMATIO_TITLE: "[CI] NLG Business E2E ${{ github.run_id }} attempt ${{ github.run_attempt }}"
+        shell: bash
+        run: |
+          if [[ -z "$TESTOMATIO" ]]; then
+            echo "::error title=Missing Actions secret::TESTOMATIO is required for the Businesses workflow."
+            exit 1
+          fi
+
+          echo "::add-mask::$TESTOMATIO"
+          run_id="$REQUESTED_RUN_ID"
+
+          if [[ -z "$run_id" ]]; then
+            run_id="$(npx --no-install @testomatio/reporter start --kind automated --format id)"
+          fi
+
+          if [[ -z "$run_id" || "$run_id" =~ [[:space:]] ]]; then
+            echo "::error title=Invalid Testomat.io run::The run ID must be a non-empty single-line identifier."
+            exit 1
+          fi
+
+          printf 'run_id=%s\n' "$run_id" >> "$GITHUB_OUTPUT"
+
+  playwright-tests:
+    needs: [preflight, prepare-testomatio]
     name: Businesses ${{ matrix.slot_id }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -153,11 +212,8 @@ jobs:
           BUSINESSES_EXPECTED_SLOT_ID: ${{ matrix.slot_id }}
           REQUESTED_GREP: ${{ github.event.inputs.grep || github.event.client_payload.grep || github.event.client_payload.inputs.grep || '' }}
           TESTOMATIO: ${{ secrets.TESTOMATIO }}
-          TESTOMATIO_RUN: ${{ github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run || '' }}
-          TESTOMATIO_PROCEED: ${{ (github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run) && 'true' || '' }}
-          TESTOMATIO_SHARED_RUN: "true"
-          TESTOMATIO_SHARED_RUN_TIMEOUT: "300"
-          TESTOMATIO_TITLE: NLG Business E2E ${{ github.run_id }} attempt ${{ github.run_attempt }}
+          TESTOMATIO_RUN: ${{ needs.prepare-testomatio.outputs.run_id }}
+          TESTOMATIO_PROCEED: "1"
         shell: bash
         run: |
           playwright_args=(--workers=1 --pass-with-no-tests)
@@ -182,7 +238,8 @@ jobs:
           retention-days: 30
 
   reset-municipality-test:
-    needs: playwright-tests
+    needs: [preflight, prepare-testomatio, playwright-tests]
+    if: ${{ always() && !cancelled() && needs.preflight.result == 'success' && needs.prepare-testomatio.result == 'success' && (needs.playwright-tests.result == 'success' || needs.playwright-tests.result == 'failure') }}
     name: Businesses TC32 municipality reset
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -226,11 +283,8 @@ jobs:
           E2E_RUN_GLOBAL_STATE: "true"
           REQUESTED_GREP: ${{ github.event.inputs.grep || github.event.client_payload.grep || github.event.client_payload.inputs.grep || '' }}
           TESTOMATIO: ${{ secrets.TESTOMATIO }}
-          TESTOMATIO_RUN: ${{ github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run || '' }}
-          TESTOMATIO_PROCEED: ${{ (github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run) && 'true' || '' }}
-          TESTOMATIO_SHARED_RUN: "true"
-          TESTOMATIO_SHARED_RUN_TIMEOUT: "300"
-          TESTOMATIO_TITLE: NLG Business E2E ${{ github.run_id }} attempt ${{ github.run_attempt }}
+          TESTOMATIO_RUN: ${{ needs.prepare-testomatio.outputs.run_id }}
+          TESTOMATIO_PROCEED: "1"
         shell: bash
         run: |
           playwright_args=(--workers=1 --pass-with-no-tests)
@@ -255,8 +309,8 @@ jobs:
           retention-days: 30
 
   finalize-testomatio:
-    needs: [playwright-tests, reset-municipality-test]
-    if: ${{ always() && !cancelled() && (github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run) }}
+    needs: [prepare-testomatio, playwright-tests, reset-municipality-test]
+    if: ${{ always() && !cancelled() && needs.prepare-testomatio.result == 'success' && needs.prepare-testomatio.outputs.run_id != '' }}
     name: Finalize Testomat.io run
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -268,8 +322,8 @@ jobs:
     env:
       CI: true
       TESTOMATIO: ${{ secrets.TESTOMATIO }}
-      TESTOMATIO_FINISH_SHARED_RUN: "true"
-      TESTOMATIO_RUN: ${{ github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run || '' }}
+      TESTOMATIO_FINISH_SHARED_RUN: "1"
+      TESTOMATIO_RUN: ${{ needs.prepare-testomatio.outputs.run_id }}
 
     steps:
       - name: Checkout repository
@@ -287,7 +341,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Finalize the shared Testomat.io run
+      - name: Finalize the aggregate Testomat.io run
         shell: bash
         run: |
           if [[ -z "$TESTOMATIO" ]]; then
