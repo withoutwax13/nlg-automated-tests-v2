@@ -6,7 +6,7 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As a taxpayer, I should be able to delete a draft filing.", () => {
-  test("Initiate test", { tag: ["@slot-02", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+  test("As a taxpayer, I should be able to delete a draft filing.", { tag: ["@slot-02", "@taxpayer", "@business-draft"] }, async ({ page, resourceSlot }) => {
     await createDraftFiling(page, resourceSlot);
     await deleteMatchingFilingAsTaxpayer(page, resourceSlot);
     const taxpayerFilingGrid = new FilingGrid(page, { userType: "taxpayer" });

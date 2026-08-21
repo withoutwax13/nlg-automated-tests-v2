@@ -4,7 +4,7 @@ import RequestedExtracts from "../../objects/RequestedExtracts";
 import { loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As a municipal user, I should be able to export full filing data.", () => {
-  test("Initiate test", { tag: ["@slot-03", "@municipal"] }, async ({ page, resourceSlot }) => {
+  test("As a municipal user, I should be able to export full filing data.", { tag: ["@slot-03", "@municipal"] }, async ({ page, resourceSlot }) => {
     await loginFresh(page, resourceSlot, { accountType: "municipal" });
     const requestedExtracts = new RequestedExtracts(page);
     await requestedExtracts.init();

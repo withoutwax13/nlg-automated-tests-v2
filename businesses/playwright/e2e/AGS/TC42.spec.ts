@@ -4,7 +4,7 @@ import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
 test.describe("As an AGS user, the default filter for the business list should be the Operating Status", () => {
-  test("Initiating test", { tag: ["@slot-09", "@ags"] }, async ({ page, resourceSlot }) => {
+  test("As an AGS user, the default filter for the business list should be the Operating Status", { tag: ["@slot-09", "@ags"] }, async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

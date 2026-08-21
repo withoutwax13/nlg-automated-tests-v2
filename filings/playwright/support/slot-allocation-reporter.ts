@@ -13,14 +13,24 @@ const SLOT_TAGS = Array.from(
   (_, index) => `@slot-${String(index).padStart(2, '0')}`,
 );
 const SLOT_TAG_SET = new Set(SLOT_TAGS);
+
 const ROLE_TAGS = ['@ags', '@municipal', '@taxpayer'] as const;
 const ROLE_TAG_SET = new Set<string>(ROLE_TAGS);
-
 type RoleTag = (typeof ROLE_TAGS)[number];
+
+const BUSINESS_TAGS = [
+  '@business-default',
+  '@business-funded',
+  '@business-draft',
+  '@business-zero-payment',
+] as const;
+const BUSINESS_TAG_SET = new Set<string>(BUSINESS_TAGS);
+type BusinessTag = (typeof BUSINESS_TAGS)[number];
 
 interface SlotSummary {
   tests: number;
   roles: Record<RoleTag, number>;
+  businesses: Record<BusinessTag, number>;
 }
 
 function createSlotSummary(): SlotSummary {
@@ -31,12 +41,38 @@ function createSlotSummary(): SlotSummary {
       '@municipal': 0,
       '@taxpayer': 0,
     },
+    businesses: {
+      '@business-default': 0,
+      '@business-funded': 0,
+      '@business-draft': 0,
+      '@business-zero-payment': 0,
+    },
   };
 }
 
 function testLabel(test: TestCase): string {
   const file = path.relative(process.cwd(), test.location.file);
   return `${file}:${test.location.line} › ${test.titlePath().at(-1)}`;
+}
+
+function validateBalancedDistribution(
+  errors: string[],
+  tag: string,
+  counts: number[],
+  requireEverySlot: boolean,
+): void {
+  if (requireEverySlot && Math.min(...counts) < 1) {
+    errors.push(
+      `${tag} must be used by at least one test in every slot; found ${counts.join(', ')}.`,
+    );
+  }
+
+  const total = counts.reduce((sum, count) => sum + count, 0);
+  if (total > 0 && Math.max(...counts) - Math.min(...counts) > 1) {
+    errors.push(
+      `${tag} distribution must differ by at most 1 across slots; found ${counts.join(', ')}.`,
+    );
+  }
 }
 
 export default class SlotAllocationReporter implements Reporter {
@@ -65,8 +101,17 @@ export default class SlotAllocationReporter implements Reporter {
 
       const slotTags = tags.filter((tag) => tag.startsWith('@slot-'));
       const roleTags = tags.filter((tag): tag is RoleTag => ROLE_TAG_SET.has(tag));
+      const candidateBusinessTags = tags.filter((tag) =>
+        tag.startsWith('@business-'),
+      );
+      const businessTags = candidateBusinessTags.filter(
+        (tag): tag is BusinessTag => BUSINESS_TAG_SET.has(tag),
+      );
       const unsupportedTags = tags.filter(
-        (tag) => !tag.startsWith('@slot-') && !ROLE_TAG_SET.has(tag),
+        (tag) =>
+          !tag.startsWith('@slot-') &&
+          !ROLE_TAG_SET.has(tag) &&
+          !BUSINESS_TAG_SET.has(tag),
       );
 
       if (slotTags.length !== 1) {
@@ -83,6 +128,9 @@ export default class SlotAllocationReporter implements Reporter {
       if (new Set(roleTags).size !== roleTags.length) {
         errors.push(`${label} contains a duplicate account-role tag.`);
       }
+      if (new Set(candidateBusinessTags).size !== candidateBusinessTags.length) {
+        errors.push(`${label} contains a duplicate business tag.`);
+      }
       if (unsupportedTags.length > 0) {
         errors.push(
           `${label} uses unsupported tags: ${unsupportedTags.join(', ')}.`,
@@ -98,6 +146,9 @@ export default class SlotAllocationReporter implements Reporter {
       for (const roleTag of new Set(roleTags)) {
         summary.roles[roleTag] += 1;
       }
+      for (const businessTag of new Set(businessTags)) {
+        summary.businesses[businessTag] += 1;
+      }
     }
 
     for (const [slotTag, summary] of summaries) {
@@ -109,25 +160,29 @@ export default class SlotAllocationReporter implements Reporter {
     }
 
     for (const roleTag of ROLE_TAGS) {
-      const counts = SLOT_TAGS.map(
-        (slotTag) => summaries.get(slotTag)!.roles[roleTag],
+      validateBalancedDistribution(
+        errors,
+        roleTag,
+        SLOT_TAGS.map((slotTag) => summaries.get(slotTag)!.roles[roleTag]),
+        true,
       );
-      if (Math.min(...counts) < 1) {
-        errors.push(
-          `${roleTag} must be used by at least one test in every slot; found ${counts.join(', ')}.`,
-        );
-      }
-      if (Math.max(...counts) - Math.min(...counts) > 1) {
-        errors.push(
-          `${roleTag} distribution must differ by at most 1 across slots; found ${counts.join(', ')}.`,
-        );
-      }
+    }
+
+    for (const businessTag of BUSINESS_TAGS) {
+      validateBalancedDistribution(
+        errors,
+        businessTag,
+        SLOT_TAGS.map(
+          (slotTag) => summaries.get(slotTag)!.businesses[businessTag],
+        ),
+        false,
+      );
     }
 
     console.log('Filings slot allocation:');
     for (const [slotTag, summary] of summaries) {
       console.log(
-        `${slotTag}: tests=${summary.tests}, ags=${summary.roles['@ags']}, municipal=${summary.roles['@municipal']}, taxpayer=${summary.roles['@taxpayer']}`,
+        `${slotTag}: tests=${summary.tests}, ags=${summary.roles['@ags']}, municipal=${summary.roles['@municipal']}, taxpayer=${summary.roles['@taxpayer']}, default=${summary.businesses['@business-default']}, funded=${summary.businesses['@business-funded']}, draft=${summary.businesses['@business-draft']}, zeroPayment=${summary.businesses['@business-zero-payment']}`,
       );
     }
 

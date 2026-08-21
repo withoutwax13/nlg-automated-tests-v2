@@ -5,7 +5,7 @@ import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
 test.describe("As a ags user, I should be able to add notes to a business via the business details page", () => {
-  test("Initiating test", { tag: ["@slot-05", "@ags", "@business-active"] }, async ({ page, resourceSlot }) => {
+  test("As a ags user, I should be able to add notes to a business via the business details page", { tag: ["@slot-05", "@ags", "@business-active"] }, async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

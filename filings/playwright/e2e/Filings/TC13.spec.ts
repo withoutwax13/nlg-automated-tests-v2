@@ -3,7 +3,7 @@ import FilingGrid from "../../objects/FilingGrid";
 import { GOVERNMENT, loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As an AGS user, I should be able to view requested extract.", () => {
-  test("Initiate test", { tag: ["@slot-07", "@ags"] }, async ({ page, resourceSlot }) => {
+  test("As an AGS user, I should be able to view requested extract.", { tag: ["@slot-07", "@ags"] }, async ({ page, resourceSlot }) => {
     await loginFresh(page, resourceSlot, { accountType: "ags" });
     const filingGrid = new FilingGrid(page, {
       userType: "ags",

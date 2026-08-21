@@ -4,7 +4,7 @@ import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
 test.describe("As an AGS user, I should be able to set close date from the grid", () => {
-  test("Initiating test", { tag: ["@slot-01", "@ags", "@business-inactive"] }, async ({ page, resourceSlot }) => {
+  test("As an AGS user, I should be able to set close date from the grid", { tag: ["@slot-01", "@ags", "@business-inactive"] }, async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

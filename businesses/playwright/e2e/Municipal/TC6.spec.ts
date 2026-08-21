@@ -8,7 +8,7 @@ const municipalBusinessGrid = new BusinessGrid({
 });
 
 test.describe("As a municipal user, I should be able to set close date from the grid", () => {
-  test("Initiating test", { tag: ["@slot-00", "@municipal", "@business-inactive"] }, async ({ page, resourceSlot }) => {
+  test("As a municipal user, I should be able to set close date from the grid", { tag: ["@slot-00", "@municipal", "@business-inactive"] }, async ({ page, resourceSlot }) => {
     await Login.login(page, resourceSlot, { accountType: "municipal" });
     await municipalBusinessGrid.init(page);
     await municipalBusinessGrid.clickClearAllFiltersButton();

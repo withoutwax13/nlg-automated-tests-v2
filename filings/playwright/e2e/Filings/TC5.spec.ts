@@ -7,7 +7,7 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As a taxpayer, I should be able to download the PDF of specific filing by selecting 'Download' in the action button dropdown", () => {
-  test("Initiate test", { tag: ["@slot-09", "@ags", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+  test("As a taxpayer, I should be able to download the PDF of specific filing by selecting 'Download' in the action button dropdown", { tag: ["@slot-09", "@ags", "@taxpayer", "@business-default"] }, async ({ page, resourceSlot }) => {
     await deleteMatchingFilingsAsAgs(page, resourceSlot, {
       businessName: resourceSlot.businesses.default,
       formName: MONTHLY_FORM,

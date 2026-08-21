@@ -28,7 +28,7 @@ const baseBusinessData = {
 
 test.describe("As an AGS user, I should be able to add a business.", () => {
   
-  test("Initiating test", { tag: ["@slot-04", "@ags", "@business-generated"] }, async ({ page, resourceSlot }, testInfo) => {
+  test("As an AGS user, I should be able to add a business.", { tag: ["@slot-04", "@ags", "@business-generated"] }, async ({ page, resourceSlot }, testInfo) => {
     const identity = createBusinessTestIdentity(resourceSlot.id, testInfo);
     const newBusinessData = {
       ...baseBusinessData,

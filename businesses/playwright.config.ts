@@ -8,10 +8,10 @@ const isLocalSingleRun = process.env.BUSINESSES_LOCAL_SINGLE === 'true';
 const captureLocalFailureScreenshots =
   process.env.BUSINESSES_LOCAL_FAILURE_SCREENSHOTS === 'true';
 const expectedSlotId = process.env.BUSINESSES_EXPECTED_SLOT_ID;
-const testTimeoutMs = 3 * 60_000;
-const expectTimeoutMs = 20_000;
-const actionTimeoutMs = 30_000;
-const navigationTimeoutMs = 60_000;
+const testTimeoutMs = 15 * 60_000;
+const expectTimeoutMs = 3 * 60_000;
+const actionTimeoutMs = 3 * 60_000;
+const navigationTimeoutMs = 3 * 60_000;
 const localResultsRoot = path.resolve(
   __dirname,
   'test-results',

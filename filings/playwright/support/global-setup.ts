@@ -9,6 +9,12 @@ export default async function globalSetup(config: FullConfig): Promise<void> {
     );
   }
 
+  if ((config.shard?.total ?? 1) > 1) {
+    throw new Error(
+      'Filings selected-slot runs must be unsharded so one resource slot cannot be used concurrently by multiple Playwright shards.',
+    );
+  }
+
   if (
     process.env.E2E_RUN_GLOBAL_STATE === 'true' &&
     (config.workers !== 1 || (config.shard?.total ?? 1) > 1)

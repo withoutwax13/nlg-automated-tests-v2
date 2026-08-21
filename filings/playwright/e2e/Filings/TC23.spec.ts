@@ -8,7 +8,7 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As a municipal, I should be able to to view a specific filing by selecting the View icon", () => {
-  test("Initiate test", { tag: ["@slot-03", "@ags", "@municipal", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+  test("As a municipal, I should be able to to view a specific filing by selecting the View icon", { tag: ["@slot-03", "@ags", "@municipal", "@taxpayer", "@business-default"] }, async ({ page, resourceSlot }) => {
     await deleteMatchingFilingsAsAgs(page, resourceSlot, {
       businessName: resourceSlot.businesses.default,
       formName: MONTHLY_FORM,

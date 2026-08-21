@@ -36,7 +36,7 @@ const createNewBusinessData = (
 
 test.describe("As a municipal user, I should be able to add a business.", () => {
   
-  test("Initiating test", { tag: ["@slot-03", "@municipal", "@business-generated"] }, async ({ page, resourceSlot }, testInfo) => {
+  test("As a municipal user, I should be able to add a business.", { tag: ["@slot-03", "@municipal", "@business-generated"] }, async ({ page, resourceSlot }, testInfo) => {
     const addBusinessPage = new BusinessAdd(page, { userType: "municipal" });
     const identity = createBusinessTestIdentity(resourceSlot.id, testInfo);
     const newBusinessData = createNewBusinessData(identity);

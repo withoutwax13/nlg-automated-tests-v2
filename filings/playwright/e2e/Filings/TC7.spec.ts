@@ -8,7 +8,7 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As an AGS user, I should be able to see Payment Submitted logs on the audit log for Funded filings", () => {
-  test("Initiate test", { tag: ["@slot-06", "@ags", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+  test("As an AGS user, I should be able to see Payment Submitted logs on the audit log for Funded filings", { tag: ["@slot-06", "@ags", "@taxpayer", "@business-funded"] }, async ({ page, resourceSlot }) => {
     await deleteMatchingFilingsAsAgs(page, resourceSlot, {
       businessName: resourceSlot.businesses.funded,
       formName: MONTHLY_FORM,

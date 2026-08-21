@@ -18,7 +18,7 @@ const cleanTestData = async (page: any, businessName: string, requiredForm: stri
 };
 
 test.describe.skip("As a municipal user, I should be able to remove required forms from the grid", () => {
-  test("Initiating test", async ({ page, resourceSlot }) => {
+  test("As a municipal user, I should be able to remove required forms from the grid", async ({ page, resourceSlot }) => {
     await Login.login(page, resourceSlot, { accountType: "municipal" });
     await cleanTestData(page, resourceSlot.businesses.requiredForms, "Food and Beverage Tax Return (Monthly)");
     await municipalBusinessGrid.init(page);

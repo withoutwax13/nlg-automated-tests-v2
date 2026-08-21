@@ -18,7 +18,7 @@ const cleanTestData = async (page: any, businessName: string, requiredForm: stri
 };
 
 test.describe("As a municipal user, I should be able to add required forms from the grid", () => {
-  test("Initiating test", { tag: ["@slot-03", "@municipal", "@business-required-forms"] }, async ({ page, resourceSlot }) => {
+  test("As a municipal user, I should be able to add required forms from the grid", { tag: ["@slot-03", "@municipal", "@business-required-forms"] }, async ({ page, resourceSlot }) => {
     await Login.login(page, resourceSlot, { accountType: "municipal" });
     await cleanTestData(page, resourceSlot.businesses.requiredForms, "Food and Beverage Tax Return (Monthly)");
     await municipalBusinessGrid.init(page);

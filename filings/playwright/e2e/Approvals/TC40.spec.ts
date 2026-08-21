@@ -8,7 +8,7 @@ test.describe("As a government user, I want to be able to start all the pending 
     "This test mutates all pending approvals and must run explicitly in a one-worker, unsharded lane."
   );
 
-  test("Initiate test", async ({ page, resourceSlot }, testInfo) => {
+  test("As a government user, I want to be able to start all the pending Approvals", async ({ page, resourceSlot }, testInfo) => {
     if (testInfo.config.workers !== 1 || (testInfo.config.shard?.total ?? 1) > 1) {
       throw new Error("TC40 requires --workers=1 and an unsharded Playwright run.");
     }

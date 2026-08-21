@@ -49,7 +49,7 @@ const operatingStatus = [
 ];
 
 test.describe("As a municipal user, I should be able to update operating status in the business details page", () => {
-  test("Initiating test", { tag: ["@slot-07", "@municipal", "@business-generated"] }, async ({ page, resourceSlot }, testInfo) => {
+  test("As a municipal user, I should be able to update operating status in the business details page", { tag: ["@slot-07", "@municipal", "@business-generated"] }, async ({ page, resourceSlot }, testInfo) => {
     const municipalBusinessDetails = new BusinessDetails(page, { userType: "municipal" });
     const setBusinessStatusModal = new SetBusinessStatusModal(page);
     const identity = createBusinessTestIdentity(resourceSlot.id, testInfo);

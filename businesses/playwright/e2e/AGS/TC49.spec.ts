@@ -35,7 +35,7 @@ const randomDate = Math.floor(Math.random() * 28) + 1;
 const operatingStatus = ["Inactive", "Active/Seasonal", "Closed", "Sold"];
 
 test.describe("As a ags user, I should be able to update operating status in the business details page", () => {
-  test("Initiating test", { tag: ["@slot-08", "@ags", "@business-generated"] }, async ({ page, resourceSlot }, testInfo) => {
+  test("As a ags user, I should be able to update operating status in the business details page", { tag: ["@slot-08", "@ags", "@business-generated"] }, async ({ page, resourceSlot }, testInfo) => {
     const identity = createBusinessTestIdentity(resourceSlot.id, testInfo);
     const newBusinessData = {
       ...baseBusinessData,

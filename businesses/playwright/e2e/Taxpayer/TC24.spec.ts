@@ -36,7 +36,7 @@ const newBusinessData = {
 
 test.describe.skip("As a taxpayer, when my business has been deleted by a municipal user, I should be able to verify that the business does not exist in my grid", () => {
   
-  test("Initiating test", async ({ page, resourceSlot }) => {
+  test("As a taxpayer, when my business has been deleted by a municipal user, I should be able to verify that the business does not exist in my grid", async ({ page, resourceSlot }) => {
     const taxpayerAddBusinessPage = new BusinessAdd(page, { userType: "taxpayer" });
     const addBusinessPage = new BusinessAdd(page, { userType: "municipal" });
     await Login.login(page, resourceSlot, {

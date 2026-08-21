@@ -6,7 +6,7 @@ import BusinessUpdate from "../../objects/BusinessUpdate";
 import Login from "../../utils/Login";
 
 test.describe("As a user, if there are no changes made in the update business page, the save button should not exist", () => {
-  test("Initiating test", { tag: ["@slot-09", "@ags", "@business-inactive"] }, async ({ page, resourceSlot }) => {
+  test("As a user, if there are no changes made in the update business page, the save button should not exist", { tag: ["@slot-09", "@ags", "@business-inactive"] }, async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

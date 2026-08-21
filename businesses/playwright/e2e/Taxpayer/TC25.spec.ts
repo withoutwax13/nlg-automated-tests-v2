@@ -37,7 +37,7 @@ const newBusinessData = {
 // Skipped, assertions alrady covered in TC26
 test.describe.skip("As a taxpayer user, I should be able to add a business.", () => {
   
-  test("Initiating test", async ({ page, resourceSlot }) => {
+  test("As a taxpayer user, I should be able to add a business.", async ({ page, resourceSlot }) => {
     const taxpayerAddBusinessPage = new BusinessAdd(page, { userType: "taxpayer" });
     const addBusinessPage = new BusinessAdd(page, { userType: "municipal" });
     await Login.login(page, resourceSlot, {

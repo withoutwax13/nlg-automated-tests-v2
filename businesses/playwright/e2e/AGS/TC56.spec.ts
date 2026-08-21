@@ -6,7 +6,7 @@ import Login from "../../utils/Login";
 
 test.describe("As a user, I should not be able to add blank notes in the business details page", () => {
   // Skipped, assertion moved to TC55
-  test.skip("Initiating test", async ({ page, resourceSlot }) => {
+  test.skip("As a user, I should not be able to add blank notes in the business details page", async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

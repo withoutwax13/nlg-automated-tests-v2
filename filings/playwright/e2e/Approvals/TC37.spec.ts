@@ -8,7 +8,7 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As a government user, I want to be able to see message of an approved filing in approval list", () => {
-  test("Initiate test", { tag: ["@slot-01", "@ags", "@municipal", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+  test("As a government user, I want to be able to see message of an approved filing in approval list", { tag: ["@slot-01", "@ags", "@municipal", "@taxpayer", "@business-default"] }, async ({ page, resourceSlot }) => {
     await deleteMatchingFilingsAsAgs(page, resourceSlot, {
       businessName: resourceSlot.businesses.default,
       formName: MONTHLY_FORM,

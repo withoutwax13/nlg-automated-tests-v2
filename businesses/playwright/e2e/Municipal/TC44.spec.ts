@@ -6,7 +6,7 @@ import Login from "../../utils/Login";
 const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
 
 test.describe("As a municipal user, I should be able to update start date for delinquency tracking in the business details page", () => {
-  test("Initiating test", { tag: ["@slot-04", "@municipal", "@business-active"] }, async ({ page, resourceSlot }) => {
+  test("As a municipal user, I should be able to update start date for delinquency tracking in the business details page", { tag: ["@slot-04", "@municipal", "@business-active"] }, async ({ page, resourceSlot }) => {
     const municipalBusinessDetails = new BusinessDetails(page, { userType: "municipal" });
     await Login.login(page, resourceSlot, { accountType: "municipal" });
     await municipalBusinessGrid.init(page);

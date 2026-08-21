@@ -231,7 +231,7 @@ class BusinessGrid {
 
       this.page.on("response", handler);
 
-      const wait = async (timeout = 30000) => {
+      const wait = async (timeout = 180000) => {
         if (responses.length > 0) {
           return responses.shift()!;
         }

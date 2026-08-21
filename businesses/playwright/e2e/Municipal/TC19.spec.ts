@@ -6,7 +6,7 @@ import Login from "../../utils/Login";
 const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
 
 test.describe("As a municipal user,  I should be able to reveal the full content of FEIN in business list.", () => {
-  test("Initiating test", { tag: ["@slot-01", "@municipal", "@business-active"] }, async ({ page, resourceSlot }) => {
+  test("As a municipal user,  I should be able to reveal the full content of FEIN in business list.", { tag: ["@slot-01", "@municipal", "@business-active"] }, async ({ page, resourceSlot }) => {
     await Login.login(page, resourceSlot, { accountType: "municipal" });
     await municipalBusinessGrid.init(page);
     const feinValueBeforeClick = await municipalBusinessGrid.getDataOfColumn(

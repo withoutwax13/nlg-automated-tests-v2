@@ -14,7 +14,7 @@ const cleanTestData = async (agsBusinessGrid: BusinessGrid, page: any, businessN
 };
 
 test.describe("As an AGS user, I should be able to add required forms from the grid", () => {
-  test("Initiating test", { tag: ["@slot-02", "@ags", "@business-required-forms"] }, async ({ page, resourceSlot }) => {
+  test("As an AGS user, I should be able to add required forms from the grid", { tag: ["@slot-02", "@ags", "@business-required-forms"] }, async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

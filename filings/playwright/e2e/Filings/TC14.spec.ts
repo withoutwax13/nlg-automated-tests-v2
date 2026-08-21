@@ -8,7 +8,7 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As a AGS, I should be able to to view a specific filing by selecting the View icon", () => {
-  test("Initiate test", { tag: ["@slot-07", "@ags", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+  test("As a AGS, I should be able to to view a specific filing by selecting the View icon", { tag: ["@slot-07", "@ags", "@taxpayer", "@business-funded"] }, async ({ page, resourceSlot }) => {
     await deleteMatchingFilingsAsAgs(page, resourceSlot, {
       businessName: resourceSlot.businesses.funded,
       formName: MONTHLY_FORM,

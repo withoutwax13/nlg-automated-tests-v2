@@ -7,7 +7,7 @@ const randomMonth = Math.floor(Math.random() * 12) + 1;
 const randomDate = Math.floor(Math.random() * 28) + 1;
 
 test.describe("When I update the business close date, system should let the save button of the Set Business Status modal to be disabled until I select a business status", () => {
-  test("Initiating test", { tag: ["@slot-05", "@ags", "@business-inactive"] }, async ({ page, resourceSlot }) => {
+  test("When I update the business close date, system should let the save button of the Set Business Status modal to be disabled until I select a business status", { tag: ["@slot-05", "@ags", "@business-inactive"] }, async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

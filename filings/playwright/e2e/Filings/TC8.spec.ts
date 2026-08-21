@@ -7,7 +7,7 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As an AGS user, I should be able to navigate to the Audit Log page", () => {
-  test.skip("Initiate test", async ({ page, resourceSlot }) => {
+  test.skip("As an AGS user, I should be able to navigate to the Audit Log page", async ({ page, resourceSlot }) => {
     // skipped, covered already by TC7
     await deleteMatchingFilingsAsAgs(page, resourceSlot, {
       businessName: resourceSlot.businesses.funded,

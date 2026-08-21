@@ -35,7 +35,7 @@ const newBusinessData = {
 
 test.describe.skip("As a taxpayer, when my business has been deleted by an AGS user, I should be able to verify that the business does not exist in my grid.", () => {
   
-  test("Initiating test", async ({ page, resourceSlot }) => {
+  test("As a taxpayer, when my business has been deleted by an AGS user, I should be able to verify that the business does not exist in my grid.", async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

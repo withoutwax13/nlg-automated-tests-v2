@@ -5,7 +5,7 @@ import { AGS_COLUMNS as defaultColumns } from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
 test.describe.skip("As a user, I should be able to reorganize the order of the columns.", () => {
-  test("Initiating test", async ({ page, resourceSlot }) => {
+  test("As a user, I should be able to reorganize the order of the columns.", async ({ page, resourceSlot }) => {
     const businessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

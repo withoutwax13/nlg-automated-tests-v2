@@ -34,7 +34,7 @@ test.describe("I should be able to reset all data of a specific municipality", (
     "This test resets an entire municipality and must run explicitly in a one-worker, unsharded lane."
   );
 
-  test("Initiating test", async ({ page, resourceSlot }, testInfo) => {
+  test("I should be able to reset all data of a specific municipality", async ({ page, resourceSlot }, testInfo) => {
     if (testInfo.config.workers !== 1 || (testInfo.config.shard?.total ?? 1) > 1) {
       throw new Error("Businesses TC32 requires --workers=1 and an unsharded Playwright run.");
     }

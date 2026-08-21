@@ -5,7 +5,7 @@ import Form from "../../objects/Form";
 import { createDraftFiling } from "../helpers/filing-workflows";
 
 test.describe("As a taxpayer, I should be able to resume a draft filing.", () => {
-  test("Initiate test", { tag: ["@slot-03", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+  test("As a taxpayer, I should be able to resume a draft filing.", { tag: ["@slot-03", "@taxpayer", "@business-draft"] }, async ({ page, resourceSlot }) => {
     await createDraftFiling(page, resourceSlot);
     const filing = new Filing(page);
     const taxpayerFilingGrid = new FilingGrid(page, { userType: "taxpayer" });

@@ -37,7 +37,7 @@ const newBusinessData = {
 // Skipped, assertions alrady covered in TC24
 test.describe.skip("As a taxpayer, when a business has been added by a municipal user, I should be able to add the business in my account", () => {
   
-  test("Initiating test", async ({ page, resourceSlot }) => {
+  test("As a taxpayer, when a business has been added by a municipal user, I should be able to add the business in my account", async ({ page, resourceSlot }) => {
     const taxpayerAddBusinessPage = new BusinessAdd(page, { userType: "taxpayer" });
     const addBusinessPage = new BusinessAdd(page, { userType: "municipal" });
     await Login.login(page, resourceSlot, { accountType: "municipal" });

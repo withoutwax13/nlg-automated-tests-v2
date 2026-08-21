@@ -10,7 +10,7 @@ const municipalBusinessGrid = new BusinessGrid({
 });
 
 test.describe("As a municipal user, I should be able to upload documents to a business via the business details page", () => {
-  test("Initiating test", { tag: ["@slot-07", "@municipal", "@business-active"] }, async ({ page, resourceSlot }, testInfo) => {
+  test("As a municipal user, I should be able to upload documents to a business via the business details page", { tag: ["@slot-07", "@municipal", "@business-active"] }, async ({ page, resourceSlot }, testInfo) => {
     const identity = createBusinessTestIdentity(resourceSlot.id, testInfo);
     const municipalBusinessDetails = new BusinessDetails(page, { userType: "municipal" });
     await Login.login(page, resourceSlot, { accountType: "municipal" });

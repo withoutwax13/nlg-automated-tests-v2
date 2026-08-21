@@ -8,7 +8,7 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As a municipal, I should be able to download the PDF of specific filing by selecting the PDF image icon", () => {
-  test("Initiate test", { tag: ["@slot-02", "@ags", "@municipal", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+  test("As a municipal, I should be able to download the PDF of specific filing by selecting the PDF image icon", { tag: ["@slot-02", "@ags", "@municipal", "@taxpayer", "@business-funded"] }, async ({ page, resourceSlot }) => {
     await deleteMatchingFilingsAsAgs(page, resourceSlot, {
       businessName: resourceSlot.businesses.funded,
       formName: MONTHLY_FORM,

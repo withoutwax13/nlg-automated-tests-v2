@@ -5,7 +5,7 @@ import MunicipalityDetails from "../../objects/MunicipalityDetails";
 import { GOVERNMENT, loginFresh } from "../helpers/filing-workflows";
 
 test.describe("As an Municipal user, I should be able to see the custom field on the filing list", () => {
-  test("Initiate test", { tag: ["@slot-00", "@ags", "@municipal"] }, async ({ page, resourceSlot }) => {
+  test("As an Municipal user, I should be able to see the custom field on the filing list", { tag: ["@slot-00", "@ags", "@municipal"] }, async ({ page, resourceSlot }) => {
     const customField = {
       title: `title ${resourceSlot.id} ${Date.now()}`,
       name: `name ${resourceSlot.id} ${Date.now()}`,

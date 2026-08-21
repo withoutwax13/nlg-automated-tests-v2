@@ -6,7 +6,7 @@ const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
 
 // Skipped, assertions in TC38
 test.describe.skip("As a taxpayer user, I should be able to view business details.", () => {
-  test("Initiating test", async ({ page, resourceSlot }) => {
+  test("As a taxpayer user, I should be able to view business details.", async ({ page, resourceSlot }) => {
     await Login.login(page, resourceSlot, { accountType: "taxpayer" });
     await taxpayerBusinessList.init(page);
     await taxpayerBusinessList.viewBusinessDetails(resourceSlot.businesses.active);

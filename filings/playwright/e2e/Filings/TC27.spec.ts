@@ -8,7 +8,7 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As a taxpayer, I should be able to reattempt a declined filing.", () => {
-  test("Initiate test", { tag: ["@slot-08", "@ags", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+  test("As a taxpayer, I should be able to reattempt a declined filing.", { tag: ["@slot-08", "@ags", "@taxpayer", "@business-default"] }, async ({ page, resourceSlot }) => {
     await deleteMatchingFilingsAsAgs(page, resourceSlot, {
       businessName: resourceSlot.businesses.default,
       formName: MONTHLY_FORM,

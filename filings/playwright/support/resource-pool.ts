@@ -1,11 +1,6 @@
-export type AccountType =
-  | 'taxpayer'
-  | 'municipal'
-  | 'municipality'
-  | 'ags'
-  | 'municipalDel';
-
+export type AccountType = 'taxpayer' | 'municipal' | 'municipality' | 'ags';
 type CanonicalAccountType = Exclude<AccountType, 'municipality'>;
+
 export type BusinessType = 'default' | 'funded' | 'draft' | 'zeroPayment';
 
 export interface Credentials {
@@ -15,15 +10,14 @@ export interface Credentials {
 
 export interface ResourceSlot {
   id: string;
-  accounts: {
-    taxpayer: Credentials;
-    municipal: Credentials;
-    ags: Credentials;
-    municipalDel?: Credentials;
-  };
+  accounts: Record<CanonicalAccountType, Credentials>;
   businesses: Record<BusinessType, string>;
 }
 
+/**
+ * Filings accepts the same atomic slot object as Businesses. Filings exposes
+ * only the accounts and four filing-specific businesses that its tests use.
+ */
 export interface ResourceSlotPayload {
   VERSION: 1;
   SLOT_ID: string;
@@ -33,23 +27,38 @@ export interface ResourceSlotPayload {
   MUNICIPAL_PASSWORD: string;
   AGS_USERNAME: string;
   AGS_PASSWORD: string;
+  MUNICIPALITY: string;
+  RESET_MUNICIPALITY: string;
+  ACTIVE_BUSINESS: string;
+  INACTIVE_BUSINESS: string;
+  REQUIRED_FORMS_BUSINESS: string;
+  DELINQUENCY_BUSINESS: string;
+  FILINGS_BUSINESS: string;
   DEFAULT_BUSINESS: string;
   FUNDED_BUSINESS: string;
   DRAFT_BUSINESS: string;
   ZERO_PAYMENT_BUSINESS: string;
 }
 
-const RESOURCE_SLOT_ENV = 'FILINGS_RESOURCE_SLOT_JSON';
-const EXPECTED_SLOT_ID_ENV = 'FILINGS_EXPECTED_SLOT_ID';
+export const RESOURCE_SLOT_ENV = 'FILINGS_RESOURCE_SLOT_JSON';
+export const EXPECTED_SLOT_ID_ENV = 'FILINGS_EXPECTED_SLOT_ID';
+
 const GITHUB_SECRET_LIMIT_BYTES = 48 * 1024;
 
-const SECRET_FIELD_NAMES = [
+const MASKED_FIELD_NAMES = [
   'TAXPAYER_USERNAME',
   'TAXPAYER_PASSWORD',
   'MUNICIPAL_USERNAME',
   'MUNICIPAL_PASSWORD',
   'AGS_USERNAME',
   'AGS_PASSWORD',
+  'MUNICIPALITY',
+  'RESET_MUNICIPALITY',
+  'ACTIVE_BUSINESS',
+  'INACTIVE_BUSINESS',
+  'REQUIRED_FORMS_BUSINESS',
+  'DELINQUENCY_BUSINESS',
+  'FILINGS_BUSINESS',
   'DEFAULT_BUSINESS',
   'FUNDED_BUSINESS',
   'DRAFT_BUSINESS',
@@ -59,8 +68,10 @@ const SECRET_FIELD_NAMES = [
 const REQUIRED_FIELD_NAMES = [
   'VERSION',
   'SLOT_ID',
-  ...SECRET_FIELD_NAMES,
+  ...MASKED_FIELD_NAMES,
 ] as const;
+
+type RequiredFieldName = (typeof REQUIRED_FIELD_NAMES)[number];
 
 const REQUIRED_FIELD_NAME_SET = new Set<string>(REQUIRED_FIELD_NAMES);
 const registeredMasks = new Set<string>();
@@ -71,7 +82,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function requireNonEmptyString(
   value: unknown,
-  fieldName: (typeof REQUIRED_FIELD_NAMES)[number],
+  fieldName: RequiredFieldName,
 ): string {
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new Error(
@@ -92,27 +103,40 @@ function requireSelectedSlotUniqueness(payload: ResourceSlotPayload): void {
     payload.MUNICIPAL_USERNAME,
     payload.AGS_USERNAME,
   ].map(normalizeUniqueValue);
+
   if (new Set(usernames).size !== usernames.length) {
     throw new Error(
       'Invalid filings resource slot: taxpayer, municipal, and AGS usernames must be unique.',
     );
   }
 
+  // These five Businesses resources represent different seeded states and
+  // must stay distinct. The four filing businesses are compatibility aliases
+  // and may intentionally reuse any configured business value.
   const businesses = [
-    payload.DEFAULT_BUSINESS,
-    payload.FUNDED_BUSINESS,
-    payload.DRAFT_BUSINESS,
-    payload.ZERO_PAYMENT_BUSINESS,
+    payload.ACTIVE_BUSINESS,
+    payload.INACTIVE_BUSINESS,
+    payload.REQUIRED_FORMS_BUSINESS,
+    payload.DELINQUENCY_BUSINESS,
+    payload.FILINGS_BUSINESS,
   ].map(normalizeUniqueValue);
+
   if (new Set(businesses).size !== businesses.length) {
     throw new Error(
-      'Invalid filings resource slot: default, funded, draft, and zero-payment businesses must be unique.',
+      'Invalid filings resource slot: active, inactive, required-forms, delinquency, and filings businesses must be unique.',
+    );
+  }
+
+  if (
+    normalizeUniqueValue(payload.MUNICIPALITY) ===
+    normalizeUniqueValue(payload.RESET_MUNICIPALITY)
+  ) {
+    throw new Error(
+      'Invalid filings resource slot: MUNICIPALITY and RESET_MUNICIPALITY must be different.',
     );
   }
 }
 
-// GitHub workflow command message escaping. Escaping percent first prevents the
-// escapes introduced for line endings from being escaped a second time.
 function escapeWorkflowCommandMessage(value: string): string {
   return value.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
 }
@@ -127,7 +151,7 @@ function registerMask(value: string): void {
 }
 
 function registerKnownMasks(value: Record<string, unknown>): void {
-  for (const fieldName of SECRET_FIELD_NAMES) {
+  for (const fieldName of MASKED_FIELD_NAMES) {
     const fieldValue = value[fieldName];
     if (typeof fieldValue === 'string' && fieldValue.length > 0) {
       registerMask(fieldValue);
@@ -136,8 +160,8 @@ function registerKnownMasks(value: Record<string, unknown>): void {
 }
 
 /**
- * Parse the one slot injected into a matrix job. Errors describe only schema
- * locations and never echo the JSON, credentials, or business values.
+ * Parses the single resource slot selected for a matrix or local child run.
+ * Validation errors identify schema locations without echoing configured data.
  */
 export function parseResourceSlot(
   rawJson: string,
@@ -154,6 +178,15 @@ export function parseResourceSlot(
   if (typeof expectedSlotId !== 'string' || expectedSlotId.trim().length === 0) {
     throw new Error(`${EXPECTED_SLOT_ID_ENV} must be a non-empty string.`);
   }
+  if (!/^slot-0[0-9]$/.test(expectedSlotId)) {
+    throw new Error(
+      `${EXPECTED_SLOT_ID_ENV} must be one of slot-00 through slot-09.`,
+    );
+  }
+
+  // Mask the complete structured secret before parsing can fail, then mask
+  // every usable leaf as defense in depth for later workflow output.
+  registerMask(rawJson);
 
   let parsed: unknown;
   try {
@@ -166,8 +199,6 @@ export function parseResourceSlot(
     throw new Error(`${RESOURCE_SLOT_ENV} must contain a flat JSON object.`);
   }
 
-  // Register every usable field before schema validation can throw and before a
-  // caller can log a validation result.
   registerKnownMasks(parsed);
 
   for (const fieldName of REQUIRED_FIELD_NAMES) {
@@ -177,12 +208,17 @@ export function parseResourceSlot(
       );
     }
   }
+
+  const parsedFieldNames = Object.keys(parsed);
   if (
-    Object.keys(parsed).length !== REQUIRED_FIELD_NAMES.length ||
-    Object.keys(parsed).some((fieldName) => !REQUIRED_FIELD_NAME_SET.has(fieldName))
+    parsedFieldNames.length !== REQUIRED_FIELD_NAMES.length ||
+    parsedFieldNames.some((fieldName) => !REQUIRED_FIELD_NAME_SET.has(fieldName))
   ) {
-    throw new Error('Invalid filings resource slot: unknown fields are not allowed.');
+    throw new Error(
+      'Invalid filings resource slot: unknown fields are not allowed.',
+    );
   }
+
   if (parsed.VERSION !== 1) {
     throw new Error('Invalid filings resource slot: VERSION must be 1.');
   }
@@ -208,6 +244,31 @@ export function parseResourceSlot(
     ),
     AGS_USERNAME: requireNonEmptyString(parsed.AGS_USERNAME, 'AGS_USERNAME'),
     AGS_PASSWORD: requireNonEmptyString(parsed.AGS_PASSWORD, 'AGS_PASSWORD'),
+    MUNICIPALITY: requireNonEmptyString(parsed.MUNICIPALITY, 'MUNICIPALITY'),
+    RESET_MUNICIPALITY: requireNonEmptyString(
+      parsed.RESET_MUNICIPALITY,
+      'RESET_MUNICIPALITY',
+    ),
+    ACTIVE_BUSINESS: requireNonEmptyString(
+      parsed.ACTIVE_BUSINESS,
+      'ACTIVE_BUSINESS',
+    ),
+    INACTIVE_BUSINESS: requireNonEmptyString(
+      parsed.INACTIVE_BUSINESS,
+      'INACTIVE_BUSINESS',
+    ),
+    REQUIRED_FORMS_BUSINESS: requireNonEmptyString(
+      parsed.REQUIRED_FORMS_BUSINESS,
+      'REQUIRED_FORMS_BUSINESS',
+    ),
+    DELINQUENCY_BUSINESS: requireNonEmptyString(
+      parsed.DELINQUENCY_BUSINESS,
+      'DELINQUENCY_BUSINESS',
+    ),
+    FILINGS_BUSINESS: requireNonEmptyString(
+      parsed.FILINGS_BUSINESS,
+      'FILINGS_BUSINESS',
+    ),
     DEFAULT_BUSINESS: requireNonEmptyString(
       parsed.DEFAULT_BUSINESS,
       'DEFAULT_BUSINESS',
@@ -216,7 +277,10 @@ export function parseResourceSlot(
       parsed.FUNDED_BUSINESS,
       'FUNDED_BUSINESS',
     ),
-    DRAFT_BUSINESS: requireNonEmptyString(parsed.DRAFT_BUSINESS, 'DRAFT_BUSINESS'),
+    DRAFT_BUSINESS: requireNonEmptyString(
+      parsed.DRAFT_BUSINESS,
+      'DRAFT_BUSINESS',
+    ),
     ZERO_PAYMENT_BUSINESS: requireNonEmptyString(
       parsed.ZERO_PAYMENT_BUSINESS,
       'ZERO_PAYMENT_BUSINESS',
@@ -286,13 +350,6 @@ export function getCredentialsForAccountType(
 ): Credentials {
   const canonicalAccountType: CanonicalAccountType =
     accountType === 'municipality' ? 'municipal' : accountType;
-  const credentials = slot.accounts[canonicalAccountType];
 
-  if (!credentials) {
-    throw new Error(
-      `The selected filings resource slot does not provide credentials for account type ${canonicalAccountType}.`,
-    );
-  }
-
-  return credentials;
+  return slot.accounts[canonicalAccountType];
 }

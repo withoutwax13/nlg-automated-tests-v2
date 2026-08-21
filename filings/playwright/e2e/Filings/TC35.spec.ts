@@ -7,7 +7,7 @@ import {
 } from "../helpers/filing-workflows";
 
 test.describe("As a taxpayer, I should be able to to view a specific filing by selecting the View in the action dropdown button", () => {
-  test("Initiate test", { tag: ["@slot-05", "@ags", "@taxpayer"] }, async ({ page, resourceSlot }) => {
+  test("As a taxpayer, I should be able to to view a specific filing by selecting the View in the action dropdown button", { tag: ["@slot-05", "@ags", "@taxpayer", "@business-default"] }, async ({ page, resourceSlot }) => {
     await deleteMatchingFilingsAsAgs(page, resourceSlot, {
       businessName: resourceSlot.businesses.default,
       formName: MONTHLY_FORM,

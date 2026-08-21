@@ -6,7 +6,7 @@ import { createBusinessTestIdentity } from "../../support/business-test-identity
 import Login from "../../utils/Login";
 
 test.describe("As a ags user, I should be able to upload documents to a business via the business details page", () => {
-  test("Initiating test", { tag: ["@slot-08", "@ags", "@business-active"] }, async ({ page, resourceSlot }, testInfo) => {
+  test("As a ags user, I should be able to upload documents to a business via the business details page", { tag: ["@slot-08", "@ags", "@business-active"] }, async ({ page, resourceSlot }, testInfo) => {
     const identity = createBusinessTestIdentity(resourceSlot.id, testInfo);
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",

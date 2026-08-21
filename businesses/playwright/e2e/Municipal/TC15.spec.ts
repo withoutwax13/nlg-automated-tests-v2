@@ -7,7 +7,7 @@ import Login from "../../utils/Login";
 const municipalBusinessGrid = new BusinessGrid({ userType: "municipal" });
 
 test.describe("As a municipal user, I should be able to export business list with Users info as excel", () => {
-  test("Initiating test", { tag: ["@slot-02", "@municipal"] }, async ({ page, resourceSlot }) => {
+  test("As a municipal user, I should be able to export business list with Users info as excel", { tag: ["@slot-02", "@municipal"] }, async ({ page, resourceSlot }) => {
     const exportModal = new ExportModal(page);
     await Login.login(page, resourceSlot, { accountType: "municipal" });
     await municipalBusinessGrid.init(page);

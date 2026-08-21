@@ -8,7 +8,7 @@ const municipalBusinessGrid = new BusinessGrid({
 });
 
 test.describe("As a municipal user, I should be able to set delinquency start date from the grid", () => {
-  test("Initiating test", { tag: ["@slot-09", "@municipal", "@business-active"] }, async ({ page, resourceSlot }) => {
+  test("As a municipal user, I should be able to set delinquency start date from the grid", { tag: ["@slot-09", "@municipal", "@business-active"] }, async ({ page, resourceSlot }) => {
     await Login.login(page, resourceSlot, { accountType: "municipal" });
     await municipalBusinessGrid.init(page);
     await municipalBusinessGrid.clickClearAllFiltersButton();

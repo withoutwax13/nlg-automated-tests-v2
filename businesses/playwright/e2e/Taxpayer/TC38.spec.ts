@@ -5,7 +5,7 @@ import Login from "../../utils/Login";
 
 const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
 test.describe("As a taxpayer, I should be able to see required forms in my business details page", () => {
-  test("Initiating test", { tag: ["@slot-02", "@taxpayer", "@business-active"] }, async ({ page, resourceSlot }) => {
+  test("As a taxpayer, I should be able to see required forms in my business details page", { tag: ["@slot-02", "@taxpayer", "@business-active"] }, async ({ page, resourceSlot }) => {
     const taxpayerBusinessDetails = new BusinessDetails(page, { userType: "taxpayer" });
     await Login.login(page, resourceSlot, { accountType: "taxpayer" });
     await taxpayerBusinessList.init(page);

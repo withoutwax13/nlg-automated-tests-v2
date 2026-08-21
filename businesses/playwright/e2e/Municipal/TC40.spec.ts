@@ -7,7 +7,7 @@ import Login from "../../utils/Login";
 const municipalBusinessList = new BusinessGrid({ userType: "municipal" });
 
 test.describe("As a user, I should be able to reveal the full content of FEIN in business details page", () => {
-  test("Initiating test", { tag: ["@slot-02", "@municipal", "@business-active"] }, async ({ page, resourceSlot }) => {
+  test("As a user, I should be able to reveal the full content of FEIN in business details page", { tag: ["@slot-02", "@municipal", "@business-active"] }, async ({ page, resourceSlot }) => {
     const municipalBusinessDetails = new BusinessDetails(page, { userType: "municipal" });
     await Login.login(page, resourceSlot, { accountType: "municipal" });
     await municipalBusinessList.init(page);

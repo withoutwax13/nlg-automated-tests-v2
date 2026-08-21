@@ -1,5 +1,5 @@
 import { test } from "@playwright/test";
 
 test.describe.skip("As AGS user, I want to be able to start approval workflow a specific item in Approvals", () => {
-  test("Initiate test", async () => {});
+  test("As AGS user, I want to be able to start approval workflow a specific item in Approvals", async () => {});
 });

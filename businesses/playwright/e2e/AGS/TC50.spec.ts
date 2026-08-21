@@ -5,7 +5,7 @@ import Login from "../../utils/Login";
 
 test.describe("When I update the business close date, system should show me the Set Business Status modal", () => {
   // Reason for skipping: This can be already covered in TC51 by adding an assertion to check if the Set Business Status modal is triggered after updating the business close date.
-  test.skip("Initiating test", async ({ page, resourceSlot }) => {
+  test.skip("When I update the business close date, system should show me the Set Business Status modal", async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

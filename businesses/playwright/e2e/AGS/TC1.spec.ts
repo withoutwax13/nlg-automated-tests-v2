@@ -4,7 +4,7 @@ import BusinessGrid from "../../objects/BusinessGrid";
 import Login from "../../utils/Login";
 
 test.describe("As an AGS user, I should be able to set delinquency start date from the grid", () => {
-  test("Initiating test", { tag: ["@slot-00", "@ags", "@business-active"] }, async ({ page, resourceSlot }) => {
+  test("As an AGS user, I should be able to set delinquency start date from the grid", { tag: ["@slot-00", "@ags", "@business-active"] }, async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

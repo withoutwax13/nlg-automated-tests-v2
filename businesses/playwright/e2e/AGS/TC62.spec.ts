@@ -9,7 +9,7 @@ const agsBusinessUpdatePage = new BusinessUpdate({ userType: "ags" });
 
 test.describe("As a user, if I clear the required fields in the update business page, the save button should remain disabled", () => {
   // Skipped, assertion moved to TC61
-  test.skip("Initiating test", async ({ page, resourceSlot }) => {
+  test.skip("As a user, if I clear the required fields in the update business page, the save button should remain disabled", async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

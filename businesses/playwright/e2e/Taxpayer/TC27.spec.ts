@@ -6,7 +6,7 @@ import Login from "../../utils/Login";
 const taxpayerBusinessList = new BusinessGrid({ userType: "taxpayer" });
 
 test.describe("As a taxpayer user,  I should be able to reveal the full content of FEIN in business list.", () => {
-  test("Initiating test", { tag: ["@slot-00", "@taxpayer", "@business-active"] }, async ({ page, resourceSlot }) => {
+  test("As a taxpayer user,  I should be able to reveal the full content of FEIN in business list.", { tag: ["@slot-00", "@taxpayer", "@business-active"] }, async ({ page, resourceSlot }) => {
     await Login.login(page, resourceSlot, { accountType: "taxpayer" });
     await taxpayerBusinessList.init(page);
     const feinValueBeforeClick = await taxpayerBusinessList.getDataOfColumn(

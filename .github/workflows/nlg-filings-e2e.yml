@@ -1,0 +1,363 @@
+name: NLG Filings E2E Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      grep:
+        description: "Tests to grep"
+        required: false
+        default: ""
+      run:
+        required: false
+      testomatio:
+        description: "Legacy Testomat.io input; the TESTOMATIO Actions secret is used"
+        required: false
+  repository_dispatch:
+    types: [my-event-jp]
+
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: read
+
+# Filings and Businesses intentionally share the same account/business slots.
+# Serialize both workflows so they cannot mutate those resources concurrently.
+concurrency:
+  group: businesses-e2e-dev
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    name: Filings non-secret preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    defaults:
+      run:
+        working-directory: ./filings
+
+    env:
+      CI: true
+
+    steps:
+      - name: Require main for manual runs
+        shell: bash
+        working-directory: .
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "::error title=Unsupported ref::Manual Filings E2E runs must use refs/heads/main."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: filings/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check Filings tests
+        run: npm run typecheck
+
+      - name: Test resource slot parser and guards
+        run: npm run resources:test
+
+      - name: Validate balanced slot and account allocation
+        run: npm run slots:validate
+
+      - name: Validate optional test grep
+        env:
+          REQUESTED_GREP: ${{ github.event.inputs.grep || github.event.client_payload.grep || github.event.client_payload.inputs.grep || '' }}
+        shell: bash
+        run: |
+          if [[ -z "$REQUESTED_GREP" ]]; then
+            exit 0
+          fi
+
+          reporter=./playwright/support/runnable-test-reporter.ts
+
+          if npm run test:playwright:list -- --grep="$REQUESTED_GREP" --reporter="$reporter"; then
+            exit 0
+          fi
+
+          # TC40 is intentionally skipped in normal discovery and becomes
+          # runnable only in its isolated global-state configuration.
+          E2E_RUN_GLOBAL_STATE=true \
+            npm run test:playwright:list -- --grep="$REQUESTED_GREP" --reporter="$reporter"
+
+  prepare-testomatio:
+    needs: preflight
+    name: Prepare Testomat.io run
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    outputs:
+      run_id: ${{ steps.resolve-run.outputs.run_id }}
+
+    defaults:
+      run:
+        working-directory: ./filings
+
+    env:
+      CI: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: filings/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create or reuse one Testomat.io run
+        id: resolve-run
+        env:
+          REQUESTED_RUN_ID: ${{ github.event.inputs.run || github.event.client_payload.run || github.event.client_payload.inputs.run || '' }}
+          TESTOMATIO: ${{ secrets.TESTOMATIO }}
+          TESTOMATIO_TITLE: "[CI] NLG Filings E2E ${{ github.run_id }} attempt ${{ github.run_attempt }}"
+        shell: bash
+        run: |
+          if [[ -z "$TESTOMATIO" ]]; then
+            echo "::error title=Missing Actions secret::TESTOMATIO is required for the Filings workflow."
+            exit 1
+          fi
+
+          echo "::add-mask::$TESTOMATIO"
+          run_id="$REQUESTED_RUN_ID"
+
+          if [[ -z "$run_id" ]]; then
+            run_id="$(npx --no-install @testomatio/reporter start --kind automated --format id)"
+          fi
+
+          if [[ -z "$run_id" || "$run_id" =~ [[:space:]] ]]; then
+            echo "::error title=Invalid Testomat.io run::The run ID must be a non-empty single-line identifier."
+            exit 1
+          fi
+
+          printf 'run_id=%s\n' "$run_id" >> "$GITHUB_OUTPUT"
+
+  playwright-tests:
+    needs: [preflight, prepare-testomatio]
+    name: Filings ${{ matrix.slot_id }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        working-directory: ./filings
+
+    env:
+      CI: true
+
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        include:
+          - slot_id: slot-00
+            secret_name: BUSINESSES_SLOT_00
+          - slot_id: slot-01
+            secret_name: BUSINESSES_SLOT_01
+          - slot_id: slot-02
+            secret_name: BUSINESSES_SLOT_02
+          - slot_id: slot-03
+            secret_name: BUSINESSES_SLOT_03
+          - slot_id: slot-04
+            secret_name: BUSINESSES_SLOT_04
+          - slot_id: slot-05
+            secret_name: BUSINESSES_SLOT_05
+          - slot_id: slot-06
+            secret_name: BUSINESSES_SLOT_06
+          - slot_id: slot-07
+            secret_name: BUSINESSES_SLOT_07
+          - slot_id: slot-08
+            secret_name: BUSINESSES_SLOT_08
+          - slot_id: slot-09
+            secret_name: BUSINESSES_SLOT_09
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: filings/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate and mask selected slot
+        env:
+          FILINGS_RESOURCE_SLOT_JSON: ${{ secrets[matrix.secret_name] }}
+          FILINGS_EXPECTED_SLOT_ID: ${{ matrix.slot_id }}
+        run: npm run resources:validate
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run selected Playwright slot
+        env:
+          FILINGS_RESOURCE_SLOT_JSON: ${{ secrets[matrix.secret_name] }}
+          FILINGS_EXPECTED_SLOT_ID: ${{ matrix.slot_id }}
+          REQUESTED_GREP: ${{ github.event.inputs.grep || github.event.client_payload.grep || github.event.client_payload.inputs.grep || '' }}
+          TESTOMATIO: ${{ secrets.TESTOMATIO }}
+          TESTOMATIO_RUN: ${{ needs.prepare-testomatio.outputs.run_id }}
+          TESTOMATIO_PROCEED: "1"
+        shell: bash
+        run: |
+          playwright_args=(--workers=1 --pass-with-no-tests)
+
+          if [[ -n "$TESTOMATIO" ]]; then
+            echo "::add-mask::$TESTOMATIO"
+          fi
+
+          if [[ -n "$REQUESTED_GREP" ]]; then
+            playwright_args+=(--grep "$REQUESTED_GREP")
+          fi
+
+          npm run test:playwright -- "${playwright_args[@]}"
+
+      - name: Upload Playwright test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: nlg-filings-test-results-${{ github.run_number }}-${{ github.run_attempt }}-${{ matrix.slot_id }}
+          path: filings/test-results/
+          if-no-files-found: warn
+          retention-days: 30
+
+  global-approval-state-test:
+    needs: [preflight, prepare-testomatio, playwright-tests]
+    if: ${{ always() && !cancelled() && needs.preflight.result == 'success' && needs.prepare-testomatio.result == 'success' && (needs.playwright-tests.result == 'success' || needs.playwright-tests.result == 'failure') }}
+    name: Filings TC40 global approval state
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        working-directory: ./filings
+
+    env:
+      CI: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: filings/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate and mask global-state slot
+        env:
+          FILINGS_RESOURCE_SLOT_JSON: ${{ secrets.BUSINESSES_SLOT_00 }}
+          FILINGS_EXPECTED_SLOT_ID: slot-00
+        run: npm run resources:validate
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run TC40 after the parallel matrix
+        env:
+          FILINGS_RESOURCE_SLOT_JSON: ${{ secrets.BUSINESSES_SLOT_00 }}
+          FILINGS_EXPECTED_SLOT_ID: slot-00
+          E2E_RUN_GLOBAL_STATE: "true"
+          REQUESTED_GREP: ${{ github.event.inputs.grep || github.event.client_payload.grep || github.event.client_payload.inputs.grep || '' }}
+          TESTOMATIO: ${{ secrets.TESTOMATIO }}
+          TESTOMATIO_RUN: ${{ needs.prepare-testomatio.outputs.run_id }}
+          TESTOMATIO_PROCEED: "1"
+        shell: bash
+        run: |
+          playwright_args=(--workers=1 --pass-with-no-tests)
+
+          if [[ -n "$TESTOMATIO" ]]; then
+            echo "::add-mask::$TESTOMATIO"
+          fi
+
+          if [[ -n "$REQUESTED_GREP" ]]; then
+            playwright_args+=(--grep "$REQUESTED_GREP")
+          fi
+
+          npm run test:playwright -- "${playwright_args[@]}"
+
+      - name: Upload TC40 Playwright test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: nlg-filings-test-results-${{ github.run_number }}-${{ github.run_attempt }}-tc40
+          path: filings/test-results/
+          if-no-files-found: warn
+          retention-days: 30
+
+  finalize-testomatio:
+    needs: [prepare-testomatio, playwright-tests, global-approval-state-test]
+    if: ${{ always() && !cancelled() && needs.prepare-testomatio.result == 'success' && needs.prepare-testomatio.outputs.run_id != '' }}
+    name: Finalize Testomat.io run
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: ./filings
+
+    env:
+      CI: true
+      TESTOMATIO: ${{ secrets.TESTOMATIO }}
+      TESTOMATIO_FINISH_SHARED_RUN: "1"
+      TESTOMATIO_RUN: ${{ needs.prepare-testomatio.outputs.run_id }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: filings/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Finalize the aggregate Testomat.io run
+        shell: bash
+        run: |
+          if [[ -z "$TESTOMATIO" ]]; then
+            echo "::error title=Missing Actions secret::TESTOMATIO is required to finalize the requested Testomat.io run."
+            exit 1
+          fi
+
+          npx --no-install @testomatio/reporter finish

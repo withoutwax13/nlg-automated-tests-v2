@@ -6,7 +6,7 @@ import Login from "../../utils/Login";
 
 test.describe("As a ags user, I should be able to delete notes to a business via the business details page", () => {
   // Skipped, assertions moved to TC55
-  test.skip("Initiating test", async ({ page, resourceSlot }) => {
+  test.skip("As a ags user, I should be able to delete notes to a business via the business details page", async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,

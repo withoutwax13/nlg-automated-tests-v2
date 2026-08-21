@@ -36,7 +36,7 @@ const newBusinessData = {
 // Skipped, assertions alrady covered in TC11
 test.describe.skip("As a taxpayer, when a business has been added by an AGS user, I should be able to add the business in my account", () => {
   
-  test("Initiating test", async ({ page, resourceSlot }) => {
+  test("As a taxpayer, when a business has been added by an AGS user, I should be able to add the business in my account", async ({ page, resourceSlot }) => {
     const agsBusinessGrid = new BusinessGrid({
       userType: "ags",
       municipalitySelection: resourceSlot.municipality,
