@@ -198,6 +198,94 @@ class BusinessGrid {
       gridPopupCancelButton: () => this.page.locator(".k-popup button").filter({ hasText: "Cancel" }).first(),
       activeFilterChipsLabel: () => this.page.getByText("Filtered By:"),
       activeFilterChip: (name: string) => this.page.locator("[class*='FilterTags-filterTags-module__filter-tag']").filter({ hasText: name }).first(),
+      mapViewRadio: () =>
+        this.page
+          .getByRole("radiogroup")
+          .getByText("Map View", { exact: true }),
+      businessMapWrapper: () =>
+        this.page.locator('[class*="BusinessMapWrapper"]').first(),
+      mapContainer: () =>
+        this.page.getByRole("region", { name: "Map" }),
+      mapCanvas: () =>
+        this.page.locator(".gm-style").first(),
+      businessCardList: () => this.page.locator("#BusinessCardList"),
+      businessCardListButtons: () =>
+        this.page.getByRole("button", { name: /^Select business / }),
+      businessCardListStatuses: () =>
+        this.page
+          .getByRole("button", { name: /^Select business / })
+          .locator("button span.text-nowrap"),
+      businessCardListAddresses: () =>
+        this.page
+          .getByRole("button", { name: /^Select business / })
+          .locator("span.gray2.fw-medium"),
+      backToTopButton: () =>
+        this.page.getByText("Back To Top", { exact: true }),
+      businessCardListEnd: () =>
+        this.page.getByText(/reached the end of the list/i),
+      collapseBusinessListButton: () =>
+        this.page.locator('button[title="Collapse List Section"]'),
+      expandBusinessListButton: () =>
+        this.page.locator('button[title="Expand List Section"]'),
+      mapLocationClusters: () =>
+        this.getElement().mapCanvas().locator(".cluster:visible"),
+      mapLocationPins: () =>
+        this.getElement().mapCanvas().locator('div[role="button"]:visible'),
+      mapScale: () =>
+        this.page.getByRole("button", { name: /^Map Scale:/ }),
+      fullInfoCard: () =>
+        this.page.locator('[class*="FullInfoCard_Wrapper"]').first(),
+      mapIframeContainer: () =>
+        this.page.locator('[class*="FullInfoCard_Wrapper"]').first(),
+      mapCardDescription: () =>
+        this.page
+          .locator('[class*="FullInfoCard_Wrapper"]')
+          .first()
+          .locator('p[class*="FullInfoCard_Description"]'),
+      mapCardOperationField: () =>
+        this.getElement().fullInfoCard().getByText("Operation", { exact: true }),
+      mapCardDelinquencyField: () =>
+        this.getElement().fullInfoCard().getByText("Delinquency", { exact: true }),
+      mapCardLocationDBAField: () =>
+        this.getElement().fullInfoCard().getByText("Location DBA", { exact: true }),
+      mapCardOpenDateField: () =>
+        this.getElement().fullInfoCard().getByText("Open Date", { exact: true }),
+      mapCardOwnerNameField: () =>
+        this.getElement().fullInfoCard().getByText("Owner Name", { exact: true }),
+      mapCardOwnerEmailField: () =>
+        this.getElement().fullInfoCard().getByText("Owner Email", { exact: true }),
+      mapCardOwnerPhoneField: () =>
+        this.getElement().fullInfoCard().getByText("Owner Phone", { exact: true }),
+      mapCardZipCodeField: () =>
+        this.getElement().fullInfoCard().getByText("Zip Code", { exact: true }),
+      mapCardZoomInButton: () =>
+        this.getElement().fullInfoCard().getByRole("button", { name: "Zoom In" }),
+      mapCardZoomOutButton: () =>
+        this.getElement().fullInfoCard().getByRole("button", { name: "Zoom Out" }),
+      mapCardViewLessButton: () =>
+        this.getElement().fullInfoCard().getByRole("button", { name: "View Less" }),
+      mapCardOpenButton: () =>
+        this.getElement().fullInfoCard().getByRole("button", { name: "Open" }),
+      mapLegendButton: () =>
+        this.page.getByRole("button", { name: "Legend" }),
+      operatingStatusLegendButton: () =>
+        this.page.getByText("Operating Status", { exact: true }).last(),
+      legendCheckboxActive: () =>
+        this.page.getByLabel("Active", { exact: true }),
+      legendCheckboxActiveSeasonal: () =>
+        this.page.getByLabel("Active/Seasonal", { exact: true }),
+      legendCheckboxInactive: () =>
+        this.page.getByLabel("Inactive", { exact: true }),
+      legendCheckboxClosed: () =>
+        this.page.getByLabel("Closed", { exact: true }),
+      legendCheckboxSold: () =>
+        this.page.getByLabel("Sold", { exact: true }),
+      mapLayersButton: () =>
+        this.page.getByRole("button", { name: "Layers" }),
+      mapLayersLocationsCheckbox: () =>
+        this.page.getByLabel("Locations", { exact: true }),
+      noMapBusinessesMessage: () =>
+        this.page.getByText("No results found.", { exact: true }),
     };
   }
 
@@ -540,6 +628,211 @@ class BusinessGrid {
 
   clickBusinessConfigurationButton(): Promise<void> {
     return this.getElement().businessConfigurationButton().click();
+  }
+
+  async clickMapViewRadio(): Promise<void> {
+    await this.getElement().mapViewRadio().click();
+    await this.waitForMapLoad();
+  }
+
+  async waitForMapLoad(): Promise<void> {
+    await expect(this.getElement().businessMapWrapper()).toBeVisible();
+    await expect(this.getElement().mapContainer()).toBeVisible();
+  }
+
+  async waitForMapNodeLoad(): Promise<void> {
+    await this.waitForMapLoad();
+    await expect
+      .poll(
+        async () =>
+          (await this.getElement().mapLocationClusters().count()) +
+          (await this.getElement().mapLocationPins().count()),
+        { timeout: NETWORK_RESPONSE_TIMEOUT_MS },
+      )
+      .toBeGreaterThan(0);
+  }
+
+  async waitForBusinessCardListToLoad(): Promise<void> {
+    await expect(this.getElement().businessCardList()).toBeVisible();
+    await expect(this.getElement().businessCardListButtons().first()).toBeVisible();
+  }
+
+  async businessCardListLoadNextItems(): Promise<void> {
+    const previousCount = await this.getElement().businessCardListButtons().count();
+    await expect
+      .poll(
+        async () => {
+          await this.getElement().businessCardList().evaluate((element) => {
+            element.scrollTop = Math.max(
+              0,
+              element.scrollHeight - element.clientHeight - 50,
+            );
+            element.dispatchEvent(new Event("scroll", { bubbles: true }));
+            element.scrollTop = element.scrollHeight;
+            element.dispatchEvent(new Event("scroll", { bubbles: true }));
+          });
+          return this.getElement().businessCardListButtons().count();
+        },
+        { timeout: NETWORK_RESPONSE_TIMEOUT_MS },
+      )
+      .toBeGreaterThan(previousCount);
+  }
+
+  async scrollBusinessCardListToBottom(
+    options: { requireBackToTop?: boolean } = {},
+  ): Promise<void> {
+    const list = this.getElement().businessCardList();
+    let previousCount = -1;
+    let stableBottomChecks = 0;
+
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+      await list.evaluate((element) => {
+        element.scrollTop = Math.max(
+          0,
+          element.scrollHeight - element.clientHeight - 50,
+        );
+        element.dispatchEvent(new Event("scroll", { bubbles: true }));
+        element.scrollTop = element.scrollHeight;
+        element.dispatchEvent(new Event("scroll", { bubbles: true }));
+      });
+      await this.page.waitForTimeout(1_000);
+
+      if (await this.getElement().backToTopButton().isVisible()) {
+        return;
+      }
+
+      const reachedEnd = await this.getElement().businessCardListEnd().isVisible();
+      if (reachedEnd && !options.requireBackToTop) {
+        return;
+      }
+
+      const currentCount = await this.getElement().businessCardListButtons().count();
+      const atBottom = await list.evaluate(
+        (element) =>
+          element.scrollTop + element.clientHeight >= element.scrollHeight - 2,
+      );
+
+      if (currentCount === previousCount && atBottom) {
+        stableBottomChecks += 1;
+        if (stableBottomChecks >= 5 && !options.requireBackToTop) {
+          return;
+        }
+      } else {
+        stableBottomChecks = 0;
+      }
+
+      previousCount = currentCount;
+    }
+
+    throw new Error("Business card list did not reach a stable bottom state.");
+  }
+
+  clickCollapseBusinessListButton(): Promise<void> {
+    return this.getElement().collapseBusinessListButton().click();
+  }
+
+  clickExpandBusinessListButton(): Promise<void> {
+    return this.getElement().expandBusinessListButton().click();
+  }
+
+  clickMapZoomInButton(): Promise<void> {
+    return this.page.getByRole("button", { name: "Zoom in" }).click();
+  }
+
+  async countVisibleMapLocations(): Promise<number> {
+    let count = await this.getElement().mapLocationPins().count();
+    const clusters = this.getElement().mapLocationClusters();
+    const clusterCount = await clusters.count();
+
+    for (let index = 0; index < clusterCount; index += 1) {
+      const clusterValue = Number.parseInt(await clusters.nth(index).innerText(), 10);
+      if (Number.isFinite(clusterValue)) {
+        count += clusterValue;
+      }
+    }
+
+    return count;
+  }
+
+  async getMapScale(): Promise<string> {
+    const label = await this.getElement().mapScale().getAttribute("aria-label");
+    if (!label) {
+      throw new Error("The map scale label is unavailable.");
+    }
+    return label.replace(/^Map Scale:\s*/i, "").trim();
+  }
+
+  compareDistances(firstDistance: string, secondDistance: string): boolean {
+    const toMeters = (value: string): number => {
+      const match = value
+        .replace(/,/g, "")
+        .match(/<?\s*([\d.]+)\s*(km|m|mi|ft)\b/i);
+      if (!match) {
+        throw new Error(`Unsupported map distance: ${value}`);
+      }
+
+      const multiplier: Record<string, number> = {
+        km: 1_000,
+        m: 1,
+        mi: 1_609.344,
+        ft: 0.3048,
+      };
+      return Number.parseFloat(match[1]) * multiplier[match[2].toLowerCase()];
+    };
+
+    return toMeters(firstDistance) > toMeters(secondDistance);
+  }
+
+  clickCardZoomInButton(): Promise<void> {
+    return this.getElement().mapCardZoomInButton().click();
+  }
+
+  clickCardZoomOutButton(): Promise<void> {
+    return this.getElement().mapCardZoomOutButton().click();
+  }
+
+  clickMapCardViewLessButton(): Promise<void> {
+    return this.getElement().mapCardViewLessButton().click();
+  }
+
+  clickMapCardOpenButton(): Promise<void> {
+    return this.getElement().mapCardOpenButton().click();
+  }
+
+  clickMapLegendButton(): Promise<void> {
+    return this.getElement().mapLegendButton().click();
+  }
+
+  clickOperatingStatusLegendButton(): Promise<void> {
+    return this.getElement().operatingStatusLegendButton().click();
+  }
+
+  clickLegendCheckboxActive(): Promise<void> {
+    return this.getElement().legendCheckboxActive().click();
+  }
+
+  clickLegendCheckboxActiveSeasonal(): Promise<void> {
+    return this.getElement().legendCheckboxActiveSeasonal().click();
+  }
+
+  clickLegendCheckboxInactive(): Promise<void> {
+    return this.getElement().legendCheckboxInactive().click();
+  }
+
+  clickLegendCheckboxClosed(): Promise<void> {
+    return this.getElement().legendCheckboxClosed().click();
+  }
+
+  clickLegendCheckboxSold(): Promise<void> {
+    return this.getElement().legendCheckboxSold().click();
+  }
+
+  clickMapLayersButton(): Promise<void> {
+    return this.getElement().mapLayersButton().click();
+  }
+
+  clickMapLayersLocationsCheckbox(): Promise<void> {
+    return this.getElement().mapLayersLocationsCheckbox().click();
   }
 
   private async getRowByFilters(filterParams: { anchorColumnName: string; anchorValue: string }[]) {

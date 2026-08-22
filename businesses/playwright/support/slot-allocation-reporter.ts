@@ -172,13 +172,11 @@ export default class SlotAllocationReporter implements Reporter {
       }
     }
 
-    for (const [slotTag, summary] of summaries) {
-      if (summary.tests < 4 || summary.tests > 5) {
-        errors.push(
-          `${slotTag} must contain 4 or 5 runnable matrix tests; found ${summary.tests}.`,
-        );
-      }
-    }
+    validateBalancedDistribution(
+      errors,
+      "runnable matrix test",
+      SLOT_TAGS.map((slotTag) => summaries.get(slotTag)!.tests),
+    );
 
     for (const roleTag of ROLE_TAGS) {
       validateBalancedDistribution(
